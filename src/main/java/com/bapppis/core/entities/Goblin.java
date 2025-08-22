@@ -1,19 +1,18 @@
 package com.bapppis.core.entities;
 
-public class Goblin {
-    // Goblin has hp that can be damaged hp starts 25
-    private int hp;
+import com.bapppis.core.components.Coward;
+
+public class Goblin extends Creature {
 
     public Goblin() {
-        this.hp = 25;
-    }
+        setName("Billy the Goblin");
+        setMaxHp(10);
+        setCurrentHp(10);
+        setSize(Size.SMALL);
+        setType(Type.ENEMY);
+        setCreatureType(CreatureType.HUMANOID);
 
-    public int getHp() {
-        return hp;
-    }
-
-    public void takeDamage(int damage) {
-        hp -= damage;
+        addComponent(new Coward());
     }
 
 }
