@@ -124,6 +124,9 @@ mvn test
 
 ## License
 
-- This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- This project is licensed under a custom Non-Commercial License.  
+You may use, modify, and share for personal and educational purposes only.  
+Commercial use is not permitted. See the [LICENSE](LICENSE) file for details.
+- For other use cases, questions or anything else, feel free to message me!
 
 ---
