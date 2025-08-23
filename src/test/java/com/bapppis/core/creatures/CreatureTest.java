@@ -20,6 +20,7 @@ public class CreatureTest {
         assertEquals(-2, goblin.getStat(Creature.Stats.STRENGTH));
         assertEquals(2, goblin.getStat(Creature.Stats.DEXTERITY));
         assertEquals(100, goblin.getResistance(Creature.Resistances.SLASHING));
+        System.out.println(goblin.toString());
     }
     @Test
     public void testHpModification() {
