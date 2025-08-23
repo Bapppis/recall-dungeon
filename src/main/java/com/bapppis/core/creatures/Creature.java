@@ -1,10 +1,11 @@
-package com.bapppis.core.entities;
+package com.bapppis.core.creatures;
 
-import com.bapppis.core.components.Component;
 import java.util.EnumMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import com.bapppis.core.properties.Property;
 
 public abstract class Creature {
 
@@ -77,10 +78,12 @@ public abstract class Creature {
     // Resistances stored in EnumMap
     private EnumMap<Resistances, Integer> resistances;
 
-    // List of components that can be added to creatures
-    private List<Component> components;
+    // List of properties that can be added to creatures
+    private List<Property> properties;
 
-    // Constructor: sets stats to 10 and resistances to 100 by default, and initializes components
+    private String description;
+
+    // Constructor: sets stats to 10 and resistances to 100 by default, and initializes properties
     public Creature() {
         stats = new EnumMap<>(Stats.class);
         for (Stats stat : Stats.values()) {
@@ -96,7 +99,7 @@ public abstract class Creature {
             resistances.put(res, 100); // default resistance 100%
         }
 
-        components = new ArrayList<>();
+        properties = new ArrayList<>();
     }
 
     // Getters and setters for stats
@@ -108,6 +111,11 @@ public abstract class Creature {
         stats.put(stat, value);
     }
 
+    // Add or subtract from a specific stat
+    public void modifyStat(Stats stat, int amount) {
+        stats.put(stat, getStat(stat) + amount);
+    }
+
     // Getters and setters for resistances
     public int getResistance(Resistances resistance) {
         return resistances.getOrDefault(resistance, 0);
@@ -115,6 +123,11 @@ public abstract class Creature {
 
     public void setResistance(Resistances resistance, int value) {
         resistances.put(resistance, value);
+    }
+
+    // Add or subtract from a specific resistance
+    public void modifyResistance(Resistances resistance, int amount) {
+        resistances.put(resistance, getResistance(resistance) + amount);
     }
 
     // Other getters and setters for name, hp, size, type, etc.
@@ -139,7 +152,16 @@ public abstract class Creature {
     }
 
     public void setCurrentHp(int currentHp) {
-        this.currentHp = currentHp;
+        this.currentHp = Math.min(currentHp, maxHp);
+    }
+
+    public void modifyHp(int amount) {
+        currentHp += amount;
+        if (currentHp > maxHp) {
+            currentHp = maxHp;
+        } else if (currentHp < 0) {
+            currentHp = 0;
+        }
     }
 
     public Size getSize() {
@@ -166,22 +188,30 @@ public abstract class Creature {
         this.creatureType = creatureType;
     }
 
-    // Components management
-    public void addComponent(Component component) {
-        components.add(component);
+    // Properties management
+    public void addProperty(Property property) {
+        properties.add(property);
     }
 
-    public List<Component> getComponents() {
-        return components;
+    public List<Property> getProperties() {
+        return properties;
     }
 
-    public boolean hasComponent(Class<? extends Component> componentClass) {
-        for (Component c : components) {
-            if (componentClass.isInstance(c)) {
+    public boolean hasProperty(Class<? extends Property> propertyClass) {
+        for (Property p : properties) {
+            if (propertyClass.isInstance(p)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -199,7 +229,8 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
-        sb.append("Components: ").append(components).append("\n");
+        sb.append("Properties: ").append(properties).append("\n");
+        sb.append("Description: ").append(description).append("\n");
         return sb.toString();
     }
 }
