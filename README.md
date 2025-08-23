@@ -20,18 +20,18 @@ Explore the mysterious dungeon where you have awakened. Decide whether you will 
 
 ---
 ## Roadmap
-Turn based combat: Fight or flee from the monsters and other habitants of the dungeon.
-Interesting stat and resistance based combat: Match your gear to defeat the monsters efficiently.
-Interactive grid based world: Explore the dungeon and its many secrets.
-Inventory management: Choose and find gear that will help you during your visit.
-Many characters: Choose from mawny different starting champions that have different stats and resistances.
+- Turn based combat: Fight or flee from the monsters and other habitants of the dungeon.
+- Interesting stat and resistance based combat: Match your gear to defeat the monsters efficiently.
+- Interactive grid based world: Explore the dungeon and its many secrets.
+- Inventory management: Choose and find gear that will help you during your visit.
+- Many characters: Choose from many different starting champions that have different stat
 
 ---
 
 ## Wishlist
-Add a graphical user interface (GUI) using JavaFX.
-Interesting story/lore.
-For the game to proudly call itself a roguelike dungeon crawler.
+- Add a graphical user interface (GUI) using JavaFX.
+- Interesting story/lore.
+- For the game to proudly call itself a roguelike dungeon crawler.
 
 ---
 
@@ -113,17 +113,17 @@ mvn test
 
 ## Contributing
 
-This is a personal project developed for my portfolio. I am building this project solo to demonstrate my individual capabilities and am not seeking contributions.
+- This is a personal project developed for my portfolio. I am building this project solo to demonstrate my individual capabilities and am not seeking contributions.
 
-I want realize my crazy ideas, learn from my victories and defeats. 
+- I want realize my crazy ideas, learn from my victories and defeats. 
 
-If you have feedback, ideas, questions, general curiosity, feel free to message me!
-Email: Heinonen.sasha@gmail.com
-Discord: Bappis
+- If you have feedback, ideas, questions, general curiosity, feel free to message me!
+- Email: Heinonen.sasha@gmail.com
+- Discord: Bappis
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
