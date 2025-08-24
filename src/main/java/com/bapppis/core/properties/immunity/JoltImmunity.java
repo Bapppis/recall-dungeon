@@ -1,4 +1,7 @@
-package com.bapppis.core.properties;
+package com.bapppis.core.properties.immunity;
+
+import com.bapppis.core.properties.Property;
+import com.bapppis.core.properties.PropertyType;
 
 public class JoltImmunity implements Property {
 

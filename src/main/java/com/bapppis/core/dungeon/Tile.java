@@ -38,6 +38,4 @@ public class Tile {
         this.down = null;
     }
 
-
-
 }
