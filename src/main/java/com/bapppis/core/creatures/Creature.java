@@ -125,7 +125,6 @@ public abstract class Creature {
         resistances.put(resistance, value);
     }
 
-    // Add or subtract from a specific resistance
     public void modifyResistance(Resistances resistance, int amount) {
         resistances.put(resistance, getResistance(resistance) + amount);
     }

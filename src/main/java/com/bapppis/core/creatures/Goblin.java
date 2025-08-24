@@ -13,9 +13,9 @@ public class Goblin extends Creature {
         setCreatureType(CreatureType.HUMANOID);
         setDescription("A small and cowardly goblin. Are you sure you want to fight it?");
 
-        setStat(Stats.STRENGTH, -2);
-        setStat(Stats.DEXTERITY, 2);
-        setResistance(Resistances.SLASHING, 100);
+        modifyStat(Stats.STRENGTH, -2);
+        modifyStat(Stats.DEXTERITY, 2);
+        modifyResistance(Resistances.SLASHING, 50);
 
         addProperty(new Coward());
     }
