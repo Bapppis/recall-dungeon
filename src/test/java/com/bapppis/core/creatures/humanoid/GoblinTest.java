@@ -1,7 +1,9 @@
-package com.bapppis.core.creatures;
+package com.bapppis.core.creatures.humanoid;
 
 
 import org.junit.jupiter.api.Test;
+
+import com.bapppis.core.creatures.Creature;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GoblinTest {

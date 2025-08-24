@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.bapppis.core.creatures.Creature.Resistances;
 import com.bapppis.core.creatures.Creature.Stats;
+import com.bapppis.core.creatures.humanoid.Goblin;
 
 public class CreatureTest {
 

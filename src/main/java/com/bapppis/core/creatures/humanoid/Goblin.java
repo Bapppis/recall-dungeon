@@ -1,5 +1,6 @@
-package com.bapppis.core.creatures;
+package com.bapppis.core.creatures.humanoid;
 
+import com.bapppis.core.creatures.Creature;
 import com.bapppis.core.properties.Coward;
 
 public class Goblin extends Creature {
