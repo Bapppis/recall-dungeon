@@ -45,13 +45,32 @@ recall-dungeon/
 │   │       └── com/
 │   │           └── bapppis/
 │   │               └── core/
-│   │                   └── creatures/
+│   │                   ├── creatures/
+│   │                   │   ├── Creature.java
+│   │                   │   ├── Goblin.java
+│   │                   │   └── ...
+│   │                   ├── dungeon/
+│   │                   │   ├── Dungeon.java
+│   │                   │   ├── Tile.java
+│   │                   │   └── ...
+│   │                   ├── mapparser/
+│   │                   │   ├── MapParser.java
+│   │                   │   └── ...
+│   │                   ├── game/
+│   │                   │   ├── Game.java
+│   │                   │   └── ...
+│   │                   └── ... (other submodules/classes)
 │   ├── test/
 │   │   └── java/
 │   │       └── com/
 │   │           └── bapppis/
 │   │               └── core/
-│   │                   └── creatures/
+│   │                   ├── creatures/
+│   │                   │   ├── CreatureTest.java
+│   │                   │   └── ...
+│   │                   ├── dungeon/
+│   │                   │   └── DungeonTest.java
+│   │                   └── ...
 ├── target/                # Maven build output (ignored in git)
 ├── pom.xml                # Maven build file
 ├── .gitignore
