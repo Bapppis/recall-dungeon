@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.bapppis.core.properties.Property;
+import com.bapppis.core.property.Property;
 
 public abstract class Creature {
 

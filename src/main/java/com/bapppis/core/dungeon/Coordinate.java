@@ -29,4 +29,8 @@ public class Coordinate {
     public int hashCode() {
         return 31 * x + y;
     }
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
 }

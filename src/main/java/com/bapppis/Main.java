@@ -11,7 +11,7 @@ public class Main {
         System.out.println("---------------------------------------------------------");
 
         MapParser mapParser = new MapParser();
-        String resourceName = "testFloor(20x20).txt";
+        String resourceName = "floor(20x20).txt";
         InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceName);
         mapParser.parseStream(is);
     }
