@@ -17,6 +17,8 @@ Explore the mysterious dungeon where you have awakened. Decide whether you will 
 - [Running Tests](#running-tests)
 - [Contributing](#contributing)
 - [License](#license)
+- [Manual](#manual)
+- [Story](#story)
 
 ---
 ## Roadmap
@@ -24,7 +26,8 @@ Explore the mysterious dungeon where you have awakened. Decide whether you will 
 - Interesting stat and resistance based combat: Match your gear to defeat the monsters efficiently.
 - Interactive grid based world: Explore the dungeon and its many secrets.
 - Inventory management: Choose and find gear that will help you during your visit.
-- Many characters: Choose from many different starting champions that have different stat
+- Many characters: Choose from many different starting champions that have different stats.
+- A story mode and a roguelike mode. More handcrafted elements and story elements in the story mode and a fun roguelike mode with randomized floors, loot and enemies!
 
 ---
 
@@ -45,13 +48,32 @@ recall-dungeon/
 │   │       └── com/
 │   │           └── bapppis/
 │   │               └── core/
-│   │                   └── creatures/
+│   │                   ├── creatures/
+│   │                   │   ├── Creature.java
+│   │                   │   ├── Goblin.java
+│   │                   │   └── ...
+│   │                   ├── dungeon/
+│   │                   │   ├── Dungeon.java
+│   │                   │   ├── Tile.java
+│   │                   │   └── ...
+│   │                   ├── mapparser/
+│   │                   │   ├── MapParser.java
+│   │                   │   └── ...
+│   │                   ├── game/
+│   │                   │   ├── Game.java
+│   │                   │   └── ...
+│   │                   └── ... (other submodules/classes)
 │   ├── test/
 │   │   └── java/
 │   │       └── com/
 │   │           └── bapppis/
 │   │               └── core/
-│   │                   └── creatures/
+│   │                   ├── creatures/
+│   │                   │   ├── CreatureTest.java
+│   │                   │   └── ...
+│   │                   ├── dungeon/
+│   │                   │   └── DungeonTest.java
+│   │                   └── ...
 ├── target/                # Maven build output (ignored in git)
 ├── pom.xml                # Maven build file
 ├── .gitignore
@@ -115,7 +137,7 @@ mvn test
 
 - This is a personal project developed for my portfolio. I am building this project solo to demonstrate my individual capabilities and am not seeking contributions.
 
-- I want realize my crazy ideas, learn from my victories and defeats. 
+- I want realize my crazy ideas, learn from my victories and defeats.
 
 - If you have feedback, ideas, questions, general curiosity, feel free to message me!
 - Email: Heinonen.sasha@gmail.com
@@ -124,9 +146,22 @@ mvn test
 
 ## License
 
-- This project is licensed under a custom Non-Commercial License.  
-You may use, modify, and share for personal and educational purposes only.  
+- This project is licensed under a custom Non-Commercial License.
+You may use, modify, and share for personal and educational purposes only.
 Commercial use is not permitted. See the [LICENSE](LICENSE) file for details.
 - For other use cases, questions or anything else, feel free to message me!
+
+---
+
+## Manual
+
+- To be done.
+
+---
+
+## Story
+
+- Welcome to the world of Aurum. You have awoken in this completely new and glorious world but... in an eerie dungeon. Yet you remember being in this situation.
+- Use this meta knowledge to explore and find the answers to the questions you have. Will you go deeper into the dungeon to put stop whatever is causing these weird things to happen, or will you seek your escape by going up and defeating whatever is guarding the way up to protect the lands?
 
 ---

@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+
 import com.bapppis.core.dungeon.Coordinate;
+import com.bapppis.core.dungeon.Floor;
+import com.bapppis.core.dungeon.Tile;
 
 public class MapParser {
+    Floor floor;
     public void parseStream(InputStream inputStream) {
         System.out.println("Parsing map from input stream...");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -24,6 +28,7 @@ public class MapParser {
                     x = 0;
                 } else {
                     Coordinate coord = new Coordinate(x, y);
+                    Tile tile = new Tile(coord, ch);
                     System.out.println("Current coordinate: " + coord + ", Symbol: " + ch);
                     x++;
                 }
