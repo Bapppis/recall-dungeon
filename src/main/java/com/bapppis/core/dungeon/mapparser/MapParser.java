@@ -11,8 +11,8 @@ import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.Tile;
 
 public class MapParser {
-    Floor floor;
     public void parseStream(InputStream inputStream) {
+        Floor floor = new Floor() {};
         System.out.println("Parsing map from input stream...");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             int x = 0, y = 0;
@@ -29,7 +29,8 @@ public class MapParser {
                 } else {
                     Coordinate coord = new Coordinate(x, y);
                     Tile tile = new Tile(coord, ch);
-                    System.out.println("Current coordinate: " + coord + ", Symbol: " + ch);
+                    //System.out.println("Current coordinate: " + coord + ", Symbol: " + ch);
+                    floor.addTile(coord, tile);
                     x++;
                 }
             }
@@ -37,5 +38,6 @@ public class MapParser {
             System.err.println("Error reading stream");
             e.printStackTrace();
         }
+        System.out.println(floor.toString());
     }
 }

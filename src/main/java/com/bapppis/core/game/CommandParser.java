@@ -1,6 +1,9 @@
 package com.bapppis.core.game;
 
+import java.io.InputStream;
 import java.util.*;
+
+import com.bapppis.core.dungeon.mapparser.MapParser;
 
 public class CommandParser {
     private Map<String, Command> commandMap = new HashMap<>();
@@ -9,6 +12,7 @@ public class CommandParser {
         // Register commands using lowercase names
         commandMap.put("move", new MoveCommand());
         commandMap.put("attack", new AttackCommand());
+        commandMap.put("mapgen", new MapGenCommand());
         // ... add more as needed
     }
 
@@ -46,5 +50,15 @@ class MoveCommand implements Command {
 class AttackCommand implements Command {
     public void execute(String[] args) {
         System.out.println("You attack " + (args.length > 0 ? args[0] : "something"));
+    }
+}
+
+class MapGenCommand implements Command {
+    public void execute(String[] args) {
+        System.out.println("Generating map...");
+        MapParser mapParser = new MapParser();
+        String resourceName = "floor(20x20).txt";
+        InputStream is = CommandParser.class.getClassLoader().getResourceAsStream(resourceName);
+        mapParser.parseStream(is);
     }
 }

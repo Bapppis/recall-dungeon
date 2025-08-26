@@ -16,6 +16,7 @@ public class Tile {
     private boolean isUpstairs = false;
     private boolean isDownstairs = false;
     private boolean isPit = false;
+    private char symbol;
     private Event isEvent = null;
     private Item item = null;
     private List<Creature> occupants = new ArrayList<>();
@@ -40,6 +41,7 @@ public class Tile {
      */
     public Tile(Coordinate coordinate, char symbol) {
         this.coordinate = coordinate;
+        this.symbol = symbol;
 
         switch (symbol) {
             case '#':
@@ -52,13 +54,14 @@ public class Tile {
                 break;
             case '@':
                 this.isSpawn = true;
-                this.isOccupied = true;
                 break;
             case '^':
                 this.isUpstairs = true;
                 break;
             case 'v':
                 this.isDownstairs = true;
+                break;
+            case '.':
                 break;
             /*case '!':
                 this.isEvent = new Event();
@@ -79,5 +82,11 @@ public class Tile {
                 throw new IllegalArgumentException("Unknown symbol: " + symbol);
         }
     }
+    public Coordinate getCoordinate() {
+        return coordinate;
+    }
 
+    public char getSymbol() {
+        return symbol;
+    }
 }

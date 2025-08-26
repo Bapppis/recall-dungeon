@@ -14,7 +14,7 @@ public class Main {
 
         /*MapParser mapParser = new MapParser();
         String resourceName = "floor(20x20).txt";
-        InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceName);
+        InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceName);map
         mapParser.parseStream(is);*/
 
         Scanner scanner = new Scanner(System.in);
