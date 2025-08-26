@@ -42,43 +42,25 @@ Explore the mysterious dungeon where you have awakened. Decide whether you will 
 
 ```
 recall-dungeon/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com/
-│   │           └── bapppis/
-│   │               └── core/
-│   │                   ├── creatures/
-│   │                   │   ├── Creature.java
-│   │                   │   ├── Goblin.java
-│   │                   │   └── ...
-│   │                   ├── dungeon/
-│   │                   │   ├── Dungeon.java
-│   │                   │   ├── Tile.java
-│   │                   │   └── ...
-│   │                   ├── mapparser/
-│   │                   │   ├── MapParser.java
-│   │                   │   └── ...
-│   │                   ├── game/
-│   │                   │   ├── Game.java
-│   │                   │   └── ...
-│   │                   └── ... (other submodules/classes)
-│   ├── test/
-│   │   └── java/
-│   │       └── com/
-│   │           └── bapppis/
-│   │               └── core/
-│   │                   ├── creatures/
-│   │                   │   ├── CreatureTest.java
-│   │                   │   └── ...
-│   │                   ├── dungeon/
-│   │                   │   └── DungeonTest.java
-│   │                   └── ...
-├── target/                # Maven build output (ignored in git)
-├── pom.xml                # Maven build file
-├── .gitignore
-├── LICENSE
-└── README.md
+├─ LICENSE          # Custom license for non-commercial use
+├─ pom.xml          # Maven build configuration
+├─ README.md        # Project overview and documentation
+└─ src
+   ├─ main
+   │  ├─ java
+   │  │  └─ com
+   │  │     └─ bapppis
+   │  │        ├─ core
+   │  │        │  ├─ creatures   # Core creature classes (player, goblin, etc.)
+   │  │        │  ├─ dungeon     # Dungeon and map related logic
+   │  │        │  ├─ event       # Game events
+   │  │        │  ├─ game        # Game loop and command handling
+   │  │        │  ├─ item        # Item classes (armor, weapon, consumables)
+   │  │        │  └─ property    # Properties, traits, buffs/debuffs
+   │  └─ resources               # Data files (maps, etc.)
+   └─ test
+      ├─ java                    # Unit and integration tests
+      └─ resources               # Test data files
 ```
 
 ---
