@@ -15,4 +15,9 @@ public class InstaKillImmunity implements Property {
         return "Insta-Kill Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3008;
+    }
+
 }

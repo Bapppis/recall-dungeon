@@ -1,10 +1,10 @@
-package com.bapppis.core.Creature.humanoid;
+package com.bapppis.core.Creature.humanoid.goblinoid;
 
 
 import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creatures.Creature;
-import com.bapppis.core.creatures.humanoid.Goblin;
+import com.bapppis.core.creatures.humanoid.goblinoid.Goblin;
 
 import static org.junit.jupiter.api.Assertions.*;
 

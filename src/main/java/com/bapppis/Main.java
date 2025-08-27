@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import com.bapppis.core.dungeon.mapparser.MapParser;
 import com.bapppis.core.game.CommandParser;
+import com.bapppis.core.game.Game;
 
 public class Main {
     public static void main(String[] args) {
@@ -17,12 +18,7 @@ public class Main {
         InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceName);map
         mapParser.parseStream(is);*/
 
-        Scanner scanner = new Scanner(System.in);
-        CommandParser commandParser = new CommandParser();
-        while (true) {
-        System.out.print("> ");
-        String input = scanner.nextLine();
-        commandParser.parseAndExecute(input);
-        }
+        Game game = new Game();
+        game.initialize();
     }
 }

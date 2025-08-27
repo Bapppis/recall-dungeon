@@ -14,5 +14,8 @@ public class AfraidImmunity implements Property {
     public String toString() {
         return "Afraid Immunity";
     }
-
+    @Override
+    public int getId() {
+        return 3000;
+    }
 }

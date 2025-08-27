@@ -3,12 +3,7 @@ package com.bapppis.core.game;
 import org.junit.jupiter.api.Test;
 
 public class CommandParserTest {
-    private CommandParser commandParser;
-
-    @Before
-    public void setUp() {
-        commandParser = new CommandParser();
-    }
+    private CommandParser commandParser = new CommandParser();
 
     @Test
     public void testMoveCommand() {

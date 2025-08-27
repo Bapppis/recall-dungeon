@@ -15,4 +15,9 @@ public class SilenceImmunity implements Property {
         return "Silence Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3010;
+    }
+
 }

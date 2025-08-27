@@ -15,4 +15,9 @@ public class CorrosionImmunity implements Property {
         return "Corrosion Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3005;
+    }
+
 }

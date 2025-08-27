@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.bapppis.core.creatures.Creature;
 import com.bapppis.core.creatures.Creature.Resistances;
 import com.bapppis.core.creatures.Creature.Stats;
-import com.bapppis.core.creatures.humanoid.Goblin;
+import com.bapppis.core.creatures.humanoid.goblinoid.Goblin;
 
 public class CreatureTest {
 
@@ -14,6 +14,7 @@ public class CreatureTest {
     public void testCreatureCreation() {
         System.out.println("---------------------Creature creation---------------------");
         Goblin goblin = new Goblin();
+        System.out.println(goblin.toString());
         assertGoblinDefaults(goblin);
     }
 
@@ -55,6 +56,7 @@ public class CreatureTest {
         assertEquals(Creature.Type.ENEMY, goblin.getType(), "Goblin type should be ENEMY");
         assertEquals(Creature.CreatureType.HUMANOID, goblin.getCreatureType(), "Goblin creature type should be HUMANOID");
         assertEquals("A small and cowardly goblin. Are you sure you want to fight it?", goblin.getDescription(), "Goblin description mismatch");
+        goblin.toString();
     }
 
     private void assertResistance(Goblin goblin, Resistances resistanceType, int expectedValue) {

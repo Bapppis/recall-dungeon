@@ -15,4 +15,9 @@ public class JoltImmunity implements Property {
         return "Jolt Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3009;
+    }
+
 }

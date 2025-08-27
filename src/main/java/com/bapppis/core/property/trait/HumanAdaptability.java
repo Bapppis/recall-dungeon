@@ -1,23 +1,23 @@
-package com.bapppis.core.property.immunity;
+package com.bapppis.core.property.trait;
 
 import com.bapppis.core.property.Property;
 import com.bapppis.core.property.PropertyType;
 
-public class BleedImmunity implements Property {
+public class HumanAdaptability implements Property {
 
     @Override
     public PropertyType getType() {
-        return PropertyType.IMMUNITY;
+        return PropertyType.TRAIT;
     }
 
     @Override
     public String toString() {
-        return "Bleed Immunity";
+        return "Human Adaptability";
     }
 
     @Override
     public int getId() {
-        return 3001;
+        return 4001;
     }
 
 }

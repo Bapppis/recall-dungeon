@@ -1,8 +1,7 @@
 package com.bapppis.core.creatures;
 
 import java.util.EnumMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.bapppis.core.property.Property;
@@ -78,8 +77,11 @@ public abstract class Creature {
     // Resistances stored in EnumMap
     private EnumMap<Resistances, Integer> resistances;
 
-    // List of properties that can be added to creatures
-    private List<Property> properties;
+    // All the properties separated by categories
+    private HashMap<Integer, Property> buffs = new HashMap<>();
+    private HashMap<Integer, Property> debuffs = new HashMap<>();
+    private HashMap<Integer, Property> immunities = new HashMap<>();
+    private HashMap<Integer, Property> traits = new HashMap<>();
 
     private String description;
 
@@ -99,7 +101,8 @@ public abstract class Creature {
             resistances.put(res, 100); // default resistance 100%
         }
 
-        properties = new ArrayList<>();
+        // Not sure what this does
+        //properties = new ArrayList<>();
     }
 
     // Getters and setters for stats
@@ -187,8 +190,52 @@ public abstract class Creature {
         this.creatureType = creatureType;
     }
 
+    public void addBuff(Property buff) {
+        buffs.put(buff.getId(), buff);
+        buff.onApply(this);
+    }
+
+
+    public void addDebuff(Property debuff) {
+        debuffs.put(debuff.getId(), debuff);
+        debuff.onApply(this);
+    }
+
+
+    public void addImmunity(Property immunity) {
+        immunities.put(immunity.getId(), immunity);
+        immunity.onApply(this);
+    }
+
+    public void addTrait(Property trait) {
+        traits.put(trait.getId(), trait);
+        trait.onApply(this);
+    }
+
+    public void printStatusEffects() {
+        System.out.println("Buffs:");
+        for (Property buff : buffs.values()) {
+            System.out.println(" - " + buff);
+        }
+
+        System.out.println("Debuffs:");
+        for (Property debuff : debuffs.values()) {
+            System.out.println(" - " + debuff);
+        }
+
+        System.out.println("Immunities:");
+        for (Property immunity : immunities.values()) {
+            System.out.println(" - " + immunity);
+        }
+
+        System.out.println("Traits:");
+        for (Property trait : traits.values()) {
+            System.out.println(" - " + trait);
+        }
+    }
+
     // Properties management
-    public void addProperty(Property property) {
+    /*public void addProperty(Property property) {
         properties.add(property);
     }
 
@@ -203,7 +250,7 @@ public abstract class Creature {
             }
         }
         return false;
-    }
+    }*/
 
     public String getDescription() {
         return description;
@@ -228,8 +275,10 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
-        sb.append("Properties: ").append(properties).append("\n");
-        sb.append("Description: ").append(description).append("\n");
+        sb.append("Buffs: ").append(buffs.values()).append("\n");
+        sb.append("Debuffs: ").append(debuffs.values()).append("\n");
+        sb.append("Immunities: ").append(immunities.values()).append("\n");
+        sb.append("Traits: ").append(traits.values()).append("\n");
         return sb.toString();
     }
 }

@@ -15,4 +15,9 @@ public class ConcussionImmunity implements Property {
         return "Concussion Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3004;
+    }
+
 }

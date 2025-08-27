@@ -1,7 +1,7 @@
-package com.bapppis.core.creatures.humanoid;
+package com.bapppis.core.creatures.humanoid.goblinoid;
 
 import com.bapppis.core.creatures.Creature;
-import com.bapppis.core.property.Coward;
+import com.bapppis.core.property.trait.Coward;
 
 public class Goblin extends Creature {
 
@@ -13,12 +13,9 @@ public class Goblin extends Creature {
         setType(Type.ENEMY);
         setCreatureType(CreatureType.HUMANOID);
         setDescription("A small and cowardly goblin. Are you sure you want to fight it?");
-
-        modifyStat(Stats.STRENGTH, -2);
-        modifyStat(Stats.DEXTERITY, 2);
         modifyResistance(Resistances.SLASHING, 50);
 
-        addProperty(new Coward());
+        addTrait(new Coward());
     }
 
 }

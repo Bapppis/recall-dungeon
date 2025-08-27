@@ -15,4 +15,9 @@ public class BlindImmunity implements Property {
         return "Blind Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3002;
+    }
+
 }

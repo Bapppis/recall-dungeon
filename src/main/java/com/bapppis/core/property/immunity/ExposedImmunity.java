@@ -13,6 +13,11 @@ public class ExposedImmunity implements Property {
     @Override
     public String toString() {
         return "Exposed Immunity";
+    }  
+
+    @Override
+    public int getId() {
+        return 3006;
     }
 
 }

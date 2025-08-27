@@ -15,4 +15,9 @@ public class FreezeImmunity implements Property {
         return "Freeze Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3007;
+    }
+
 }

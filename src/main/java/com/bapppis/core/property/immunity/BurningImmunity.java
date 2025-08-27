@@ -15,4 +15,9 @@ public class BurningImmunity implements Property {
         return "Burning Immunity";
     }
 
+    @Override
+    public int getId() {
+        return 3003;
+    }
+
 }
