@@ -4,6 +4,8 @@ A Java-based dungeon recall project built with Maven.
 
 Explore the mysterious dungeon where you have awakened. Decide whether you will go further down the dungeon or try to escape to the surface!
 
+This project includes a custom Java-based game engine designed specifically for grid-based dungeon gameplay.
+All game logic, entity systems, map parsing, and command handling are part of a custom Java game engine I am developing from scratch.
 ---
 
 ## Table of Contents
