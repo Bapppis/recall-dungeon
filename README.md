@@ -4,7 +4,7 @@ A Java-based dungeon recall project built with Maven.
 
 Explore the mysterious dungeon where you have awakened. Decide whether you will go further down the dungeon or try to escape to the surface!
 
-This project includes a custom Java-based game engine designe specifically for grid-based dungeon gameplay.
+This project includes a custom Java-based game engine designed specifically for grid-based dungeon gameplay.
 All game logic, entity systems, map parsing, and command handling are part of a custom Java game engine I am developing from scratch.
 
 ---
@@ -45,7 +45,8 @@ All game logic, entity systems, map parsing, and command handling are part of a 
 
 ```
 recall-dungeon/
-├─ LICENSE          # Custom license for non-commercial use
+├─ LICENSE          # MIT License for code, CC BY-NC-ND 4.0 for assets
+├─ ASSETS-LICENSE   # Creative Commons license details for assets
 ├─ pom.xml          # Maven build configuration
 ├─ README.md        # Project overview and documentation
 └─ src
@@ -131,10 +132,43 @@ mvn test
 
 ## License
 
-- This project is licensed under a custom Non-Commercial License.
-You may use, modify, and share for personal and educational purposes only.
-Commercial use is not permitted. See the [LICENSE](LICENSE) file for details.
-- For other use cases, questions or anything else, feel free to message me!
+### Code License
+
+All source code in this repository is licensed under the [MIT License](LICENSE):
+
+```
+MIT License
+
+Copyright (c) 2025 Sasha Sebastian Heinonen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+### Assets License
+
+All non-code assets (images, audio, story, text, data files, etc.) in this repository are licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)](ASSETS-LICENSE):
+
+- You must give appropriate credit.
+- You may not use the material for commercial purposes.
+- You may not remix, transform, or build upon the material.
+
+See the full license at: https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
 
 ---
 
