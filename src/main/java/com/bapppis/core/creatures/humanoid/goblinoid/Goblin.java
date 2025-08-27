@@ -10,7 +10,6 @@ public class Goblin extends Creature {
         setMaxHp(10);
         setCurrentHp(10);
         setSize(Size.SMALL);
-        setType(Type.ENEMY);
         setCreatureType(CreatureType.HUMANOID);
         setDescription("A small and cowardly goblin. Are you sure you want to fight it?");
         modifyResistance(Resistances.SLASHING, 50);

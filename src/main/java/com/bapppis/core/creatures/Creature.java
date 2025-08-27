@@ -100,9 +100,8 @@ public abstract class Creature {
         for (Resistances res : Resistances.values()) {
             resistances.put(res, 100); // default resistance 100%
         }
-
-        // Not sure what this does
-        //properties = new ArrayList<>();
+        size = Size.MEDIUM; // default size
+        type = Type.ENEMY; // default type
     }
 
     // Getters and setters for stats
@@ -233,24 +232,6 @@ public abstract class Creature {
             System.out.println(" - " + trait);
         }
     }
-
-    // Properties management
-    /*public void addProperty(Property property) {
-        properties.add(property);
-    }
-
-    public List<Property> getProperties() {
-        return properties;
-    }
-
-    public boolean hasProperty(Class<? extends Property> propertyClass) {
-        for (Property p : properties) {
-            if (propertyClass.isInstance(p)) {
-                return true;
-            }
-        }
-        return false;
-    }*/
 
     public String getDescription() {
         return description;
