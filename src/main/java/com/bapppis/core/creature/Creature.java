@@ -1,12 +1,39 @@
-package com.bapppis.core.creatures;
+package com.bapppis.core.creature;
 
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.bapppis.core.property.Property;
+import com.google.gson.Gson;
 
 public abstract class Creature {
+    // Add a property to the correct map based on id prefix
+    public void addProperty(Property property) {
+        int id = property.getId();
+        if (id >= 1000 && id < 2000) {
+            buffs.put(id, property);
+        } else if (id >= 2000 && id < 3000) {
+            debuffs.put(id, property);
+        } else if (id >= 3000 && id < 4000) {
+            immunities.put(id, property);
+        } else if (id >= 4000 && id < 5000) {
+            traits.put(id, property);
+        }
+    }
+
+    // Remove a property from the correct map based on id prefix
+    public void removeProperty(int id) {
+        if (id >= 1000 && id < 2000) {
+            buffs.remove(id);
+        } else if (id >= 2000 && id < 3000) {
+            debuffs.remove(id);
+        } else if (id >= 3000 && id < 4000) {
+            immunities.remove(id);
+        } else if (id >= 4000 && id < 5000) {
+            traits.remove(id);
+        }
+    }
 
     // Properties for all creatures including the player
     private String name;
@@ -104,6 +131,11 @@ public abstract class Creature {
         type = Type.ENEMY; // default type
     }
 
+    public static Creature fromJson(String json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, Creature.class);
+    }
+
     // Getters and setters for stats
     public int getStat(Stats stat) {
         return stats.getOrDefault(stat, 0);
@@ -189,27 +221,15 @@ public abstract class Creature {
         this.creatureType = creatureType;
     }
 
-    public void addBuff(Property buff) {
-        buffs.put(buff.getId(), buff);
-        buff.onApply(this);
-    }
+    public HashMap<Integer, Property> getBuffs() { return buffs; }
+    public HashMap<Integer, Property> getDebuffs() { return debuffs; }
+    public HashMap<Integer, Property> getImmunities() { return immunities; }
+    public HashMap<Integer, Property> getTraits() { return traits; }
 
-
-    public void addDebuff(Property debuff) {
-        debuffs.put(debuff.getId(), debuff);
-        debuff.onApply(this);
-    }
-
-
-    public void addImmunity(Property immunity) {
-        immunities.put(immunity.getId(), immunity);
-        immunity.onApply(this);
-    }
-
-    public void addTrait(Property trait) {
-        traits.put(trait.getId(), trait);
-        trait.onApply(this);
-    }
+    public Property getBuff(int id) { return buffs.get(id); }
+    public Property getDebuff(int id) { return debuffs.get(id); }
+    public Property getImmunity(int id) { return immunities.get(id); }
+    public Property getTrait(int id) { return traits.get(id); }
 
     public void printStatusEffects() {
         System.out.println("Buffs:");
@@ -240,6 +260,26 @@ public abstract class Creature {
     public void setDescription(String description) {
         this.description = description;
     }
+    public String printProperties() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Buffs:\n");
+        for (Property buff : buffs.values()) {
+            sb.append(" - ").append(buff).append("\n");
+        }
+        sb.append("Debuffs:\n");
+        for (Property debuff : debuffs.values()) {
+            sb.append(" - ").append(debuff).append("\n");
+        }
+        sb.append("Immunities:\n");
+        for (Property immunity : immunities.values()) {
+            sb.append(" - ").append(immunity).append("\n");
+        }
+        sb.append("Traits:\n");
+        for (Property trait : traits.values()) {
+            sb.append(" - ").append(trait).append("\n");
+        }
+        return sb.toString();
+    }
 
     @Override
     public String toString() {
@@ -256,10 +296,7 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
-        sb.append("Buffs: ").append(buffs.values()).append("\n");
-        sb.append("Debuffs: ").append(debuffs.values()).append("\n");
-        sb.append("Immunities: ").append(immunities.values()).append("\n");
-        sb.append("Traits: ").append(traits.values()).append("\n");
+        sb.append(printProperties());
         return sb.toString();
     }
 }

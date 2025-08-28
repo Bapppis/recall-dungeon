@@ -1,34 +1,41 @@
 package com.bapppis.core.Creature.player.humanplayer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
-
-import com.bapppis.core.creatures.Creature.CreatureType;
-import com.bapppis.core.creatures.Creature.Size;
-import com.bapppis.core.creatures.Creature.Stats;
-import com.bapppis.core.creatures.player.humanplayer.CaptainVoss;
+import com.bapppis.core.creature.Creature.CreatureType;
+import com.bapppis.core.creature.Creature.Size;
+import com.bapppis.core.creature.Creature.Stats;
+import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.property.PropertyManagerTest;
+import com.google.gson.Gson;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 public class HumanPlayerTest {
 
     @Test
-    public void testHumanPlayerCreation() {
-        System.out.println("---------------------Human Player Creation---------------------");
-        CaptainVoss captainVoss = new CaptainVoss();
-        System.out.println(captainVoss.toString());
-        assertCaptainVossDefaults(captainVoss);
+    public void testHumanPlayerCreationFromJson() throws Exception {
+        System.out.println("---------------------Human Player Creation from JSON---------------------");
+        PropertyManagerTest propertyManagerTest = new PropertyManagerTest();
+        // Load all properties with propertymanagertest
+        propertyManagerTest.testLoadTestProperties();
+        Gson gson = new Gson();
+        try (Reader reader = new InputStreamReader(
+                getClass().getResourceAsStream("/assets/creatures/players/humanplayers/CaptainVossTest.json"))) {
+            Player captainVoss = gson.fromJson(reader, Player.class);
+            System.out.println(captainVoss.toString());
+            assertCaptainVossDefaults(captainVoss);
+        }
     }
 
-    private void assertCaptainVossDefaults(CaptainVoss captainVoss) {
-        // Check default values for Captain Voss
+    private void assertCaptainVossDefaults(Player captainVoss) {
         assertEquals("Captain Aldric Voss", captainVoss.getName());
         assertEquals(30, captainVoss.getMaxHp());
         assertEquals(30, captainVoss.getCurrentHp());
         assertEquals(Size.MEDIUM, captainVoss.getSize());
         assertEquals(CreatureType.HUMANOID, captainVoss.getCreatureType());
-        assertEquals(14, captainVoss.getStat(Stats.STRENGTH));
-        assertEquals(13, captainVoss.getStat(Stats.CONSTITUTION));
+        assertEquals(13, captainVoss.getStat(Stats.STRENGTH));
+        assertEquals(12, captainVoss.getStat(Stats.CONSTITUTION));
         assertEquals("Captain Voss, a seasoned warrior. Determined to find home and protect his homeland.", captainVoss.getDescription());
     }
-
 }

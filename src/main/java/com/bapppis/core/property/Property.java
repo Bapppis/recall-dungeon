@@ -1,10 +1,11 @@
 package com.bapppis.core.property;
 
-import com.bapppis.core.creatures.Creature;
+import com.bapppis.core.creature.Creature;
 
 // Make a property interface which has property and id
 
 public interface Property {
+    String getName();
     PropertyType getType();
     int getId();
 

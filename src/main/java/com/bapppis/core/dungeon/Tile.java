@@ -3,7 +3,7 @@ package com.bapppis.core.dungeon;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bapppis.core.creatures.Creature;
+import com.bapppis.core.creature.Creature;
 import com.bapppis.core.event.Event;
 import com.bapppis.core.item.Item;
 

@@ -1,6 +1,6 @@
 package com.bapppis.core.item;
 
-import com.bapppis.core.creatures.Creature;
+import com.bapppis.core.creature.Creature;
 
 public interface Item {
 

@@ -1,0 +1,10 @@
+{
+  "id": 4000,
+  "name": "Coward",
+  "type": "TRAIT",
+  "description": "Decreases strength by 2 and increases dexterity by 2.",
+  "statModifiers": {
+    "STRENGTH": -2,
+    "DEXTERITY": 2
+  }
+}
