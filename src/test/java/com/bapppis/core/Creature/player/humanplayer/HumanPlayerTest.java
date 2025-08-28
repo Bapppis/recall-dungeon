@@ -6,6 +6,7 @@ import com.bapppis.core.creature.Creature.CreatureType;
 import com.bapppis.core.creature.Creature.Size;
 import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.property.Property;
 import com.bapppis.core.property.PropertyManagerTest;
 import com.google.gson.Gson;
 import java.io.InputStreamReader;
@@ -16,14 +17,19 @@ public class HumanPlayerTest {
     @Test
     public void testHumanPlayerCreationFromJson() throws Exception {
         System.out.println("---------------------Human Player Creation from JSON---------------------");
-        PropertyManagerTest propertyManagerTest = new PropertyManagerTest();
-        // Load all properties with propertymanagertest
-        propertyManagerTest.testLoadTestProperties();
+        // Load all test properties using static PropertyManagerTest methods
+        PropertyManagerTest.testLoadProperties();
+        Property property4001 = PropertyManagerTest.testGetProperty(4001);
+        if (property4001 != null) {
+            System.out.println("Property 4001: " + property4001.getName());
+        } else {
+            System.out.println("Property 4001 not found.");
+        }
         Gson gson = new Gson();
         try (Reader reader = new InputStreamReader(
                 getClass().getResourceAsStream("/assets/creatures/players/humanplayers/CaptainVossTest.json"))) {
             Player captainVoss = gson.fromJson(reader, Player.class);
-            System.out.println(captainVoss.toString());
+            //System.out.println(captainVoss.toString());
             assertCaptainVossDefaults(captainVoss);
         }
     }
