@@ -1,0 +1,9 @@
+{
+  "name": "Biggles The Unlucky",
+  "maxHp": 10,
+  "currentHp": 10,
+  "size": "SMALL",
+  "creatureType": "HUMANOID",
+  "description": "Biggles The Unlucky, a small and unfortunate creature.",
+  "properties": [2000]
+}

@@ -14,7 +14,5 @@
     "LUCK": 1
   },
   "description": "Captain Voss, a seasoned warrior. Determined to find home and protect his homeland.",
-  "traits": [
-    "HumanAdaptability"
-  ]
+  "properties": [4001]
 }

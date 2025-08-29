@@ -19,17 +19,12 @@ public class HumanPlayerTest {
         System.out.println("---------------------Human Player Creation from JSON---------------------");
         // Load all test properties using static PropertyManagerTest methods
         PropertyManagerTest.testLoadProperties();
-        Property property4001 = PropertyManagerTest.testGetProperty(4001);
-        if (property4001 != null) {
-            System.out.println("Property 4001: " + property4001.getName());
-        } else {
-            System.out.println("Property 4001 not found.");
-        }
+
         Gson gson = new Gson();
         try (Reader reader = new InputStreamReader(
                 getClass().getResourceAsStream("/assets/creatures/players/humanplayers/CaptainVossTest.json"))) {
             Player captainVoss = gson.fromJson(reader, Player.class);
-            //System.out.println(captainVoss.toString());
+            System.out.println(captainVoss.toString());
             assertCaptainVossDefaults(captainVoss);
         }
     }

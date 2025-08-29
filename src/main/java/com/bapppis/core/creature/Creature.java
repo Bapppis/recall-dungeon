@@ -20,18 +20,28 @@ public abstract class Creature {
         } else if (id >= 4000 && id < 5000) {
             traits.put(id, property);
         }
+        // Apply property effects
+        property.onApply(this);
     }
 
     // Remove a property from the correct map based on id prefix
     public void removeProperty(int id) {
+        Property property = null;
         if (id >= 1000 && id < 2000) {
+            property = buffs.get(id);
             buffs.remove(id);
         } else if (id >= 2000 && id < 3000) {
+            property = debuffs.get(id);
             debuffs.remove(id);
         } else if (id >= 3000 && id < 4000) {
+            property = immunities.get(id);
             immunities.remove(id);
         } else if (id >= 4000 && id < 5000) {
+            property = traits.get(id);
             traits.remove(id);
+        }
+        if (property != null) {
+            property.onRemove(this);
         }
     }
 
