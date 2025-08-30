@@ -69,8 +69,8 @@ public class CreatureLoader {
                                 creatureMap.put(cname, creature);
                             }
 
-                            System.out.println("Loaded creature: " + (cname != null ? cname : "<unnamed>") +
-                                    " (id: " + cid + ") from " + resource.getPath());
+                            /*System.out.println("Loaded creature: " + (cname != null ? cname : "<unnamed>") +
+                                    " (id: " + cid + ") from " + resource.getPath());*/
                         }
                     } catch (Exception e) {
                         System.out.println("Error loading creature from: " + resource.getPath());

@@ -23,7 +23,11 @@ public class Tile {
     private Tile left = null;
     private Tile right = null;
     private Tile up = null;
-    private Tile down;
+    private Tile down = null;
+    private Tile downLeft = null;
+    private Tile downRight = null;
+    private Tile upLeft = null;
+    private Tile upRight = null;
 
     /*
      * Symbols legend
@@ -46,14 +50,13 @@ public class Tile {
         switch (symbol) {
             case '#':
                 this.isWall = true;
-                this.isOccupied = true;
                 break;
             case '<':
                 this.isBreakableWall = true;
-                this.isOccupied = true;
                 break;
             case '@':
                 this.isSpawn = true;
+                this.isOccupied = true;
                 break;
             case '^':
                 this.isUpstairs = true;
@@ -89,4 +92,24 @@ public class Tile {
     public char getSymbol() {
         return symbol;
     }
+
+    // Neighbor getters
+    public Tile getLeft() { return left; }
+    public Tile getRight() { return right; }
+    public Tile getUp() { return up; }
+    public Tile getDown() { return down; }
+    public Tile getDownLeft() { return downLeft; }
+    public Tile getDownRight() { return downRight; }
+    public Tile getUpLeft() { return upLeft; }
+    public Tile getUpRight() { return upRight; }
+
+    // Neighbor setters
+    public void setLeft(Tile left) { this.left = left; }
+    public void setRight(Tile right) { this.right = right; }
+    public void setUp(Tile up) { this.up = up; }
+    public void setDown(Tile down) { this.down = down; }
+    public void setDownLeft(Tile downLeft) { this.downLeft = downLeft; }
+    public void setDownRight(Tile downRight) { this.downRight = downRight; }
+    public void setUpLeft(Tile upLeft) { this.upLeft = upLeft; }
+    public void setUpRight(Tile upRight) { this.upRight = upRight; }
 }

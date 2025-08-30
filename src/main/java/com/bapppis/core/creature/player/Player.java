@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.item.Item;
-import com.bapppis.core.property.Property;
 import com.google.gson.Gson;
 
 public class Player extends Creature {
     //add item inventory
     private List<Item> inventory;
+    // current position on the floor (null until placed/spawned)
+    private Coordinate position;
 
     public Player() {
         inventory = new ArrayList<>();
@@ -34,6 +36,27 @@ public class Player extends Creature {
 
     public List<Item> getInventory() {
         return inventory;
+    }
+
+    // --- Position helpers ---
+    public Coordinate getPosition() {
+        return position;
+    }
+
+    public void setPosition(Coordinate position) {
+        this.position = position;
+    }
+
+    public void setPosition(int x, int y) {
+        this.position = new Coordinate(x, y);
+    }
+
+    public int getX() {
+        return position != null ? position.getX() : -1;
+    }
+
+    public int getY() {
+        return position != null ? position.getY() : -1;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class PropertyManager {
                     try (Reader reader = new InputStreamReader(resource.open())) {
                         PropertyImpl property = gson.fromJson(reader, PropertyImpl.class);
                         propertyMap.put(property.getId(), property);
-                        System.out.println("Loaded property: " + property.getId() + " from " + resource.getPath());
+                        //System.out.println("Loaded property: " + property.getId() + " from " + resource.getPath());
                     } catch (Exception e) {
                         System.out.println("Error loading property from: " + resource.getPath());
                         e.printStackTrace();

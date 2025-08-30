@@ -1,18 +1,24 @@
 package com.bapppis.core.game;
 
-import java.io.InputStream;
-import java.util.*;
-
+/* import java.io.InputStream;
 import com.bapppis.core.dungeon.mapparser.MapParser;
+import com.bapppis.core.creature.player.Player; */
+import java.util.*;
+import com.bapppis.core.dungeon.*;
 
 public class CommandParser {
     private Map<String, Command> commandMap = new HashMap<>();
 
     public CommandParser() {
+        /*
+         * Command for seeing nearby tiles and what they are
+         * Moving (finally)
+         */
         // Register commands using lowercase names
         commandMap.put("move", new MoveCommand());
         commandMap.put("attack", new AttackCommand());
-        commandMap.put("mapgen", new MapGenCommand());
+        commandMap.put("map", new MapCommand());
+        commandMap.put("player", new PlayerCommand());
         // ... add more as needed
     }
 
@@ -27,7 +33,6 @@ public class CommandParser {
         for (int i = 0; i < args.length; i++) {
             args[i] = args[i].toLowerCase();
         }
-
         Command command = commandMap.get(commandName);
         if (command != null) {
             command.execute(args);
@@ -53,12 +58,47 @@ class AttackCommand implements Command {
     }
 }
 
-class MapGenCommand implements Command {
+class MapCommand implements Command {
     public void execute(String[] args) {
-        System.out.println("Generating map...");
-        MapParser mapParser = new MapParser();
-        String resourceName = "floor(20x20).txt";
-        InputStream is = CommandParser.class.getClassLoader().getResourceAsStream(resourceName);
-        mapParser.parseStream(is);
+        Floor floor = GameState.getCurrentFloor();
+        if (floor == null) {
+            System.out.println("No floor loaded. Use: mapgen [floor-file]");
+            return;
+        }
+        MapPrinter.printWithPlayer(floor, GameState.getPlayer());
+    }
+}
+
+class PlayerCommand implements Command {
+    public void execute(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Usage: player <id>");
+            return;
+        }
+        try {
+            int id = Integer.parseInt(args[0]);
+            Game.selectPlayerById(id);
+            System.out.println("Selected player id " + id + ".");
+            // If a floor is already loaded, spawn the player at a valid tile and reprint
+            Floor floor = GameState.getCurrentFloor();
+            if (floor != null) {
+                // Find a spawn '@' or fallback '.'
+                Coordinate spawn = null;
+                for (Map.Entry<Coordinate, Tile> entry : floor.getTiles().entrySet()) {
+                    Tile t = entry.getValue();
+                    if (t.getSymbol() == '@' || t.getSymbol() == '.') {
+                        spawn = entry.getKey();
+                        if (t.getSymbol() == '@') break;
+                    }
+                }
+                if (spawn != null) {
+                    GameState.getPlayer().setPosition(spawn);
+                    System.out.println("Player spawned at " + spawn);
+                    MapPrinter.printWithPlayer(floor, GameState.getPlayer());
+                }
+            }
+        } catch (NumberFormatException nfe) {
+            System.out.println("Player id must be a number.");
+        }
     }
 }
