@@ -46,9 +46,14 @@ public abstract class Creature {
     }
 
     // Properties for all creatures including the player
+    private int id; // id set by Gson, no setter
     private String name;
     private int maxHp;
     private int currentHp;
+    // Getter for id
+    public int getId() {
+        return id;
+    }
 
     // Enum for size, small, medium, large
     public enum Size {

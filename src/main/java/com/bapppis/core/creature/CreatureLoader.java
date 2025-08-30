@@ -15,11 +15,16 @@ import java.util.ArrayList;
 
 public class CreatureLoader {
     private static final HashMap<String, Creature> creatureMap = new HashMap<>();
+    private static final HashMap<Integer, Creature> creatureIdMap = new HashMap<>();
 
     public static void loadCreatures() {
+        // Fresh load each time
+        creatureMap.clear();
+        creatureIdMap.clear();
+
         Gson gson = new Gson();
         try (ScanResult scanResult = new ClassGraph()
-                .acceptPaths("assets/creatures/players/humanplayers") // Add more paths as needed
+                .acceptPaths("assets/creatures") // Scan all creatures and subfolders (players, enemies, etc.)
                 .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
@@ -29,22 +34,43 @@ public class CreatureLoader {
                         if (resource.getPath().contains("players")) {
                             creature = gson.fromJson(reader, Player.class);
                         } else {
-                            creature = gson.fromJson(reader, Creature.class);
+                            creature = gson.fromJson(reader, Enemy.class);
                         }
-                        // Load properties by ID
-                        if (creature != null && creature.getName() != null) {
+                        // Load properties by ID array from JSON
+                        if (creature != null) {
+                            // Determine creature type based on id ranges when available
+                            int cidForType = creature.getId();
+                            if (cidForType >= 5000 && cidForType < 6000) {
+                                creature.setType(Creature.Type.PLAYER);
+                            } else if (cidForType >= 6000 && cidForType < 7000) {
+                                creature.setType(Creature.Type.ENEMY);
+                            }
                             List<Integer> propertyIds = getPropertyIdsFromJson(resource.getPath(), gson);
                             if (propertyIds != null) {
-                                for (Integer id : propertyIds) {
-                                    Property prop = PropertyManager.getProperty(id);
+                                for (Integer pid : propertyIds) {
+                                    Property prop = PropertyManager.getProperty(pid);
                                     if (prop != null) {
                                         creature.addProperty(prop);
                                     }
                                 }
                             }
-                            // If resistances are present in JSON, they will override defaults
-                            creatureMap.put(creature.getName(), creature);
-                            System.out.println("Loaded creature: " + creature.getName() + " from " + resource.getPath());
+
+                            // Index by id (primary) and by name (optional)
+                            int cid = creature.getId();
+                            if (cid > 0) {
+                                if (creatureIdMap.containsKey(cid)) {
+                                    System.out.println("Warning: Duplicate creature id " + cid + ". Overwriting previous entry.");
+                                }
+                                creatureIdMap.put(cid, creature);
+                            }
+
+                            String cname = creature.getName();
+                            if (cname != null && !cname.isEmpty()) {
+                                creatureMap.put(cname, creature);
+                            }
+
+                            System.out.println("Loaded creature: " + (cname != null ? cname : "<unnamed>") +
+                                    " (id: " + cid + ") from " + resource.getPath());
                         }
                     } catch (Exception e) {
                         System.out.println("Error loading creature from: " + resource.getPath());
@@ -74,6 +100,10 @@ public class CreatureLoader {
 
     public static Creature getCreature(String name) {
         return creatureMap.get(name);
+    }
+
+    public static Creature getCreatureById(int id) {
+        return creatureIdMap.get(id);
     }
 
     public static List<Creature> getAllCreatures() {

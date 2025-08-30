@@ -5,6 +5,5 @@
   "description": "Afraid, unable to act and weaker to darkness",
   "resistances": {
     "DARKNESS": 50
-  },
-  "properties": [2000]
+  }
 }
