@@ -45,26 +45,58 @@ All game logic, entity systems, map parsing, and command handling are part of a 
 
 ```
 recall-dungeon/
-├─ LICENSE          # MIT License for code, CC BY-NC-ND 4.0 for assets
-├─ ASSETS-LICENSE   # Creative Commons license details for assets
-├─ pom.xml          # Maven build configuration
-├─ README.md        # Project overview and documentation
+├─ LICENSE                    # MIT License (code)
+├─ ASSETS-LICENSE             # CC BY-NC-ND 4.0 (assets)
+├─ pom.xml                    # Maven build configuration
+├─ README.md                  # Project overview and docs
 └─ src
    ├─ main
    │  ├─ java
-   │  │  └─ com
-   │  │     └─ bapppis
-   │  │        ├─ core
-   │  │        │  ├─ creatures   # Core creature classes (player, goblin, etc.)
-   │  │        │  ├─ dungeon     # Dungeon and map related logic
-   │  │        │  ├─ event       # Game events
-   │  │        │  ├─ game        # Game loop and command handling
-   │  │        │  ├─ item        # Item classes (armor, weapon, consumables)
-   │  │        │  └─ property    # Properties, traits, buffs/debuffs
-   │  └─ resources               # Data files (maps, etc.)
+   │  │  └─ com/bapppis
+   │  │     ├─ Main.java
+   │  │     └─ core
+   │  │        ├─ creature
+   │  │        │  ├─ Creature.java
+   │  │        │  ├─ Enemy.java
+   │  │        │  ├─ CreatureLoader.java
+   │  │        │  └─ player/Player.java
+   │  │        ├─ dungeon
+   │  │        │  ├─ Coordinate.java
+   │  │        │  ├─ Floor.java
+   │  │        │  ├─ Tile.java
+   │  │        │  ├─ MapPrinter.java
+   │  │        │  └─ mapparser/MapParser.java
+   │  │        ├─ event/...
+   │  │        ├─ game
+   │  │        │  ├─ CommandParser.java
+   │  │        │  ├─ Game.java
+   │  │        │  └─ GameState.java
+   │  │        ├─ item/...
+   │  │        └─ property
+   │  │           ├─ PropertyImpl.java
+   │  │           └─ PropertyManager.java
+   │  └─ resources
+   │     └─ assets
+   │        ├─ creatures
+   │        │  ├─ players/...
+   │        │  ├─ humanoids/...
+   │        │  └─ ... (beasts, dragons, elementals, etc.)
+   │        ├─ floors
+   │        │  ├─ floor(20x20).txt
+   │        │  └─ floor(50x50).txt
+   │        └─ properties
+   │           ├─ trait/...
+   │           ├─ buff/...
+   │           ├─ debuff/...
+   │           └─ immunity/...
    └─ test
-      ├─ java                    # Unit and integration tests
-      └─ resources               # Test data files
+      ├─ java                    # Unit and integration tests (JUnit)
+      └─ resources
+         └─ assets
+            ├─ floors
+            │  ├─ testFloor(20x20).txt
+            │  └─ testFloor(50x50).txt
+            └─ properties/...
 ```
 
 ---
