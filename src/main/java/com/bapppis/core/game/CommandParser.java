@@ -48,7 +48,62 @@ interface Command {
 
 class MoveCommand implements Command {
     public void execute(String[] args) {
-        System.out.println("You move " + (args.length > 0 ? args[0] : "somewhere"));
+        if (args.length < 1) {
+            System.out.println("Usage: move <direction>");
+            return;
+        }
+        String dir = args[0];
+        int dx = 0, dy = 0;
+        switch (dir) {
+            case "right": case "r": case "east": case "e":
+                dx = 1; dy = 0; break;
+            case "left": case "l": case "west": case "w":
+                dx = -1; dy = 0; break;
+            case "up": case "u": case "north": case "n":
+                dx = 0; dy = -1; break;
+            case "down": case "d": case "south": case "s":
+                dx = 0; dy = 1; break;
+            case "upright": case "ur": case "northeast": case "ne":
+                dx = 1; dy = -1; break;
+            case "upleft": case "ul": case "northwest": case "nw":
+                dx = -1; dy = -1; break;
+            case "downright": case "dr": case "southeast": case "se":
+                dx = 1; dy = 1; break;
+            case "downleft": case "dl": case "southwest": case "sw":
+                dx = -1; dy = 1; break;
+            default:
+                System.out.println("Unknown direction: " + dir);
+                return;
+        }
+
+        Floor floor = GameState.getCurrentFloor();
+        if (floor == null) {
+            System.out.println("No floor loaded. Load a map first.");
+            return;
+        }
+        var player = GameState.getPlayer();
+        if (player.getPosition() == null) {
+            System.out.println("Player is not on the map. Use 'player <id>' or generate a map.");
+            return;
+        }
+
+        int nx = player.getX() + dx;
+        int ny = player.getY() + dy;
+        Coordinate target = new Coordinate(nx, ny);
+        Tile next = floor.getTile(target);
+        if (next == null) {
+            System.out.println("You can't move outside the map.");
+            return;
+        }
+        char sym = next.getSymbol();
+        if (sym == '#' || sym == '<') {
+            System.out.println("A wall blocks your way.");
+            return;
+        }
+
+        player.setPosition(target);
+        System.out.println("You move " + dir + " to " + target);
+        MapPrinter.printWithPlayer(floor, player);
     }
 }
 

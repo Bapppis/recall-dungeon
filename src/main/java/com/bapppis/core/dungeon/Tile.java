@@ -11,7 +11,6 @@ public class Tile {
     private final Coordinate coordinate;
     private boolean isWall = false;
     private boolean isBreakableWall = false;
-    private boolean isOccupied = false;
     private boolean isSpawn = false;
     private boolean isUpstairs = false;
     private boolean isDownstairs = false;
@@ -56,7 +55,6 @@ public class Tile {
                 break;
             case '@':
                 this.isSpawn = true;
-                this.isOccupied = true;
                 break;
             case '^':
                 this.isUpstairs = true;
