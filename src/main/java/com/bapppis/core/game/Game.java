@@ -35,6 +35,7 @@ public class Game {
             // 1) Parse a floor from resources
             MapParser parser = new MapParser();
             String resourceName = "assets/floors/floor(20x20).txt";
+            /* String resourceName = "assets/floors/floor(50x50).txt"; */
             try (InputStream is = Game.class.getClassLoader().getResourceAsStream(resourceName)) {
                 if (is == null) {
                     System.out.println("[Demo] Floor resource not found: " + resourceName);

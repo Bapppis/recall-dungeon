@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.Tile;
+import com.bapppis.core.dungeon.MapPrinter;
+import com.bapppis.core.game.GameState;
 
 public class MapParser {
     public Floor parseStream(InputStream inputStream) {
@@ -70,29 +72,13 @@ public class MapParser {
                             up.setDown(t);
                         }
                     }
-                    // Up-right
-                    if (BoundsUtil.inBounds(xx + 1, yy + 1, width, height)) {
-                        Tile upRight = floor.getTile(new Coordinate(xx + 1, yy + 1));
-                        if (upRight != null) {
-                            t.setUpRight(upRight);
-                            upRight.setDownLeft(t);
-                        }
-                    }
-                    // Up-left
-                    if (BoundsUtil.inBounds(xx - 1, yy + 1, width, height)) {
-                        Tile upLeft = floor.getTile(new Coordinate(xx - 1, yy + 1));
-                        if (upLeft != null) {
-                            t.setUpLeft(upLeft);
-                            upLeft.setDownRight(t);
-                        }
-                    }
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading stream");
             e.printStackTrace();
         }
-    System.out.println(floor.toString());
+    MapPrinter.printWithPlayer(floor, GameState.getPlayer());
     return floor;
     }
 }

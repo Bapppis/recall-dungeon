@@ -19,6 +19,7 @@ public class CommandParser {
         commandMap.put("attack", new AttackCommand());
         commandMap.put("map", new MapCommand());
         commandMap.put("player", new PlayerCommand());
+    commandMap.put("look", new LookCommand());
         // ... add more as needed
     }
 
@@ -46,6 +47,93 @@ interface Command {
     void execute(String[] args);
 }
 
+class LookCommand implements Command {
+    private static final String[] directions = {
+        "north", "east", "south", "west"
+    };
+    private static final int[][] deltas = {
+        {0, -1}, {1, 0}, {0, 1}, {-1, 0}
+    };
+    public void execute(String[] args) {
+        Floor floor = GameState.getCurrentFloor();
+        var player = GameState.getPlayer();
+        if (floor == null || player.getPosition() == null) {
+            System.out.println("No map or player loaded.");
+            return;
+        }
+        int px = player.getX();
+        int py = player.getY();
+        if (args.length < 1) {
+            // Print all directions
+            for (int i = 0; i < directions.length; i++) {
+                int dx = deltas[i][0];
+                int dy = deltas[i][1];
+                Coordinate coord = new Coordinate(px + dx, py + dy);
+                Tile tile = floor.getTile(coord);
+                String desc;
+                if (tile == null) {
+                    desc = "nothing";
+                } else {
+                    char sym = tile.getSymbol();
+                    switch (sym) {
+                        case '#': desc = "a wall"; break;
+                        case '.': desc = "the floor"; break;
+                        case '<': desc = "stairs up"; break;
+                        case '>': desc = "stairs down"; break;
+                        case '@': desc = "a spawn point"; break;
+                        default:
+                            desc = "something";
+                            break;
+                    }
+                }
+                System.out.println("To the " + directions[i] + " you see " + desc);
+            }
+        } else {
+            String dir = args[0];
+            int idx = -1;
+            for (int i = 0; i < directions.length; i++) {
+                if (dir.equals(directions[i])) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx == -1) {
+                System.out.println("Unknown direction: " + dir);
+                return;
+            }
+            int dx = deltas[idx][0];
+            int dy = deltas[idx][1];
+            Coordinate coord = new Coordinate(px + dx, py + dy);
+            Tile tile = floor.getTile(coord);
+            String desc;
+            if (tile == null) {
+                desc = "nothing";
+            } else {
+                char sym = tile.getSymbol();
+                switch (sym) {
+                    case '#': desc = "a wall"; break;
+                    case '<': desc = "a breakable wall"; break;
+                    case '.': desc = "the floor"; break;
+                    case '@': desc = "a spawn point"; break;
+                    case '^': desc = "an up staircase"; break;
+                    case 'v': desc = "a down staircase"; break;
+                    case '!': desc = "an event"; break;
+                    case 'C': desc = "a chest"; break;
+                    case '+': desc = "a pit"; break;
+                    case 'M': desc = "a monster"; break;
+                    case 'P': desc = "a player"; break;
+                    default:
+                        desc = "something";
+                        break;
+                }
+            }
+            System.out.println("To the " + directions[idx] + " you see " + desc);
+        }
+    }
+}
+
+
+
 class MoveCommand implements Command {
     public void execute(String[] args) {
         if (args.length < 1) {
@@ -63,14 +151,6 @@ class MoveCommand implements Command {
                 dx = 0; dy = -1; break;
             case "down": case "d": case "south": case "s":
                 dx = 0; dy = 1; break;
-            case "upright": case "ur": case "northeast": case "ne":
-                dx = 1; dy = -1; break;
-            case "upleft": case "ul": case "northwest": case "nw":
-                dx = -1; dy = -1; break;
-            case "downright": case "dr": case "southeast": case "se":
-                dx = 1; dy = 1; break;
-            case "downleft": case "dl": case "southwest": case "sw":
-                dx = -1; dy = 1; break;
             default:
                 System.out.println("Unknown direction: " + dir);
                 return;
