@@ -11,22 +11,48 @@ import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.MapPrinter;
 import com.bapppis.core.dungeon.Tile;
 import com.bapppis.core.dungeon.mapparser.MapParser;
+import com.bapppis.core.dungeon.Dungeon;
 
 public class Game {
+
+    private Dungeon dungeon;
+    private int[] currentFloorRef = new int[]{0}; // Start at floor 0, use array for mutability
 
     public void initialize() {
         com.bapppis.core.property.PropertyManager.loadProperties();
         com.bapppis.core.creature.CreatureLoader.loadCreatures();
-        loadMap();
+        loadDungeon();
 
         System.out.println("Game initialized.");
         try (Scanner scanner = new Scanner(System.in)) {
-            CommandParser commandParser = new CommandParser();
+            CommandParser commandParser = new CommandParser(dungeon, currentFloorRef);
             while (true) {
-                System.out.println("Please enter a command");
+                System.out.println("You are on floor " + currentFloorRef[0]);
+                System.out.println("Please enter a command (move, look, up, down, etc.)");
                 System.out.print("> ");
                 String input = scanner.nextLine();
                 commandParser.parseAndExecute(input);
+            }
+        }
+    }
+
+    private void loadDungeon() {
+        dungeon = new Dungeon() {}; // Use anonymous subclass since Dungeon is abstract
+        MapParser parser = new MapParser();
+        for (int i = -10; i <= 10; i++) {
+            String resourceName = "assets/floors/floor" + i + "/floor" + i + ".txt";
+            try (InputStream is = Game.class.getClassLoader().getResourceAsStream(resourceName)) {
+                if (is == null) {
+                    System.out.println("[Dungeon] Floor resource not found: " + resourceName);
+                    continue;
+                }
+                Floor floor = parser.parseStream(is);
+                dungeon.addFloor(i, floor);
+                if (i == 0) {
+                    GameState.setCurrentFloor(floor); // Start at floor 0
+                }
+            } catch (Exception e) {
+                System.out.println("[Dungeon] Failed to load floor " + i + ": " + e.getMessage());
             }
         }
     }
@@ -34,7 +60,7 @@ public class Game {
         try {
             // 1) Parse a floor from resources
             MapParser parser = new MapParser();
-            String resourceName = "assets/floors/floor(20x20).txt";
+            String resourceName = "assets/floors/floor0/floor0.txt";
             /* String resourceName = "assets/floors/floor(50x50).txt"; */
             try (InputStream is = Game.class.getClassLoader().getResourceAsStream(resourceName)) {
                 if (is == null) {

@@ -4,24 +4,105 @@ package com.bapppis.core.game;
 import com.bapppis.core.dungeon.mapparser.MapParser;
 import com.bapppis.core.creature.player.Player; */
 import java.util.*;
+
+import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.dungeon.*;
 
 public class CommandParser {
     private Map<String, Command> commandMap = new HashMap<>();
 
-    public CommandParser() {
-        /*
-         * Command for seeing nearby tiles and what they are
-         * Moving (finally)
-         */
+    public CommandParser(Dungeon dungeon, int[] currentFloorRef) {
         // Register commands using lowercase names
         commandMap.put("move", new MoveCommand());
         commandMap.put("attack", new AttackCommand());
         commandMap.put("map", new MapCommand());
         commandMap.put("player", new PlayerCommand());
-    commandMap.put("look", new LookCommand());
+        commandMap.put("look", new LookCommand());
+        commandMap.put("up", new UpCommand(dungeon, currentFloorRef));
+        commandMap.put("down", new DownCommand(dungeon, currentFloorRef));
         // ... add more as needed
     }
+class UpCommand implements Command {
+    private Dungeon dungeon;
+    private int[] currentFloorRef;
+    public UpCommand(Dungeon dungeon, int[] currentFloorRef) {
+        this.dungeon = dungeon;
+        this.currentFloorRef = currentFloorRef;
+    }
+    public void execute(String[] args) {
+        Player player = GameState.getPlayer();
+        Floor floor = dungeon.getFloor(currentFloorRef[0]);
+        Tile playerTile = floor.getTile(player.getPosition());
+        if (playerTile != null && playerTile.getSymbol() == '^') {
+            if (currentFloorRef[0] < 10 && dungeon.getFloor(currentFloorRef[0] + 1) != null) {
+                currentFloorRef[0]++;
+                System.out.println("You ascend to floor " + currentFloorRef[0]);
+                Floor newFloor = dungeon.getFloor(currentFloorRef[0]);
+                GameState.setCurrentFloor(newFloor);
+                // Move player to '@' symbol on new floor
+                Coordinate spawn = null;
+                for (var entry : newFloor.getTiles().entrySet()) {
+                    if (entry.getValue().getSymbol() == '@') {
+                        spawn = entry.getKey();
+                        break;
+                    }
+                }
+                if (spawn != null) {
+                    player.setPosition(spawn);
+                    System.out.println("Player spawned at " + spawn);
+                } else {
+                    System.out.println("No '@' spawn found on this floor. Position unchanged.");
+                }
+                MapPrinter.printWithPlayer(newFloor, player);
+            } else {
+                System.out.println("You can't go higher!");
+            }
+        } else {
+            System.out.println("You must be standing on an up staircase (^) to go up.");
+        }
+    }
+}
+
+class DownCommand implements Command {
+    private Dungeon dungeon;
+    private int[] currentFloorRef;
+    public DownCommand(Dungeon dungeon, int[] currentFloorRef) {
+        this.dungeon = dungeon;
+        this.currentFloorRef = currentFloorRef;
+    }
+    public void execute(String[] args) {
+        Player player = GameState.getPlayer();
+        Floor floor = dungeon.getFloor(currentFloorRef[0]);
+        Tile playerTile = floor.getTile(player.getPosition());
+        if (playerTile != null && playerTile.getSymbol() == 'v') {
+            if (currentFloorRef[0] > -10 && dungeon.getFloor(currentFloorRef[0] - 1) != null) {
+                currentFloorRef[0]--;
+                System.out.println("You descend to floor " + currentFloorRef[0]);
+                Floor newFloor = dungeon.getFloor(currentFloorRef[0]);
+                GameState.setCurrentFloor(newFloor);
+                // Move player to '@' symbol on new floor
+                Coordinate spawn = null;
+                for (var entry : newFloor.getTiles().entrySet()) {
+                    if (entry.getValue().getSymbol() == '@') {
+                        spawn = entry.getKey();
+                        break;
+                    }
+                }
+                if (spawn != null) {
+                    player.setPosition(spawn);
+                    System.out.println("Player spawned at " + spawn);
+                } else {
+                    System.out.println("No '@' spawn found on this floor. Position unchanged.");
+                }
+                MapPrinter.printWithPlayer(newFloor, player);
+            } else {
+                System.out.println("You can't go lower!");
+            }
+        } else {
+            System.out.println("You must be standing on a down staircase (v) to go down.");
+        }
+    }
+}
 
     public void parseAndExecute(String input) {
         if (input == null || input.trim().isEmpty()) return;
