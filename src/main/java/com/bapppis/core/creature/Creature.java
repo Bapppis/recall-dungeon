@@ -22,8 +22,20 @@ public abstract class Creature {
         return xp;
     }
 
-    public void setXp(int xp) {
-        this.xp = xp;
+    public void addXp(int xp) {
+        int currentXp = this.xp + xp;
+        if (this.level >= 30) {
+            this.level = 30;
+            this.xp = 0;
+        }
+        else if (currentXp >= ((this.level + 1) * 10)) {
+            this.level++;
+            currentXp -= ((this.level) * 10);
+            addXp(currentXp); // Recursively add remaining XP
+        }
+        else {
+            this.xp = this.xp + xp;
+        }
     }
 
     // Getter and setter for baseHp
@@ -170,6 +182,8 @@ public abstract class Creature {
                 stats.put(stat, 10); // other stats default to 10
             }
         }
+        level = 0; // Default level
+        xp = 0;    // Default experience
         updateMaxHp();
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
@@ -391,6 +405,8 @@ public abstract class Creature {
         StringBuilder sb = new StringBuilder();
         sb.append("Creature: ").append(name).append("\n");
         sb.append("Id: ").append(id).append("\n");
+        sb.append("Level: ").append(level).append("\n");
+        sb.append("XP: ").append(xp).append("\n");
         sb.append("Base HP: ").append(baseHp).append("\n");
         sb.append("Max HP: ").append(maxHp).append("\n");
         sb.append("Current HP: ").append(currentHp).append("\n");

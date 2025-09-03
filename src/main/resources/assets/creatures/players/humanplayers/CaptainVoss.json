@@ -1,8 +1,7 @@
 {
   "id": 5001,
   "name": "Captain Aldric Voss",
-  "level": 1,
-  "experience": 0,
+  "level": 0,
   "baseHp": 15,
   "currentHp": 15,
   "size": "MEDIUM",

@@ -27,7 +27,7 @@ public class TestPlayerCreation {
         assertCaptainVossDebuffed(captainVoss);
         System.out.println(captainVoss.toString()); */
 
-        captainVoss.modifyStat(Stats.CONSTITUTION, 10);
+        captainVoss.addXp(72);
         System.out.println(captainVoss.toString());
 
     }
