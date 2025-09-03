@@ -1,8 +1,10 @@
 {
   "id": 5001,
   "name": "Captain Aldric Voss",
-  "maxHp": 30,
-  "currentHp": 30,
+  "level": 1,
+  "experience": 0,
+  "baseHp": 15,
+  "currentHp": 15,
   "size": "MEDIUM",
   "creatureType": "HUMANOID",
   "stats": {

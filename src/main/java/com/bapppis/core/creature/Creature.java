@@ -4,10 +4,37 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+//import com.google.gson.Gson;
 import com.bapppis.core.property.Property;
-import com.google.gson.Gson;
 
 public abstract class Creature {
+    // Getter and setter for level
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    // Getter and setter for xp
+    public int getXp() {
+        return xp;
+    }
+
+    public void setXp(int xp) {
+        this.xp = xp;
+    }
+
+    // Getter and setter for baseHp
+    public int getBaseHp() {
+        return baseHp;
+    }
+
+    public void setBaseHp(int baseHp) {
+        this.baseHp = baseHp;
+    }
+
     // Add a property to the correct map based on id prefix
     public void addProperty(Property property) {
         int id = property.getId();
@@ -48,8 +75,12 @@ public abstract class Creature {
     // Properties for all creatures including the player
     private int id; // id set by Gson, no setter
     private String name;
+    private int level;
+    private int xp;
+    private int baseHp;
     private int maxHp;
     private int currentHp;
+
     // Getter for id
     public int getId() {
         return id;
@@ -84,6 +115,7 @@ public abstract class Creature {
         UNDEAD,
         UNKNOWN,
     }
+
     private CreatureType creatureType;
 
     // Creature stats default values are 10, except for Luck which is 1
@@ -127,7 +159,8 @@ public abstract class Creature {
 
     private String description;
 
-    // Constructor: sets stats to 10 and resistances to 100 by default, and initializes properties
+    // Constructor: sets stats to 10 and resistances to 100 by default, and
+    // initializes properties
     public Creature() {
         stats = new EnumMap<>(Stats.class);
         for (Stats stat : Stats.values()) {
@@ -137,7 +170,7 @@ public abstract class Creature {
                 stats.put(stat, 10); // other stats default to 10
             }
         }
-
+        updateMaxHp();
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
             resistances.put(res, 100); // default resistance 100%
@@ -146,10 +179,12 @@ public abstract class Creature {
         type = Type.ENEMY; // default type
     }
 
-    public static Creature fromJson(String json) {
-        Gson gson = new Gson();
-        return gson.fromJson(json, Creature.class);
-    }
+    /*
+     * public static Creature fromJson(String json) {
+     * Gson gson = new Gson();
+     * return gson.fromJson(json, Creature.class);
+     * }
+     */
 
     // Getters and setters for stats
     public int getStat(Stats stat) {
@@ -158,11 +193,17 @@ public abstract class Creature {
 
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
+        if (stat == Stats.CONSTITUTION) {
+            updateMaxHp();
+        }
     }
 
     // Add or subtract from a specific stat
     public void modifyStat(Stats stat, int amount) {
         stats.put(stat, getStat(stat) + amount);
+        if (stat == Stats.CONSTITUTION) {
+            updateMaxHp();
+        }
     }
 
     // Getters and setters for resistances
@@ -191,7 +232,25 @@ public abstract class Creature {
         return maxHp;
     }
 
+    public void updateMaxHp() {
+        if (this.getStat(Stats.CONSTITUTION) >= 10) {
+            int bonusHp = (this.getStat(Stats.CONSTITUTION) - 10) * 5; // Each point above 10 gives +5 max HP
+            this.setMaxHp(this.getBaseHp() + bonusHp);
+            this.modifyHp(bonusHp);
+        } else {
+            int penaltyHp = (10 - this.getStat(Stats.CONSTITUTION)) * 5; // Each point below 10 gives -5 max HP
+            this.setMaxHp(this.getBaseHp() - penaltyHp);
+            this.modifyHp(-penaltyHp);
+        }
+    }
+
     public void setMaxHp(int maxHp) {
+        if (maxHp < 1) {
+            maxHp = 1; // Ensure maxHp is at least 1
+        }
+        if (currentHp > maxHp) {
+            currentHp = maxHp; // Adjust currentHp if it exceeds new maxHp
+        }
         this.maxHp = maxHp;
     }
 
@@ -199,8 +258,16 @@ public abstract class Creature {
         return currentHp;
     }
 
-    public void setCurrentHp(int currentHp) {
-        this.currentHp = Math.min(currentHp, maxHp);
+    public void setCurrentHp(int hp) {
+        if (hp < 0) {
+            hp = 0;
+        }
+        if (this.currentHp >= this.maxHp) {
+            this.currentHp = this.maxHp;
+        }
+        else {
+            this.currentHp = this.currentHp + hp;
+        }
     }
 
     public void modifyHp(int amount) {
@@ -236,15 +303,37 @@ public abstract class Creature {
         this.creatureType = creatureType;
     }
 
-    public HashMap<Integer, Property> getBuffs() { return buffs; }
-    public HashMap<Integer, Property> getDebuffs() { return debuffs; }
-    public HashMap<Integer, Property> getImmunities() { return immunities; }
-    public HashMap<Integer, Property> getTraits() { return traits; }
+    public HashMap<Integer, Property> getBuffs() {
+        return buffs;
+    }
 
-    public Property getBuff(int id) { return buffs.get(id); }
-    public Property getDebuff(int id) { return debuffs.get(id); }
-    public Property getImmunity(int id) { return immunities.get(id); }
-    public Property getTrait(int id) { return traits.get(id); }
+    public HashMap<Integer, Property> getDebuffs() {
+        return debuffs;
+    }
+
+    public HashMap<Integer, Property> getImmunities() {
+        return immunities;
+    }
+
+    public HashMap<Integer, Property> getTraits() {
+        return traits;
+    }
+
+    public Property getBuff(int id) {
+        return buffs.get(id);
+    }
+
+    public Property getDebuff(int id) {
+        return debuffs.get(id);
+    }
+
+    public Property getImmunity(int id) {
+        return immunities.get(id);
+    }
+
+    public Property getTrait(int id) {
+        return traits.get(id);
+    }
 
     public void printStatusEffects() {
         System.out.println("Buffs:");
@@ -275,6 +364,7 @@ public abstract class Creature {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public String printProperties() {
         StringBuilder sb = new StringBuilder();
         sb.append("Buffs:\n");
@@ -300,6 +390,8 @@ public abstract class Creature {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Creature: ").append(name).append("\n");
+        sb.append("Id: ").append(id).append("\n");
+        sb.append("Base HP: ").append(baseHp).append("\n");
         sb.append("Max HP: ").append(maxHp).append("\n");
         sb.append("Current HP: ").append(currentHp).append("\n");
         sb.append("Size: ").append(size).append("\n");

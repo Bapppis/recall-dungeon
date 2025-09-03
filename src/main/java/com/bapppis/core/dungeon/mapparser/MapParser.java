@@ -15,7 +15,7 @@ import com.bapppis.core.game.GameState;
 public class MapParser {
     public Floor parseStream(InputStream inputStream) {
         Floor floor = new Floor() {};
-        System.out.println("Parsing map from input stream...");
+        // System.out.println("Parsing map from input stream...");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             int x = 0, y = 0;
             int maxX = 0; // width - 1
@@ -48,7 +48,7 @@ public class MapParser {
             // Compute final dimensions for bounds checks
             int width = maxX;         // columns
             int height = maxY + 1;    // rows
-            System.out.println("Parsed dimensions -> width=" + width + ", height=" + height);
+            // System.out.println("Parsed dimensions -> width=" + width + ", height=" + height);
 
             // Second pass: link neighbors for each tile using bounds-safe lookups
             for (int yy = 0; yy < height; yy++) {
@@ -78,7 +78,7 @@ public class MapParser {
             System.err.println("Error reading stream");
             e.printStackTrace();
         }
-    MapPrinter.printWithPlayer(floor, GameState.getPlayer());
+    // MapPrinter.printWithPlayer(floor, GameState.getPlayer());
     return floor;
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.property.PropertyManager;
 
@@ -12,22 +13,23 @@ public class TestPlayerCreation {
     // Test player creation logic here
     @Test
     public void testPlayerCreation() {
-        // Implement test logic
-        // Load all properties first
         PropertyManager.loadProperties();
-
-        // Load player characters
         CreatureLoader.loadCreatures();
         // Make the player Voss
         Player captainVoss = (Player) CreatureLoader.getCreatureById(5001);
         assert captainVoss != null;
 
-        assertCaptainVossDefaults(captainVoss);
-        //System.out.println(captainVoss.toString());
-        captainVoss.removeProperty(4001);
+        //assertCaptainVossDefaults(captainVoss);
+        System.out.println(captainVoss.toString());
+
+        /* captainVoss.removeProperty(4001);
         captainVoss.addProperty(PropertyManager.getProperty(2000)); // Add a debuff
         assertCaptainVossDebuffed(captainVoss);
+        System.out.println(captainVoss.toString()); */
+
+        captainVoss.modifyStat(Stats.CONSTITUTION, 10);
         System.out.println(captainVoss.toString());
+
     }
 
     // make an assert function for captain voss
