@@ -1,6 +1,8 @@
 package com.bapppis.core.game;
 
 import java.io.InputStream;
+// Remove List after debugging
+import java.util.List;
 import java.util.Scanner;
 
 import com.bapppis.core.creature.Creature;
@@ -11,6 +13,8 @@ import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.MapPrinter;
 import com.bapppis.core.dungeon.Tile;
 import com.bapppis.core.dungeon.mapparser.MapParser;
+// Remove Item after debugging
+import com.bapppis.core.item.Item;
 import com.bapppis.core.dungeon.Dungeon;
 
 public class Game {
@@ -21,6 +25,11 @@ public class Game {
     public void initialize() {
         com.bapppis.core.property.PropertyManager.loadProperties();
         com.bapppis.core.creature.CreatureLoader.loadCreatures();
+        com.bapppis.core.item.ItemLoader.loadItems();
+        com.bapppis.core.item.ItemLoader.getAllItems();
+        // Testing items
+        List <Item> allItems = com.bapppis.core.item.ItemLoader.getAllItems();
+        allItems.forEach(System.out::println);
         loadDungeon();
 
         System.out.println("Game initialized.");

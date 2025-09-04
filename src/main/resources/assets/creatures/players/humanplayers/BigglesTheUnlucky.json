@@ -1,7 +1,8 @@
 {
   "id": 5000,
   "name": "Biggles The Unlucky",
-  "maxHp": 10,
+  "level": 0,
+  "baseHp": 10,
   "currentHp": 10,
   "size": "SMALL",
   "creatureType": "HUMANOID",

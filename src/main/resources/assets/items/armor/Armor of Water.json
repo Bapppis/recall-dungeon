@@ -1,0 +1,14 @@
+{
+  "id": 8500,
+  "name": "Armor of Water",
+  "description": "A shimmering blue armor that is hypnotizing to look at.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "ARMOR",
+  "stats": {
+    "INTELLIGENCE": 1
+  },
+  "resistances": {
+    "WATER": 50
+  },
+  "rarity": "RARE"
+}
