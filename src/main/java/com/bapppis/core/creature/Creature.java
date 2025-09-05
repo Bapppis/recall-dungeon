@@ -90,9 +90,9 @@ public abstract class Creature {
                 stats.put(stat, 10); // other stats default to 10
             }
         }
-        level = 0; // Default level
-        xp = 0; // Default experience
-        updateMaxHp();
+        //level = 0; // Default level
+        //xp = 0; // Default experience
+        //this.maxHp = this.baseHp; // Default maxHp
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
             resistances.put(res, 100); // default resistance 100%
@@ -124,6 +124,10 @@ public abstract class Creature {
 
     public int getXp() {
         return xp;
+    }
+
+    public void setXp(int xp) {
+        this.xp = xp;
     }
 
     public void addXp(int xp) {

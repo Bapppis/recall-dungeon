@@ -2,6 +2,7 @@
   "id": 5000,
   "name": "Biggles The Unlucky",
   "level": 0,
+  "xp": 57,
   "baseHp": 10,
   "currentHp": 10,
   "size": "SMALL",
