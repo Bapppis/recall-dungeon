@@ -5,10 +5,10 @@
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
   "stats": {
-    "INTELLIGENCE": 1
+    "INTELLIGENCE": 0
   },
   "resistances": {
-    "WATER": 50
+    "WATER": -50
   },
   "rarity": "RARE"
 }

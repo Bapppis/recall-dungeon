@@ -1,0 +1,16 @@
+{
+  "id": 8501,
+  "name": "Armor of bones",
+  "description": "A little uneasy to look at but the craftsmanship is undeniable.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "ARMOR",
+  "stats": {
+    "STRENGTH": 2
+  },
+  "resistances": {
+    "LIGHT": 40,
+    "DARKNESS": -70,
+    "BLUDGEONING": -20
+  },
+  "rarity": "RARE"
+}

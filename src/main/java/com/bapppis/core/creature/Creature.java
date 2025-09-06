@@ -28,6 +28,10 @@ public abstract class Creature {
     private HashMap<Integer, Property> traits = new HashMap<>();
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
+    private Inventory inventory = new Inventory();
+    public Inventory getInventory() {
+        return inventory;
+    }
 
     // --- Enums ---
     public enum Size {
@@ -281,16 +285,91 @@ public abstract class Creature {
 
     public void equipItem(Item item) {
         EquipmentSlot slot = item.getSlot();
+        // Remove any existing item in the slot first
+        Item oldItem = null;
         if (item.isTwoHanded()) {
+            oldItem = equipment.get(EquipmentSlot.WEAPON);
+            if (oldItem != null) unequipItem(EquipmentSlot.WEAPON);
+            oldItem = equipment.get(EquipmentSlot.OFFHAND);
+            if (oldItem != null) unequipItem(EquipmentSlot.OFFHAND);
             equipment.put(EquipmentSlot.WEAPON, item);
             equipment.put(EquipmentSlot.OFFHAND, item);
         } else {
+            oldItem = equipment.get(slot);
+            if (oldItem != null) unequipItem(slot);
             equipment.put(slot, item);
         }
+        // Remove from inventory if present
+        getInventory().removeItem(item);
+        // Apply stat and resistance effects if present
+        applyItemEffects(item);
     }
 
     public void unequipItem(EquipmentSlot slot) {
-        equipment.remove(slot);
+        Item item = equipment.remove(slot);
+        if (item != null) {
+            removeItemEffects(item);
+            // Try to add back to inventory
+            boolean added = getInventory().addItem(item);
+            if (!added) {
+                // Optionally: print or log that inventory is full
+                System.out.println("Inventory full! Could not add " + item.getName() + " back to inventory.");
+            }
+        }
+    }
+
+    private void applyItemEffects(Item item) {
+        // Only apply if item is Equipment (has stats/resistances)
+        if (item instanceof com.bapppis.core.item.Equipment) {
+            com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
+            if (eq.getStats() != null) {
+                for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
+                    try {
+                        Stats stat = Stats.valueOf(entry.getKey());
+                        modifyStat(stat, entry.getValue());
+                    } catch (IllegalArgumentException e) {
+                        // Ignore unknown stat
+                    }
+                }
+            }
+            if (eq.getResistances() != null) {
+                for (java.util.Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
+                    try {
+                        Resistances res = Resistances.valueOf(entry.getKey());
+                        modifyResistance(res, entry.getValue());
+                    } catch (IllegalArgumentException e) {
+                        // Ignore unknown resistance
+                    }
+                }
+            }
+        }
+    }
+
+    private void removeItemEffects(Item item) {
+        // Only remove if item is Equipment (has stats/resistances)
+        if (item instanceof com.bapppis.core.item.Equipment) {
+            com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
+            if (eq.getStats() != null) {
+                for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
+                    try {
+                        Stats stat = Stats.valueOf(entry.getKey());
+                        modifyStat(stat, -entry.getValue());
+                    } catch (IllegalArgumentException e) {
+                        // Ignore unknown stat
+                    }
+                }
+            }
+            if (eq.getResistances() != null) {
+                for (java.util.Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
+                    try {
+                        Resistances res = Resistances.valueOf(entry.getKey());
+                        modifyResistance(res, -entry.getValue());
+                    } catch (IllegalArgumentException e) {
+                        // Ignore unknown resistance
+                    }
+                }
+            }
+        }
     }
 
     public void addProperty(Property property) {
@@ -412,7 +491,38 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
+        sb.append("Equipment:\n");
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            Item equipped = equipment.get(slot);
+            sb.append(slot.name()).append(": ");
+            if (equipped != null) {
+                sb.append(equipped.getName());
+            } else {
+                sb.append("Empty");
+            }
+            sb.append("\n");
+        }
+        sb.append("-----------------\n");
         sb.append(printProperties());
+        sb.append("-----------------\n");
+        sb.append("Inventory:\n");
+        sb.append("Weapons: ").append(listInventoryItems(inventory.getWeapons())).append("\n");
+        sb.append("Offhands: ").append(listInventoryItems(inventory.getOffhands())).append("\n");
+        sb.append("Helmets: ").append(listInventoryItems(inventory.getHelmets())).append("\n");
+        sb.append("Armor: ").append(listInventoryItems(inventory.getArmors())).append("\n");
+        sb.append("Legwear: ").append(listInventoryItems(inventory.getLegwear())).append("\n");
+        sb.append("Consumables: ").append(listInventoryItems(inventory.getConsumables())).append("\n");
+        sb.append("Misc: ").append(listInventoryItems(inventory.getMisc())).append("\n");
+        return sb.toString();
+    }
+
+    private String listInventoryItems(java.util.List<Item> items) {
+        if (items.isEmpty()) return "Empty";
+        StringBuilder sb = new StringBuilder();
+        for (Item item : items) {
+            sb.append(item.getName()).append(", ");
+        }
+        if (sb.length() > 2) sb.setLength(sb.length() - 2); // Remove trailing comma
         return sb.toString();
     }
 }

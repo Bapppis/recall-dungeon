@@ -9,16 +9,13 @@ import com.bapppis.core.item.Item;
 import com.google.gson.Gson;
 
 public class Player extends Creature {
-    //add item inventory
-    private List<Item> inventory;
     // current position on the floor (null until placed/spawned)
     private Coordinate position;
 
     public Player() {
-        inventory = new ArrayList<>();
-        this.setMaxHp(20);
+        /* this.setMaxHp(20);
         this.setCurrentHp(20);
-        this.setType(Type.PLAYER);
+        this.setType(Type.PLAYER); */
     }
 
     public static Player fromJson(String json) {
@@ -26,16 +23,12 @@ public class Player extends Creature {
         return gson.fromJson(json, Player.class);
     }
 
-    public void addItem(Item item) {
-        inventory.add(item);
+    public boolean addItem(Item item) {
+        return getInventory().addItem(item);
     }
 
-    public void removeItem(Item item) {
-        inventory.remove(item);
-    }
-
-    public List<Item> getInventory() {
-        return inventory;
+    public boolean removeItem(Item item) {
+        return getInventory().removeItem(item);
     }
 
     // --- Position helpers ---
@@ -61,6 +54,6 @@ public class Player extends Creature {
 
     @Override
     public String toString() {
-        return super.toString() + ", Inventory: " + inventory;
+    return super.toString();
     }
 }
