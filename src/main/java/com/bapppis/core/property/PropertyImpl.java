@@ -8,12 +8,9 @@ public class PropertyImpl implements Property {
     private Map<com.bapppis.core.creature.Creature.Resistances, Integer> resistanceModifiers;
     @Override
     public String toString() {
-        return "PropertyImpl{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", type=" + type +
-                ", description='" + description + '\'' +
-                '}';
+        return "id: " + id + ", " +
+                " '" + name + '\'' + ", " +
+                " '" + description + '\'';
     }
     private int id;
     private String name;

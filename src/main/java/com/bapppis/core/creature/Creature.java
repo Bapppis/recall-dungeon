@@ -379,7 +379,7 @@ public abstract class Creature {
         } else {
             int penaltyHp = (10 - this.getStat(Stats.CONSTITUTION)) * 5; // Each point below 10 gives -5 max HP
             this.setMaxHp(this.getBaseHp() - penaltyHp);
-            this.modifyHp(-penaltyHp);
+            this.setCurrentHp(-penaltyHp);
         }
     }
 
@@ -407,6 +407,7 @@ public abstract class Creature {
         sb.append("Creature Type: ").append(creatureType).append("\n");
         sb.append("Stats: ").append(stats).append("\n");
         sb.append("-----------------\n");
+        sb.append("Resistances:\n");
         for (Entry<Resistances, Integer> entry : resistances.entrySet()) {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }

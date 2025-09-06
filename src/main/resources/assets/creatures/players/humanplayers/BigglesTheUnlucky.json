@@ -7,6 +7,14 @@
   "currentHp": 10,
   "size": "SMALL",
   "creatureType": "HUMANOID",
+  "stats": {
+    "INTELLIGENCE": 7,
+    "LUCK": 2
+  },
+  "resistances": {
+    "NATURE": 90,
+    "SLASHING": 120
+  },
   "description": "Biggles The Unlucky, a small and unfortunate creature.",
-  "properties": [2000]
+  "properties": [2000, 4000]
 }

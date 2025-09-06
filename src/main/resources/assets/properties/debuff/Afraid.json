@@ -2,7 +2,7 @@
   "id": 2000,
   "name": "Afraid",
   "type": "DEBUFF",
-  "description": "Afraid, unable to act and weaker to darkness",
+  "description": "Unable to act and weaker to darkness",
   "resistances": {
     "DARKNESS": 50
   }

@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 public class CreatureLoader {
     private static final HashMap<String, Creature> creatureMap = new HashMap<>();
@@ -45,6 +46,46 @@ public class CreatureLoader {
                             } else if (cidForType >= 6000 && cidForType < 7000) {
                                 creature.setType(Creature.Type.ENEMY);
                             }
+                            // Ensure all stats are set to defaults if missing
+                            // Only set default if stat key is missing from the map
+                            @SuppressWarnings("unchecked")
+                            EnumMap<Creature.Stats, Integer> statMap = null;
+                            try {
+                                java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
+                                statsField.setAccessible(true);
+                                statMap = (EnumMap<Creature.Stats, Integer>) statsField.get(creature);
+                            } catch (Exception e) {
+                                // Should not happen
+                            }
+                            if (statMap != null) {
+                                for (Creature.Stats stat : Creature.Stats.values()) {
+                                    if (!statMap.containsKey(stat)) {
+                                        if (stat == Creature.Stats.LUCK) {
+                                            creature.setStat(stat, 1);
+                                        } else {
+                                            creature.setStat(stat, 10);
+                                        }
+                                    }
+                                }
+                            }
+                            // Ensure all resistances are set to 100 unless provided
+                            @SuppressWarnings("unchecked")
+                            EnumMap<Creature.Resistances, Integer> resistMap = null;
+                            try {
+                                java.lang.reflect.Field resistField = Creature.class.getDeclaredField("resistances");
+                                resistField.setAccessible(true);
+                                resistMap = (EnumMap<Creature.Resistances, Integer>) resistField.get(creature);
+                            } catch (Exception e) {
+                                // Should not happen
+                            }
+                            if (resistMap != null) {
+                                for (Creature.Resistances res : Creature.Resistances.values()) {
+                                    if (!resistMap.containsKey(res)) {
+                                        creature.setResistance(res, 100);
+                                    }
+                                }
+                            }
+                            // Now apply properties (modifiers will be correct)
                             List<Integer> propertyIds = getPropertyIdsFromJson(resource.getPath(), gson);
                             if (propertyIds != null) {
                                 for (Integer pid : propertyIds) {
