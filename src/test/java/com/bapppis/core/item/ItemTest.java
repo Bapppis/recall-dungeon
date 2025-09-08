@@ -22,8 +22,16 @@ public class ItemTest {
         //biggles.equipItem(ItemLoader.getItemById(7000)); // Equip Armor of Water
         biggles.addItem(ItemLoader.getItemById(7000)); // Add Armor of water to inventory
         biggles.addItem(ItemLoader.getItemById(7001)); // Add Armor of bones to inventory
+        biggles.addItem(ItemLoader.getItemById(7250)); // Add Crusader Helmet to inventory
+        biggles.addItem(ItemLoader.getItemById(7500)); // Add Legs of Speed to inventory
+        biggles.addItem(ItemLoader.getItemById(7750)); // Add Tower Shield to inventory
+        biggles.addItem(ItemLoader.getItemById(9800)); // Add Falchion of Doom to inventory
         System.out.println(biggles.toString());
         biggles.equipItem(biggles.getInventory().getArmors().get(1)); // Equip Armor of bones
+        biggles.equipItem(biggles.getInventory().getHelmets().get(0)); // Equip Crusader Helmet
+        biggles.equipItem(biggles.getInventory().getLegwear().get(0)); // Equip Legs of Speed
+        biggles.equipItem(biggles.getInventory().getOffhands().get(0)); // Equip Tower Shield
+        biggles.equipItem(biggles.getInventory().getWeapons().get(0)); // Equip Falchion of Doom and it unequips the shield
         System.out.println(biggles.toString());
         /* captainVoss.removeProperty(4001);
         biggles.addProperty(PropertyManager.getProperty(2000)); // Add a debuff

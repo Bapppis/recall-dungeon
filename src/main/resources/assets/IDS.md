@@ -69,36 +69,36 @@ Notes
 ## Items (7000-9999)
 ### Armor (7000-7999)
 #### Armor (7000-7249)
-- 7000 — Armor of Water — items/armor/armor/Armor of Water.json
-- 7001 — Armor of Bones — items/armor/armor/Armor of Bones.json
+ - 7000 — Armor of Water — items/armor/armor/Armor of Water.json
+ - 7001 — Armor of Bones — items/armor/armor/Armor of Bones.json
 
 #### Helmets (7250-7499)
-- [none indexed yet]
+ - 7250 — Crusader Helmet — items/armor/helmets/Crusader Helmet.json
 
 #### Legwear (7500-7749)
-- [none indexed yet]
+ - 7500 — Legs of Speed — items/armor/legwear/Legs of Speed.json
 
 #### Shields (7750-7999)
-- [none indexed yet]
+ - 7750 — Tower Shield — items/armor/shields/Tower Shield.json
 
 ### Consumables(8000-8999)
 - [none indexed yet]
 
 ### Weapons (9000-9999)
-#### Blunt Weapons
+#### Blunt Weapons (9000-9199)
 - [none indexed yet]
 
-#### Magic Weapons
+#### Magic Weapons (9200-9399)
 - [none indexed yet]
 
-#### Piercing Weapons
+#### Piercing Weapons (9400-9599)
 - [none indexed yet]
 
-#### Ranged Weapons
+#### Ranged Weapons (9600-9799)
 - [none indexed yet]
 
-#### Slash Weapons
-- [none indexed yet]
+#### Slash Weapons (9800-9999)
+ - 9800 — Falchion of Doom — items/weapons/slash weapons/Falchion of Doom.json
 
 ## Maintenance tips
 - Enforce unique ids (consider an automated test).

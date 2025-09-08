@@ -1,0 +1,15 @@
+{
+  "id": 7500,
+  "name": "Legs of Speed",
+  "description": "Lightweight armor that makes the wearer more dexterous.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "LEGWEAR",
+  "stats": {
+    "DEXTERITY": 4
+  },
+  "resistances": {
+    "BLUDGEONING": -10,
+    "SLASHING": -10
+  },
+  "rarity": "RARE"
+}

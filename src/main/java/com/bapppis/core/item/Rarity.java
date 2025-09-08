@@ -4,6 +4,6 @@ public enum Rarity {
     COMMON,
     UNCOMMON,
     RARE,
-    SUPERIOR,
-    LEGENDARY
+    MYTHICAL,
+    ARTIFACT
 }

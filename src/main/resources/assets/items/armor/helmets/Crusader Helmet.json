@@ -1,0 +1,13 @@
+{
+  "id": 7250,
+  "name": "Crusader Helmet",
+  "description": "A helmet worn by the bravest of knights.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "HELMET",
+  "resistances": {
+    "LIGHT": -20,
+    "DARKNESS": 5,
+    "SLASHING": -25
+  },
+  "rarity": "COMMON"
+}
