@@ -19,9 +19,9 @@ public class ItemTest {
         Player biggles = (Player) CreatureLoader.getCreatureById(5000);
         assert biggles != null;
         //assertCaptainVossDefaults(captainVoss);
-        //biggles.equipItem(ItemLoader.getItemById(8500)); // Equip Armor of Water
-        biggles.addItem(ItemLoader.getItemById(8500)); // Add Armor of water to inventory
-        biggles.addItem(ItemLoader.getItemById(8501)); // Add Armor of bones to inventory
+        //biggles.equipItem(ItemLoader.getItemById(7000)); // Equip Armor of Water
+        biggles.addItem(ItemLoader.getItemById(7000)); // Add Armor of water to inventory
+        biggles.addItem(ItemLoader.getItemById(7001)); // Add Armor of bones to inventory
         System.out.println(biggles.toString());
         biggles.equipItem(biggles.getInventory().getArmors().get(1)); // Equip Armor of bones
         System.out.println(biggles.toString());

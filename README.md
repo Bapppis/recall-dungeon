@@ -72,34 +72,54 @@ recall-dungeon/
    │  │        │  ├─ Game.java
    │  │        │  └─ GameState.java
    │  │        ├─ item/...
+   │  │        ├─ spell
+   │  │        │  └─ Spell.java
    │  │        └─ property
    │  │           ├─ PropertyImpl.java
    │  │           └─ PropertyManager.java
    │  └─ resources
    │     └─ assets
-   │        ├─ creatures
-   │        │  ├─ players/...
-   │        │  ├─ humanoids/...
-   │        │  └─ ... (beasts, dragons, elementals, etc.)
+   │        ├─ IDS.md
+   │        ├─ creatures/
+   │        │  ├─ README.md
+   │        │  ├─ beasts/
+   │        │  ├─ constructs/
+   │        │  ├─ dragons/
+   │        │  ├─ elementals/
+   │        │  ├─ humanoids/
+   │        │  ├─ players/
+   │        │  ├─ plants/
+   │        │  ├─ undead/
+   │        │  └─ unknown/
+   │        ├─ floors/
    │        ├─ items
-   │        │  ├─ armor/...
-   │        │  ├─ weapons/...
-   │        │  └─ consumables/...
-   │        ├─ floors
-   │        │  ├─ floor(20x20).txt
-   │        │  └─ floor(50x50).txt
+   │        │  ├─ armor/
+   │        │  │  └─ armor/
+   │        │  │     ├─ Armor of bones.json
+   │        │  │     └─ Armor of Water.json
+   │        │  │  ├─ helmets/
+   │        │  │  ├─ legwear/
+   │        │  │  └─ shields/
+   │        │  ├─ consumables/
+   │        │  └─ weapons/
+   │        │     ├─ blunt weapons/
+   │        │     ├─ magic weapons/
+   │        │     ├─ piercing weapons/
+   │        │     ├─ ranged weapons/
+   │        │     └─ slash weapons/
    │        └─ properties
-   │           ├─ trait/...
-   │           ├─ buff/...
-   │           ├─ debuff/...
-   │           └─ immunity/...
+   │           ├─ buff/
+   │           ├─ debuff/
+   │           │  └─ Afraid.json
+   │           ├─ immunity/
+   │           └─ trait/
+   │              ├─ Coward.json
+   │              └─ HumanAdaptability.json
    └─ test
       ├─ java                    # Unit and integration tests (JUnit)
       └─ resources
          └─ assets
             ├─ floors
-            │  ├─ testFloor(20x20).txt
-            │  └─ testFloor(50x50).txt
             └─ properties/...
 ```
 
