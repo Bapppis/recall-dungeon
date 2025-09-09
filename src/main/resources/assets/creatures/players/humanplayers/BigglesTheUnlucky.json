@@ -1,6 +1,7 @@
 {
   "id": 5000,
   "name": "Biggles The Unlucky",
+  "visionRange": 1,
   "level": 0,
   "xp": 57,
   "baseHp": 10,

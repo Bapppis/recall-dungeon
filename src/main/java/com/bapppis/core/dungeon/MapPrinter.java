@@ -30,7 +30,13 @@ public class MapPrinter {
                     sb.append('P');
                 } else {
                     Tile t = floor.getTile(new Coordinate(x, y));
-                    sb.append(t != null ? t.getSymbol() : '.');
+                    if (t == null) {
+                        sb.append('.');
+                    } else if (!t.isDiscovered()) {
+                        sb.append('#');
+                    } else {
+                        sb.append(t.getSymbol());
+                    }
                 }
             }
             sb.append('\n');

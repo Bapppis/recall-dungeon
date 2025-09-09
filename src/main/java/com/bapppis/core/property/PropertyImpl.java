@@ -6,6 +6,9 @@ import java.util.Map;
 public class PropertyImpl implements Property {
     @com.google.gson.annotations.SerializedName("resistances")
     private Map<com.bapppis.core.creature.Creature.Resistances, Integer> resistanceModifiers;
+    // Support for vision range modifier
+    @com.google.gson.annotations.SerializedName("visionRange")
+    private Integer visionRange;
     @Override
     public String toString() {
         return "id: " + id + ", " +
@@ -24,6 +27,7 @@ public class PropertyImpl implements Property {
     public String getDescription() { return description; }
     public Map<Creature.Stats, Integer> getStatModifiers() { return statModifiers; }
     public Map<com.bapppis.core.creature.Creature.Resistances, Integer> getResistanceModifiers() { return resistanceModifiers; }
+    public Integer getVisionRangeModifier() { return visionRange; }
 
     @Override
     public void onApply(Creature creature) {
@@ -36,6 +40,9 @@ public class PropertyImpl implements Property {
             for (Map.Entry<com.bapppis.core.creature.Creature.Resistances, Integer> entry : resistanceModifiers.entrySet()) {
                 creature.modifyResistance(entry.getKey(), entry.getValue());
             }
+        }
+        if (visionRange != null) {
+            creature.setVisionRange(creature.getVisionRange() + visionRange);
         }
     }
 
@@ -50,6 +57,9 @@ public class PropertyImpl implements Property {
             for (Map.Entry<com.bapppis.core.creature.Creature.Resistances, Integer> entry : resistanceModifiers.entrySet()) {
                 creature.modifyResistance(entry.getKey(), -entry.getValue());
             }
+        }
+        if (visionRange != null) {
+            creature.setVisionRange(creature.getVisionRange() - visionRange);
         }
     }
 }

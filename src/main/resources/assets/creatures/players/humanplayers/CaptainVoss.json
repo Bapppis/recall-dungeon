@@ -1,6 +1,7 @@
 {
   "id": 5001,
   "name": "Captain Aldric Voss",
+  "visionRange": 1,
   "level": 0,
   "baseHp": 15,
   "currentHp": 15,

@@ -85,6 +85,9 @@ public class CreatureLoader {
                                     }
                                 }
                             }
+                            if (creature.getVisionRange() == 0) {
+                                creature.setVisionRange(1);
+                            }
                             // Now apply properties (modifiers will be correct)
                             List<Integer> propertyIds = getPropertyIdsFromJson(resource.getPath(), gson);
                             if (propertyIds != null) {

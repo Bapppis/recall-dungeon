@@ -33,6 +33,7 @@ Notes
 ### Trait (4000–4999)
 - 4000 — Coward — properties/trait/Coward.json
 - 4001 — Human Adaptability — properties/trait/HumanAdaptability.json
+- 4002 — Darksight — properties/trait/Darksight.json
 
 ## Creatures (5000-6999)
 ### Players (5000-5499)

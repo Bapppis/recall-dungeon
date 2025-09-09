@@ -53,7 +53,8 @@ class UpCommand implements Command {
                 } else {
                     System.out.println("No '@' spawn found on this floor. Position unchanged.");
                 }
-                MapPrinter.printWithPlayer(newFloor, player);
+                // Reveal tiles around the player as on spawn
+                Game.respawnPlayerOnCurrentFloor(true);
             } else {
                 System.out.println("You can't go higher!");
             }
@@ -94,7 +95,8 @@ class DownCommand implements Command {
                 } else {
                     System.out.println("No '@' spawn found on this floor. Position unchanged.");
                 }
-                MapPrinter.printWithPlayer(newFloor, player);
+                // Reveal tiles around the player as on spawn
+                Game.respawnPlayerOnCurrentFloor(true);
             } else {
                 System.out.println("You can't go lower!");
             }
@@ -262,9 +264,11 @@ class MoveCommand implements Command {
             return;
         }
 
-        player.setPosition(target);
-        System.out.println("You move " + dir + " to " + target);
-        MapPrinter.printWithPlayer(floor, player);
+    player.setPosition(target);
+    System.out.println("You move " + dir + " to " + target);
+    // Reveal tiles around the player after moving
+    floor.revealTilesWithVision(target.getX(), target.getY(), player.getVisionRange());
+    MapPrinter.printWithPlayer(floor, player);
     }
 }
 
@@ -295,24 +299,8 @@ class PlayerCommand implements Command {
             int id = Integer.parseInt(args[0]);
             Game.selectPlayerById(id);
             System.out.println("Selected player id " + id + ".");
-            // If a floor is already loaded, spawn the player at a valid tile and reprint
-            Floor floor = GameState.getCurrentFloor();
-            if (floor != null) {
-                // Find a spawn '@' or fallback '.'
-                Coordinate spawn = null;
-                for (Map.Entry<Coordinate, Tile> entry : floor.getTiles().entrySet()) {
-                    Tile t = entry.getValue();
-                    if (t.getSymbol() == '@' || t.getSymbol() == '.') {
-                        spawn = entry.getKey();
-                        if (t.getSymbol() == '@') break;
-                    }
-                }
-                if (spawn != null) {
-                    GameState.getPlayer().setPosition(spawn);
-                    System.out.println("Player spawned at " + spawn);
-                    MapPrinter.printWithPlayer(floor, GameState.getPlayer());
-                }
-            }
+            // Always use the main respawn logic so vision/fog is correct
+            Game.respawnPlayerOnCurrentFloor(true);
         } catch (NumberFormatException nfe) {
             System.out.println("Player id must be a number.");
         }

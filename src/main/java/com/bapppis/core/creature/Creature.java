@@ -12,6 +12,7 @@ public abstract class Creature {
     // --- Fields ---
     private int id; // id set by Gson, no setter
     private String name;
+    private int visionRange = 1; // default vision range
     private int level;
     private int xp;
     private int baseHp;
@@ -94,9 +95,6 @@ public abstract class Creature {
                 stats.put(stat, 10); // other stats default to 10
             }
         }
-        //level = 0; // Default level
-        //xp = 0; // Default experience
-        //this.maxHp = this.baseHp; // Default maxHp
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
             resistances.put(res, 100); // default resistance 100%
@@ -116,6 +114,14 @@ public abstract class Creature {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getVisionRange() {
+        return visionRange;
+    }
+
+    public void setVisionRange(int visionRange) {
+        this.visionRange = visionRange;
     }
 
     public int getLevel() {
@@ -324,11 +330,15 @@ public abstract class Creature {
             com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
             if (eq.getStats() != null) {
                 for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
-                    try {
-                        Stats stat = Stats.valueOf(entry.getKey());
-                        modifyStat(stat, entry.getValue());
-                    } catch (IllegalArgumentException e) {
-                        // Ignore unknown stat
+                    if (entry.getKey().equalsIgnoreCase("VISION_RANGE")) {
+                        setVisionRange(getVisionRange() + entry.getValue());
+                    } else {
+                        try {
+                            Stats stat = Stats.valueOf(entry.getKey());
+                            modifyStat(stat, entry.getValue());
+                        } catch (IllegalArgumentException e) {
+                            // Ignore unknown stat
+                        }
                     }
                 }
             }
@@ -351,11 +361,15 @@ public abstract class Creature {
             com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
             if (eq.getStats() != null) {
                 for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
-                    try {
-                        Stats stat = Stats.valueOf(entry.getKey());
-                        modifyStat(stat, -entry.getValue());
-                    } catch (IllegalArgumentException e) {
-                        // Ignore unknown stat
+                    if (entry.getKey().equalsIgnoreCase("VISION_RANGE")) {
+                        setVisionRange(getVisionRange() - entry.getValue());
+                    } else {
+                        try {
+                            Stats stat = Stats.valueOf(entry.getKey());
+                            modifyStat(stat, -entry.getValue());
+                        } catch (IllegalArgumentException e) {
+                            // Ignore unknown stat
+                        }
                     }
                 }
             }
@@ -476,6 +490,7 @@ public abstract class Creature {
         StringBuilder sb = new StringBuilder();
         sb.append("Creature: ").append(name).append("\n");
         sb.append("Id: ").append(id).append("\n");
+        sb.append("Vision Range: ").append(visionRange).append("\n");
         sb.append("Level: ").append(level).append("\n");
         sb.append("XP: ").append(xp).append("\n");
         sb.append("Base HP: ").append(baseHp).append("\n");

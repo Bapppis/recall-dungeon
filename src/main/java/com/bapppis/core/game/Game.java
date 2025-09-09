@@ -1,8 +1,7 @@
+
 package com.bapppis.core.game;
 
 import java.io.InputStream;
-// Remove List after debugging
-import java.util.List;
 import java.util.Scanner;
 
 import com.bapppis.core.creature.Creature;
@@ -13,10 +12,7 @@ import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.MapPrinter;
 import com.bapppis.core.dungeon.Tile;
 import com.bapppis.core.dungeon.mapparser.MapParser;
-// Remove Item after debugging
-import com.bapppis.core.item.Item;
 import com.bapppis.core.dungeon.Dungeon;
-
 public class Game {
 
     private Dungeon dungeon;
@@ -26,10 +22,6 @@ public class Game {
         com.bapppis.core.property.PropertyManager.loadProperties();
         com.bapppis.core.creature.CreatureLoader.loadCreatures();
         com.bapppis.core.item.ItemLoader.loadItems();
-        com.bapppis.core.item.ItemLoader.getAllItems();
-        // Testing items
-        List <Item> allItems = com.bapppis.core.item.ItemLoader.getAllItems();
-        allItems.forEach(System.out::println);
         loadDungeon();
 
         System.out.println("Game initialized.");
@@ -64,28 +56,6 @@ public class Game {
                 System.out.println("[Dungeon] Failed to load floor " + i + ": " + e.getMessage());
             }
         }
-    }
-    private void loadMap() {
-        try {
-            // 1) Parse a floor from resources
-            MapParser parser = new MapParser();
-            String resourceName = "assets/floors/floor0/floor0.txt";
-            /* String resourceName = "assets/floors/floor(50x50).txt"; */
-            try (InputStream is = Game.class.getClassLoader().getResourceAsStream(resourceName)) {
-                if (is == null) {
-                    System.out.println("[Demo] Floor resource not found: " + resourceName);
-                    return;
-                }
-                Floor floor = parser.parseStream(is);
-                GameState.setCurrentFloor(floor);
-            }
-        } catch (Exception e) {
-            System.out.println("[Demo] Failed to load demo map: " + e.getMessage());
-        }
-    }
-    private void selectPlayer(int id) {
-        // Delegate to the public static selector using the provided id
-        selectPlayerById(id);
     }
 
     // Public helper so commands can select a player by id at runtime
@@ -122,7 +92,12 @@ public class Game {
         }
         if (spawn != null) {
             player.setPosition(spawn);
-            System.out.println("Player spawned at " + spawn);
+            // Reset all tiles to undiscovered
+            for (Tile t : floor.getTiles().values()) {
+                t.setDiscovered(false);
+            }
+            // Reveal tiles around the player before first print
+            floor.revealTilesWithVision(spawn.getX(), spawn.getY(), player.getVisionRange());
             if (printAfter) {
                 MapPrinter.printWithPlayer(floor, player);
             }

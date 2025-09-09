@@ -1,6 +1,7 @@
 {
   "id": 6400,
   "name": "Goblin",
+  "visionRange": 1,
   "xp": 10,
   "baseHp": 10,
   "currentHp": 10,

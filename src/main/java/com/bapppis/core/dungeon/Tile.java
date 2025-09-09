@@ -15,6 +15,7 @@ public class Tile {
     private boolean isUpstairs = false;
     private boolean isDownstairs = false;
     private boolean isPit = false;
+    private boolean isDiscovered = false;
     private char symbol;
     private Event isEvent = null;
     private Item item = null;
@@ -26,7 +27,7 @@ public class Tile {
 
     /*
      * Symbols legend
-     * # - Wall
+     * # - Wall or undiscovered tile
      * < - Breakable wall
      * . - Floor
      * @ - Spawn point
@@ -98,4 +99,17 @@ public class Tile {
     public void setRight(Tile right) { this.right = right; }
     public void setUp(Tile up) { this.up = up; }
     public void setDown(Tile down) { this.down = down; }
+
+    // Fog of war and wall logic
+    public boolean isWall() {
+        return isWall;
+    }
+
+    public boolean isDiscovered() {
+        return isDiscovered;
+    }
+
+    public void setDiscovered(boolean discovered) {
+        this.isDiscovered = discovered;
+    }
 }
