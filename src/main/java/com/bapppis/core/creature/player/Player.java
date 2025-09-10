@@ -1,8 +1,5 @@
 package com.bapppis.core.creature.player;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.item.Item;

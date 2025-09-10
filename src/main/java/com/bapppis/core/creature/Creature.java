@@ -18,6 +18,7 @@ public abstract class Creature {
     private int baseHp;
     private int maxHp;
     private int currentHp;
+    private int hpLvlBonus; // Additional HP gained per level
     private Size size;
     private Type type;
     private CreatureType creatureType;
@@ -147,6 +148,7 @@ public abstract class Creature {
             this.xp = 0;
         } else if (currentXp >= ((this.level + 1) * 10)) {
             this.level++;
+            this.updateMaxHp();
             currentXp -= ((this.level) * 10);
             addXp(currentXp); // Recursively add remaining XP
         } else {
@@ -190,7 +192,13 @@ public abstract class Creature {
             this.currentHp = this.currentHp + hp;
         }
     }
+    public int getHpLvlBonus() {
+        return hpLvlBonus;
+    }
 
+    public void setHpLvlBonus(int hpLvlBonus) {
+        this.hpLvlBonus = hpLvlBonus;
+    }
     public Size getSize() {
         return size;
     }
@@ -262,14 +270,14 @@ public abstract class Creature {
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
         if (stat == Stats.CONSTITUTION) {
-            updateMaxHp();
+            alterHp();
         }
     }
 
     public void modifyStat(Stats stat, int amount) {
         stats.put(stat, getStat(stat) + amount);
         if (stat == Stats.CONSTITUTION) {
-            updateMaxHp();
+            alterHp();
         }
     }
 
@@ -466,13 +474,14 @@ public abstract class Creature {
 
     public void updateMaxHp() {
         if (this.getStat(Stats.CONSTITUTION) >= 10) {
-            int bonusHp = (this.getStat(Stats.CONSTITUTION) - 10) * 5; // Each point above 10 gives +5 max HP
-            this.setMaxHp(this.getBaseHp() + bonusHp);
+            int bonusHp = this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10); // Each point above 10 gives +1 HP plus level bonus
+            this.setMaxHp(this.maxHp + bonusHp);
             this.modifyHp(bonusHp);
         } else {
-            int penaltyHp = (10 - this.getStat(Stats.CONSTITUTION)) * 5; // Each point below 10 gives -5 max HP
-            this.setMaxHp(this.getBaseHp() - penaltyHp);
-            this.setCurrentHp(-penaltyHp);
+            int bonusHp = (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))); // Each point below 10 gives -1 max HP
+            if(bonusHp < 0) bonusHp = 1; // Prevent reducing maxHp below base due to low CON
+            this.setMaxHp(this.maxHp + bonusHp);
+            this.modifyHp(bonusHp);
         }
     }
 
@@ -484,7 +493,17 @@ public abstract class Creature {
             currentHp = 0;
         }
     }
-
+    public void alterHp() {
+        if ((this.getStat(Stats.CONSTITUTION) >= 10)) {
+            int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10)));
+            this.setMaxHp(newMaxHp);
+            this.modifyHp(newMaxHp - this.currentHp);
+        } else {
+            int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))));
+            this.setMaxHp(newMaxHp);
+            this.modifyHp(newMaxHp - this.currentHp);
+        }
+    }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -496,6 +515,7 @@ public abstract class Creature {
         sb.append("Base HP: ").append(baseHp).append("\n");
         sb.append("Max HP: ").append(maxHp).append("\n");
         sb.append("Current HP: ").append(currentHp).append("\n");
+        sb.append("HP Level Bonus: ").append(hpLvlBonus).append("\n");
         sb.append("Size: ").append(size).append("\n");
         sb.append("Type: ").append(type).append("\n");
         sb.append("Creature Type: ").append(creatureType).append("\n");

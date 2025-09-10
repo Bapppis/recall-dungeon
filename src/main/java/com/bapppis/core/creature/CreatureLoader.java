@@ -85,6 +85,9 @@ public class CreatureLoader {
                                     }
                                 }
                             }
+                            if (creature.getHpLvlBonus() == 0) {
+                                creature.setHpLvlBonus(6);
+                            }
                             if (creature.getVisionRange() == 0) {
                                 creature.setVisionRange(1);
                             }
@@ -99,6 +102,9 @@ public class CreatureLoader {
                                 }
                             }
                             // Apply any property effects that modify stats or other attributes
+                            int baseHp = creature.getBaseHp();
+                            creature.setMaxHp(baseHp); // Reset max HP to base before applying properties
+                            creature.setCurrentHp(baseHp);
                             creature.updateMaxHp();
                             int tempXp = creature.getXp();
                             creature.setXp(0); // Reset XP to 0 before adding

@@ -3,8 +3,8 @@
   "name": "Goblin",
   "visionRange": 1,
   "xp": 10,
-  "baseHp": 10,
-  "currentHp": 10,
+  "baseHp": 5,
+  "hpLvlBonus": 4,
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {

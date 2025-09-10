@@ -3,8 +3,8 @@
   "name": "Captain Aldric Voss",
   "visionRange": 1,
   "level": 0,
-  "baseHp": 15,
-  "currentHp": 15,
+  "baseHp": 5,
+  "hpLvlBonus": 8,
   "size": "MEDIUM",
   "creatureType": "HUMANOID",
   "stats": {

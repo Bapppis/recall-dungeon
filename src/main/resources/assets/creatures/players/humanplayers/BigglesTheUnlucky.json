@@ -3,12 +3,13 @@
   "name": "Biggles The Unlucky",
   "visionRange": 1,
   "level": 0,
-  "xp": 57,
-  "baseHp": 10,
-  "currentHp": 10,
+  "xp": 12,
+  "baseHp": 5,
+  "hpLvlBonus": 4,
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {
+    "CONSTITUTION": 12,
     "INTELLIGENCE": 7,
     "LUCK": 2
   },
