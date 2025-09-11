@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.Item;
+import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.EquipmentSlot;
 
 public abstract class Creature {
@@ -19,6 +20,8 @@ public abstract class Creature {
     private int maxHp;
     private int currentHp;
     private int hpLvlBonus; // Additional HP gained per level
+    private Resistances defaultDamageType = Resistances.BLUDGEONING;
+    private Resistances damageType = Resistances.BLUDGEONING;
     private Size size;
     private Type type;
     private CreatureType creatureType;
@@ -31,6 +34,7 @@ public abstract class Creature {
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
     private Inventory inventory = new Inventory();
+
     public Inventory getInventory() {
         return inventory;
     }
@@ -172,10 +176,10 @@ public abstract class Creature {
         if (maxHp < 1) {
             maxHp = 1; // Ensure maxHp is at least 1
         }
-        if (currentHp > maxHp) {
-            currentHp = maxHp; // Adjust currentHp if it exceeds new maxHp
-        }
+        // Preserve the currentHp/maxHp ratio, rounding down
+        double ratio = this.maxHp > 0 ? (double) currentHp / this.maxHp : 1.0;
         this.maxHp = maxHp;
+        this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
     }
 
     public int getCurrentHp() {
@@ -183,15 +187,9 @@ public abstract class Creature {
     }
 
     public void setCurrentHp(int hp) {
-        if (hp < 0) {
-            hp = 0;
-        }
-        if (this.currentHp >= this.maxHp) {
-            this.currentHp = this.maxHp;
-        } else {
-            this.currentHp = this.currentHp + hp;
-        }
+        this.currentHp = Math.max(0, hp);
     }
+
     public int getHpLvlBonus() {
         return hpLvlBonus;
     }
@@ -199,6 +197,23 @@ public abstract class Creature {
     public void setHpLvlBonus(int hpLvlBonus) {
         this.hpLvlBonus = hpLvlBonus;
     }
+
+    public Resistances getDefaultDamageType() {
+        return defaultDamageType;
+    }
+
+    public void setDefaultDamageType(Resistances defaultDamageType) {
+        this.defaultDamageType = defaultDamageType;
+    }
+
+    public Resistances getDamageType() {
+        return damageType;
+    }
+
+    public void setDamageType(Resistances damageType) {
+        this.damageType = damageType;
+    }
+
     public Size getSize() {
         return size;
     }
@@ -293,6 +308,37 @@ public abstract class Creature {
         resistances.put(resistance, getResistance(resistance) + amount);
     }
 
+    public void attack() {
+        // Implement attack logic here
+        Item weapon = getEquipped(EquipmentSlot.WEAPON);
+        int baseDamage = Math.max(1, 10 - this.getStat(Stats.STRENGTH)); // Default unarmed damage
+
+        // 2. Calculate damage (could use weapon stats, STR, etc.)
+        if (weapon instanceof Equipment) {
+            Equipment eq = (Equipment) weapon;
+            if (eq.getStats() != null && eq.getStats().containsKey("DAMAGE")) {
+                baseDamage = eq.getStats().get("DAMAGE");
+            }
+        }
+        // Example: add STR modifier
+        baseDamage += getStat(Stats.STRENGTH) / 2;
+
+        // 3. Apply resistances (optional)
+        /*
+         * int resistance = target.getResistance(getDamageType());
+         * int finalDamage = Math.max(1, baseDamage * (100 - resistance) / 100);
+         */
+
+        // 4. Deal damage
+        // target.modifyHp(-finalDamage);
+
+        // 5. Print/log attack
+        // System.out.println(getName() + " attacks " + target.getName() + " for " +
+        // finalDamage + " damage!");
+        // System.out.println(getName() + " attacks " + target.getName() + " for " +
+        // finalDamage + " damage!");
+    }
+
     public Item getEquipped(EquipmentSlot slot) {
         return equipment.get(slot);
     }
@@ -303,14 +349,17 @@ public abstract class Creature {
         Item oldItem = null;
         if (item.isTwoHanded()) {
             oldItem = equipment.get(EquipmentSlot.WEAPON);
-            if (oldItem != null) unequipItem(EquipmentSlot.WEAPON);
+            if (oldItem != null)
+                unequipItem(EquipmentSlot.WEAPON);
             oldItem = equipment.get(EquipmentSlot.OFFHAND);
-            if (oldItem != null) unequipItem(EquipmentSlot.OFFHAND);
+            if (oldItem != null)
+                unequipItem(EquipmentSlot.OFFHAND);
             equipment.put(EquipmentSlot.WEAPON, item);
             equipment.put(EquipmentSlot.OFFHAND, item);
         } else {
             oldItem = equipment.get(slot);
-            if (oldItem != null) unequipItem(slot);
+            if (oldItem != null)
+                unequipItem(slot);
             equipment.put(slot, item);
         }
         // Remove from inventory if present
@@ -474,12 +523,15 @@ public abstract class Creature {
 
     public void updateMaxHp() {
         if (this.getStat(Stats.CONSTITUTION) >= 10) {
-            int bonusHp = this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10); // Each point above 10 gives +1 HP plus level bonus
+            int bonusHp = this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10); // Each point above 10 gives +1 HP
+                                                                                     // plus level bonus
             this.setMaxHp(this.maxHp + bonusHp);
             this.modifyHp(bonusHp);
         } else {
-            int bonusHp = (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))); // Each point below 10 gives -1 max HP
-            if(bonusHp < 0) bonusHp = 1; // Prevent reducing maxHp below base due to low CON
+            int bonusHp = (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))); // Each point below 10 gives -1
+                                                                                       // max HP
+            if (bonusHp < 0)
+                bonusHp = 1; // Prevent reducing maxHp below base due to low CON
             this.setMaxHp(this.maxHp + bonusHp);
             this.modifyHp(bonusHp);
         }
@@ -493,17 +545,20 @@ public abstract class Creature {
             currentHp = 0;
         }
     }
+
     public void alterHp() {
+        // Preserve currentHp/maxHp ratio when maxHp changes
+        double ratio = this.maxHp > 0 ? (double) currentHp / this.maxHp : 1.0;
+        int newMaxHp;
         if ((this.getStat(Stats.CONSTITUTION) >= 10)) {
-            int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10)));
-            this.setMaxHp(newMaxHp);
-            this.modifyHp(newMaxHp - this.currentHp);
+            newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10)));
         } else {
-            int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))));
-            this.setMaxHp(newMaxHp);
-            this.modifyHp(newMaxHp - this.currentHp);
+            newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))));
         }
+        this.maxHp = Math.max(1, newMaxHp);
+        this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -516,6 +571,8 @@ public abstract class Creature {
         sb.append("Max HP: ").append(maxHp).append("\n");
         sb.append("Current HP: ").append(currentHp).append("\n");
         sb.append("HP Level Bonus: ").append(hpLvlBonus).append("\n");
+        sb.append("Default Damage Type: ").append(defaultDamageType).append("\n");
+        sb.append("Damage Type: ").append(damageType).append("\n");
         sb.append("Size: ").append(size).append("\n");
         sb.append("Type: ").append(type).append("\n");
         sb.append("Creature Type: ").append(creatureType).append("\n");
@@ -552,12 +609,14 @@ public abstract class Creature {
     }
 
     private String listInventoryItems(java.util.List<Item> items) {
-        if (items.isEmpty()) return "Empty";
+        if (items.isEmpty())
+            return "Empty";
         StringBuilder sb = new StringBuilder();
         for (Item item : items) {
             sb.append(item.getName()).append(", ");
         }
-        if (sb.length() > 2) sb.setLength(sb.length() - 2); // Remove trailing comma
+        if (sb.length() > 2)
+            sb.setLength(sb.length() - 2); // Remove trailing comma
         return sb.toString();
     }
 }

@@ -2,8 +2,12 @@
   "id": 9800,
   "name": "Falchion of Doom",
   "description": "A sword that glows hellish red, it is said to be forged by the Deathknights themselves, the blade and the handle are decorated by the bones of their enemies.",
+  "weaponClass": "MELEE",
+  "damageType": "SLASHING",
+  "physicalDamageDice": "2d6",
+  "magicDamageDice": "1d8",
+  "twoHanded": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
-  "twoHanded": true,
   "rarity": "MYTHICAL"
 }

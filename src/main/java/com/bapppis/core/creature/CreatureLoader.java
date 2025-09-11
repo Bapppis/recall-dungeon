@@ -104,7 +104,7 @@ public class CreatureLoader {
                             // Apply any property effects that modify stats or other attributes
                             int baseHp = creature.getBaseHp();
                             creature.setMaxHp(baseHp); // Reset max HP to base before applying properties
-                            creature.setCurrentHp(baseHp);
+                            // creature.setCurrentHp(baseHp);
                             creature.updateMaxHp();
                             int tempXp = creature.getXp();
                             creature.setXp(0); // Reset XP to 0 before adding
@@ -113,7 +113,8 @@ public class CreatureLoader {
                             int cid = creature.getId();
                             if (cid > 0) {
                                 if (creatureIdMap.containsKey(cid)) {
-                                    System.out.println("Warning: Duplicate creature id " + cid + ". Overwriting previous entry.");
+                                    System.out.println(
+                                            "Warning: Duplicate creature id " + cid + ". Overwriting previous entry.");
                                 }
                                 creatureIdMap.put(cid, creature);
                             }
@@ -134,7 +135,8 @@ public class CreatureLoader {
 
     // Helper to extract property IDs from JSON
     private static List<Integer> getPropertyIdsFromJson(String resourcePath, Gson gson) {
-        try (Reader reader = new InputStreamReader(CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
+        try (Reader reader = new InputStreamReader(
+                CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
             com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);
             if (obj != null && obj.has("properties")) {
                 List<Integer> ids = new ArrayList<>();

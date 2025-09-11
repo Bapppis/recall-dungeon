@@ -9,7 +9,7 @@
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {
-    "CONSTITUTION": 12,
+    "CONSTITUTION": 11,
     "INTELLIGENCE": 7,
     "LUCK": 2
   },
