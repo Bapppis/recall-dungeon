@@ -28,6 +28,7 @@ public class TestCreatureAttack {
         biggles.equipItem(biggles.getInventory().getWeapons().get(0)); // Equip Falchion of Doom
         System.out.println(biggles.toString());
         System.out.println(biggles.getEquipped(EquipmentSlot.WEAPON).toString());
+        biggles.attack(biggles); // Self-attack for testing
 
     }
 

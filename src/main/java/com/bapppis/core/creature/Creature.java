@@ -3,11 +3,13 @@ package com.bapppis.core.creature;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.EquipmentSlot;
+import com.bapppis.core.item.WeaponClass;
 
 public abstract class Creature {
     // --- Fields ---
@@ -21,7 +23,7 @@ public abstract class Creature {
     private int currentHp;
     private int hpLvlBonus; // Additional HP gained per level
     private Resistances defaultDamageType = Resistances.BLUDGEONING;
-    private Resistances damageType = Resistances.BLUDGEONING;
+    // private Resistances damageType = Resistances.BLUDGEONING;
     private Size size;
     private Type type;
     private CreatureType creatureType;
@@ -88,6 +90,23 @@ public abstract class Creature {
         PIERCING,
         SLASHING,
         TRUE,
+    }
+
+    // --- Dice utility ---
+    /**
+     * Rolls dice in NdM format, e.g. "2d6" rolls two 6-sided dice.
+     * Returns 0 if input is invalid.
+     */
+    public static int rollDice(String dice) {
+        if (dice == null || !dice.matches("\\d+d\\d+")) return 0;
+        String[] parts = dice.toLowerCase().split("d");
+        int num = Integer.parseInt(parts[0]);
+        int sides = Integer.parseInt(parts[1]);
+        int total = 0;
+        for (int i = 0; i < num; i++) {
+            total += ThreadLocalRandom.current().nextInt(1, sides + 1);
+        }
+        return total;
     }
 
     // --- Constructor ---
@@ -206,13 +225,15 @@ public abstract class Creature {
         this.defaultDamageType = defaultDamageType;
     }
 
-    public Resistances getDamageType() {
-        return damageType;
-    }
-
-    public void setDamageType(Resistances damageType) {
-        this.damageType = damageType;
-    }
+    /*
+     * public Resistances getDamageType() {
+     * return damageType;
+     * }
+     * 
+     * public void setDamageType(Resistances damageType) {
+     * this.damageType = damageType;
+     * }
+     */
 
     public Size getSize() {
         return size;
@@ -308,35 +329,40 @@ public abstract class Creature {
         resistances.put(resistance, getResistance(resistance) + amount);
     }
 
-    public void attack() {
-        // Implement attack logic here
-        Item weapon = getEquipped(EquipmentSlot.WEAPON);
-        int baseDamage = Math.max(1, 10 - this.getStat(Stats.STRENGTH)); // Default unarmed damage
-
-        // 2. Calculate damage (could use weapon stats, STR, etc.)
-        if (weapon instanceof Equipment) {
-            Equipment eq = (Equipment) weapon;
-            if (eq.getStats() != null && eq.getStats().containsKey("DAMAGE")) {
-                baseDamage = eq.getStats().get("DAMAGE");
+    public void attack(Creature target) {
+        // If weapon is versatile, choose the higher, dexterity or strength
+        if (this.getEquipped(EquipmentSlot.WEAPON) != null
+                && this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
+            Equipment weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
+            int damage = 0;
+            int statBonus = 0;
+            int magicDamage = 0;
+            if (weapon.isVersatile()) {
+                statBonus = Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
+                damage = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+            } else if (weapon.getWeaponClass() == WeaponClass.MELEE) {
+                statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+                damage = rollDice(weapon.getPhysicalDamageDice());
+                magicDamage = rollDice(weapon.getMagicDamageDice());
+                System.out.println("Melee attack with bludgeon STR mod: " + "Rolled damage: " + damage + " Magic damage: " + magicDamage + " Stat bonus: " + statBonus);
+            } else if (weapon.getWeaponClass() == WeaponClass.RANGED) {
+                statBonus = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
+                damage = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+            } else if (weapon.getWeaponClass() == WeaponClass.MAGIC) {
+                statBonus = Math.max(1, this.getStat(Stats.INTELLIGENCE) - 10);
+                damage = rollDice(weapon.getMagicDamageDice()) + statBonus;
             }
+            // Example: print result
+            System.out.println(getName() + " attacks " + target.getName() + " for " + damage + " damage!");
+        } else if (this.defaultDamageType == Resistances.BLUDGEONING) {
+            // Unarmed attack logic here
+            // Roll 1dX where x is strength modifier
+            int strMod = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+            int damage = ThreadLocalRandom.current().nextInt(1, strMod);
+
+        } else {
+            // Fallback logic
         }
-        // Example: add STR modifier
-        baseDamage += getStat(Stats.STRENGTH) / 2;
-
-        // 3. Apply resistances (optional)
-        /*
-         * int resistance = target.getResistance(getDamageType());
-         * int finalDamage = Math.max(1, baseDamage * (100 - resistance) / 100);
-         */
-
-        // 4. Deal damage
-        // target.modifyHp(-finalDamage);
-
-        // 5. Print/log attack
-        // System.out.println(getName() + " attacks " + target.getName() + " for " +
-        // finalDamage + " damage!");
-        // System.out.println(getName() + " attacks " + target.getName() + " for " +
-        // finalDamage + " damage!");
     }
 
     public Item getEquipped(EquipmentSlot slot) {
@@ -572,7 +598,6 @@ public abstract class Creature {
         sb.append("Current HP: ").append(currentHp).append("\n");
         sb.append("HP Level Bonus: ").append(hpLvlBonus).append("\n");
         sb.append("Default Damage Type: ").append(defaultDamageType).append("\n");
-        sb.append("Damage Type: ").append(damageType).append("\n");
         sb.append("Size: ").append(size).append("\n");
         sb.append("Type: ").append(type).append("\n");
         sb.append("Creature Type: ").append(creatureType).append("\n");
