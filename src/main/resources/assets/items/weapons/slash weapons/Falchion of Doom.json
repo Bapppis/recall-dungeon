@@ -5,6 +5,7 @@
   "weaponClass": "MELEE",
   "damageType": "SLASHING",
   "physicalDamageDice": "2d6",
+  "magicElement": "DARKNESS",
   "magicDamageDice": "1d8",
   "twoHanded": true,
   "itemType": "WEAPON",

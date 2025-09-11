@@ -208,7 +208,9 @@ public abstract class Creature {
     public void setCurrentHp(int hp) {
         this.currentHp = Math.max(0, hp);
     }
-
+    public void alterHp(int amount) {
+        this.currentHp = Math.max(0, this.currentHp + amount);
+    }
     public int getHpLvlBonus() {
         return hpLvlBonus;
     }
@@ -224,16 +226,6 @@ public abstract class Creature {
     public void setDefaultDamageType(Resistances defaultDamageType) {
         this.defaultDamageType = defaultDamageType;
     }
-
-    /*
-     * public Resistances getDamageType() {
-     * return damageType;
-     * }
-     * 
-     * public void setDamageType(Resistances damageType) {
-     * this.damageType = damageType;
-     * }
-     */
 
     public Size getSize() {
         return size;
@@ -334,32 +326,70 @@ public abstract class Creature {
         if (this.getEquipped(EquipmentSlot.WEAPON) != null
                 && this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
             Equipment weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
-            int damage = 0;
-            int statBonus = 0;
-            int magicDamage = 0;
             if (weapon.isVersatile()) {
-                statBonus = Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
-                damage = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+                int statBonus = Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
+                int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+                int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
+                if (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) {
+                    int rawMagic = rollDice(weapon.getMagicDamageDice());
+                    int magicAfterRes = Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100);
+                    System.out.println("Versatile attack: Rolled damage: " + rawPhysical + ", Magic: " + rawMagic + ", After resistances: " + physicalAfterRes + ", Magic: " + magicAfterRes);
+                    target.alterHp(-physicalAfterRes);
+                    target.alterHp(-magicAfterRes);
+                } else {
+                    System.out.println("Versatile attack: Rolled damage: " + rawPhysical + ", After resistances: " + physicalAfterRes);
+                    target.alterHp(-physicalAfterRes);
+                }
             } else if (weapon.getWeaponClass() == WeaponClass.MELEE) {
-                statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
-                damage = rollDice(weapon.getPhysicalDamageDice());
-                magicDamage = rollDice(weapon.getMagicDamageDice());
-                System.out.println("Melee attack with bludgeon STR mod: " + "Rolled damage: " + damage + " Magic damage: " + magicDamage + " Stat bonus: " + statBonus);
+                int statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+                int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+                int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
+                if (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) {
+                    int rawMagic = rollDice(weapon.getMagicDamageDice());
+                    int magicAfterRes = Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100);
+                    System.out.println("Melee attack: Rolled damage: " + rawPhysical + ", Magic: " + rawMagic + ", After resistances: " + physicalAfterRes + ", Magic: " + magicAfterRes);
+                    target.alterHp(-physicalAfterRes);
+                    target.alterHp(-magicAfterRes);
+                } else {
+                    System.out.println("Melee attack: Rolled damage: " + rawPhysical + ", After resistances: " + physicalAfterRes);
+                    target.alterHp(-physicalAfterRes);
+                }
             } else if (weapon.getWeaponClass() == WeaponClass.RANGED) {
-                statBonus = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
-                damage = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+                int statBonus = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
+                int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
+                int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
+                if (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) {
+                    int rawMagic = rollDice(weapon.getMagicDamageDice());
+                    int magicAfterRes = Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100);
+                    System.out.println("Ranged attack: Rolled damage: " + rawPhysical + ", Magic: " + rawMagic + ", After resistances: " + physicalAfterRes + ", Magic: " + magicAfterRes);
+                    target.alterHp(-physicalAfterRes);
+                    target.alterHp(-magicAfterRes);
+                } else {
+                    System.out.println("Ranged attack: Rolled damage: " + rawPhysical + ", After resistances: " + physicalAfterRes);
+                    target.alterHp(-physicalAfterRes);
+                }
             } else if (weapon.getWeaponClass() == WeaponClass.MAGIC) {
-                statBonus = Math.max(1, this.getStat(Stats.INTELLIGENCE) - 10);
-                damage = rollDice(weapon.getMagicDamageDice()) + statBonus;
+                int statBonus = Math.max(1, this.getStat(Stats.INTELLIGENCE) - 10);
+                int rawMagic = rollDice(weapon.getMagicDamageDice()) + statBonus;
+                int magicAfterRes = (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) ?
+                    Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100) : 0;
+                System.out.println("Magic attack: Rolled magic: " + rawMagic + ", After resistances: " + magicAfterRes);
+                target.alterHp(-magicAfterRes);
             }
-            // Example: print result
-            System.out.println(getName() + " attacks " + target.getName() + " for " + damage + " damage!");
-        } else if (this.defaultDamageType == Resistances.BLUDGEONING) {
+        } else if (this.defaultDamageType == Resistances.BLUDGEONING || this.defaultDamageType == Resistances.PIERCING) {
             // Unarmed attack logic here
             // Roll 1dX where x is strength modifier
             int strMod = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
             int damage = ThreadLocalRandom.current().nextInt(1, strMod);
-
+            System.out.println("Unarmed attack: Rolled damage: " + damage);
+            target.alterHp(-damage);
+        } else if (this.defaultDamageType == Resistances.SLASHING) {
+            // Unarmed attack logic here
+            // Roll 1dX where x is dexterity modifier
+            int dexMod = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
+            int damage = ThreadLocalRandom.current().nextInt(1, dexMod);
+            System.out.println("Unarmed attack: Rolled damage: " + damage);
+            target.alterHp(-damage);
         } else {
             // Fallback logic
         }

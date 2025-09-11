@@ -104,9 +104,15 @@ public class CreatureLoader {
                             // Apply any property effects that modify stats or other attributes
                             int baseHp = creature.getBaseHp();
                             creature.setMaxHp(baseHp); // Reset max HP to base before applying properties
-                            // creature.setCurrentHp(baseHp);
+                            //creature.setCurrentHp(baseHp);
                             creature.updateMaxHp();
                             int tempXp = creature.getXp();
+                            // Convert all levels to XP and add to tempXp
+                            int lvl = creature.getLevel();
+                            for (int i = lvl; i > 0; i--) {
+                                tempXp += i * 10;
+                            }
+                            creature.setLevel(0); // Reset level to 0 after converting to XP
                             creature.setXp(0); // Reset XP to 0 before adding
                             creature.addXp(tempXp); // Add any extra XP specified in JSON
                             // Index by id (primary) and by name (optional)

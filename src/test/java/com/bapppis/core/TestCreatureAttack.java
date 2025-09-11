@@ -29,7 +29,7 @@ public class TestCreatureAttack {
         System.out.println(biggles.toString());
         System.out.println(biggles.getEquipped(EquipmentSlot.WEAPON).toString());
         biggles.attack(biggles); // Self-attack for testing
-
+        System.out.println(biggles.toString());
     }
 
     // make an assert function for biggles
