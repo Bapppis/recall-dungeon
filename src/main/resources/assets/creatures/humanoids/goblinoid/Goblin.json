@@ -5,17 +5,9 @@
   "xp": 10,
   "baseHp": 5,
   "hpLvlBonus": 4,
+  "defaultDamageType": "SLASHING",
   "size": "SMALL",
   "creatureType": "HUMANOID",
-  "stats": {
-    "STRENGTH": 10,
-    "CONSTITUTION": 10,
-    "DEXTERITY": 10,
-    "INTELLIGENCE": 10,
-    "WISDOM": 10,
-    "CHARISMA": 10,
-    "LUCK": 1
-  },
   "description": "A small and cowardly goblin. Are you sure you want to fight it?",
   "properties": [4000]
 }

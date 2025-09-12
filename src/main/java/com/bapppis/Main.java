@@ -1,6 +1,11 @@
 package com.bapppis;
 
+import com.bapppis.core.creature.Creature;
+import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.game.Combat;
 import com.bapppis.core.game.Game;
+import com.bapppis.core.item.ItemLoader;
 
 public class Main {
     public static void main(String[] args) {
@@ -8,8 +13,18 @@ public class Main {
         System.out.println("Welcome to the world of Aurum!");
         System.out.println("---------------------------------------------------------");
 
-        // Initialize and start the game
-        Game game = new Game();
-        game.initialize();
+        com.bapppis.core.property.PropertyManager.loadProperties();
+        com.bapppis.core.creature.CreatureLoader.loadCreatures();
+        com.bapppis.core.item.ItemLoader.loadItems();
+        // Testing combat
+        Player biggles = (Player) CreatureLoader.getCreatureById(5000);
+        // Give Falchion of Doom to Biggles and equip it
+        biggles.addItem(ItemLoader.getItemById(9800)); // Falchion of Doom
+        biggles.equipItem(biggles.getInventory().getWeapons().get(0)); // Equip Falchion of Doom
+
+        Creature goblin = CreatureLoader.getCreatureById(6400);
+        Combat.startCombat(biggles, goblin);
+        /* Game game = new Game();
+        game.initialize(); */
     }
 }

@@ -10,7 +10,7 @@ All game logic, entity systems, map parsing, and command handling are part of a 
 ---
 
 ## Table of Contents
-
+- [Features](#features)
 - [Roadmap for Features](#roadmap)
 - [Wishlist](#wishlist)
 - [Project Structure](#project-structure)
@@ -24,11 +24,50 @@ All game logic, entity systems, map parsing, and command handling are part of a 
 - [Story](#story)
 
 ---
+## Features
+### Turn-based Dungeon Exploration
+
+- Procedurally loaded dungeon floors with fog-of-war (undiscovered tiles are hidden until explored)
+- Player vision range determines how much of the map is revealed
+
+### Creature System
+
+- Multiple creature types (players, enemies, beasts, undead, etc.)
+- Creatures have stats (Strength, Dexterity, Constitution, etc.) and resistances (Fire, Ice, Bludgeoning, etc.)
+- Level and XP system with customizable XP progression
+
+### Inventory & Equipment
+
+- Inventory system for items, weapons, armor, and consumables
+- Equipment slots (weapon, shield, armor, helmet, legwear, etc.)
+- Support for two-handed and versatile weapons
+- Weapons have physical and optional magical damage types (with dice notation, e.g., 2d6)
+- Items and equipment can modify stats, resistances, and traits
+
+### Combat System
+
+- Turn-based combat loop between player and enemies
+- Player chooses actions (attack, flee, etc.) each turn
+- Dice-based damage calculation (e.g., 2d6 for physical, 1d8 for magic)
+- Damage types interact with creature resistances for a complex, old-school combat system
+
+### Properties & Traits
+
+- Buffs, debuffs, immunities, and traits can be applied to creatures
+- Properties can modify stats, resistances, and vision range
+
+### Asset-driven Design
+
+- Creatures, items, floors, and properties are loaded from JSON files for easy customization and extension
+- Extensible mod support for the future
+
+### Extensible Command System
+
+- Command parser for player input (move, look, up, down, etc.)
+- Easily extendable for new commands and actions
+
 ## Roadmap
-- Turn based combat: Fight or flee from the monsters and other habitants of the dungeon.
-- Interesting stat and resistance based combat: Match your gear to defeat the monsters efficiently.
 - Interactive grid based world: Explore the dungeon and its many secrets.
-- Inventory management: Choose and find gear that will help you during your visit.
 - Many characters: Choose from many different starting champions that have different stats.
 - A story mode and a roguelike mode. More handcrafted elements and story elements in the story mode and a fun roguelike mode with randomized floors, loot and enemies!
 
@@ -68,6 +107,7 @@ recall-dungeon/
    │  │        │  └─ mapparser/MapParser.java
    │  │        ├─ event/...
    │  │        ├─ game
+   │  │        │  ├─ Combat.java
    │  │        │  ├─ CommandParser.java
    │  │        │  ├─ Game.java
    │  │        │  └─ GameState.java

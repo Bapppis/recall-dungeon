@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.EquipmentSlot;
 import com.bapppis.core.item.ItemLoader;

@@ -380,14 +380,14 @@ public abstract class Creature {
             // Unarmed attack logic here
             // Roll 1dX where x is strength modifier
             int strMod = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
-            int damage = ThreadLocalRandom.current().nextInt(1, strMod);
+            int damage = rollDice("1d" + strMod);
             System.out.println("Unarmed attack: Rolled damage: " + damage);
             target.alterHp(-damage);
         } else if (this.defaultDamageType == Resistances.SLASHING) {
             // Unarmed attack logic here
             // Roll 1dX where x is dexterity modifier
             int dexMod = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
-            int damage = ThreadLocalRandom.current().nextInt(1, dexMod);
+            int damage = rollDice("1d" + dexMod);
             System.out.println("Unarmed attack: Rolled damage: " + damage);
             target.alterHp(-damage);
         } else {
