@@ -13,11 +13,11 @@ public class TestBigglesCreation {
     // Test Biggles creation logic here
     @Test
     public void testBigglesCreation() {
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
-        // Make the player Biggles
-        Player biggles = (Player) CreatureLoader.getCreatureById(5000);
-        assert biggles != null;
+    PropertyManager.loadProperties();
+    CreatureLoader.loadCreatures();
+    // Make the player Biggles
+    Player biggles = CreatureLoader.getPlayerById(5000);
+    org.junit.jupiter.api.Assertions.assertNotNull(biggles, "Biggles should be loaded as a Player");
 
         //assertBigglesDefaults(biggles);
         System.out.println(biggles.toString());

@@ -2,7 +2,9 @@
 package com.bapppis.core.game;
 
 import java.io.InputStream;
-import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.player.Player;
@@ -17,24 +19,60 @@ public class Game {
 
     private Dungeon dungeon;
     private int[] currentFloorRef = new int[]{0}; // Start at floor 0, use array for mutability
+    private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
+    public Game() {
+        // no-op default constructor
+    }
+
+    public Game(com.bapppis.core.creature.player.Player player) {
+        if (player == null) return;
+        selectPlayer(player);
+    }
 
     public void initialize() {
-        com.bapppis.core.property.PropertyManager.loadProperties();
-        com.bapppis.core.creature.CreatureLoader.loadCreatures();
-        com.bapppis.core.item.ItemLoader.loadItems();
         loadDungeon();
 
         System.out.println("Game initialized.");
-        try (Scanner scanner = new Scanner(System.in)) {
-            CommandParser commandParser = new CommandParser(dungeon, currentFloorRef);
-            while (true) {
-                System.out.println("You are on floor " + currentFloorRef[0]);
-                System.out.println("Please enter a command (move, look, up, down, etc.)");
-                System.out.print("> ");
-                String input = scanner.nextLine();
-                commandParser.parseAndExecute(input);
-            }
+        // Start a background loop to consume commands submitted from GUI
+        // If a player was pre-selected, ensure they are spawned on the current floor
+        if (GameState.getPlayer() != null && GameState.getCurrentFloor() != null) {
+            respawnPlayerOnCurrentFloor(false);
         }
+        if (running.compareAndSet(false, true)) {
+            CommandParser commandParser = new CommandParser(dungeon, currentFloorRef);
+            Thread loop = new Thread(() -> {
+                while (running.get()) {
+                    try {
+                        String cmd = commandQueue.take();
+                        if (cmd == null) continue;
+                        if (cmd.equalsIgnoreCase("__shutdown__")) break;
+                        commandParser.parseAndExecute(cmd);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    } catch (Exception e) {
+                        System.out.println("[Game] Error executing command: " + e.getMessage());
+                    }
+                }
+                running.set(false);
+            }, "Game-Command-Loop");
+            loop.setDaemon(true);
+            loop.start();
+        }
+    }
+
+    public void submitCommand(String command) {
+        if (!running.get()) return;
+        if (command == null) return;
+        commandQueue.offer(command);
+    }
+
+    public void shutdown() {
+        if (!running.get()) return;
+        running.set(false);
+        commandQueue.offer("__shutdown__");
     }
 
     private void loadDungeon() {
@@ -69,6 +107,14 @@ public class Game {
             player = GameState.getPlayer();
         } else {
             System.out.println("[Player] No creature found for id " + id + ". Using default player.");
+            player = GameState.getPlayer();
+        }
+        GameState.setPlayer(player);
+    }
+
+    public static void selectPlayer(Player player) {
+        if (player == null) {
+            System.out.println("[Player] Given player is null. Using default player.");
             player = GameState.getPlayer();
         }
         GameState.setPlayer(player);

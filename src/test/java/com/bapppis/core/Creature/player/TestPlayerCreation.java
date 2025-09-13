@@ -16,7 +16,7 @@ public class TestPlayerCreation {
         PropertyManager.loadProperties();
         CreatureLoader.loadCreatures();
         // Make the player Voss
-        Player captainVoss = (Player) CreatureLoader.getCreatureById(5001);
+    Player captainVoss = CreatureLoader.getPlayerById(5001);
         assert captainVoss != null;
 
         //assertCaptainVossDefaults(captainVoss);

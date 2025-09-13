@@ -16,7 +16,7 @@ public class ItemTest {
         CreatureLoader.loadCreatures();
         ItemLoader.loadItems();
         // Make the test player Biggles
-        Player biggles = (Player) CreatureLoader.getCreatureById(5000);
+    Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;
 
         // Add items to inventory

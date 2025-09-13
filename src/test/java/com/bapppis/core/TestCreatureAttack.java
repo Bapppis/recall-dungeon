@@ -19,7 +19,7 @@ public class TestCreatureAttack {
         ItemLoader.loadItems();
 
         // Make the player Biggles
-        Player biggles = (Player) CreatureLoader.getCreatureById(5000);
+    Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;
 
         // Give Falchion of Doom to Biggles and equip it

@@ -17,11 +17,15 @@ import java.util.EnumMap;
 public class CreatureLoader {
     private static final HashMap<String, Creature> creatureMap = new HashMap<>();
     private static final HashMap<Integer, Creature> creatureIdMap = new HashMap<>();
+    private static final HashMap<String, Player> playerMap = new HashMap<>();
+    private static final HashMap<Integer, Player> playerIdMap = new HashMap<>();
 
     public static void loadCreatures() {
         // Fresh load each time
         creatureMap.clear();
         creatureIdMap.clear();
+        playerMap.clear();
+        playerIdMap.clear();
 
         Gson gson = new Gson();
         try (ScanResult scanResult = new ClassGraph()
@@ -118,16 +122,24 @@ public class CreatureLoader {
                             // Index by id (primary) and by name (optional)
                             int cid = creature.getId();
                             if (cid > 0) {
-                                if (creatureIdMap.containsKey(cid)) {
+                                if (creatureIdMap.containsKey(cid) || playerIdMap.containsKey(cid)) {
                                     System.out.println(
                                             "Warning: Duplicate creature id " + cid + ". Overwriting previous entry.");
                                 }
-                                creatureIdMap.put(cid, creature);
+                                if (creature instanceof Player) {
+                                    playerIdMap.put(cid, (Player) creature);
+                                } else {
+                                    creatureIdMap.put(cid, creature);
+                                }
                             }
 
                             String cname = creature.getName();
                             if (cname != null && !cname.isEmpty()) {
-                                creatureMap.put(cname, creature);
+                                if (creature instanceof Player) {
+                                    playerMap.put(cname, (Player) creature);
+                                } else {
+                                    creatureMap.put(cname, creature);
+                                }
                             }
                         }
                     } catch (Exception e) {
@@ -158,14 +170,33 @@ public class CreatureLoader {
     }
 
     public static Creature getCreature(String name) {
-        return creatureMap.get(name);
+        Creature c = creatureMap.get(name);
+        if (c != null) return c;
+        return playerMap.get(name);
     }
 
     public static Creature getCreatureById(int id) {
-        return creatureIdMap.get(id);
+        Creature c = creatureIdMap.get(id);
+        if (c != null) return c;
+        return playerIdMap.get(id);
     }
 
     public static List<Creature> getAllCreatures() {
-        return new ArrayList<>(creatureMap.values());
+        ArrayList<Creature> combined = new ArrayList<>(creatureMap.values());
+        combined.addAll(playerMap.values());
+        return combined;
+    }
+
+    // Player-specific accessors
+    public static Player getPlayer(String name) {
+        return playerMap.get(name);
+    }
+
+    public static Player getPlayerById(int id) {
+        return playerIdMap.get(id);
+    }
+
+    public static List<Player> getAllPlayers() {
+        return new ArrayList<>(playerMap.values());
     }
 }
