@@ -30,6 +30,43 @@
             <artifactId>classgraph</artifactId>
             <version>4.8.162</version>
         </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>1.13.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-backend-lwjgl3</artifactId>
+            <version>1.13.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-platform</artifactId>
+            <version>1.13.1</version>
+            <classifier>natives-desktop</classifier>
+        </dependency>
+        <!-- VisUI UI toolkit used by the provided uiskin.json -->
+        <dependency>
+            <groupId>com.kotcrab.vis</groupId>
+            <artifactId>vis-ui</artifactId>
+            <version>1.5.5</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <!-- Ensure runtime assets (e.g., LibGDX skins) are on the classpath -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <!-- Include the top-level assets/ so Gdx.files.internal("uiskin.json") can find it -->
+            <resource>
+                <directory>assets</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+    </build>
 
 </project>

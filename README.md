@@ -1,17 +1,19 @@
 # Recall Dungeon
 
-A Java-based dungeon recall project built with Maven.
+A Java-based roguelike dungeon crawler built with Maven and LibGDX.
 
 Explore the mysterious dungeon where you have awakened. Decide whether you will go further down the dungeon or try to escape to the surface!
 
-This project includes a custom Java-based game engine designed specifically for grid-based dungeon gameplay.
+This project includes a custom Java-based "Recall engine" designed specifically for grid-based dungeon gameplay.
 All game logic, entity systems, map parsing, and command handling are part of a custom Java game engine I am developing from scratch.
+
+Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 
 ---
 
 ## Table of Contents
 - [Features](#features)
-- [Roadmap for Features](#roadmap)
+- [Tech Stack](#tech-stack)
 - [Wishlist](#wishlist)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
@@ -66,15 +68,25 @@ All game logic, entity systems, map parsing, and command handling are part of a 
 - Command parser for player input (move, look, up, down, etc.)
 - Easily extendable for new commands and actions
 
+-
+## Tech Stack
+
+- Java 17
+- Maven 3.8+
+- LibGDX 1.13.1 (core, LWJGL3 backend, desktop natives)
+- VisUI 1.5.5 (Scene2D UI widgets/skin)
+- JUnit 5 (testing)
+
 ## Roadmap
 - Interactive grid based world: Explore the dungeon and its many secrets.
 - Many characters: Choose from many different starting champions that have different stats.
+- Randomized dungeons.
+- Making enemies intelligent, having them move around the map searching for the player and making the smarter during the combat.
 - A story mode and a roguelike mode. More handcrafted elements and story elements in the story mode and a fun roguelike mode with randomized floors, loot and enemies!
 
 ---
 
 ## Wishlist
-- Add a graphical user interface (GUI) using JavaFX.
 - Interesting story/lore.
 - For the game to proudly call itself a roguelike dungeon crawler.
 
@@ -88,12 +100,21 @@ recall-dungeon/
 ├─ ASSETS-LICENSE             # CC BY-NC-ND 4.0 (assets)
 ├─ pom.xml                    # Maven build configuration
 ├─ README.md                  # Project overview and docs
+├─ assets/                    # LibGDX runtime assets (skins, fonts, textures)
+│  ├─ uiskin.json
+│  ├─ uiskin.atlas
+│  ├─ uiskin.png
+│  ├─ default.fnt
+│  └─ font-small.fnt
 └─ src
    ├─ main
    │  ├─ java
    │  │  └─ com/bapppis
    │  │     ├─ Main.java
    │  │     └─ core
+   │  │        ├─ gfx
+   │  │        │  ├─ DesktopLauncher.java     # LibGDX desktop entrypoint
+   │  │        │  └─ RecallDungeon.java       # LibGDX ApplicationAdapter
    │  │        ├─ creature
    │  │        │  ├─ Creature.java
    │  │        │  ├─ Enemy.java
@@ -167,7 +188,7 @@ recall-dungeon/
 
 ## Prerequisites
 
-- Java 17+ (or your project's required version)
+- Java 17+
 - Maven 3.8+
 - Git
 
@@ -190,19 +211,16 @@ recall-dungeon/
 
 ## Running the Project
 
-To run the main application (customize if you have a main class):
+Desktop (LibGDX LWJGL3):
 
 ```sh
-mvn exec:java -Dexec.mainClass="com.bapppis.core.Main"
+mvn -q -DskipTests package
+mvn exec:java -Dexec.mainClass="com.bapppis.core.gfx.DesktopLauncher"
 ```
 
-Or, if you have a jar file:
-
-```sh
-java -jar target/recall-dungeon-<version>.jar
-```
-
-Version in POM.
+Tips:
+- Ensure the working directory is the project root so LibGDX sees `assets/`.
+- VS Code users can use `.vscode/launch.json` with `"cwd": "${workspaceFolder}"`.
 ---
 
 ## Running Tests
