@@ -1,0 +1,2 @@
+// copied from target/generated-resources/licenses/apache-2.0 - license-2.0.txt
+<contents omitted for brevity; original license is in target/generated-resources/licenses>

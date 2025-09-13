@@ -33,6 +33,11 @@ Thumbs.db
 # Logs
 *.log
 
+# JVM crash logs and heap dumps
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
+
 # Java build artifacts
 *.jar
 *.war
@@ -47,3 +52,43 @@ Thumbs.db
 
 # Disabled files
 *.disabled
+
+# Eclipse APT
+.factorypath
+
+# IDE build dirs
+bin/
+
+# Windows metadata
+desktop.ini
+
+# --- LibGDX multi-platform (optional future modules) ---
+
+# Gradle artifacts (if you add Gradle-based targets like Android)
+.gradle/
+**/build/
+
+# Android module (keep source tracked; ignore local/build/caches)
+android/local.properties
+android/.idea/
+android/**/*.iml
+android/**/.cxx/
+android/**/.externalNativeBuild/
+android/**/captures/
+android/**/build/
+*.apk
+*.aab
+
+# iOS/RoboVM module
+ios/.idea/
+ios/**/*.iml
+ios/**/build/
+ios/robovm.properties
+ios/robovm.xml
+
+# HTML/GWT module
+html/.idea/
+html/**/*.iml
+html/**/build/
+html/**/war/
+html/**/out/
