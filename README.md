@@ -290,38 +290,6 @@ Key points about this mixed licensing:
 
 See `ASSETS-LICENSE` for the full CC BY‑NC‑ND text for the project-owned assets.
 
-Next steps — pick one and I will apply it for you:
-
-1) Add VisUI license file
-
-   - I will create `third-party-licenses/visui-APACHE-2.0.txt` containing VisUI's Apache 2.0 text and add a short reference in this README. This documents that VisUI is included under Apache 2.0.
-
-2) Stop tracking repository copies of the VisUI skin
-
-   - If you prefer to rely on VisUI at runtime and not ship the `uiskin.*` files, I can remove them from Git tracking while keeping your local copies. This prevents accidental distribution of third-party or non-commercial skin files.
-   - Command I will run (keeps local files):
-
-     ```bash
-     git rm --cached assets/uiskin.*
-     git commit -m "chore: stop tracking VisUI skin files (use VisUI runtime skin)"
-     ```
-
-3) Prepare assets for commercial release
-
-   - If you confirm you own all project assets and want to commercially distribute them, I can help update `ASSETS-LICENSE` to a commercial-permissive license or add guidance for packaging. I will not change asset licensing without explicit confirmation that you own the assets.
-
-Tell me which option (1, 2, or 3) you want me to execute and I will do it. If you want, I can also perform 1+2 together (add VisUI license and stop tracking `uiskin.*`).
-
-Included third-party license files (added to `third-party-licenses/`):
-
-- `visui-APACHE-2.0.txt` (VisUI - Apache 2.0)
-- `apache-2.0 - license-2.0.txt` (Apache 2.0)
-- `bsd-3-clause - license.html` (BSD 3-Clause / LWJGL)
-- `eclipse public license v2.0 - epl-v20.html` (EPL v2)
-- `gnu lesser general public license - lesser.html` (LGPL)
-- `the mit license (mit) - mit.html` (MIT)
-
-These were copied from the Maven license plugin output at `target/generated-resources/licenses/` to ensure third-party license texts are versioned in the repository.
 ---
 
 ## Manual
