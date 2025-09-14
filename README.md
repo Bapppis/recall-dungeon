@@ -114,7 +114,8 @@ recall-dungeon/
    │  │     └─ core
    │  │        ├─ gfx
    │  │        │  ├─ DesktopLauncher.java     # LibGDX desktop entrypoint
-   │  │        │  └─ RecallDungeon.java       # LibGDX ApplicationAdapter
+   │  │        │  ├─ RecallDungeon.java       # LibGDX ApplicationAdapter (UI)
+   │  │        │  └─ MapActor.java            # Scene2D actor that renders the ASCII map
    │  │        ├─ creature
    │  │        │  ├─ Creature.java
    │  │        │  ├─ Enemy.java
