@@ -2,6 +2,8 @@ package com.bapppis.core.gfx;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 import com.bapppis.core.dungeon.MapPrinter;
@@ -15,10 +17,29 @@ public class MapActor extends Actor {
     private float cellWidth;
     private float lineHeight;
     private String[] lines = new String[0];
+    private final TextureAtlas atlas;
+    private final java.util.Map<Character, String> charToRegion;
+    private final java.util.Map<Character, TextureRegion> charTextureRegions;
 
     public MapActor(BitmapFont font) {
+        this(font, null, null, null);
+    }
+
+    public MapActor(BitmapFont font, TextureAtlas atlas, java.util.Map<Character, String> charToRegion) {
+        this(font, atlas, charToRegion, null);
+    }
+
+    /**
+     * Create a MapActor which can render sprites from an atlas when available.
+     * If atlas==null or charToRegion==null drawing falls back to text.
+     */
+    public MapActor(BitmapFont font, TextureAtlas atlas, java.util.Map<Character, String> charToRegion,
+            java.util.Map<Character, TextureRegion> charTextureRegions) {
         this.font = font;
         this.lineHeight = font.getLineHeight();
+        this.atlas = atlas;
+        this.charToRegion = charToRegion;
+        this.charTextureRegions = charTextureRegions;
         computeCellWidth();
     }
 
@@ -78,7 +99,25 @@ public class MapActor extends Actor {
                 char ch = line.charAt(col);
                 String s = String.valueOf(ch);
                 float x = startX + col * cellWidth;
-                font.draw(batch, s, x, y);
+                boolean drawn = false;
+                if (atlas != null && charToRegion != null) {
+                    String regionName = charToRegion.get(ch);
+                    if (regionName != null) {
+                        TextureRegion reg = atlas.findRegion(regionName);
+                        if (reg != null) {
+                            // draw texture region sized to the cell
+                            float tileW = cellWidth;
+                            float tileH = lineHeight * 0.9f;
+                            // compute bottom-left for texture so it visually aligns with text baseline
+                            float texY = y - lineHeight + (lineHeight * 0.1f);
+                            batch.draw(reg, x, texY, tileW, tileH);
+                            drawn = true;
+                        }
+                    }
+                }
+                if (!drawn) {
+                    font.draw(batch, s, x, y);
+                }
             }
         }
     }

@@ -165,7 +165,79 @@ public class RecallDungeon extends ApplicationAdapter {
         // keep track so we can dispose only if it's different from the main `font`
         mapFont = chosen != font ? chosen : null;
 
-        mapActor = new com.bapppis.core.gfx.MapActor(chosen);
+        // Attempt to load a sprite atlas from packaged assets. If present, MapActor
+        // will draw sprites for mapped characters, otherwise fall back to text.
+        com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = null;
+        try {
+            if (Gdx.files.internal("assets/sprites.atlas").exists()) {
+                atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("assets/sprites.atlas"));
+                Gdx.app.log("RecallDungeon", "Loaded assets/sprites.atlas");
+            } else if (Gdx.files.internal("sprites.atlas").exists()) {
+                atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("sprites.atlas"));
+                Gdx.app.log("RecallDungeon", "Loaded sprites.atlas from project root");
+            }
+        } catch (Exception e) {
+            Gdx.app.error("RecallDungeon", "Error loading sprites atlas", e);
+            atlas = null;
+        }
+
+        // load mapping from assets/tiles.json if present, otherwise fall back to defaults
+        java.util.Map<Character, String> charToRegion = new java.util.HashMap<>();
+        try {
+            if (Gdx.files.internal("assets/tiles.json").exists()) {
+                String json = Gdx.files.internal("assets/tiles.json").readString();
+                com.badlogic.gdx.utils.JsonReader jr = new com.badlogic.gdx.utils.JsonReader();
+                com.badlogic.gdx.utils.JsonValue root = jr.parse(json);
+                com.badlogic.gdx.utils.JsonValue mappings = root.get("mappings");
+                if (mappings != null) {
+                    for (com.badlogic.gdx.utils.JsonValue entry = mappings.child; entry != null; entry = entry.next) {
+                        String key = entry.name();
+                        if (key != null && key.length() > 0) {
+                            char ch = key.charAt(0);
+                            String region = entry.asString();
+                            charToRegion.put(ch, region);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Gdx.app.error("RecallDungeon", "Error parsing assets/tiles.json", e);
+        }
+        if (charToRegion.isEmpty()) {
+            charToRegion.put('#', "wall");
+            charToRegion.put('.', "floor");
+            charToRegion.put('^', "stairs_up");
+            charToRegion.put('v', "stairs_down");
+            charToRegion.put('P', "player");
+        }
+
+        // If atlas missing, try to load individual PNGs named after region (e.g. floor.png)
+        java.util.Map<Character, com.badlogic.gdx.graphics.g2d.TextureRegion> charTextureRegions = new java.util.HashMap<>();
+        java.util.List<com.badlogic.gdx.graphics.Texture> createdTextures = new java.util.ArrayList<>();
+        if (atlas == null) {
+            for (java.util.Map.Entry<Character, String> e : charToRegion.entrySet()) {
+                String fileName = e.getValue() + ".png"; // e.g. floor.png
+                try {
+                    if (Gdx.files.internal(fileName).exists()) {
+                        com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal(fileName));
+                        createdTextures.add(t);
+                        com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
+                        charTextureRegions.put(e.getKey(), tr);
+                        Gdx.app.log("RecallDungeon", "Loaded texture for " + e.getKey() + " -> " + fileName);
+                    } else if (Gdx.files.internal("assets/" + fileName).exists()) {
+                        com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("assets/" + fileName));
+                        createdTextures.add(t);
+                        com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
+                        charTextureRegions.put(e.getKey(), tr);
+                        Gdx.app.log("RecallDungeon", "Loaded texture for " + e.getKey() + " -> assets/" + fileName);
+                    }
+                } catch (Exception ex) {
+                    Gdx.app.error("RecallDungeon", "Error loading texture " + fileName, ex);
+                }
+            }
+        }
+
+        mapActor = new com.bapppis.core.gfx.MapActor(chosen, atlas, charToRegion, charTextureRegions);
         // Put the actor inside a container table cell and center it. Don't force fill
         // so actor size is used.
         com.badlogic.gdx.scenes.scene2d.ui.Container<com.bapppis.core.gfx.MapActor> container = new com.badlogic.gdx.scenes.scene2d.ui.Container<>(
@@ -770,6 +842,32 @@ public class RecallDungeon extends ApplicationAdapter {
         font.dispose();
         if (mapFont != null)
             mapFont.dispose();
+        // dispose atlas or any textures loaded when creating MapActor
+        try {
+            if (mapActor != null) {
+                java.lang.reflect.Field fAtlas = com.bapppis.core.gfx.MapActor.class.getDeclaredField("atlas");
+                fAtlas.setAccessible(true);
+                Object a = fAtlas.get(mapActor);
+                if (a instanceof com.badlogic.gdx.graphics.g2d.TextureAtlas) {
+                    ((com.badlogic.gdx.graphics.g2d.TextureAtlas) a).dispose();
+                }
+                java.lang.reflect.Field fTexMap = com.bapppis.core.gfx.MapActor.class.getDeclaredField("charTextureRegions");
+                fTexMap.setAccessible(true);
+                Object tm = fTexMap.get(mapActor);
+                if (tm instanceof java.util.Map) {
+                    java.util.Map<?, ?> mm = (java.util.Map<?, ?>) tm;
+                    for (Object v : mm.values()) {
+                        if (v instanceof com.badlogic.gdx.graphics.g2d.TextureRegion) {
+                            com.badlogic.gdx.graphics.g2d.TextureRegion tr = (com.badlogic.gdx.graphics.g2d.TextureRegion) v;
+                            com.badlogic.gdx.graphics.Texture tex = tr.getTexture();
+                            if (tex != null) try { tex.dispose(); } catch (Exception ex) {}
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // ignore - best effort dispose
+        }
         stage.dispose();
         if (VisUI.isLoaded())
             VisUI.dispose();

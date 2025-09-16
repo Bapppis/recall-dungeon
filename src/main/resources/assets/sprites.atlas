@@ -1,0 +1,15 @@
+sprites.png
+size:128,32
+repeat:none
+floor
+bounds:94,4,16,16
+player
+bounds:2,2,18,18
+stairs_down
+bounds:76,4,16,16
+stairs_up
+bounds:22,4,16,16
+undiscovered
+bounds:40,4,16,16
+wall
+bounds:58,4,16,16

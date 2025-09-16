@@ -1,0 +1,9 @@
+{
+  "mappings": {
+    "#": "wall",
+    ".": "floor",
+    "^": "stairs_up",
+    "v": "stairs_down",
+    "P": "player"
+  }
+}
