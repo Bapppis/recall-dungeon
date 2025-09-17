@@ -63,6 +63,14 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Creatures, items, floors, and properties are loaded from JSON files for easy customization and extension
 - Extensible mod support for the future
 
+### Rendering & Sprites
+
+- Tile and creature rendering: ASCII map characters are mapped to sprite regions so the LibGDX map view renders tiles and creatures using graphics instead of plain text.
+- Per-character sprite binding: player and creature JSON may include a `"sprite"` field to select a specific sprite for that character (for example, different starting characters can show different player sprites).
+- Loading strategy: the renderer prefers a packed `TextureAtlas` (region names from `tiles.json`) and falls back to individual PNG files in `src/main/resources/assets/sprite_pngs/` when an atlas region is not available.
+- Default behavior: when a player character has no sprite defined or loading fails, the runtime falls back to a built-in `player_default` sprite.
+- Asset locations: runtime sprite art and per-PNG fallbacks are kept in `src/main/resources/assets/`. Full third-party packs are archived under `src/main/resources/assets/thirdparty/` and are noted in `ATTRIBUTION.md`.
+
 ### Extensible Command System
 
 - Command parser for player input (move, look, up, down, etc.)
@@ -300,26 +308,10 @@ Project-owned JSON data files
    - You must give attribution when required by the CC terms.
    - You may not use them in commercial products or redistribute modified versions for commercial use.
 
-Optional organization suggestion
-- For clarity, move project-owned data (the JSON files) into a dedicated folder such as `src/main/resources/data/` or `src/main/resources/assets/data/`. This separates authored game data from third-party art and makes packaging rules clearer.
+Project data location
 
-PowerShell commands to move JSON data into `src/main/resources/data/` (run from project root):
+- The project-owned JSON data (creatures, floors, items, and properties) has already been moved to `src/main/resources/data/` to separate authored game data from runtime art. This makes packaging and licensing clearer.
 
-```powershell
-New-Item -ItemType Directory -Force -Path .\src\main\resources\data
-Copy-Item -Recurse -Force .\src\main\resources\assets\creatures .\src\main\resources\data\creatures
-Copy-Item -Recurse -Force .\src\main\resources\assets\floors .\src\main\resources\data\floors
-Copy-Item -Recurse -Force .\src\main\resources\assets\items .\src\main\resources\data\items
-Copy-Item -Recurse -Force .\src\main\resources\assets\properties .\src\main\resources\data\properties
-
-# Optionally remove originals from assets if you want them only in data/
-# Remove-Item -Recurse -Force .\src\main\resources\assets\creatures
-# Remove-Item -Recurse -Force .\src\main\resources\assets\floors
-# Remove-Item -Recurse -Force .\src\main\resources\assets\items
-# Remove-Item -Recurse -Force .\src\main\resources\assets\properties
-```
-
-If you prefer to perform the relocation yourself, use the PowerShell commands above to copy the JSON folders into `src/main/resources/data/` and optionally remove the originals.
 See `ASSETS-LICENSE` for the full CC BY‑NC‑ND text for the project-owned assets.
 
 ---
