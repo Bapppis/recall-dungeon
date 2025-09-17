@@ -90,17 +90,26 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - JUnit 5 (testing)
 
 ## Roadmap
+- Loot pools and monster pools for randomized yet balanced and fun gameplay experience.
+- Sprite variety for environment.
+- Gear, armor and weapons would affect how the player looks.
+- Animations for characters and environment.
+- Randomized dungeon layouts.
+- Deepen the element based combat system, for example statuses for bleeding, stuns, shocked etc. Elements would build up to statuses.
 - Interactive grid based world: Explore the dungeon and its many secrets.
 - Many characters: Choose from many different starting champions that have different stats.
-- Randomized dungeons.
 - Making enemies intelligent, having them move around the map searching for the player and making the smarter during the combat.
+- Traps, consumables, events and story elements.
 - A story mode and a roguelike mode. More handcrafted elements and story elements in the story mode and a fun roguelike mode with randomized floors, loot and enemies!
+- Sound and music.
 
 ---
 
 ## Wishlist
 - Interesting story/lore.
+- Balanced and fun gameplay.
 - For the game to proudly call itself a roguelike dungeon crawler.
+- For the game to use mostly self-made sprites.
 
 ---
 
