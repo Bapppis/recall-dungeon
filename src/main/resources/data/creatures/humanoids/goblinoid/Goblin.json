@@ -1,0 +1,14 @@
+{
+  "id": 6400,
+  "name": "Goblin",
+  "visionRange": 1,
+  "xp": 10,
+  "baseHp": 5,
+  "hpLvlBonus": 4,
+  "defaultDamageType": "SLASHING",
+  "size": "SMALL",
+  "creatureType": "HUMANOID",
+  "description": "A small and cowardly goblin. Are you sure you want to fight it?",
+  "properties": [4000],
+  "sprite": "monster_goblin"
+}

@@ -29,7 +29,7 @@ public class CreatureLoader {
 
         Gson gson = new Gson();
         try (ScanResult scanResult = new ClassGraph()
-                .acceptPaths("assets/creatures") // Scan all creatures and subfolders (players, enemies, etc.)
+                .acceptPaths("data/creatures") // Scan all creatures and subfolders (players, enemies, etc.)
                 .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {

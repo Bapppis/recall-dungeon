@@ -19,9 +19,9 @@ public class ItemLoader {
         itemNameMap.clear();
 
         Gson gson = new Gson();
-        try (ScanResult scanResult = new ClassGraph()
-                .acceptPaths("assets/items") // Scan all item folders
-                .scan()) {
+    try (ScanResult scanResult = new ClassGraph()
+        .acceptPaths("data/items") // Scan all item folders
+        .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
                     try (Reader reader = new InputStreamReader(resource.open())) {

@@ -142,41 +142,44 @@ recall-dungeon/
    │  └─ resources
    │     └─ assets
    │        ├─ IDS.md
-   │        ├─ creatures/
-   │        │  ├─ README.md
-   │        │  ├─ beasts/
-   │        │  ├─ constructs/
-   │        │  ├─ dragons/
-   │        │  ├─ elementals/
-   │        │  ├─ humanoids/
-   │        │  ├─ players/
-   │        │  ├─ plants/
-   │        │  ├─ undead/
-   │        │  └─ unknown/
-   │        ├─ floors/
-   │        ├─ items
-   │        │  ├─ armor/
-   │        │  │  └─ armor/
-   │        │  │     ├─ Armor of bones.json
-   │        │  │     └─ Armor of Water.json
-   │        │  │  ├─ helmets/
-   │        │  │  ├─ legwear/
-   │        │  │  └─ shields/
-   │        │  ├─ consumables/
-   │        │  └─ weapons/
-   │        │     ├─ blunt weapons/
-   │        │     ├─ magic weapons/
-   │        │     ├─ piercing weapons/
-   │        │     ├─ ranged weapons/
-   │        │     └─ slash weapons/
-   │        └─ properties
-   │           ├─ buff/
-   │           ├─ debuff/
-   │           │  └─ Afraid.json
-   │           ├─ immunity/
-   │           └─ trait/
-   │              ├─ Coward.json
-   │              └─ HumanAdaptability.json
+   │        ├─ sprite_pngs/
+   │        ├─ sprites/
+   │        ├─ thirdparty/
+   │        └─ tiles/
+   └─ resources
+      ├─ data
+      │  ├─ creatures/
+      │  │  ├─ README.md
+      │  │  ├─ beasts/
+      │  │  ├─ constructs/
+      │  │  ├─ dragons/
+      │  │  ├─ elementals/
+      │  │  ├─ humanoids/
+      │  │  ├─ players/
+      │  │  ├─ plants/
+      │  │  ├─ undead/
+      │  │  └─ unknown/
+      │  ├─ floors/
+      │  ├─ items/
+      │  │  ├─ armor/
+      │  │  │  └─ armor/
+      │  │  │     ├─ Armor of bones.json
+      │  │  │     └─ Armor of Water.json
+      │  │  ├─ consumables/
+      │  │  └─ weapons/
+      │  │     ├─ blunt weapons/
+      │  │     ├─ magic weapons/
+      │  │     ├─ piercing weapons/
+      │  │     ├─ ranged weapons/
+      │  │     └─ slash weapons/
+      │  └─ properties/
+      │     ├─ buff/
+      │     ├─ debuff/
+      │     │  └─ Afraid.json
+      │     ├─ immunity/
+      │     └─ trait/
+      │        ├─ Coward.json
+      │        └─ HumanAdaptability.json
    └─ test
       ├─ java                    # Unit and integration tests (JUnit)
       └─ resources
@@ -283,12 +286,40 @@ This repository contains two categories of non-code assets:
 
 - **Project assets (my own):** All other non-code assets created for this project (images, JSON data files, fonts, floor definitions, etc.) are licensed under **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY‑NC‑ND 4.0)** and are stored in `src/main/resources/assets/` and the top-level `assets/` folder.
 
+   Note: You have added two third-party sprite packs into `src/main/resources/assets/thirdparty/` and recorded them in `ATTRIBUTION.md`. Those sprite packs are not authored by me and are licensed by their respective authors (see `ATTRIBUTION.md` and the files under `assets/thirdparty/` for exact license text). When distributing this project, follow the license terms in those packs and include their license files and attribution as required.
+
 Key points about this mixed licensing:
 
 - You may use VisUI (Apache 2.0) in commercial releases. Include VisUI's license file and attribution when distributing.
 - The project-owned assets under **CC BY‑NC‑ND 4.0** are **not permitted** for commercial use and cannot be included in products you sell. If you plan to sell the game, you must either replace these assets with commercially-licensed assets, obtain a commercial license from the asset authors (if any of those assets are third-party), or re-license them under a commercial-permissive license if you own them and wish to do so.
 - If you want to keep the CC BY‑NC‑ND assets in the repository for development but avoid accidental inclusion in commercial distributions, remove them from the distribution package (or from Git tracking) and rely on VisUI or replacement assets in released builds.
 
+Project-owned JSON data files
+- The JSON files that define creatures, floors, items and properties (the structured game data under `src/main/resources/assets/creatures/`, `floors/`, `items/`, and `properties/`) are authored by the project and licensed under **CC BY‑NC‑ND 4.0**. This means:
+   - You may share and redistribute them for non-commercial use.
+   - You must give attribution when required by the CC terms.
+   - You may not use them in commercial products or redistribute modified versions for commercial use.
+
+Optional organization suggestion
+- For clarity, move project-owned data (the JSON files) into a dedicated folder such as `src/main/resources/data/` or `src/main/resources/assets/data/`. This separates authored game data from third-party art and makes packaging rules clearer.
+
+PowerShell commands to move JSON data into `src/main/resources/data/` (run from project root):
+
+```powershell
+New-Item -ItemType Directory -Force -Path .\src\main\resources\data
+Copy-Item -Recurse -Force .\src\main\resources\assets\creatures .\src\main\resources\data\creatures
+Copy-Item -Recurse -Force .\src\main\resources\assets\floors .\src\main\resources\data\floors
+Copy-Item -Recurse -Force .\src\main\resources\assets\items .\src\main\resources\data\items
+Copy-Item -Recurse -Force .\src\main\resources\assets\properties .\src\main\resources\data\properties
+
+# Optionally remove originals from assets if you want them only in data/
+# Remove-Item -Recurse -Force .\src\main\resources\assets\creatures
+# Remove-Item -Recurse -Force .\src\main\resources\assets\floors
+# Remove-Item -Recurse -Force .\src\main\resources\assets\items
+# Remove-Item -Recurse -Force .\src\main\resources\assets\properties
+```
+
+If you prefer to perform the relocation yourself, use the PowerShell commands above to copy the JSON folders into `src/main/resources/data/` and optionally remove the originals.
 See `ASSETS-LICENSE` for the full CC BY‑NC‑ND text for the project-owned assets.
 
 ---

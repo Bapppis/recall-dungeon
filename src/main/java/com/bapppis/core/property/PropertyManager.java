@@ -16,9 +16,9 @@ public class PropertyManager {
 
     public static void loadProperties() {
         Gson gson = new Gson();
-        try (ScanResult scanResult = new ClassGraph()
-                .acceptPaths("assets/properties/buff", "assets/properties/debuff", "assets/properties/immunity", "assets/properties/trait")
-                .scan()) {
+    try (ScanResult scanResult = new ClassGraph()
+        .acceptPaths("data/properties/buff", "data/properties/debuff", "data/properties/immunity", "data/properties/trait")
+        .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
                     try (Reader reader = new InputStreamReader(resource.open())) {

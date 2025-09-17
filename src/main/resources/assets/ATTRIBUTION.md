@@ -2,9 +2,14 @@
 
 This file lists asset sources, authors and licenses for sprite packs and other third-party resources used in the project.
 
-Example format:
+Included third-party packs (copied to `src/main/resources/assets/thirdparty/`):
 
-- freepixel — Jane Artist — CC0 — https://example.com/freepixel — files: player_*, ui_*
-- kenney — Kenney.nl — Public Domain — https://kenney.nl/assets — files: goblin_*
+- Deep Dive Game Studio — Deep Dive Game Studio asset packs (various sprite sheets and animations).
+  - License: see the included license files in `assets/thirdparty/Deep Dive Game Studio/originals/` (author notes state attribution is appreciated for some packs).
+  - Files preserved: full pack preserved under `assets/thirdparty/Deep Dive Game Studio/originals/`.
 
-Please edit this file to add the real attributions for any sprite packs or assets you include.
+- RGS_Dev — "Free CC0 Top Down Tileset Pixel Art".
+  - License: CC0 (public domain) as indicated by the pack author.
+  - Files preserved: full pack preserved under `assets/thirdparty/RGS_Dev/originals/`.
+
+- Thank you so much for the quality assets! <3

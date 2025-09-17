@@ -1,0 +1,23 @@
+{
+  "id": 5000,
+  "name": "Biggles The Unlucky",
+  "visionRange": 1,
+  "level": 5,
+  "xp": 20,
+  "baseHp": 5,
+  "hpLvlBonus": 4,
+  "size": "SMALL",
+  "creatureType": "HUMANOID",
+  "stats": {
+    "CONSTITUTION": 17,
+    "INTELLIGENCE": 7,
+    "LUCK": 2
+  },
+  "resistances": {
+    "NATURE": 90,
+    "SLASHING": 120
+  },
+  "description": "Biggles The Unlucky, a small and unfortunate creature.",
+  "properties": [2000, 4000, 4002],
+  "sprite": "player_biggles"
+}

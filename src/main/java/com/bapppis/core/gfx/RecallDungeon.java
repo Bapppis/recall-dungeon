@@ -208,7 +208,8 @@ public class RecallDungeon extends ApplicationAdapter {
             charToRegion.put('.', "floor");
             charToRegion.put('^', "stairs_up");
             charToRegion.put('v', "stairs_down");
-            charToRegion.put('P', "player");
+            // default player sprite key: use a generic player_default region if available
+            charToRegion.put('P', "player_default");
         }
 
         // If atlas missing, try to load individual PNGs named after region (e.g. floor.png)
@@ -236,6 +237,59 @@ public class RecallDungeon extends ApplicationAdapter {
                 }
             }
         }
+
+        // --- Runtime override: prefer player-specific sprite for 'P' ---
+        try {
+            com.bapppis.core.creature.player.Player current = com.bapppis.core.game.GameState.getPlayer();
+            if (current != null) {
+                String spriteKey = current.getSprite();
+                if (spriteKey != null && !spriteKey.trim().isEmpty()) {
+                    // if atlas contains region, use it
+                    if (atlas != null && atlas.findRegion(spriteKey) != null) {
+                        charToRegion.put('P', spriteKey);
+                        Gdx.app.log("RecallDungeon", "Player sprite mapping from creature: 'P' -> " + spriteKey + " (atlas)");
+                    } else {
+                        // try to load PNG from sprite_pngs or assets/sprite_pngs
+                        String pngName = spriteKey + ".png";
+                        boolean loaded = false;
+                        try {
+                            if (Gdx.files.internal("sprite_pngs/" + pngName).exists()) {
+                                com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("sprite_pngs/" + pngName));
+                                createdTextures.add(t);
+                                com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
+                                charTextureRegions.put('P', tr);
+                                charToRegion.put('P', spriteKey);
+                                loaded = true;
+                                Gdx.app.log("RecallDungeon", "Loaded player PNG sprite for P -> sprite_pngs/" + pngName);
+                            } else if (Gdx.files.internal("assets/sprite_pngs/" + pngName).exists()) {
+                                com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("assets/sprite_pngs/" + pngName));
+                                createdTextures.add(t);
+                                com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
+                                charTextureRegions.put('P', tr);
+                                charToRegion.put('P', spriteKey);
+                                loaded = true;
+                                Gdx.app.log("RecallDungeon", "Loaded player PNG sprite for P -> assets/sprite_pngs/" + pngName);
+                            }
+                        } catch (Exception ex) {
+                            Gdx.app.error("RecallDungeon", "Error loading player PNG sprite " + pngName, ex);
+                        }
+                        if (!loaded) {
+                            // fallback: attempt to use atlas region if present, otherwise revert to 'player_default'
+                            if (atlas != null && atlas.findRegion(spriteKey) != null) {
+                                charToRegion.put('P', spriteKey);
+                                Gdx.app.log("RecallDungeon", "Set player sprite mapping to 'P' -> " + spriteKey + " (atlas only)");
+                            } else {
+                                charToRegion.put('P', "player_default");
+                                Gdx.app.log("RecallDungeon", "Player sprite unavailable, falling back to 'player_default' for 'P'");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Gdx.app.error("RecallDungeon", "Error assigning player sprite mapping", ex);
+        }
+        // --- end runtime override ---
 
         mapActor = new com.bapppis.core.gfx.MapActor(chosen, atlas, charToRegion, charTextureRegions);
         // Put the actor inside a container table cell and center it. Don't force fill
@@ -871,5 +925,11 @@ public class RecallDungeon extends ApplicationAdapter {
         stage.dispose();
         if (VisUI.isLoaded())
             VisUI.dispose();
+    }
+
+    // simple name -> key sanitizer: lowercase, replace non-alnum with '_'
+    private static String sanitize(String s) {
+        if (s == null) return "";
+        return s.toLowerCase().replaceAll("[^a-z0-9]+", "_");
     }
 }

@@ -36,9 +36,15 @@ public abstract class Creature {
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
     private Inventory inventory = new Inventory();
+    // Optional sprite key loaded from JSON (e.g. "player_biggles", "monster_goblin")
+    private String sprite;
 
     public Inventory getInventory() {
         return inventory;
+    }
+
+    public String getSprite() {
+        return sprite;
     }
 
     // --- Enums ---

@@ -79,7 +79,7 @@ public class Game {
         dungeon = new Dungeon() {}; // Use anonymous subclass since Dungeon is abstract
         MapParser parser = new MapParser();
         for (int i = -10; i <= 10; i++) {
-            String resourceName = "assets/floors/floor" + i + "/floor" + i + ".txt";
+            String resourceName = "data/floors/floor" + i + "/floor" + i + ".txt";
             try (InputStream is = Game.class.getClassLoader().getResourceAsStream(resourceName)) {
                 if (is == null) {
                     System.out.println("[Dungeon] Floor resource not found: " + resourceName);
