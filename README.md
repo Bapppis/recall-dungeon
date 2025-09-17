@@ -1,5 +1,9 @@
 # Recall Dungeon
 
+![Demo — tiles & sprites](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnJkcW56Ymt6Zml5ZWl0eXZzZmVzc3FkaTE4YzViZ3VqcTlpbzFqdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dfahiJN1ducOisBcLV/giphy.gif)
+
+<sub>GIF embedded from GIPHY — <a href="https://giphy.com/gifs/dfahiJN1ducOisBcLV">via GIPHY</a></sub>
+
 A Java-based roguelike dungeon crawler built with Maven and LibGDX.
 
 Explore the mysterious dungeon where you have awakened. Decide whether you will go further down the dungeon or try to escape to the surface!
