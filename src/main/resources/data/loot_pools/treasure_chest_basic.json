@@ -1,0 +1,9 @@
+{
+  "id": "treasure_chest_basic",
+  "entries": [
+    { "type": "item", "id": "gold_coin", "weight": 50, "countMin": 5, "countMax": 20 },
+    { "type": "item", "id": "healing_potion", "weight": 20, "countMin": 1, "countMax": 2 },
+    { "type": "item", "id": "rare_gem", "weight": 5, "countMin": 1, "countMax": 1 },
+    { "type": "pool", "id": "small_weapon_cache", "weight": 10, "countMin": 1, "countMax": 1 }
+  ]
+}

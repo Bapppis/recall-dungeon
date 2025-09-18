@@ -9,6 +9,12 @@
 *.md text eol=lf
 *.txt text eol=lf
 *.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.properties text eol=lf
+*.conf text eol=lf
+*.ini text eol=lf
+*.gradle.kts text eol=lf
 
 # LibGDX/VisUI asset files that should stay LF
 *.fnt text eol=lf
@@ -27,3 +33,8 @@
 *.mp3 binary
 *.wav binary
 *.jar binary
+*.zip binary
+*.7z binary
+*.ico binary
+*.ttf binary
+*.otf binary

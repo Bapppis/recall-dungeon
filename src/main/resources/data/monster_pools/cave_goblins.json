@@ -1,0 +1,7 @@
+{
+  "id": "cave_goblins",
+  "entries": [
+    { "type": "monster", "id": "goblin_warrior", "weight": 70, "minGroup": 1, "maxGroup": 3 },
+    { "type": "monster", "id": "goblin_shaman", "weight": 10, "minGroup": 1, "maxGroup": 1 }
+  ]
+}
