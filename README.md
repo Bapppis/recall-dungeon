@@ -181,6 +181,11 @@ recall-dungeon/
       │  │  ├─ undead/
       │  │  └─ unknown/
       │  ├─ floors/
+   │  ├─ loot_pools/
+   │  │  ├─ treasure_chest_basic.json
+   │  │  └─ small_weapon_cache.json
+   │  └─ monster_pools/
+   │     └─ cave_goblins.json
       │  ├─ items/
       │  │  ├─ armor/
       │  │  │  └─ armor/
