@@ -91,6 +91,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 
 ## Roadmap
 - Loot pools and monster pools for randomized yet balanced and fun gameplay experience.
+- Many player character choices who each feel different, fun and balanced within their own play-styles. 
 - Sprite variety for environment.
 - Gear, armor and weapons would affect how the player looks.
 - Animations for characters and environment.
@@ -108,6 +109,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 ## Wishlist
 - Interesting story/lore.
 - Balanced and fun gameplay.
+- A huge compendium of armor, weapons, items and monsters.
 - For the game to proudly call itself a roguelike dungeon crawler.
 - For the game to use mostly self-made sprites.
 
