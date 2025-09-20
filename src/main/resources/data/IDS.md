@@ -72,15 +72,20 @@ Notes
 #### Armor (7000-7249)
  - 7000 — Armor of Water — items/armor/armor/Armor of Water.json
  - 7001 — Armor of Bones — items/armor/armor/Armor of Bones.json
+ - 7002 — Broken Steel Armor — items/armor/armor/Broken Steel Armor.json
+ - 7003 — Leather Armor — items/armor/armor/Leather Armor.json
 
 #### Helmets (7250-7499)
  - 7250 — Crusader Helmet — items/armor/helmets/Crusader Helmet.json
+ - 7251 — Green Hood — items/armor/helmets/Green Hood.json
 
 #### Legwear (7500-7749)
  - 7500 — Legs of Speed — items/armor/legwear/Legs of Speed.json
+ - 7501 — Leather Leggings — items/armor/legwear/Leather Leggings.json
 
 #### Shields (7750-7999)
  - 7750 — Tower Shield — items/armor/shields/Tower Shield.json
+ - 7751 — Heater Shield — items/armor/shields/Heater Shield.json
 
 ### Consumables(8000-8999)
 - [none indexed yet]
@@ -96,10 +101,12 @@ Notes
 - [none indexed yet]
 
 #### Ranged Weapons (9600-9799)
-- [none indexed yet]
+ - 9600 — Old Bow — items/weapons/slash weapons/Old Bow.json
 
 #### Slash Weapons (9800-9999)
  - 9800 — Falchion of Doom — items/weapons/slash weapons/Falchion of Doom.json
+ - 9801 — Rusty Iron Sword — items/weapons/slash weapons/Rusty Iron Sword.json
+ - 9802 — Parrying Dagger — items/weapons/slash weapons/Parrying Dagger.json
 
 ## Maintenance tips
 - Enforce unique ids (consider an automated test).
