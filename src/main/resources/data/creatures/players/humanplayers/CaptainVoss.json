@@ -1,8 +1,10 @@
 {
   "id": 5001,
   "name": "Captain Aldric Voss",
+  "description": "Captain Voss, a seasoned warrior. Determined to find home and protect his homeland.",
   "visionRange": 2,
   "level": 0,
+  "xp": 0,
   "baseHp": 5,
   "hpLvlBonus": 8,
   "size": "MEDIUM",
@@ -16,7 +18,13 @@
     "CHARISMA": 10,
     "LUCK": 1
   },
-  "description": "Captain Voss, a seasoned warrior. Determined to find home and protect his homeland.",
   "properties": [4001],
-  "sprite": "player_voss"
+  "sprite": "player_voss",
+
+  "inventory": [9803, 7000],
+  "armor": 7002,
+  "helmet": null,
+  "legwear": 7501,
+  "weapon": 9801,
+  "offhand": 7751
 }

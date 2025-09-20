@@ -1,0 +1,11 @@
+{
+  "id": 7501,
+  "name": "Leather Leggings",
+  "description": "Leg armor made of flexible leather, better than nothing.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "LEGWEAR",
+  "resistances": {
+    "SLASHING": -5
+  },
+  "rarity": "COMMON"
+}

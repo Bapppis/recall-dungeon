@@ -332,7 +332,7 @@ public abstract class Creature {
         if (this.getEquipped(EquipmentSlot.WEAPON) != null
                 && this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
             Equipment weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
-            if (weapon.isVersatile()) {
+            if (weapon.isFinesse()) {
                 int statBonus = Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
                 int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
                 int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
@@ -432,12 +432,46 @@ public abstract class Creature {
 
     public void unequipItem(EquipmentSlot slot) {
         Item item = equipment.remove(slot);
-        if (item != null) {
-            removeItemEffects(item);
-            // Try to add back to inventory
+        if (item == null) return;
+
+        // If the item is two-handed, it may occupy both WEAPON and OFFHAND slots.
+        // Remove any other slot that references the same instance to avoid leaving a ghost.
+        try {
+            if (item.isTwoHanded()) {
+                EquipmentSlot other = (slot == EquipmentSlot.WEAPON) ? EquipmentSlot.OFFHAND : EquipmentSlot.WEAPON;
+                Item otherItem = equipment.get(other);
+                if (otherItem != null && otherItem == item) {
+                    // Remove the other slot without triggering effects/add again
+                    equipment.remove(other);
+                }
+            }
+        } catch (Exception e) {
+            // Defensive: if item doesn't implement isTwoHanded or similar, ignore
+        }
+
+        // Remove effects once
+        removeItemEffects(item);
+
+        // Try to add back to inventory, but only if there's not already an item with the same id
+        boolean alreadyInInventory = false;
+        try {
+            int id = item.getId();
+            // Check each inventory container for matching id
+            for (Item it : getInventory().getWeapons()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            if (!alreadyInInventory) for (Item it : getInventory().getOffhands()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            if (!alreadyInInventory) for (Item it : getInventory().getHelmets()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            if (!alreadyInInventory) for (Item it : getInventory().getArmors()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            if (!alreadyInInventory) for (Item it : getInventory().getLegwear()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            if (!alreadyInInventory) for (Item it : getInventory().getConsumables()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            if (!alreadyInInventory) for (Item it : getInventory().getMisc()) if (it.getId() == id) { alreadyInInventory = true; break; }
+        } catch (Exception e) {
+            // If anything goes wrong checking ids, fall back to allowing add
+            alreadyInInventory = false;
+        }
+
+        if (!alreadyInInventory) {
             boolean added = getInventory().addItem(item);
             if (!added) {
-                // Optionally: print or log that inventory is full
                 System.out.println("Inventory full! Could not add " + item.getName() + " back to inventory.");
             }
         }

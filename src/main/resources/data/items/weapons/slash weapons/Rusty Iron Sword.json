@@ -1,0 +1,11 @@
+{
+  "id": 9801,
+  "name": "Rusty Iron Sword",
+  "description": "A rusty iron sword, worn and weathered from years of neglect.",
+  "weaponClass": "MELEE",
+  "damageType": "SLASHING",
+  "physicalDamageDice": "2d2",
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
+  "rarity": "COMMON"
+}

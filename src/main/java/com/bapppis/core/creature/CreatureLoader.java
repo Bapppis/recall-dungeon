@@ -2,6 +2,8 @@ package com.bapppis.core.creature;
 
 import com.bapppis.core.property.PropertyManager;
 import com.bapppis.core.property.Property;
+import com.bapppis.core.item.Item;
+import com.bapppis.core.item.ItemLoader;
 import com.google.gson.Gson;
 import com.bapppis.core.creature.player.Player;
 import io.github.classgraph.ClassGraph;
@@ -27,6 +29,13 @@ public class CreatureLoader {
         playerMap.clear();
         playerIdMap.clear();
 
+        // Ensure items are loaded first so starting inventory/equipment ids resolve
+        try {
+            com.bapppis.core.item.ItemLoader.loadItems();
+        } catch (Exception e) {
+            // ignore if items already loaded or loading fails here
+        }
+
         Gson gson = new Gson();
         try (ScanResult scanResult = new ClassGraph()
                 .acceptPaths("data/creatures") // Scan all creatures and subfolders (players, enemies, etc.)
@@ -35,11 +44,29 @@ public class CreatureLoader {
                 if (resource.getPath().endsWith(".json")) {
                     try (Reader reader = new InputStreamReader(resource.open())) {
                         Creature creature;
-                        // Try to load as Player, fallback to Creature
+                        // Read the JSON into a JsonObject first so we can strip fields that would
+                        // conflict with existing types (for example: inventory is an array in
+                        // JSON but Creature.inventory is an Inventory object). We'll remove
+                        // the 'inventory' and equipment slot fields before letting Gson map
+                        // the JSON to the Creature/Player class.
+                        com.google.gson.JsonElement parsed = gson.fromJson(reader, com.google.gson.JsonElement.class);
+                        if (parsed == null || !parsed.isJsonObject()) {
+                            continue;
+                        }
+                        com.google.gson.JsonObject jsonObj = parsed.getAsJsonObject();
+                        // Remove starting-item related fields so Gson won't try to map them
+                        jsonObj.remove("inventory");
+                        jsonObj.remove("helmet");
+                        jsonObj.remove("armor");
+                        jsonObj.remove("legwear");
+                        jsonObj.remove("weapon");
+                        jsonObj.remove("offhand");
+
+                        // Try to load as Player, fallback to Enemy
                         if (resource.getPath().contains("players")) {
-                            creature = gson.fromJson(reader, Player.class);
+                            creature = gson.fromJson(jsonObj, Player.class);
                         } else {
-                            creature = gson.fromJson(reader, Enemy.class);
+                            creature = gson.fromJson(jsonObj, Enemy.class);
                         }
                         // Load properties by ID array from JSON
                         if (creature != null) {
@@ -105,6 +132,8 @@ public class CreatureLoader {
                                     }
                                 }
                             }
+                            // Load starting inventory and equipment slots from JSON
+                            applyStartingItemsFromJson(resource.getPath(), gson, creature);
                             // Apply any property effects that modify stats or other attributes
                             int baseHp = creature.getBaseHp();
                             creature.setMaxHp(baseHp); // Reset max HP to base before applying properties
@@ -148,6 +177,51 @@ public class CreatureLoader {
                     }
                 }
             }
+        }
+    }
+
+    private static void applyStartingItemsFromJson(String resourcePath, Gson gson, Creature creature) {
+        try (Reader reader = new InputStreamReader(
+                CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
+            com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);
+            if (obj == null) return;
+            // Inventory array
+            if (obj.has("inventory") && obj.get("inventory").isJsonArray()) {
+                for (com.google.gson.JsonElement el : obj.getAsJsonArray("inventory")) {
+                    try {
+                        int itemId = el.getAsInt();
+                        com.bapppis.core.item.Item template = ItemLoader.getItemById(itemId);
+                        if (template != null) {
+                            // Deep-copy the template so each creature gets its own instance
+                            com.bapppis.core.item.Item copy = gson.fromJson(gson.toJson(template), template.getClass());
+                            creature.getInventory().addItem(copy);
+                        }
+                    } catch (Exception e) {
+                        // ignore invalid item entries
+                    }
+                }
+            }
+
+            // Equipment slots: helmet, armor, legwear, weapon, offhand
+            String[] slots = new String[] {"helmet", "armor", "legwear", "weapon", "offhand"};
+            for (String slotName : slots) {
+                if (obj.has(slotName) && obj.get(slotName).isJsonPrimitive()) {
+                    try {
+                        int itemId = obj.get(slotName).getAsInt();
+                        com.bapppis.core.item.Item template = ItemLoader.getItemById(itemId);
+                        if (template != null) {
+                            com.bapppis.core.item.Item copy = gson.fromJson(gson.toJson(template), template.getClass());
+                            // Add to inventory first (equipItem will remove it from inventory)
+                            creature.getInventory().addItem(copy);
+                            creature.equipItem(copy);
+                        }
+                    } catch (Exception e) {
+                        // ignore invalid slot entries
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // ignore
         }
     }
 

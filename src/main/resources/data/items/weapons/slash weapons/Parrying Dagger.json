@@ -1,0 +1,18 @@
+{
+  "id": 9802,
+  "name": "Parrying Dagger",
+  "description": "Not really meant for attacking, you are not even sure how you got it.",
+  "weaponClass": "MELEE",
+  "damageType": "SLASHING",
+  "physicalDamageDice": "1d3",
+  "finesse": true,
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
+  "stats": {
+    "DEXTERITY": 1
+  },
+  "resistances": {
+    "SLASHING": -10
+  },
+  "rarity": "COMMON"
+}

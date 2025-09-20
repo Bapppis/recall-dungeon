@@ -1,0 +1,15 @@
+{
+  "id": 7003,
+  "name": "Leather Armor",
+  "description": "Light and flexible armor made from hardened leather.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "ARMOR",
+  "stats": {
+    "DEXTERITY": 1
+  },
+  "resistances": {
+    "BLUDGEONING": -5,
+    "SLASHING": -5
+  },
+  "rarity": "COMMON"
+}

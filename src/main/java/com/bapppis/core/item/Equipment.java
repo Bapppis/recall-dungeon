@@ -31,6 +31,7 @@ public class Equipment implements Item {
     private Rarity rarity;
     private Map<String, Integer> stats;
     private Map<String, Integer> resistances;
+    private boolean finesse = false;
     // Indicates if the weapon is versatile (can be used one- or two-handed)
     private boolean versatile = false;
 
@@ -66,6 +67,15 @@ public class Equipment implements Item {
     public void setWeaponClass(WeaponClass weaponClass) {
         this.weaponClass = weaponClass;
     }
+
+    public boolean isFinesse() {
+        return finesse;
+    }
+
+    public void setFinesse(boolean finesse) {
+        this.finesse = finesse;
+    }
+
     public boolean isVersatile() {
         return versatile;
     }
