@@ -20,7 +20,7 @@
   "properties": [2000, 4000, 4002],
   "sprite": "player_biggles",
 
-  "inventory": [9802],
+  "inventory": [8000, 9802],
   "helmet": 7251,
   "armor": 7003,
   "legwear": null,

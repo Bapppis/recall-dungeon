@@ -6,6 +6,8 @@ import java.util.Map;
 public class Equipment implements Item {
     private String physicalDamageDice;
     private String magicDamageDice;
+    // Optional healing dice for consumables (e.g. "2d4")
+    private String healingDice;
 
     public String getPhysicalDamageDice() {
         return physicalDamageDice;
@@ -22,6 +24,8 @@ public class Equipment implements Item {
     public void setMagicDamageDice(String dice) {
         this.magicDamageDice = dice;
     }
+    public String getHealingDice() { return healingDice; }
+    public void setHealingDice(String dice) { this.healingDice = dice; }
     private int id;
     private String name;
     private String description;
@@ -108,7 +112,22 @@ public class Equipment implements Item {
     public void setResistances(Map<String, Integer> resistances) { this.resistances = resistances; }
 
     @Override
-    public void onApply(Creature creature) {}
+    public void onApply(Creature creature) {
+        // If this item is a consumable with a healingDice field, apply healing
+        try {
+            if (this.itemType == ItemType.CONSUMABLE && this.healingDice != null && !this.healingDice.isEmpty()) {
+                int heal = Creature.rollDice(this.healingDice);
+                if (heal > 0) {
+                    int newHp = Math.min(creature.getMaxHp(), creature.getCurrentHp() + heal);
+                    creature.setCurrentHp(newHp);
+                    System.out.println("Applied consumable '" + this.name + "' to " + creature.getName() + ", healed " + heal + " HP.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error applying consumable: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onRemove(Creature creature) {}
 

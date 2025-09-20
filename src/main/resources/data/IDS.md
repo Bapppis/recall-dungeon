@@ -87,8 +87,9 @@ Notes
  - 7750 — Tower Shield — items/armor/shields/Tower Shield.json
  - 7751 — Heater Shield — items/armor/shields/Heater Shield.json
 
-### Consumables(8000-8999)
-- [none indexed yet]
+### Consumables (8000-8999)
+#### Potions (8000-8099)
+- 8000 — Minor Healing Potion — items/consumables/potions/Minor Healing Potion.json
 
 ### Weapons (9000-9999)
 #### Blunt Weapons (9000-9199)
