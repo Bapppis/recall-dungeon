@@ -1,0 +1,12 @@
+{
+  "id": 9803,
+  "name": "Old Bow",
+  "description": "The bow is past its prime, hopefully it won't break just yet.",
+  "weaponClass": "RANGED",
+  "damageType": "PIERCING",
+  "physicalDamageDice": "1d6",
+  "twoHanded": true,
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
+  "rarity": "COMMON"
+}

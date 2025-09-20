@@ -49,9 +49,9 @@ public class RecallDungeon extends ApplicationAdapter {
 
         Gdx.input.setInputProcessor(stage);
         // Load properties and creatures once at startup so selection UI has data
+        ItemLoader.loadItems();
         PropertyManager.loadProperties();
         CreatureLoader.loadCreatures();
-        ItemLoader.loadItems();
 
         showMainMenu();
     }

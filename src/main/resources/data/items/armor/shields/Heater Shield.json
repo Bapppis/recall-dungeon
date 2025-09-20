@@ -1,0 +1,13 @@
+{
+  "id": 7751,
+  "name": "Heater Shield",
+  "description": "A small shield that provides decent protection while allowing for greater mobility.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "OFFHAND",
+  "resistances": {
+    "BLUDGEONING": -10,
+    "PIERCING": -5,
+    "SLASHING": -15
+  },
+  "rarity": "COMMON"
+}

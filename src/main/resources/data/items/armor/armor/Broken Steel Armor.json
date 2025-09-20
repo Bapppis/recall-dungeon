@@ -1,0 +1,15 @@
+{
+  "id": 7002,
+  "name": "Broken Steel Armor",
+  "description": "A battle-worn armor that was once beautiful and pristine, now your life depends on it.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "ARMOR",
+  "stats": {
+    "DEXTERITY": -1
+  },
+  "resistances": {
+    "BLUDGEONING": -10,
+    "SLASHING": -15
+  },
+  "rarity": "COMMON"
+}

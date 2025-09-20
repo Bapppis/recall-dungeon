@@ -265,10 +265,10 @@ class MoveCommand implements Command {
         }
 
     player.setPosition(target);
-    System.out.println("You move " + dir + " to " + target);
+    // System.out.println("You move " + dir + " to " + target);
     // Reveal tiles around the player after moving
     floor.revealTilesWithVision(target.getX(), target.getY(), player.getVisionRange());
-    MapPrinter.printWithPlayer(floor, player);
+    // MapPrinter.printWithPlayer(floor, player);
     }
 }
 
