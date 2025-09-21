@@ -1,0 +1,8 @@
+{
+  "id": 8002,
+  "name": "Lesser Blue Healing Potion",
+  "description": "Many think blue healing potions a myth, but they do exist, this one is diluted but still extremely effective.",
+  "healingDice": "4d8+4",
+  "itemType": "CONSUMABLE",
+  "rarity": "RARE"
+}

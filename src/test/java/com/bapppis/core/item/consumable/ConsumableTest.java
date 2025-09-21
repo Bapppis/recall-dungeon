@@ -1,5 +1,5 @@
 package com.bapppis.core.item.consumable;
 
-public class CunsumableTest {
+public class ConsumableTest {
 
 }

@@ -100,19 +100,27 @@ public abstract class Creature {
 
     // --- Dice utility ---
     /**
-     * Rolls dice in NdM format, e.g. "2d6" rolls two 6-sided dice.
+     * Rolls dice in NdM format, optionally with a modifier like +K or -K.
+     * Examples: "2d6", "3d4+2", "1d8-1".
      * Returns 0 if input is invalid.
      */
     public static int rollDice(String dice) {
-        if (dice == null || !dice.matches("\\d+d\\d+")) return 0;
-        String[] parts = dice.toLowerCase().split("d");
-        int num = Integer.parseInt(parts[0]);
-        int sides = Integer.parseInt(parts[1]);
+        if (dice == null) return 0;
+        // regex captures: group1=num, group2=sides, group3=optional sign+modifier (e.g. +2 or -1)
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("^(\\d+)d(\\d+)([+-]\\d+)?$");
+        java.util.regex.Matcher m = p.matcher(dice.trim());
+        if (!m.matches()) return 0;
+        int num = Integer.parseInt(m.group(1));
+        int sides = Integer.parseInt(m.group(2));
+        int modifier = 0;
+        if (m.group(3) != null) {
+            modifier = Integer.parseInt(m.group(3));
+        }
         int total = 0;
         for (int i = 0; i < num; i++) {
             total += ThreadLocalRandom.current().nextInt(1, sides + 1);
         }
-        return total;
+        return total + modifier;
     }
 
     // --- Constructor ---
