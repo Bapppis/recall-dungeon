@@ -1,0 +1,9 @@
+{
+  "id": "10000",
+  "name": "Common Melee Weapons",
+  "entries": [
+    { "type": "item", "id": "rusty_dagger", "weight": 60, "countMin": 1, "countMax": 1, "useItemRarity": true },
+    { "type": "item", "id": "short_sword", "weight": 30, "countMin": 1, "countMax": 1 },
+    { "type": "item", "id": "broken_spear", "weight": 10, "countMin": 1, "countMax": 1 }
+  ]
+}

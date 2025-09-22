@@ -5,13 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import com.bapppis.core.item.Item;
+import com.bapppis.core.item.ItemLoader;
 
 public class LootManager {
     private final Map<String, LootPool> pools = new HashMap<>();
     private final Random rng = new Random();
 
     public void registerPool(LootPool pool) {
-        if (pool != null && pool.id != null) pools.put(pool.id, pool);
+        if (pool == null) return;
+        if (pool.id != null) pools.put(pool.id, pool);
+        if (pool.name != null && !pool.name.isEmpty()) {
+            pools.put(pool.name.toLowerCase(), pool);
+        }
     }
 
     public void registerAll(List<LootPool> list) {
@@ -47,7 +53,9 @@ public class LootManager {
         int count = min + (max > min ? rng.nextInt(max - min + 1) : 0);
 
         if ("item".equalsIgnoreCase(chosen.type)) {
-            for (int i=0;i<count;i++) out.add(new Spawn("item", chosen.id));
+            // Allow entries to reference an item by id or by name (fallback to name)
+            String ref = chosen.id != null ? chosen.id : chosen.name;
+            for (int i=0;i<count;i++) out.add(new Spawn("item", ref));
         } else if ("monster".equalsIgnoreCase(chosen.type)) {
             int groupMin = chosen.minGroup != null ? chosen.minGroup : 1;
             int groupMax = chosen.maxGroup != null ? chosen.maxGroup : groupMin;
@@ -55,7 +63,9 @@ public class LootManager {
             for (int i=0;i<group;i++) out.add(new Spawn("monster", chosen.id));
         } else if ("pool".equalsIgnoreCase(chosen.type)) {
             // nested pool: sample referenced pool recursively
-            out.addAll(samplePool(chosen.id));
+            // Allow pool reference by id or by name (we register pool names lowercased)
+            String poolRef = chosen.id != null ? chosen.id : (chosen.name != null ? chosen.name.toLowerCase() : null);
+            if (poolRef != null) out.addAll(samplePool(poolRef));
         }
 
         return out;
@@ -64,12 +74,6 @@ public class LootManager {
     private int effectiveWeight(LootPool.Entry e) {
         if (e == null) return 0;
         if (e.weight != null) return Math.max(0, e.weight);
-        if (Boolean.TRUE.equals(e.useItemRarity)) {
-            // Simple mapping: common=100, uncommon=30, rare=7, legendary=1
-            // Here we don't have access to Item objects; in the real game, lookup item rarity and map it.
-            // Fallback weight:
-            return 10;
-        }
         return 1; // default minimal weight
     }
 
@@ -77,5 +81,37 @@ public class LootManager {
         public final String type;
         public final String id;
         public Spawn(String type, String id) { this.type = type; this.id = id; }
+    }
+
+    /**
+     * Resolve a spawn reference (string) to an Item if possible.
+     * Tries to parse numeric id first, then falls back to name lookup.
+     */
+    private Item resolveSpawnToItem(String ref) {
+        if (ref == null) return null;
+        // try numeric id
+        try {
+            int iid = Integer.parseInt(ref);
+            return ItemLoader.getItemById(iid);
+        } catch (NumberFormatException ex) {
+            // not numeric — try by name
+            return ItemLoader.getItemByName(ref);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Sample a pool and return resolved Items (skips unresolved spawns).
+     */
+    public List<Item> sampleItemsFromPool(String poolId) {
+        List<Item> out = new ArrayList<>();
+        List<Spawn> spawns = samplePool(poolId);
+        for (Spawn s : spawns) {
+            if (!"item".equalsIgnoreCase(s.type)) continue;
+            Item it = resolveSpawnToItem(s.id);
+            if (it != null) out.add(it);
+        }
+        return out;
     }
 }
