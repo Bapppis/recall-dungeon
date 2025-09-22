@@ -104,8 +104,8 @@ Notes
 - 9803 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
 
 #### Slash Weapons (9800-9999)
-- 9800 — Falchion of Doom — data/items/weapons/slash weapons/Falchion of Doom.json
-- 9802 — Parrying Dagger — data/items/weapons/slash weapons/Parrying Dagger.json
+- 9800 — Falchion of Doom — data/items/weapons/melee weapons/slash weapons/Falchion of Doom.json
+- 9802 — Parrying Dagger — data/items/weapons/melee weapons/slash weapons/Parrying Dagger.json
 
 ### Loot Pools (10000-10999)
 - [none indexed yet]
