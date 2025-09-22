@@ -15,30 +15,30 @@ Notes
 - [none indexed yet]
 
 ### Debuff (2000–2999)
-- 2000 — Afraid — properties/debuff/Afraid.json
+- 2000 — Afraid — data/properties/debuff/Afraid.json
 
 ### Immunity (3000–3999)
-- 3000 — Afraid Immunity — properties/immunity/AfraidImmunity.json
-- 3001 — Bleed Immunity — properties/immunity/BleedImmunity.json
-- 3002 — Blind Immunity — properties/immunity/BlindImmunity.json
-- 3003 — Burning Immunity — properties/immunity/BurningImmunity.json
-- 3004 — Concussion Immunity — properties/immunity/ConcussionImmunity.json
-- 3005 — Corrosion Immunity — properties/immunity/CorrosionImmunity.json
-- 3006 — Exposed Immunity — properties/immunity/ExposedImmunity.json
-- 3007 — Freeze Immunity — properties/immunity/FreezeImmunity.json
-- 3008 — InstaKill Immunity — properties/immunity/InstaKillImmunity.json
-- 3009 — Jolt Immunity — properties/immunity/JoltImmunity.json
-- 3010 — Silence Immunity — properties/immunity/SilenceImmunity.json
+- 3000 — Afraid Immunity — data/properties/immunity/AfraidImmunity.json
+- 3001 — Bleed Immunity — data/properties/immunity/BleedImmunity.json
+- 3002 — Blind Immunity — data/properties/immunity/BlindImmunity.json
+- 3003 — Burning Immunity — data/properties/immunity/BurningImmunity.json
+- 3004 — Concussion Immunity — data/properties/immunity/ConcussionImmunity.json
+- 3005 — Corrosion Immunity — data/properties/immunity/CorrosionImmunity.json
+- 3006 — Exposed Immunity — data/properties/immunity/ExposedImmunity.json
+- 3007 — Freeze Immunity — data/properties/immunity/FreezeImmunity.json
+- 3008 — InstaKill Immunity — data/properties/immunity/InstaKillImmunity.json
+- 3009 — Jolt Immunity — data/properties/immunity/JoltImmunity.json
+- 3010 — Silence Immunity — data/properties/immunity/SilenceImmunity.json
 
 ### Trait (4000–4999)
-- 4000 — Coward — properties/trait/Coward.json
-- 4001 — Human Adaptability — properties/trait/HumanAdaptability.json
-- 4002 — Darksight — properties/trait/Darksight.json
+- 4000 — Coward — data/properties/trait/Coward.json
+- 4001 — Human Adaptability — data/properties/trait/HumanAdaptability.json
+- 4002 — Darksight — data/properties/trait/Darksight.json
 
 ## Creatures (5000-6999)
 ### Players (5000-5499)
-- 5001 — Captain Aldric Voss — creatures/players/humanplayers/CaptainVoss.json
-- 5000 — Biggles The Unlucky — creatures/players/humanplayers/BigglesTheUnlucky.json
+- 5001 — Captain Aldric Voss — data/creatures/players/humanplayers/CaptainVoss.json
+- 5000 — Biggles The Unlucky — data/creatures/players/humanplayers/BigglesTheUnlucky.json
 
 ### Neutrals (5500-5999)
 
@@ -56,7 +56,7 @@ Notes
 - [none indexed yet]
 
 #### Humanoids (6400-6499)
-- 6400 — Goblin — creatures/humanoids/goblinoid/Goblin.json
+- 6400 — Goblin — data/creatures/humanoids/goblinoid/Goblin.json
 
 #### Plants (6500-6599)
 - [none indexed yet]
@@ -70,25 +70,25 @@ Notes
 ## Items (7000-9999)
 ### Armor (7000-7999)
 #### Armor (7000-7249)
- - 7000 — Armor of Water — items/armor/armor/Armor of Water.json
- - 7001 — Armor of Bones — items/armor/armor/Armor of Bones.json
+- 7000 — Armor of Water — data/items/armor/armor/Armor of Water.json
+- 7001 — Armor of Bones — data/items/armor/armor/Armor of Bones.json
 
 #### Helmets (7250-7499)
- - 7250 — Crusader Helmet — items/armor/helmets/Crusader Helmet.json
+- 7250 — Crusader Helmet — data/items/armor/helmets/Crusader Helmet.json
 
 #### Legwear (7500-7749)
- - 7500 — Legs of Speed — items/armor/legwear/Legs of Speed.json
+- 7500 — Legs of Speed — data/items/armor/legwear/Legs of Speed.json
 
 #### Shields (7750-7999)
- - 7750 — Tower Shield — items/armor/shields/Tower Shield.json
+- 7750 — Tower Shield — data/items/armor/shields/Tower Shield.json
 
 ### Consumables(8000-8999)
 - [none indexed yet]
- - 8000 — Minor Healing Potion — items/consumables/potions/Minor Healing Potion.json
- - 8001 — Healing Potion — items/consumables/potions/Healing Potion.json
- - 8002 — Lesser Blue Healing Potion — items/consumables/potions/Lesser Blue Healing Potion.json
- - 8003 — Blue Healing Potion — items/consumables/potions/Blue Healing Potion.json
- - 8004 — Perfect Healing Potion — items/consumables/potions/Perfect Healing Potion.json
+- 8000 — Minor Healing Potion — data/items/consumables/potions/Minor Healing Potion.json
+- 8001 — Healing Potion — data/items/consumables/potions/Healing Potion.json
+- 8002 — Lesser Blue Healing Potion — data/items/consumables/potions/Lesser Blue Healing Potion.json
+- 8003 — Blue Healing Potion — data/items/consumables/potions/Blue Healing Potion.json
+- 8004 — Perfect Healing Potion — data/items/consumables/potions/Perfect Healing Potion.json
 
 ### Weapons (9000-9999)
 #### Blunt Weapons (9000-9199)
@@ -101,14 +101,18 @@ Notes
 - [none indexed yet]
 
 #### Ranged Weapons (9600-9799)
-- 9803 — Old Bow — items/weapons/ranged weapons/Old Bow.json
+- 9803 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
 
 #### Slash Weapons (9800-9999)
-- 9800 — Falchion of Doom — items/weapons/slash weapons/Falchion of Doom.json
-- 9802 — Falchion of Doom — items/weapons/slash weapons/Parrying Dagger.json
+- 9800 — Falchion of Doom — data/items/weapons/slash weapons/Falchion of Doom.json
+- 9802 — Parrying Dagger — data/items/weapons/slash weapons/Parrying Dagger.json
 
 ### Loot Pools (10000-10999)
 - [none indexed yet]
+- 10000 — Common Melee Weapons — data/loot_pools/Common Melee Weapons.json
+- 10001 — Common Weapons — data/loot_pools/Common Weapons.json
+- 10002 — Common Potions — data/loot_pools/Common Potions.json
+- 10003 — Common Treasure Chest — data/loot_pools/Common Treasure Chest.json
 
 ## Maintenance tips
 - Enforce unique ids (consider an automated test).
