@@ -14,6 +14,8 @@ public class LootPool {
         public String id;   // referenced id
         public String name; // optional: referenced item name (if you prefer name lookup)
         public Integer weight; // optional explicit weight
+        public Boolean guaranteed; // if true, always include this entry when sampling the pool
+        public Double chance; // optional independent chance (0.0 - 1.0) to include this entry
         public Integer countMin;
         public Integer countMax;
         // monster-specific
