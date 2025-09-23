@@ -1,9 +1,9 @@
 {
-  "id": 9801,
-  "name": "Rusty Iron Sword",
-  "description": "A rusty iron sword, worn and weathered from years of neglect.",
+  "id": 9400,
+  "name": "Rusty Iron Spear",
+  "description": "Once a proud weapon, now just a rusty relic.",
   "weaponClass": "MELEE",
-  "damageType": "SLASHING",
+  "damageType": "PIERCING",
   "physicalDamageDice": "2d2",
   "isVersatile": true,
   "itemType": "WEAPON",

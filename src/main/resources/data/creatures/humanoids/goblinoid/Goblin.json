@@ -3,12 +3,14 @@
   "name": "Goblin",
   "description": "A small and cowardly goblin. Are you sure you want to fight it?",
   "visionRange": 1,
-  "xp": 10,
+  "xp": 4,
   "baseHp": 5,
   "hpLvlBonus": 4,
   "defaultDamageType": "SLASHING",
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "properties": [4000],
-  "sprite": "monster_goblin"
+  "sprite": "monster_goblin",
+
+  "weapon": 9801
 }

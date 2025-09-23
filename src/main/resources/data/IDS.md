@@ -44,7 +44,7 @@ Notes
 
 ### Enemies (6000-6999)
 #### Beasts (6000-6099)
-- [none indexed yet]
+- 6000 — Dark Hound — data/creatures/beasts/Dark Hound.json
 
 #### Constructs (6100-6199)
 - [none indexed yet]
@@ -62,7 +62,8 @@ Notes
 - [none indexed yet]
 
 #### Undead (6600-6699)
-- [none indexed yet]
+- 6600 — Skeleton Spearman — data/creatures/undead/Skeleton Spearman.json
+- 6601 — Skeleton Spearman — data/creatures/undead/Skeleton Spearman.json
 
 #### Unknown (6700-6799)
 - [none indexed yet]
@@ -98,17 +99,17 @@ Notes
 - [none indexed yet]
 
 #### Piercing Weapons (9400-9599)
-- [none indexed yet]
+- 9400 — Rusty Iron Spear — data/items/weapons/melee weapons/piercing weapons/Rusty Iron Spear.json
 
 #### Ranged Weapons (9600-9799)
 - 9803 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
 
 #### Slash Weapons (9800-9999)
 - 9800 — Falchion of Doom — data/items/weapons/melee weapons/slash weapons/Falchion of Doom.json
+- 9801 — Rusty Iron Sword — data/items/weapons/melee weapons/slash weapons/Rusty Iron Sword.json
 - 9802 — Parrying Dagger — data/items/weapons/melee weapons/slash weapons/Parrying Dagger.json
 
 ### Loot Pools (10000-10999)
-- [none indexed yet]
 - 10000 — Common Melee Weapons — data/loot_pools/Common Melee Weapons.json
 - 10001 — Common Weapons — data/loot_pools/Common Weapons.json
 - 10002 — Common Potions — data/loot_pools/Common Potions.json
