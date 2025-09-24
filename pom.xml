@@ -84,6 +84,10 @@
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <!-- Print test System.out/err to console instead of redirecting to files -->
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <!-- Keep a short summary in console -->
+                    <printSummary>true</printSummary>
                 </configuration>
             </plugin>
         </plugins>

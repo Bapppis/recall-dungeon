@@ -1,11 +1,20 @@
 package com.bapppis.core.item;
 
+import com.bapppis.core.creature.Attack;
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.util.Dice;
+
+import java.util.List;
 import java.util.Map;
 
 public class Equipment implements Item {
     private String physicalDamageDice;
     private String magicDamageDice;
+    private List<Attack> attacks;
+
+    public List<Attack> getAttacks() {
+        return attacks;
+    }
 
     public String getPhysicalDamageDice() {
         return physicalDamageDice;
@@ -22,6 +31,7 @@ public class Equipment implements Item {
     public void setMagicDamageDice(String dice) {
         this.magicDamageDice = dice;
     }
+
     private String healingDice;
 
     public String getHealingDice() {
@@ -31,6 +41,7 @@ public class Equipment implements Item {
     public void setHealingDice(String healingDice) {
         this.healingDice = healingDice;
     }
+
     private int id;
     private String name;
     private String description;
@@ -88,60 +99,154 @@ public class Equipment implements Item {
     public boolean isVersatile() {
         return versatile;
     }
+
     public void setVersatile(boolean versatile) {
         this.versatile = versatile;
     }
-    public Equipment() {}
+
+    public Equipment() {
+    }
 
     @Override
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
+
     @Override
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
+
     @Override
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
+
     @Override
-    public ItemType getType() { return itemType; }
+    public ItemType getType() {
+        return itemType;
+    }
+
     @Override
-    public EquipmentSlot getSlot() { return equipmentSlot; }
+    public EquipmentSlot getSlot() {
+        return equipmentSlot;
+    }
+
     @Override
-    public boolean isTwoHanded() { return twoHanded; }
+    public boolean isTwoHanded() {
+        return twoHanded;
+    }
+
     @Override
-    public void setSlot(EquipmentSlot slot) { this.equipmentSlot = slot; }
+    public void setSlot(EquipmentSlot slot) {
+        this.equipmentSlot = slot;
+    }
+
     @Override
-    public void setTwoHanded(boolean twoHanded) { this.twoHanded = twoHanded; }
-    public Rarity getRarity() { return rarity; }
-    public void setRarity(Rarity rarity) { this.rarity = rarity; }
-    public Map<String, Integer> getStats() { return stats; }
-    public void setStats(Map<String, Integer> stats) { this.stats = stats; }
-    public Map<String, Integer> getResistances() { return resistances; }
-    public void setResistances(Map<String, Integer> resistances) { this.resistances = resistances; }
+    public void setTwoHanded(boolean twoHanded) {
+        this.twoHanded = twoHanded;
+    }
+
+    public Rarity getRarity() {
+        return rarity;
+    }
+
+    public void setRarity(Rarity rarity) {
+        this.rarity = rarity;
+    }
+
+    public Map<String, Integer> getStats() {
+        return stats;
+    }
+
+    // Optional defensive/offensive chance modifiers applied while equipped
+    private int crit = 0; // Crit chance between 0 and 100
+    private int dodge = 0; // Dodge chance between 0 and 100
+    private int block = 0; // Block chance between 0 and 100
+
+    public int getCrit() {
+        return crit;
+    }
+
+    public void setCrit(int crit) {
+        this.crit = Math.max(0, Math.min(100, crit));
+    }
+
+    public int getDodge() {
+        return dodge;
+    }
+
+    public void setDodge(int dodge) {
+        this.dodge = Math.max(0, Math.min(100, dodge));
+    }
+
+    public int getBlock() {
+        return block;
+    }
+
+    public void setBlock(int block) {
+        this.block = Math.max(0, Math.min(100, block));
+    }
+
+    public void setStats(Map<String, Integer> stats) {
+        this.stats = stats;
+    }
+
+    public Map<String, Integer> getResistances() {
+        return resistances;
+    }
+
+    public void setResistances(Map<String, Integer> resistances) {
+        this.resistances = resistances;
+    }
 
     @Override
     public void onApply(Creature creature) {
         if (healingDice != null && !healingDice.isEmpty()) {
-            int heal = Creature.rollDice(healingDice);
+            int heal = Dice.roll(healingDice);
             creature.setCurrentHp(Math.min(creature.getMaxHp(), creature.getCurrentHp() + heal));
+        }
+        // Apply crit/dodge/block modifiers (already clamped on the equipment side)
+        if (crit != 0) {
+            creature.setCrit(Math.max(0, Math.min(100, creature.getCrit() + crit)));
+        }
+        if (dodge != 0) {
+            creature.setDodge(Math.max(0, Math.min(100, creature.getDodge() + dodge)));
+        }
+        if (block != 0) {
+            creature.setBlock(Math.max(0, Math.min(100, creature.getBlock() + block)));
         }
     }
 
     @Override
-    public void onRemove(Creature creature) {}
+    public void onRemove(Creature creature) {
+        // Remove crit/dodge/block modifiers
+        if (crit != 0) {
+            creature.setCrit(Math.max(0, Math.min(100, creature.getCrit() - crit)));
+        }
+        if (dodge != 0) {
+            creature.setDodge(Math.max(0, Math.min(100, creature.getDodge() - dodge)));
+        }
+        if (block != 0) {
+            creature.setBlock(Math.max(0, Math.min(100, creature.getBlock() - block)));
+        }
+    }
 
     @Override
     public String toString() {
-    return "id: " + id + "\n" +
-        "name: '" + name + "'\n" +
-        "description: '" + description + "'\n" +
-        "type: " + itemType + "\n" +
-        "slot: " + equipmentSlot + "\n" +
-        "twoHanded: " + twoHanded + "\n" +
-        "rarity: " + rarity + "\n" +
-        "stats: " + stats + "\n" +
-        "resistances: " + resistances + "\n" +
-        (weaponClass != null ? "weaponClass: " + weaponClass + "\n" : "") +
-        (damageType != null ? "damageType: " + damageType + "\n" : "") +
-        (magicElement != null ? "magicElement: " + magicElement + "\n" : "") +
-        (physicalDamageDice != null ? "physicalDamageDice: " + physicalDamageDice + "\n" : "") +
-        (magicDamageDice != null ? "magicDamageDice: " + magicDamageDice + "\n" : "");
+        return "id: " + id + "\n" +
+                "name: '" + name + "'\n" +
+                "description: '" + description + "'\n" +
+                "type: " + itemType + "\n" +
+                "slot: " + equipmentSlot + "\n" +
+                "twoHanded: " + twoHanded + "\n" +
+                "rarity: " + rarity + "\n" +
+                "stats: " + stats + "\n" +
+                "resistances: " + resistances + "\n" +
+                (weaponClass != null ? "weaponClass: " + weaponClass + "\n" : "") +
+                (damageType != null ? "damageType: " + damageType + "\n" : "") +
+                (magicElement != null ? "magicElement: " + magicElement + "\n" : "") +
+                (physicalDamageDice != null ? "physicalDamageDice: " + physicalDamageDice + "\n" : "") +
+                (magicDamageDice != null ? "magicDamageDice: " + magicDamageDice + "\n" : "");
     }
 }

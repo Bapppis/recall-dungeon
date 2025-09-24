@@ -4,18 +4,18 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
+import com.bapppis.core.util.Dice;
 
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.EquipmentSlot;
-import com.bapppis.core.item.WeaponClass;
 
 public abstract class Creature {
     // --- Fields ---
     private int id; // id set by Gson, no setter
     private String name;
-    private int visionRange = 1; // default vision range
+    private int visionRange = 2; // default vision range
     private int level;
     private int xp;
     private int baseHp;
@@ -23,12 +23,14 @@ public abstract class Creature {
     private int currentHp;
     private int hpLvlBonus; // Additional HP gained per level
     private Resistances defaultDamageType = Resistances.BLUDGEONING;
-    // private Resistances damageType = Resistances.BLUDGEONING;
     private Size size;
     private Type type;
     private CreatureType creatureType;
     private EnumMap<Stats, Integer> stats;
     private EnumMap<Resistances, Integer> resistances;
+    private Integer crit = 5; // Critical hit chance percentage, 5% is the default
+    private Integer dodge = 5; // Dodge chance percentage, 5% is the default
+    private Integer block = 5; // Block chance percentage, 5% is the default
     private HashMap<Integer, Property> buffs = new HashMap<>();
     private HashMap<Integer, Property> debuffs = new HashMap<>();
     private HashMap<Integer, Property> immunities = new HashMap<>();
@@ -36,7 +38,10 @@ public abstract class Creature {
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
     private Inventory inventory = new Inventory();
-    // Optional sprite key loaded from JSON (e.g. "player_biggles", "monster_goblin")
+    // Attacks defined on creatures (Gson will fill this from JSON)
+    private java.util.List<Attack> attacks = new java.util.ArrayList<>();
+    // Optional sprite key loaded from JSON (e.g. "player_biggles",
+    // "monster_goblin")
     private String sprite;
 
     public Inventory getInventory() {
@@ -98,30 +103,7 @@ public abstract class Creature {
         TRUE,
     }
 
-    // --- Dice utility ---
-    /**
-     * Rolls dice in NdM format, optionally with a modifier like +K or -K.
-     * Examples: "2d6", "3d4+2", "1d8-1".
-     * Returns 0 if input is invalid.
-     */
-    public static int rollDice(String dice) {
-        if (dice == null) return 0;
-        // regex captures: group1=num, group2=sides, group3=optional sign+modifier (e.g. +2 or -1)
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile("^(\\d+)d(\\d+)([+-]\\d+)?$");
-        java.util.regex.Matcher m = p.matcher(dice.trim());
-        if (!m.matches()) return 0;
-        int num = Integer.parseInt(m.group(1));
-        int sides = Integer.parseInt(m.group(2));
-        int modifier = 0;
-        if (m.group(3) != null) {
-            modifier = Integer.parseInt(m.group(3));
-        }
-        int total = 0;
-        for (int i = 0; i < num; i++) {
-            total += ThreadLocalRandom.current().nextInt(1, sides + 1);
-        }
-        return total + modifier;
-    }
+    // Dice rolling moved to com.bapppis.core.util.Dice.roll(String)
 
     // --- Constructor ---
     public Creature() {
@@ -222,9 +204,11 @@ public abstract class Creature {
     public void setCurrentHp(int hp) {
         this.currentHp = Math.max(0, hp);
     }
+
     public void alterHp(int amount) {
         this.currentHp = Math.max(0, this.currentHp + amount);
     }
+
     public int getHpLvlBonus() {
         return hpLvlBonus;
     }
@@ -335,77 +319,133 @@ public abstract class Creature {
         resistances.put(resistance, getResistance(resistance) + amount);
     }
 
+    public int getCrit() {
+        return crit;
+    }
+
+    public int setCrit(int crit) {
+        this.crit = crit;
+        return this.crit;
+    }
+
+    public int getDodge() {
+        return dodge;
+    }
+
+    public int setDodge(int dodge) {
+        this.dodge = dodge;
+        return this.dodge;
+    }
+
+    public int getBlock() {
+        return block;
+    }
+
+    public int setBlock(int block) {
+        this.block = block;
+        return this.block;
+    }
+
     public void attack(Creature target) {
-        // If weapon is versatile, choose the higher, dexterity or strength
-        if (this.getEquipped(EquipmentSlot.WEAPON) != null
-                && this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
-            Equipment weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
-            if (weapon.isFinesse()) {
-                int statBonus = Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
-                int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
-                int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
-                if (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) {
-                    int rawMagic = rollDice(weapon.getMagicDamageDice());
-                    int magicAfterRes = Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100);
-                    System.out.println("Versatile attack: Rolled damage: " + rawPhysical + ", Magic: " + rawMagic + ", After resistances: " + physicalAfterRes + ", Magic: " + magicAfterRes);
-                    target.alterHp(-physicalAfterRes);
-                    target.alterHp(-magicAfterRes);
-                } else {
-                    System.out.println("Versatile attack: Rolled damage: " + rawPhysical + ", After resistances: " + physicalAfterRes);
-                    target.alterHp(-physicalAfterRes);
-                }
-            } else if (weapon.getWeaponClass() == WeaponClass.MELEE) {
-                int statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
-                int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
-                int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
-                if (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) {
-                    int rawMagic = rollDice(weapon.getMagicDamageDice());
-                    int magicAfterRes = Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100);
-                    System.out.println("Melee attack: Rolled damage: " + rawPhysical + ", Magic: " + rawMagic + ", After resistances: " + physicalAfterRes + ", Magic: " + magicAfterRes);
-                    target.alterHp(-physicalAfterRes);
-                    target.alterHp(-magicAfterRes);
-                } else {
-                    System.out.println("Melee attack: Rolled damage: " + rawPhysical + ", After resistances: " + physicalAfterRes);
-                    target.alterHp(-physicalAfterRes);
-                }
-            } else if (weapon.getWeaponClass() == WeaponClass.RANGED) {
-                int statBonus = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
-                int rawPhysical = rollDice(weapon.getPhysicalDamageDice()) + statBonus;
-                int physicalAfterRes = Math.floorDiv(rawPhysical * target.getResistance(weapon.getDamageType()), 100);
-                if (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) {
-                    int rawMagic = rollDice(weapon.getMagicDamageDice());
-                    int magicAfterRes = Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100);
-                    System.out.println("Ranged attack: Rolled damage: " + rawPhysical + ", Magic: " + rawMagic + ", After resistances: " + physicalAfterRes + ", Magic: " + magicAfterRes);
-                    target.alterHp(-physicalAfterRes);
-                    target.alterHp(-magicAfterRes);
-                } else {
-                    System.out.println("Ranged attack: Rolled damage: " + rawPhysical + ", After resistances: " + physicalAfterRes);
-                    target.alterHp(-physicalAfterRes);
-                }
-            } else if (weapon.getWeaponClass() == WeaponClass.MAGIC) {
-                int statBonus = Math.max(1, this.getStat(Stats.INTELLIGENCE) - 10);
-                int rawMagic = rollDice(weapon.getMagicDamageDice()) + statBonus;
-                int magicAfterRes = (weapon.getMagicElement() != null && weapon.getMagicDamageDice() != null && !weapon.getMagicDamageDice().isEmpty()) ?
-                    Math.floorDiv(rawMagic * target.getResistance(weapon.getMagicElement()), 100) : 0;
-                System.out.println("Magic attack: Rolled magic: " + rawMagic + ", After resistances: " + magicAfterRes);
-                target.alterHp(-magicAfterRes);
+        // Prefer weapon attacks (if equipped and weapon defines attacks), otherwise use
+        // creature attacks
+        Attack chosen = null;
+        Equipment weapon = null;
+        if (this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
+            weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
+            if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
+                chosen = chooseAttackFromList(weapon.getAttacks());
+                // stat bonus depends on weapon class/finesse
+                int statBonus = determineStatBonusForWeapon(weapon);
+                applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement());
+                return;
             }
-        } else if (this.defaultDamageType == Resistances.BLUDGEONING || this.defaultDamageType == Resistances.PIERCING) {
-            // Unarmed attack logic here
-            // Roll 1dX where x is strength modifier
+        }
+
+        // No weapon attacks — use creature's own attacks if present
+        if (this.attacks != null && !this.attacks.isEmpty()) {
+            chosen = chooseAttackFromList(this.attacks);
+            // For creature attacks, default to strength for physical damage
+            int statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+            Resistances physType = parseResistance(chosen == null ? null : chosen.damageType);
+            applyAttackToTarget(chosen, statBonus, target, physType, null);
+            return;
+        }
+
+        // Fallback: old unarmed behavior
+        if (this.defaultDamageType == Resistances.BLUDGEONING || this.defaultDamageType == Resistances.PIERCING) {
             int strMod = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
-            int damage = rollDice("1d" + strMod);
+            int damage = Dice.roll("1d" + strMod);
             System.out.println("Unarmed attack: Rolled damage: " + damage);
             target.alterHp(-damage);
         } else if (this.defaultDamageType == Resistances.SLASHING) {
-            // Unarmed attack logic here
-            // Roll 1dX where x is dexterity modifier
             int dexMod = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
-            int damage = rollDice("1d" + dexMod);
+            int damage = Dice.roll("1d" + dexMod);
             System.out.println("Unarmed attack: Rolled damage: " + damage);
             target.alterHp(-damage);
         } else {
             // Fallback logic
+        }
+    }
+
+    private int determineStatBonusForWeapon(Equipment weapon) {
+        if (weapon.isFinesse()) {
+            return Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
+        }
+        switch (weapon.getWeaponClass()) {
+            case MELEE:
+                return Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+            case RANGED:
+                return Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
+            case MAGIC:
+                return Math.max(1, this.getStat(Stats.INTELLIGENCE) - 10);
+            default:
+                return 0;
+        }
+    }
+
+    private Attack chooseAttackFromList(java.util.List<Attack> list) {
+        if (list == null || list.isEmpty())
+            return null;
+        int total = 0;
+        for (Attack a : list)
+            total += a.getWeight();
+        int pick = ThreadLocalRandom.current().nextInt(Math.max(1, total));
+        for (Attack a : list) {
+            pick -= a.getWeight();
+            if (pick < 0)
+                return a;
+        }
+        return list.get(0);
+    }
+
+    private void applyAttackToTarget(Attack attack, int statBonus, Creature target, Resistances physicalType,
+            Resistances magicType) {
+        if (attack == null || target == null)
+            return;
+        int phys = attack.rollPhysicalDamage(statBonus);
+        int physAfter = Math.floorDiv(
+                phys * target.getResistance(physicalType == null ? this.defaultDamageType : physicalType), 100);
+        int mag = attack.rollMagicDamage();
+        int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
+        if (magAfter > 0) {
+            System.out.println("Attack: " + attack.name + " Rolled physical: " + phys + ", magic: " + mag + ", After: "
+                    + physAfter + ", " + magAfter);
+            target.alterHp(-physAfter);
+            target.alterHp(-magAfter);
+        } else {
+            System.out.println("Attack: " + attack.name + " Rolled physical: " + phys + ", After: " + physAfter);
+            target.alterHp(-physAfter);
+        }
+    }
+
+    private Resistances parseResistance(String s) {
+        if (s == null)
+            return null;
+        try {
+            return Resistances.valueOf(s);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 
@@ -440,10 +480,12 @@ public abstract class Creature {
 
     public void unequipItem(EquipmentSlot slot) {
         Item item = equipment.remove(slot);
-        if (item == null) return;
+        if (item == null)
+            return;
 
         // If the item is two-handed, it may occupy both WEAPON and OFFHAND slots.
-        // Remove any other slot that references the same instance to avoid leaving a ghost.
+        // Remove any other slot that references the same instance to avoid leaving a
+        // ghost.
         try {
             if (item.isTwoHanded()) {
                 EquipmentSlot other = (slot == EquipmentSlot.WEAPON) ? EquipmentSlot.OFFHAND : EquipmentSlot.WEAPON;
@@ -460,18 +502,53 @@ public abstract class Creature {
         // Remove effects once
         removeItemEffects(item);
 
-        // Try to add back to inventory, but only if there's not already an item with the same id
+        // Try to add back to inventory, but only if there's not already an item with
+        // the same id
         boolean alreadyInInventory = false;
         try {
             int id = item.getId();
             // Check each inventory container for matching id
-            for (Item it : getInventory().getWeapons()) if (it.getId() == id) { alreadyInInventory = true; break; }
-            if (!alreadyInInventory) for (Item it : getInventory().getOffhands()) if (it.getId() == id) { alreadyInInventory = true; break; }
-            if (!alreadyInInventory) for (Item it : getInventory().getHelmets()) if (it.getId() == id) { alreadyInInventory = true; break; }
-            if (!alreadyInInventory) for (Item it : getInventory().getArmors()) if (it.getId() == id) { alreadyInInventory = true; break; }
-            if (!alreadyInInventory) for (Item it : getInventory().getLegwear()) if (it.getId() == id) { alreadyInInventory = true; break; }
-            if (!alreadyInInventory) for (Item it : getInventory().getConsumables()) if (it.getId() == id) { alreadyInInventory = true; break; }
-            if (!alreadyInInventory) for (Item it : getInventory().getMisc()) if (it.getId() == id) { alreadyInInventory = true; break; }
+            for (Item it : getInventory().getWeapons())
+                if (it.getId() == id) {
+                    alreadyInInventory = true;
+                    break;
+                }
+            if (!alreadyInInventory)
+                for (Item it : getInventory().getOffhands())
+                    if (it.getId() == id) {
+                        alreadyInInventory = true;
+                        break;
+                    }
+            if (!alreadyInInventory)
+                for (Item it : getInventory().getHelmets())
+                    if (it.getId() == id) {
+                        alreadyInInventory = true;
+                        break;
+                    }
+            if (!alreadyInInventory)
+                for (Item it : getInventory().getArmors())
+                    if (it.getId() == id) {
+                        alreadyInInventory = true;
+                        break;
+                    }
+            if (!alreadyInInventory)
+                for (Item it : getInventory().getLegwear())
+                    if (it.getId() == id) {
+                        alreadyInInventory = true;
+                        break;
+                    }
+            if (!alreadyInInventory)
+                for (Item it : getInventory().getConsumables())
+                    if (it.getId() == id) {
+                        alreadyInInventory = true;
+                        break;
+                    }
+            if (!alreadyInInventory)
+                for (Item it : getInventory().getMisc())
+                    if (it.getId() == id) {
+                        alreadyInInventory = true;
+                        break;
+                    }
         } catch (Exception e) {
             // If anything goes wrong checking ids, fall back to allowing add
             alreadyInInventory = false;
@@ -513,6 +590,17 @@ public abstract class Creature {
                     }
                 }
             }
+            // Apply crit/dodge/block if present on equipment
+            try {
+                int eqCrit = eq.getCrit();
+                int eqDodge = eq.getDodge();
+                int eqBlock = eq.getBlock();
+                if (eqCrit != 0) this.setCrit(Math.max(0, Math.min(100, this.getCrit() + eqCrit)));
+                if (eqDodge != 0) this.setDodge(Math.max(0, Math.min(100, this.getDodge() + eqDodge)));
+                if (eqBlock != 0) this.setBlock(Math.max(0, Math.min(100, this.getBlock() + eqBlock)));
+            } catch (Exception e) {
+                // Defensive: if getters aren't present, ignore
+            }
         }
     }
 
@@ -543,6 +631,17 @@ public abstract class Creature {
                         // Ignore unknown resistance
                     }
                 }
+            }
+            // Remove crit/dodge/block if present on equipment
+            try {
+                int eqCrit = eq.getCrit();
+                int eqDodge = eq.getDodge();
+                int eqBlock = eq.getBlock();
+                if (eqCrit != 0) this.setCrit(Math.max(0, Math.min(100, this.getCrit() - eqCrit)));
+                if (eqDodge != 0) this.setDodge(Math.max(0, Math.min(100, this.getDodge() - eqDodge)));
+                if (eqBlock != 0) this.setBlock(Math.max(0, Math.min(100, this.getBlock() - eqBlock)));
+            } catch (Exception e) {
+                // Defensive: if getters aren't present, ignore
             }
         }
     }
@@ -686,6 +785,9 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
+        sb.append("Critical Hit Chance: ").append(crit).append("%\n");
+        sb.append("Dodge Chance: ").append(dodge).append("%\n");
+        sb.append("Block Chance: ").append(block).append("%\n");
         sb.append("Equipment:\n");
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = equipment.get(slot);

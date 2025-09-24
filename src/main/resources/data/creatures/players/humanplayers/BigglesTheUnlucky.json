@@ -17,6 +17,9 @@
     "NATURE": 90,
     "SLASHING": 120
   },
+  "crit": 10,
+  "dodge": 10,
+  "block": 5,
   "properties": [2000, 4000, 4002],
   "sprite": "player_biggles",
 

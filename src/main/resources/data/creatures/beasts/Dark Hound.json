@@ -14,5 +14,10 @@
     "CONSTITUTION": 12
   },
   "properties": [3000],
+  "attacks": [
+    { "name": "Bite", "times": 1, "physicalDamageDice": "1d6+1", "weight": 5, "damageType": "SLASHING" },
+    { "name": "Claw Frenzy", "times": 2, "physicalDamageDice": "1d4", "weight": 3, "damageType": "SLASHING" },
+    { "name": "Shadow Bite", "times": 1, "physicalDamageDice": "1d6", "magicDamageDice": "1d3", "weight": 1, "damageType": "SLASHING" }
+  ],
   "sprite": null
 }

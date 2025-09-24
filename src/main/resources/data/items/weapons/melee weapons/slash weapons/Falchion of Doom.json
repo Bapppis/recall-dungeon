@@ -7,6 +7,8 @@
   "physicalDamageDice": "2d6",
   "magicElement": "DARKNESS",
   "magicDamageDice": "1d8",
+  "crit": 15,
+  "block": 10,
   "twoHanded": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",

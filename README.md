@@ -126,10 +126,9 @@ recall-dungeon/
 ├─ assets/                    # LibGDX runtime assets (skins, fonts, textures)
 │  ├─ uiskin.json
 │  ├─ uiskin.atlas
+   │  │        │  └─ util/
+   │  │        │     └─ Dice.java                # Utility for parsing and rolling NdM-style dice strings
 │  ├─ uiskin.png
-│  ├─ default.fnt
-│  └─ font-small.fnt
-└─ src
    ├─ main
    │  ├─ java
    │  │  └─ com/bapppis

@@ -18,6 +18,9 @@
     "CHARISMA": 10,
     "LUCK": 1
   },
+  "crit": 5,
+  "dodge": 5,
+  "block": 15,
   "properties": [4001],
   "sprite": "player_voss",
 

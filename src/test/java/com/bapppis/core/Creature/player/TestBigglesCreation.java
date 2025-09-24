@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.property.PropertyManager;
 
 public class TestBigglesCreation {
@@ -14,6 +15,7 @@ public class TestBigglesCreation {
     @Test
     public void testBigglesCreation() {
     PropertyManager.loadProperties();
+    ItemLoader.loadItems();
     CreatureLoader.loadCreatures();
     // Make the player Biggles
     Player biggles = CreatureLoader.getPlayerById(5000);
@@ -28,7 +30,8 @@ public class TestBigglesCreation {
         System.out.println(biggles.toString()); */
 
         //biggles.addXp(42);
-        biggles.setStat(Stats.CONSTITUTION, 7);
+        //biggles.setStat(Stats.CONSTITUTION, 7);
+        biggles.equipItem(ItemLoader.getItemById(9800)); // Equip the weapon
         System.out.println(biggles.toString());
     }
 
