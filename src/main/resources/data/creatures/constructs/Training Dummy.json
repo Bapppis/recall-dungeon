@@ -1,0 +1,16 @@
+{
+  "id": 6100,
+  "name": "Training Dummy",
+  "description": "A training dummy used for practice, you sense malice from it",
+  "visionRange": 2,
+  "xp": 10,
+  "baseHp": 999,
+  "hpLvlBonus": 4,
+  "defaultDamageType": "BLUDGEONING",
+  "size": "MEDIUM",
+  "creatureType": "CONSTRUCT",
+  "properties": null,
+  "sprite": "monster_goblin",
+
+  "weapon": null
+}

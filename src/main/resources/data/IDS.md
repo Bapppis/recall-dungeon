@@ -47,7 +47,7 @@ Notes
 - 6000 — Dark Hound — data/creatures/beasts/Dark Hound.json
 
 #### Constructs (6100-6199)
-- [none indexed yet]
+- 6100 — Training Dummy — data/creatures/constructs/Training Dummyjson
 
 #### Dragons (6200-6299)
 - [none indexed yet]

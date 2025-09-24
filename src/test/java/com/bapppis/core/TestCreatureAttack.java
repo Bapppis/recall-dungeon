@@ -36,6 +36,78 @@ public class TestCreatureAttack {
         System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
     }
 
+    @Test
+    public void testBigglesVsTrainingDummyMultipleAttacks() {
+        PropertyManager.loadProperties();
+        CreatureLoader.loadCreatures();
+        ItemLoader.loadItems();
+
+        Player biggles = CreatureLoader.getPlayerById(5000);
+        assert biggles != null;
+
+        // Ensure full health and high constitution so HP doesn't drop undesirably during test
+        biggles.setStat(Stats.CONSTITUTION, 100);
+
+        // Give Falchion of Doom to Biggles and equip it (Falchion id 9800)
+        biggles.addItem(ItemLoader.getItemById(9800));
+        biggles.equipItem(biggles.getInventory().getWeapons().get(1));
+
+        // Load training dummy as a target
+        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
+        assert dummy != null;
+
+        // Prepare counters
+    java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+    java.util.Map<String, Integer> physTotals = new java.util.HashMap<>();
+    java.util.Map<String, Integer> magTotals = new java.util.HashMap<>();
+    java.util.Map<String, String> physTypes = new java.util.HashMap<>();
+    java.util.Map<String, String> magTypes = new java.util.HashMap<>();
+    java.util.Map<String, Integer> timesPerAttack = new java.util.HashMap<>();
+
+        // Install listener to capture detailed attack reports
+        com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
+            counts.put(rpt.attackName, counts.getOrDefault(rpt.attackName, 0) + 1);
+            physTotals.put(rpt.attackName, physTotals.getOrDefault(rpt.attackName, 0) + rpt.physAfter);
+            magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
+            // Record damage types (first seen)
+            physTypes.putIfAbsent(rpt.attackName, rpt.damageType == null ? "UNKNOWN" : rpt.damageType);
+            if (rpt.magicType != null) magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
+            timesPerAttack.putIfAbsent(rpt.attackName, rpt.times);
+        };
+
+        int runs = 50;
+        for (int i = 0; i < runs; i++) {
+            // Reset dummy HP so it's always alive for attacks
+            dummy.setCurrentHp(dummy.getMaxHp());
+            biggles.attack(dummy);
+        }
+
+        // Print summary
+        System.out.println("--- Attack Summary after " + runs + " attacks ---");
+    for (String name : counts.keySet()) {
+        int count = counts.get(name);
+        int times = timesPerAttack.getOrDefault(name, 1);
+        int totalHits = count * times;
+        System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
+            + " | TotalHits: " + totalHits + " | PhysType: " + physTypes.getOrDefault(name, "UNKNOWN")
+            + " | MagType: " + magTypes.getOrDefault(name, "NONE") + " | PhysTotal: "
+            + physTotals.getOrDefault(name, 0) + " | MagTotal: " + magTotals.getOrDefault(name, 0));
+    }
+        System.out.println("----------------------------------------------");
+
+        // Basic sanity: At least one attack type should have occurred and total hits consistent
+        assert counts.size() > 0;
+        int summedHits = 0;
+        for (String name : counts.keySet()) {
+            summedHits += counts.get(name) * timesPerAttack.getOrDefault(name, 1);
+        }
+        // there should be at least one hit recorded across all attacks
+        assert summedHits > 0;
+
+        // Clear listener after test
+        com.bapppis.core.creature.Creature.attackListener = null;
+    }
+
     // make an assert function for biggles
     private void assertBigglesDefaults(Player biggles) {
         // Implement assertions for Biggles defaults

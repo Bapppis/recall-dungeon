@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import com.bapppis.core.util.Dice;
 
 import com.bapppis.core.property.Property;
@@ -43,6 +44,28 @@ public abstract class Creature {
     // Optional sprite key loaded from JSON (e.g. "player_biggles",
     // "monster_goblin")
     private String sprite;
+
+    // Test hook: optional consumer to receive detailed attack reports when an attack occurs.
+    // Tests can set Creature.attackListener to capture raw rolls and metadata.
+    public static Consumer<AttackReport> attackListener = null;
+
+    public static class AttackReport {
+        public String attackName;
+        public int physRaw;
+        public int magRaw;
+        /** total physical after crits but before resistances */
+        public int physAfterCritBeforeResist;
+        public int physAfter;
+        public int magAfter;
+        public int times;
+        public String damageType;
+        public String magicType;
+        /** number of individual hit crits in this attack invocation */
+        public int critCount;
+        public boolean isCrit;
+        public Creature attacker;
+        public Creature target;
+    }
 
     public Inventory getInventory() {
         return inventory;
@@ -423,18 +446,68 @@ public abstract class Creature {
             Resistances magicType) {
         if (attack == null || target == null)
             return;
-        int phys = attack.rollPhysicalDamage(statBonus);
+        // Roll physical damage per-hit and check crit per hit
+        int totalPhysBeforeResist = 0; // after applying per-hit crits
+        int physRaw = 0; // raw sum before crits
+        int critCount = 0;
+        int times = attack.getTimes();
+        int baseCrit = this.getCrit();
+        int mod = 0;
+        try { mod = attack.getCritMod(); } catch (Exception e) { mod = 0; }
+        int critChance = Math.max(0, Math.min(100, baseCrit + mod));
+        for (int i = 0; i < times; i++) {
+            int hit = 0;
+            if (attack.physicalDamageDice != null && !attack.physicalDamageDice.isBlank()) {
+                // For per-hit dice, we need to roll the dice once per hit. The dice string may be like "2d6" meaning per-attack totals —
+                // but Attack.physicalDamageDice is treated as per-hit dice in our model for multiple `times` entries.
+                hit = Dice.roll(attack.physicalDamageDice);
+            }
+            hit += Math.max(0, statBonus);
+            physRaw += hit;
+            boolean hitCrit = ThreadLocalRandom.current().nextInt(100) < critChance;
+            if (hitCrit) {
+                critCount++;
+                hit = hit * 2; // double this hit
+                System.out.println("Critical hit! " + attack.name + " single hit doubled to: " + hit);
+            }
+            totalPhysBeforeResist += hit;
+        }
+
         int physAfter = Math.floorDiv(
-                phys * target.getResistance(physicalType == null ? this.defaultDamageType : physicalType), 100);
+                totalPhysBeforeResist * target.getResistance(physicalType == null ? this.defaultDamageType : physicalType), 100);
         int mag = attack.rollMagicDamage();
         int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
+
+        // If a test listener is set, populate and send an AttackReport
+        try {
+            if (attackListener != null) {
+                AttackReport rpt = new AttackReport();
+                rpt.attackName = attack.name;
+                rpt.physRaw = physRaw;
+                rpt.magRaw = mag;
+                rpt.physAfterCritBeforeResist = totalPhysBeforeResist;
+                rpt.physAfter = physAfter;
+                rpt.magAfter = magAfter;
+                rpt.times = attack.getTimes();
+                rpt.damageType = (physicalType == null ? this.defaultDamageType.name() : physicalType.name());
+                rpt.magicType = (magicType == null ? null : magicType.name());
+                rpt.critCount = critCount;
+                rpt.isCrit = critCount > 0;
+                rpt.attacker = this;
+                rpt.target = target;
+                attackListener.accept(rpt);
+            }
+        } catch (Exception e) {
+            // ignore listener failures during gameplay
+        }
+
         if (magAfter > 0) {
-            System.out.println("Attack: " + attack.name + " Rolled physical: " + phys + ", magic: " + mag + ", After: "
+            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): " + totalPhysBeforeResist + ", magic: " + mag + ", After: "
                     + physAfter + ", " + magAfter);
             target.alterHp(-physAfter);
             target.alterHp(-magAfter);
         } else {
-            System.out.println("Attack: " + attack.name + " Rolled physical: " + phys + ", After: " + physAfter);
+            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): " + totalPhysBeforeResist + ", After: " + physAfter);
             target.alterHp(-physAfter);
         }
     }

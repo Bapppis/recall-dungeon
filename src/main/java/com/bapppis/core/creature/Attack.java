@@ -7,9 +7,10 @@ public class Attack {
   public Integer times;
   public String physicalDamageDice;
   public String magicDamageDice;
-  public Double critChance;
   public String damageType;
   public Integer weight;
+  // Optional per-attack crit modifier, can be written in JSON as "+5" or "-3" (string)
+  public String critMod;
 
   public int getTimes() {
     return times == null ? 1 : times;
@@ -19,9 +20,29 @@ public class Attack {
     return weight == null ? 1 : weight;
   }
 
-  public double getCritChance() {
-    return critChance == null ? 0.0 : critChance;
+  /**
+   * Returns the per-attack crit modifier as an integer. Accepts formats like "+5", "-2", or "3".
+   */
+  public int getCritMod() {
+    if (critMod == null || critMod.isBlank())
+      return 0;
+    String s = critMod.trim();
+    try {
+      return Integer.parseInt(s);
+    } catch (NumberFormatException e) {
+      // Be defensive: strip leading '+' if present then try again
+      if (s.startsWith("+")) {
+        try {
+          return Integer.parseInt(s.substring(1));
+        } catch (NumberFormatException ex) {
+          return 0;
+        }
+      }
+      return 0;
+    }
   }
+
+
 
   /**
    * Roll the physical component of this attack, including stat bonus per hit.
