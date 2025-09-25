@@ -5,6 +5,7 @@ import com.bapppis.core.creature.Creature;
 public interface Item {
     String getName();
     String getDescription();
+    String getTooltip();
     ItemType getType();
     int getId();
     EquipmentSlot getSlot();

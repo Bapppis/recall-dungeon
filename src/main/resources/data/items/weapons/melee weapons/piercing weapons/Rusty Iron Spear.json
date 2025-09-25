@@ -4,7 +4,7 @@
   "description": "Once a proud weapon, now just a rusty relic.",
   "weaponClass": "MELEE",
   "damageType": "PIERCING",
-  "physicalDamageDice": "2d2",
+  
   "isVersatile": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",

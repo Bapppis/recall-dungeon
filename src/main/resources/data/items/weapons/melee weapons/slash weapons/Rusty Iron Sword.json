@@ -4,7 +4,7 @@
   "description": "A rusty iron sword, worn and weathered from years of neglect.",
   "weaponClass": "MELEE",
   "damageType": "SLASHING",
-  "physicalDamageDice": "2d2",
+  
   "isVersatile": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",

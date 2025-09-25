@@ -2,11 +2,16 @@
   "id": 9800,
   "name": "Falchion of Doom",
   "description": "A sword that glows hellish red, it is said to be forged by the Deathknights themselves, the blade and the handle are decorated by the bones of their enemies.",
+  "tooltip": [
+    "Double Slash (40%): Deals 2-12 slashing damage and 2-8 darkness damage.",
+    "",
+    "Big Slash (40%): Deals 2-12 slashing damage and 1-8 darkness damage. This attack has +10% critical chance.",
+    "",
+    "Shadow Slashes (20%): Deals 9-20 slashing damage and 12-16 darkness damage. This attack has +5% critical chance."
+  ],
   "weaponClass": "MELEE",
   "damageType": "SLASHING",
-  "physicalDamageDice": "2d6",
   "magicElement": "DARKNESS",
-  "magicDamageDice": "1d8",
   "crit": 15,
   "block": 10,
   "twoHanded": true,
@@ -15,8 +20,8 @@
   "rarity": "MYTHICAL",
 
   "attacks": [
-    { "name": "Double Slash", "times": 2, "physicalDamageDice": "1d6", "magicDamageDice": "1d4", "weight": 4, "damageType": "SLASHING" },
-    { "name": "Big Slash", "times": 1, "physicalDamageDice": "2d6", "magicDamageDice": "1d8", "weight": 4, "damageType": "SLASHING" },
-    { "name": "Shadow Slashes", "times": 4, "physicalDamageDice": "1d6", "magicDamageDice": "1d2+2", "critMod": "+5", "weight": 2, "damageType": "SLASHING" }
+  { "name": "Double Slash", "times": 2, "physicalDamageDice": "1d6", "magicDamageDice": "1d4", "weight": 4, "damageType": "SLASHING" },
+  { "name": "Big Slash", "times": 1, "physicalDamageDice": "2d6", "magicDamageDice": "1d8", "critMod": "+10", "weight": 4, "damageType": "SLASHING" },
+  { "name": "Shadow Slashes", "times": 4, "physicalDamageDice": "1d3+2", "magicDamageDice": "1d2+2", "critMod": "+5", "weight": 2, "damageType": "SLASHING" }
   ]
 }

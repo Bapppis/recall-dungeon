@@ -63,7 +63,7 @@ Notes
 
 #### Undead (6600-6699)
 - 6600 — Skeleton Spearman — data/creatures/undead/Skeleton Spearman.json
-- 6601 — Skeleton Spearman — data/creatures/undead/Skeleton Spearman.json
+- 6601 — Skeleton Swordsman — data/creatures/undead/Skeleton Swordsman.json
 
 #### Unknown (6700-6799)
 - [none indexed yet]

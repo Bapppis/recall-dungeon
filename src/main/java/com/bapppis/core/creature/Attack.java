@@ -72,4 +72,6 @@ public class Attack {
     return total;
   }
 
+  // Description is now manually authored in JSON and surfaced directly.
+
 }

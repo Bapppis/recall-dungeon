@@ -8,28 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Equipment implements Item {
-    private String physicalDamageDice;
-    private String magicDamageDice;
     private List<Attack> attacks;
 
     public List<Attack> getAttacks() {
         return attacks;
-    }
-
-    public String getPhysicalDamageDice() {
-        return physicalDamageDice;
-    }
-
-    public void setPhysicalDamageDice(String dice) {
-        this.physicalDamageDice = dice;
-    }
-
-    public String getMagicDamageDice() {
-        return magicDamageDice;
-    }
-
-    public void setMagicDamageDice(String dice) {
-        this.magicDamageDice = dice;
     }
 
     private String healingDice;
@@ -45,6 +27,9 @@ public class Equipment implements Item {
     private int id;
     private String name;
     private String description;
+    // Backwards-compatible: `tooltip` in JSON can be either a single String or an array of Strings.
+    // We keep the raw value here and normalize in getTooltip().
+    private Object tooltip;
     private ItemType itemType;
     private EquipmentSlot equipmentSlot;
     private boolean twoHanded;
@@ -120,6 +105,27 @@ public class Equipment implements Item {
     @Override
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public String getTooltip() {
+        if (tooltip == null) return null;
+        if (tooltip instanceof String) return (String) tooltip;
+        // If the JSON provided an array, Gson will deserialize it as a java.util.List.
+        if (tooltip instanceof java.util.List) {
+            @SuppressWarnings("unchecked")
+            java.util.List<Object> list = (java.util.List<Object>) tooltip;
+            // Join lines, preserving empty strings as paragraph breaks
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < list.size(); i++) {
+                Object o = list.get(i);
+                if (o != null) sb.append(o.toString());
+                if (i < list.size() - 1) sb.append('\n');
+            }
+            return sb.toString();
+        }
+        // Fallback to toString()
+        return tooltip.toString();
     }
 
     @Override
@@ -245,8 +251,8 @@ public class Equipment implements Item {
                 "resistances: " + resistances + "\n" +
                 (weaponClass != null ? "weaponClass: " + weaponClass + "\n" : "") +
                 (damageType != null ? "damageType: " + damageType + "\n" : "") +
-                (magicElement != null ? "magicElement: " + magicElement + "\n" : "") +
-                (physicalDamageDice != null ? "physicalDamageDice: " + physicalDamageDice + "\n" : "") +
-                (magicDamageDice != null ? "magicDamageDice: " + magicDamageDice + "\n" : "");
+                (magicElement != null ? "magicElement: " + magicElement + "\n" : "");
     }
+
+    // We rely on a manually authored `description` field for UI/tooltips.
 }

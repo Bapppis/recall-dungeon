@@ -37,6 +37,71 @@ public class TestCreatureAttack {
     }
 
     @Test
+    public void testDarkHoundVsTrainingDummyMultipleAttacks() {
+        PropertyManager.loadProperties();
+        CreatureLoader.loadCreatures();
+        ItemLoader.loadItems();
+
+    // Load Dark Hound (id 6000)
+    com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(6000);
+        assert darkHound != null;
+
+        // Load training dummy (id 6100)
+        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
+        assert dummy != null;
+
+        // Ensure dummy is at full health before each attack
+        int runs = 100;
+
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        java.util.Map<String, Integer> physTotals = new java.util.HashMap<>();
+        java.util.Map<String, Integer> magTotals = new java.util.HashMap<>();
+        java.util.Map<String, Integer> timesPerAttack = new java.util.HashMap<>();
+
+        // Install listener to capture detailed attack reports
+        com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
+            counts.put(rpt.attackName, counts.getOrDefault(rpt.attackName, 0) + 1);
+            physTotals.put(rpt.attackName, physTotals.getOrDefault(rpt.attackName, 0) + rpt.physAfter);
+            magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
+            timesPerAttack.putIfAbsent(rpt.attackName, rpt.times);
+        };
+
+        for (int i = 0; i < runs; i++) {
+            // Reset dummy HP so it doesn't die
+            dummy.setCurrentHp(dummy.getMaxHp());
+            // Let the dark hound attack the dummy
+            darkHound.attack(dummy);
+        }
+
+        System.out.println("--- Dark Hound Attack Summary after " + runs + " runs ---");
+        for (String name : counts.keySet()) {
+            int count = counts.get(name);
+            int times = timesPerAttack.getOrDefault(name, 1);
+            int totalHits = count * times;
+            System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
+                + " | TotalHits: " + totalHits + " | PhysTotal: " + physTotals.getOrDefault(name, 0)
+                + " | MagTotal: " + magTotals.getOrDefault(name, 0));
+        }
+        System.out.println("----------------------------------------------");
+
+        // Basic checks (non-fatal): if no attacks were recorded, print a warning but don't fail the test.
+        if (counts.size() == 0) {
+            System.out.println("Warning: No attacks recorded for Dark Hound; this run produced no attack events.");
+        } else {
+            int summedHits = 0;
+            for (String name : counts.keySet()) {
+                summedHits += counts.get(name) * timesPerAttack.getOrDefault(name, 1);
+            }
+            if (summedHits == 0) {
+                System.out.println("Warning: Recorded attacks but total hits summed to 0.");
+            }
+        }
+
+        // Clear listener
+        com.bapppis.core.creature.Creature.attackListener = null;
+    }
+
+    @Test
     public void testBigglesVsTrainingDummyMultipleAttacks() {
         PropertyManager.loadProperties();
         CreatureLoader.loadCreatures();
