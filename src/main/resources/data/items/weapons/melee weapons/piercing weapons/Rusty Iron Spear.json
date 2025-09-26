@@ -1,12 +1,22 @@
 {
   "id": 9400,
   "name": "Rusty Iron Spear",
-  "description": "Once a proud weapon, now just a rusty relic.",
+  "description": "Once a proud weapon, now just a rusty relic. The rust could poison someone.",
   "weaponClass": "MELEE",
   "damageType": "PIERCING",
-  
+  "magicElement": "NATURE",
   "isVersatile": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
-  "rarity": "COMMON"
+  "rarity": "COMMON",
+  "tooltip": [
+    "Slash (70%): Deals 2-6 slashing damage and 1 nature damage.",
+    "",
+    "Thrust (30%): Deals 2-6 piercing damage and 1-2 nature damage. This attack has a +5% critical chance."
+  ],
+
+  "attacks": [
+  { "name": "Slash", "times": 2, "physicalDamageDice": "1d6", "magicDamageDice": "1d1", "weight": 7, "damageType": "SLASHING" },
+  { "name": "Thrust", "times": 1, "physicalDamageDice": "2d3", "magicDamageDice": "1d2", "critMod": "+5", "weight": 3, "damageType": "PIERCING" }
+  ]
 }

@@ -56,7 +56,7 @@ Notes
 - [none indexed yet]
 
 #### Humanoids (6400-6499)
-- 6400 — Goblin — data/creatures/humanoids/goblinoid/Goblin.json
+- 6400 — Goblin Berserker — data/creatures/humanoids/goblinoid/Goblin Berserker.json
 
 #### Plants (6500-6599)
 - [none indexed yet]
@@ -84,7 +84,6 @@ Notes
 - 7750 — Tower Shield — data/items/armor/shields/Tower Shield.json
 
 ### Consumables(8000-8999)
-- [none indexed yet]
 - 8000 — Minor Healing Potion — data/items/consumables/potions/Minor Healing Potion.json
 - 8001 — Healing Potion — data/items/consumables/potions/Healing Potion.json
 - 8002 — Lesser Blue Healing Potion — data/items/consumables/potions/Lesser Blue Healing Potion.json

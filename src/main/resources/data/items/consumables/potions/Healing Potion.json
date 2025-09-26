@@ -3,6 +3,9 @@
   "name": "Healing Potion",
   "description": "A true tested standard, just having it near you makes you feel safer",
   "healingDice": "2d8+2",
+  "tooltip": [
+    "Heals 2d8+2 HP when used."
+  ],
   "itemType": "CONSUMABLE",
   "rarity": "UNCOMMON"
 }

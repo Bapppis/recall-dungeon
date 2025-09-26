@@ -4,9 +4,22 @@
   "description": "The bow is past its prime, hopefully it won't break just yet.",
   "weaponClass": "RANGED",
   "damageType": "PIERCING",
-  
+  "crit": 10,
   "twoHanded": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
-  "rarity": "COMMON"
+  "rarity": "COMMON",
+  "tooltip": [
+    "Shoot (70%): Deals 2-8 piercing damage.",
+    "",
+    "Barrage (25%): Deals 3-9 piercing damage.",
+    "",
+    "Perfect Shot (5%): Deals 1-6 true damage. This attack has a +30% critical chance and pierces through anything."
+  ],
+
+  "attacks": [
+  { "name": "Shoot", "times": 1, "physicalDamageDice": "2d4", "weight": 70, "damageType": "PIERCING" },
+  { "name": "Barrage", "times": 3, "physicalDamageDice": "1d3", "weight": 25, "damageType": "PIERCING" },
+  { "name": "Perfect Shot", "times": 1, "physicalDamageDice": "1d6", "critMod": "+30", "weight": 5, "damageType": "TRUE" }
+  ]
 }

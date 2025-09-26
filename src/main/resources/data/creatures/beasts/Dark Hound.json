@@ -13,11 +13,20 @@
     "STRENGTH": 11,
     "CONSTITUTION": 12
   },
+  "resistances": {
+    "LIGHT": 120,
+    "DARKNESS": 80,
+    "SLASHING": 90
+  },
+  "crit": 5,
+  "dodge": 5,
+  "block": 0,
   "properties": [3000],
+
   "attacks": [
-    { "name": "Bite", "times": 1, "physicalDamageDice": "1d6+1", "weight": 5, "damageType": "SLASHING" },
-    { "name": "Claw Frenzy", "times": 2, "physicalDamageDice": "1d4", "weight": 3, "damageType": "SLASHING" },
-    { "name": "Shadow Bite", "times": 1, "physicalDamageDice": "1d6", "magicDamageDice": "1d3", "weight": 1, "damageType": "SLASHING" }
+    { "name": "Bite", "times": 1, "physicalDamageDice": "1d6+1", "weight": 38, "damageType": "PIERCING" },
+    { "name": "Claw Frenzy", "times": 2, "physicalDamageDice": "1d4", "weight": 37, "damageType": "SLASHING" },
+    { "name": "Shadow Bite", "times": 1, "physicalDamageDice": "1d6+1", "magicDamageDice": "2d3", "critMod": "+10", "weight": 15, "damageType": "PIERCING", "magicDamageType": "SHADOW" }
   ],
   "sprite": null
 }

@@ -391,7 +391,8 @@ public abstract class Creature {
             // For creature attacks, default to strength for physical damage
             int statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
             Resistances physType = parseResistance(chosen == null ? null : chosen.damageType);
-            applyAttackToTarget(chosen, statBonus, target, physType, null);
+            Resistances magType = parseResistance(chosen == null ? null : chosen.magicDamageType);
+            applyAttackToTarget(chosen, statBonus, target, physType, magType);
             return;
         }
 

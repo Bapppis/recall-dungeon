@@ -1,7 +1,7 @@
 {
   "id": 6600,
   "name": "Skeleton Spearman",
-  "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty spear.",
+  "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty spear and a shield.",
   "visionRange": 1,
   "xp": 3,
   "baseHp": 5,
@@ -12,8 +12,22 @@
   "stats": {
     "STRENGTH": 6
   },
+  "resistances": {
+    "LIGHT": 110,
+    "DARKNESS": 90,
+    "BLUDGEONING": 120,
+    "SLASHING": 90
+  },
+  "crit": 5,
+  "dodge": 5,
+  "block": 20,
   "properties": [3000],
-  "sprite": null,
 
-  "weapon": 9400
+  "attacks": [
+    { "name": "Jab", "times": 1, "physicalDamageDice": "1d6+1", "weight": 6, "damageType": "PIERCING" },
+    { "name": "Swipe", "times": 1, "physicalDamageDice": "1d6", "critMod": "+5", "weight": 4, "damageType": "SLASHING" }
+  ],
+  "sprite": null
+
+
 }

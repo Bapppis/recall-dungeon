@@ -7,6 +7,8 @@ public class Attack {
   public Integer times;
   public String physicalDamageDice;
   public String magicDamageDice;
+  // Optional override for the magic damage resistance type (e.g. DARKNESS, FIRE)
+  public String magicDamageType;
   public String damageType;
   public Integer weight;
   // Optional per-attack crit modifier, can be written in JSON as "+5" or "-3" (string)

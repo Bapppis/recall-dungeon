@@ -3,6 +3,9 @@
   "name": "Blue Healing Potion",
   "description": "These must be diluted under normal means, as common people are rarely able to handle their potency.",
   "healingDice": "4d8+4",
+  "tooltip": [
+    "Heals 4d8+4 HP when used."
+  ],
   "itemType": "CONSUMABLE",
   "rarity": "MYTHICAL"
 }

@@ -22,6 +22,11 @@
   "dodge": 5,
   "block": 15,
   "properties": [4001],
+
+  "attacks": [
+    { "name": "Punch", "times": 1, "physicalDamageDice": "1d3", "damageType": "BLUDGEONING" }
+  ],
+
   "sprite": "player_voss",
 
   "inventory": [8000, 9803, 7000],

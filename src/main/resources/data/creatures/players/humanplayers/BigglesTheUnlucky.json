@@ -10,7 +10,12 @@
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {
+    "STRENGTH": 13,
+    "CONSTITUTION": 12,
+    "DEXTERITY": 10,
     "INTELLIGENCE": 7,
+    "WISDOM": 10,
+    "CHARISMA": 10,
     "LUCK": 2
   },
   "resistances": {
@@ -21,6 +26,10 @@
   "dodge": 10,
   "block": 5,
   "properties": [2000, 4000, 4002],
+
+  "attacks": [
+    { "name": "Scratch", "times": 1, "physicalDamageDice": "1d2", "damageType": "SLASHING" }
+  ],
   "sprite": "player_biggles",
 
   "inventory": [8000, 9802],

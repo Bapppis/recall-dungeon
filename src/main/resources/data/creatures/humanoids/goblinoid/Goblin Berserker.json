@@ -1,0 +1,30 @@
+{
+  "id": 6400,
+  "name": "Goblin Berserker",
+  "description": "A small goblin wielding two axes, it is thirsting for blood.",
+  "visionRange": 1,
+  "xp": 4,
+  "baseHp": 5,
+  "hpLvlBonus": 4,
+  "size": "SMALL",
+  "creatureType": "HUMANOID",
+  "stats": {
+    "STRENGTH": 11,
+    "DEXTERITY": 11,
+    "CONSTITUTION": 12
+  },
+  "resistances": {
+    "PIERCING": 120,
+    "SLASHING": 90
+  },
+  "crit": 10,
+  "dodge": 15,
+  "block": 0,
+  "properties": null,
+
+  "attacks": [
+    { "name": "Axe Chops", "times": 2, "physicalDamageDice": "2d3", "weight": 8, "damageType": "SLASHING" },
+    { "name": "Rampage", "times": 4, "physicalDamageDice": "4d2", "critMod": "+10", "weight": 2, "damageType": "SLASHING" }
+  ],
+  "sprite": "monster_goblin"
+}

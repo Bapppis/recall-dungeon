@@ -1,12 +1,22 @@
 {
   "id": 9801,
   "name": "Rusty Iron Sword",
-  "description": "A rusty iron sword, worn and weathered from years of neglect.",
+  "description": "A rusty iron sword, worn and weathered from years of neglect. The rust could poison someone.",
   "weaponClass": "MELEE",
   "damageType": "SLASHING",
-  
+  "magicElement": "NATURE",
   "isVersatile": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
-  "rarity": "COMMON"
+  "rarity": "COMMON",
+  "tooltip": [
+    "Slashes (70%): Deals 2-6 slashing damage and 1 nature damage.",
+    "",
+    "Big Slash (30%): Deals 1-6 piercing damage and 1-2 nature damage. This attack has a +5% critical chance."
+  ],
+
+  "attacks": [
+  { "name": "Slashes", "times": 2, "physicalDamageDice": "1d3", "magicDamageDice": "1d1", "weight": 7, "damageType": "SLASHING" },
+  { "name": "Stab", "times": 1, "physicalDamageDice": "1d6", "magicDamageDice": "1d2", "critMod": "+5", "weight": 3, "damageType": "PIERCING" }
+  ]
 }

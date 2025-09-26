@@ -10,10 +10,23 @@
   "size": "MEDIUM",
   "creatureType": "UNDEAD",
   "stats": {
-    "STRENGTH": 6
+    "STRENGTH": 11,
+    "DEXTERITY": 12
   },
+  "resistances": {
+    "LIGHT": 110,
+    "DARKNESS": 90,
+    "BLUDGEONING": 120,
+    "SLASHING": 90
+  },
+  "crit": 5,
+  "dodge": 15,
+  "block": 5,
   "properties": [3000],
-  "sprite": null,
 
-  "weapon": 9801
+  "attacks": [
+    { "name": "Slash", "times": 1, "physicalDamageDice": "1d6+1", "weight": 7, "damageType": "SLASHING" },
+    { "name": "Stab", "times": 1, "physicalDamageDice": "1d6", "critMod": "+10", "weight": 3, "damageType": "PIERCING" }
+  ],
+  "sprite": null
 }
