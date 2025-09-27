@@ -35,6 +35,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 
 - Procedurally loaded dungeon floors with fog-of-war (undiscovered tiles are hidden until explored)
 - Player vision range determines how much of the map is revealed
+- Creatures have multiple attacks that are decided semi-randomly via weighted randomness
 
 ### Creature System
 
@@ -48,7 +49,9 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Equipment slots (weapon, shield, armor, helmet, legwear, etc.)
 - Support for two-handed and versatile weapons
 - Weapons have physical and optional magical damage types (with dice notation, e.g., 2d6)
+- Weapons like creatures have multiple attacks that are decided semi-randomly via weighted randomness
 - Items and equipment can modify stats, resistances, and traits
+- Loot and monster pools work (but not yet fully implemented) this makes possible for unique experiences for every play-through 
 
 ### Combat System
 
@@ -90,17 +93,19 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - JUnit 5 (testing)
 
 ## Roadmap
-- Loot pools and monster pools for randomized yet balanced and fun gameplay experience.
-- Many player character choices who each feel different, fun and balanced within their own play-styles. 
+- Possibly a class system for players
+- Skills and abilities that can be used in and out of combat
+- Mana, stamina and other resources tied to class abilities, skills and spells 
+- For every player Stat to have a meaningful use.
+- Many choices for player characters who each feel different, fun and balanced within their own play-styles. 
 - Sprite variety for environment.
 - Gear, armor and weapons would affect how the player looks.
 - Animations for characters and environment.
 - Randomized dungeon layouts.
 - Deepen the element based combat system, for example statuses for bleeding, stuns, shocked etc. Elements would build up to statuses.
 - Interactive grid based world: Explore the dungeon and its many secrets.
-- Many characters: Choose from many different starting champions that have different stats.
 - Making enemies intelligent, having them move around the map searching for the player and making the smarter during the combat.
-- Traps, consumables, events and story elements.
+- Traps, consumables, events and story elements. (Potions have been implemented) 
 - A story mode and a roguelike mode. More handcrafted elements and story elements in the story mode and a fun roguelike mode with randomized floors, loot and enemies!
 - Sound and music.
 
