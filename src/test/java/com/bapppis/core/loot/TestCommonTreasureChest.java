@@ -23,7 +23,7 @@ public class TestCommonTreasureChest {
         AtomicInteger weapons = new AtomicInteger(0);
 
         for (int i = 0; i < iterations; i++) {
-            List<LootManager.Spawn> spawns = manager.samplePool("10003");
+            List<LootManager.Spawn> spawns = manager.samplePool("10002");
             boolean seenPotion = false;
             int potionCount = 0;
             boolean seenWeapon = false;

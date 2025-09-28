@@ -109,10 +109,12 @@ Notes
 - 9802 — Parrying Dagger — data/items/weapons/melee weapons/slash weapons/Parrying Dagger.json
 
 ### Loot Pools (10000-10999)
-- 10000 — Common Melee Weapons — data/loot_pools/Common Melee Weapons.json
-- 10001 — Common Weapons — data/loot_pools/Common Weapons.json
-- 10002 — Common Potions — data/loot_pools/Common Potions.json
-- 10003 — Common Treasure Chest — data/loot_pools/Common Treasure Chest.json
+- 10000 — Common Weapons — data/loot_pools/Common Weapons.json
+- 10001 — Common Potions — data/loot_pools/Common Potions.json
+- 10002 — Common Treasure Chest — data/loot_pools/Common Treasure Chest.json
+
+### Monster Pools (11000-11999)
+- 11000 — Floor 0 Enemies — data/monster_pools/Floor 0 Enemies.json
 
 ## Maintenance tips
 - Enforce unique ids (consider an automated test).

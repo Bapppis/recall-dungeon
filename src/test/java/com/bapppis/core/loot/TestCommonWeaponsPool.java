@@ -30,7 +30,7 @@ public class TestCommonWeaponsPool {
 
         // Sample the pool multiple times to catch randomness
         for (int i = 0; i < 200; i++) {
-            List<LootManager.Spawn> spawns = manager.samplePool("10001");
+            List<LootManager.Spawn> spawns = manager.samplePool("10000");
             // should not be empty and should only contain allowed references
             assertTrue(spawns.size() >= 1, "Expected at least one spawn");
             for (LootManager.Spawn s : spawns) {

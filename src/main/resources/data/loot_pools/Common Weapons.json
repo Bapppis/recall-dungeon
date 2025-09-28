@@ -1,5 +1,5 @@
 {
-  "id": "10001",
+  "id": "10000",
   "name": "Common Weapons",
   "entries": [
     { "type": "item", "id": "9802", "name": "Parrying Dagger", "countMin": 1, "countMax": 1 },
