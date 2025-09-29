@@ -175,17 +175,19 @@ recall-dungeon/
    │        └─ tiles/
    └─ resources
       ├─ data
-      │  ├─ creatures/
-      │  │  ├─ README.md
-      │  │  ├─ beasts/
-      │  │  ├─ constructs/
-      │  │  ├─ dragons/
-      │  │  ├─ elementals/
-      │  │  ├─ humanoids/
-      │  │  ├─ players/
-      │  │  ├─ plants/
-      │  │  ├─ undead/
-      │  │  └─ unknown/
+   │  ├─ creatures/
+   │  │  ├─ README.md
+   │  │  ├─ beasts/
+   │  │  ├─ constructs/
+   │  │  ├─ dragons/
+   │  │  ├─ elementals/
+   │  │  ├─ humanoids/
+   │  │  ├─ players/
+   │  │  │  ├─ BigglesTheUnlucky.json
+   │  │  │  └─ CaptainVoss.json
+   │  │  ├─ plants/
+   │  │  ├─ undead/
+   │  │  └─ unknown/
       │  ├─ floors/
    │  ├─ loot_pools/
    │  │  ├─ treasure_chest_basic.json
