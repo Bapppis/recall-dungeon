@@ -166,32 +166,32 @@ public class Equipment implements Item {
     }
 
     // Optional defensive/offensive chance modifiers applied while equipped
-    private int crit = 0; // Crit chance between 0 and 100
-    private int dodge = 0; // Dodge chance between 0 and 100
-    private int block = 0; // Block chance between 0 and 100
+    private float crit = 0f; // Crit chance between 0 and 100
+    private float dodge = 0f; // Dodge chance between 0 and 100
+    private float block = 0f; // Block chance between 0 and 100
 
-    public int getCrit() {
+    public float getCrit() {
         return crit;
     }
 
-    public void setCrit(int crit) {
-        this.crit = Math.max(0, Math.min(100, crit));
+    public void setCrit(float crit) {
+        this.crit = Math.max(0f, Math.min(100f, crit));
     }
 
-    public int getDodge() {
+    public float getDodge() {
         return dodge;
     }
 
-    public void setDodge(int dodge) {
-        this.dodge = Math.max(0, Math.min(100, dodge));
+    public void setDodge(float dodge) {
+        this.dodge = Math.max(0f, Math.min(100f, dodge));
     }
 
-    public int getBlock() {
+    public float getBlock() {
         return block;
     }
 
-    public void setBlock(int block) {
-        this.block = Math.max(0, Math.min(100, block));
+    public void setBlock(float block) {
+        this.block = Math.max(0f, Math.min(100f, block));
     }
 
     public void setStats(Map<String, Integer> stats) {
@@ -213,28 +213,28 @@ public class Equipment implements Item {
             creature.setCurrentHp(Math.min(creature.getMaxHp(), creature.getCurrentHp() + heal));
         }
         // Apply crit/dodge/block modifiers (already clamped on the equipment side)
-        if (crit != 0) {
-            creature.setCrit(Math.max(0, Math.min(100, creature.getCrit() + crit)));
+        if (crit != 0f) {
+            creature.setCrit(Math.max(0f, Math.min(100f, creature.getCrit() + crit)));
         }
-        if (dodge != 0) {
-            creature.setDodge(Math.max(0, Math.min(100, creature.getDodge() + dodge)));
+        if (dodge != 0f) {
+            creature.setDodge(Math.max(0f, Math.min(100f, creature.getDodge() + dodge)));
         }
-        if (block != 0) {
-            creature.setBlock(Math.max(0, Math.min(100, creature.getBlock() + block)));
+        if (block != 0f) {
+            creature.setBlock(Math.max(0f, Math.min(100f, creature.getBlock() + block)));
         }
     }
 
     @Override
     public void onRemove(Creature creature) {
         // Remove crit/dodge/block modifiers
-        if (crit != 0) {
-            creature.setCrit(Math.max(0, Math.min(100, creature.getCrit() - crit)));
+        if (crit != 0f) {
+            creature.setCrit(Math.max(0f, Math.min(100f, creature.getCrit() - crit)));
         }
-        if (dodge != 0) {
-            creature.setDodge(Math.max(0, Math.min(100, creature.getDodge() - dodge)));
+        if (dodge != 0f) {
+            creature.setDodge(Math.max(0f, Math.min(100f, creature.getDodge() - dodge)));
         }
-        if (block != 0) {
-            creature.setBlock(Math.max(0, Math.min(100, creature.getBlock() - block)));
+        if (block != 0f) {
+            creature.setBlock(Math.max(0f, Math.min(100f, creature.getBlock() - block)));
         }
     }
 

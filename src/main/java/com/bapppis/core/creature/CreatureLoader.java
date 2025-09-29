@@ -37,9 +37,11 @@ public class CreatureLoader {
         }
 
         Gson gson = new Gson();
-        try (ScanResult scanResult = new ClassGraph()
-                .acceptPaths("data/creatures") // Scan all creatures and subfolders (players, enemies, etc.)
-                .scan()) {
+    try (ScanResult scanResult = new ClassGraph()
+        // Scan production creature data and also test fixture package so unit tests
+        // with JSON under com/... are found during test execution.
+        .acceptPaths("data/creatures", "com/bapppis/core/Creature")
+        .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
                     try (Reader reader = new InputStreamReader(resource.open())) {
@@ -246,7 +248,12 @@ public class CreatureLoader {
     public static Creature getCreature(String name) {
         Creature c = creatureMap.get(name);
         if (c != null) return c;
-        return playerMap.get(name);
+        Creature p = playerMap.get(name);
+        if (p != null) return p;
+        // Debug: if not found, list available creature names (helpful for tests)
+        System.out.println("CreatureLoader: lookup failed for '" + name + "'. Available creatures: " + creatureMap.keySet());
+        System.out.println("CreatureLoader: available players: " + playerMap.keySet());
+        return null;
     }
 
     public static Creature getCreatureById(int id) {

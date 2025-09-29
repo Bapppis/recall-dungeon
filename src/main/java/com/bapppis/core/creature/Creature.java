@@ -29,9 +29,9 @@ public abstract class Creature {
     private CreatureType creatureType;
     private EnumMap<Stats, Integer> stats;
     private EnumMap<Resistances, Integer> resistances;
-    private Integer crit = 5; // Critical hit chance percentage, 5% is the default
-    private Integer dodge = 5; // Dodge chance percentage, 5% is the default
-    private Integer block = 5; // Block chance percentage, 5% is the default
+    private float crit = 5.0f; // Critical hit chance percentage (0-100), 5.0 is the default
+    private float dodge = 5.0f; // Dodge chance percentage (0-100), 5.0 is the default
+    private float block = 5.0f; // Block chance percentage (0-100), 5.0 is the default
     private HashMap<Integer, Property> buffs = new HashMap<>();
     private HashMap<Integer, Property> debuffs = new HashMap<>();
     private HashMap<Integer, Property> immunities = new HashMap<>();
@@ -342,30 +342,30 @@ public abstract class Creature {
         resistances.put(resistance, getResistance(resistance) + amount);
     }
 
-    public int getCrit() {
+    public float getCrit() {
         return crit;
     }
 
-    public int setCrit(int crit) {
-        this.crit = crit;
+    public float setCrit(float crit) {
+        this.crit = Math.max(0f, Math.min(100f, crit));
         return this.crit;
     }
 
-    public int getDodge() {
+    public float getDodge() {
         return dodge;
     }
 
-    public int setDodge(int dodge) {
-        this.dodge = dodge;
+    public float setDodge(float dodge) {
+        this.dodge = Math.max(0f, Math.min(100f, dodge));
         return this.dodge;
     }
 
-    public int getBlock() {
+    public float getBlock() {
         return block;
     }
 
-    public int setBlock(int block) {
-        this.block = block;
+    public float setBlock(float block) {
+        this.block = Math.max(0f, Math.min(100f, block));
         return this.block;
     }
 
@@ -452,20 +452,36 @@ public abstract class Creature {
         int physRaw = 0; // raw sum before crits
         int critCount = 0;
         int times = attack.getTimes();
-        int baseCrit = this.getCrit();
-        int mod = 0;
-        try { mod = attack.getCritMod(); } catch (Exception e) { mod = 0; }
-        int critChance = Math.max(0, Math.min(100, baseCrit + mod));
+    float baseCrit = this.getCrit();
+    int mod = 0;
+    try { mod = attack.getCritMod(); } catch (Exception e) { mod = 0; }
+    float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
         for (int i = 0; i < times; i++) {
+            // First roll to-hit against target dodge (0.0-100.0). If roll <= dodge, the hit misses.
+            float toHitRoll = ThreadLocalRandom.current().nextFloat() * 100f;
+            if (toHitRoll <= target.getDodge()) {
+                // Missed due to dodge
+                System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName() + " | attack='" + attack.name + "' roll=" + String.format("%.2f", toHitRoll) + " dodge=" + String.format("%.2f", target.getDodge()));
+                continue;
+            }
+            // Next roll against block. If roll <= block, the hit is blocked and does no damage.
+            float blockRoll = ThreadLocalRandom.current().nextFloat() * 100f;
+            if (blockRoll <= target.getBlock()) {
+                // Hit was blocked
+                System.out.println("Missed (block): " + this.getName() + " -> " + target.getName() + " | attack='" + attack.name + "' roll=" + String.format("%.2f", blockRoll) + " block=" + String.format("%.2f", target.getBlock()));
+                continue;
+            }
+
             int hit = 0;
             if (attack.physicalDamageDice != null && !attack.physicalDamageDice.isBlank()) {
-                // For per-hit dice, we need to roll the dice once per hit. The dice string may be like "2d6" meaning per-attack totals —
-                // but Attack.physicalDamageDice is treated as per-hit dice in our model for multiple `times` entries.
+                // For per-hit dice, roll once per hit.
                 hit = Dice.roll(attack.physicalDamageDice);
             }
             hit += Math.max(0, statBonus);
+            // Only successful hits count toward physRaw (pre-crit raw) and totals
             physRaw += hit;
-            boolean hitCrit = ThreadLocalRandom.current().nextInt(100) < critChance;
+            // Convert critChance (0-100) into a 0.0-1.0 probability and compare with nextFloat()
+            boolean hitCrit = ThreadLocalRandom.current().nextFloat() < (critChance / 100f);
             if (hitCrit) {
                 critCount++;
                 hit = hit * 2; // double this hit
@@ -666,12 +682,13 @@ public abstract class Creature {
             }
             // Apply crit/dodge/block if present on equipment
             try {
-                int eqCrit = eq.getCrit();
-                int eqDodge = eq.getDodge();
-                int eqBlock = eq.getBlock();
-                if (eqCrit != 0) this.setCrit(Math.max(0, Math.min(100, this.getCrit() + eqCrit)));
-                if (eqDodge != 0) this.setDodge(Math.max(0, Math.min(100, this.getDodge() + eqDodge)));
-                if (eqBlock != 0) this.setBlock(Math.max(0, Math.min(100, this.getBlock() + eqBlock)));
+                // Equipment currently exposes int getters; cast to float and apply
+                float eqCrit = (float) eq.getCrit();
+                float eqDodge = (float) eq.getDodge();
+                float eqBlock = (float) eq.getBlock();
+                if (eqCrit != 0f) this.setCrit(Math.max(0f, Math.min(100f, this.getCrit() + eqCrit)));
+                if (eqDodge != 0f) this.setDodge(Math.max(0f, Math.min(100f, this.getDodge() + eqDodge)));
+                if (eqBlock != 0f) this.setBlock(Math.max(0f, Math.min(100f, this.getBlock() + eqBlock)));
             } catch (Exception e) {
                 // Defensive: if getters aren't present, ignore
             }
@@ -708,12 +725,12 @@ public abstract class Creature {
             }
             // Remove crit/dodge/block if present on equipment
             try {
-                int eqCrit = eq.getCrit();
-                int eqDodge = eq.getDodge();
-                int eqBlock = eq.getBlock();
-                if (eqCrit != 0) this.setCrit(Math.max(0, Math.min(100, this.getCrit() - eqCrit)));
-                if (eqDodge != 0) this.setDodge(Math.max(0, Math.min(100, this.getDodge() - eqDodge)));
-                if (eqBlock != 0) this.setBlock(Math.max(0, Math.min(100, this.getBlock() - eqBlock)));
+                float eqCrit = (float) eq.getCrit();
+                float eqDodge = (float) eq.getDodge();
+                float eqBlock = (float) eq.getBlock();
+                if (eqCrit != 0f) this.setCrit(Math.max(0f, Math.min(100f, this.getCrit() - eqCrit)));
+                if (eqDodge != 0f) this.setDodge(Math.max(0f, Math.min(100f, this.getDodge() - eqDodge)));
+                if (eqBlock != 0f) this.setBlock(Math.max(0f, Math.min(100f, this.getBlock() - eqBlock)));
             } catch (Exception e) {
                 // Defensive: if getters aren't present, ignore
             }
