@@ -212,15 +212,17 @@ public class Equipment implements Item {
             int heal = Dice.roll(healingDice);
             creature.setCurrentHp(Math.min(creature.getMaxHp(), creature.getCurrentHp() + heal));
         }
-        // Apply crit/dodge/block modifiers (already clamped on the equipment side)
+        // Apply crit/dodge/block modifiers: add raw values to the creature so that
+        // unequipping will correctly restore the original raw values. Effective
+        // clamping is applied during combat checks.
         if (crit != 0f) {
-            creature.setCrit(Math.max(0f, Math.min(100f, creature.getCrit() + crit)));
+            creature.setCrit(creature.getCrit() + crit);
         }
         if (dodge != 0f) {
-            creature.setDodge(Math.max(0f, Math.min(100f, creature.getDodge() + dodge)));
+            creature.setDodge(creature.getDodge() + dodge);
         }
         if (block != 0f) {
-            creature.setBlock(Math.max(0f, Math.min(100f, creature.getBlock() + block)));
+            creature.setBlock(creature.getBlock() + block);
         }
     }
 
@@ -228,13 +230,13 @@ public class Equipment implements Item {
     public void onRemove(Creature creature) {
         // Remove crit/dodge/block modifiers
         if (crit != 0f) {
-            creature.setCrit(Math.max(0f, Math.min(100f, creature.getCrit() - crit)));
+            creature.setCrit(creature.getCrit() - crit);
         }
         if (dodge != 0f) {
-            creature.setDodge(Math.max(0f, Math.min(100f, creature.getDodge() - dodge)));
+            creature.setDodge(creature.getDodge() - dodge);
         }
         if (block != 0f) {
-            creature.setBlock(Math.max(0f, Math.min(100f, creature.getBlock() - block)));
+            creature.setBlock(creature.getBlock() - block);
         }
     }
 

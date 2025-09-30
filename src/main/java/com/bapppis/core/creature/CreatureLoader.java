@@ -37,13 +37,22 @@ public class CreatureLoader {
         }
 
         Gson gson = new Gson();
-    try (ScanResult scanResult = new ClassGraph()
+        try (ScanResult scanResult = new ClassGraph()
         // Scan production creature data and also test fixture package so unit tests
         // with JSON under com/... are found during test execution.
         .acceptPaths("data/creatures", "com/bapppis/core/Creature")
         .scan()) {
+            // Keep track of relative resource paths we've processed so we don't load the
+            // same path multiple times when it appears on the classpath (for example
+            // when both a source and compiled copy exist). This prevents duplicate-id
+            // warnings caused by duplicate classpath entries.
+            java.util.Set<String> processedResourcePaths = new java.util.HashSet<>();
             for (Resource resource : scanResult.getAllResources()) {
-                if (resource.getPath().endsWith(".json")) {
+                String relPath = resource.getPath();
+                // Skip duplicates of the same relative path
+                if (processedResourcePaths.contains(relPath)) continue;
+                processedResourcePaths.add(relPath);
+                if (relPath.endsWith(".json")) {
                     try (Reader reader = new InputStreamReader(resource.open())) {
                         Creature creature;
                         // Read the JSON into a JsonObject first so we can strip fields that would
@@ -153,9 +162,13 @@ public class CreatureLoader {
                             // Index by id (primary) and by name (optional)
                             int cid = creature.getId();
                             if (cid > 0) {
+                                // If we've already indexed this numeric id from a previously
+                                // processed resource, skip the duplicate to avoid overwriting
+                                // and noisy warnings when the same file appears on the
+                                // classpath multiple times (source + compiled).
                                 if (creatureIdMap.containsKey(cid) || playerIdMap.containsKey(cid)) {
-                                    System.out.println(
-                                            "Warning: Duplicate creature id " + cid + ". Overwriting previous entry.");
+                                    // skip this duplicate resource entirely
+                                    continue;
                                 }
                                 if (creature instanceof Player) {
                                     playerIdMap.put(cid, (Player) creature);

@@ -1,0 +1,11 @@
+{
+  "id": 7499,
+  "name": "Test Helmet",
+  "description": "This is not a part of our world.",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "HELMET",
+  "crit": 5,
+  "dodge": 5,
+  "defense": -15,
+  "rarity": "LEGENDARY"
+}

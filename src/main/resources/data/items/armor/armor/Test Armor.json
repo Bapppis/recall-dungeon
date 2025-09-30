@@ -1,0 +1,11 @@
+{
+  "id": 7249,
+  "name": "Test Armor",
+  "description": "Where did you get this?",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "ARMOR",
+  "crit": 5,
+  "dodge": 5,
+  "block": -15,
+  "rarity": "LEGENDARY"
+}

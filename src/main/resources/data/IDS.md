@@ -37,8 +37,8 @@ Notes
 
 ## Creatures (5000-6999)
 ### Players (5000-5499)
-- 5001 — Captain Aldric Voss — data/creatures/players/humanplayers/CaptainVoss.json
-- 5000 — Biggles The Unlucky — data/creatures/players/humanplayers/BigglesTheUnlucky.json
+- 5001 — Captain Aldric Voss — data/creatures/players/CaptainVoss.json
+- 5000 — Biggles The Unlucky — data/creatures/players/BigglesTheUnlucky.json
 
 ### Neutrals (5500-5999)
 
@@ -47,7 +47,7 @@ Notes
 - 6000 — Dark Hound — data/creatures/beasts/Dark Hound.json
 
 #### Constructs (6100-6199)
-- 6100 — Training Dummy — data/creatures/constructs/Training Dummyjson
+- 6100 — Training Dummy — data/creatures/constructs/Training Dummy.json
 
 #### Dragons (6200-6299)
 - [none indexed yet]
@@ -73,15 +73,22 @@ Notes
 #### Armor (7000-7249)
 - 7000 — Armor of Water — data/items/armor/armor/Armor of Water.json
 - 7001 — Armor of Bones — data/items/armor/armor/Armor of Bones.json
+- 7002 — Broken Steel Armor — data/items/armor/armor/Broken Steel Armor.json
+- 7003 — Leather Armor — data/items/armor/armor/Leather Armor.json
+- 7249 — Test Armor — data/items/armor/armor/Test Armor.json
 
 #### Helmets (7250-7499)
 - 7250 — Crusader Helmet — data/items/armor/helmets/Crusader Helmet.json
+- 7251 — Green Hood — data/items/armor/helmets/Green Hood.json
+- 7499 — Test Helmet — data/items/armor/helmets/Green Hood.json
 
 #### Legwear (7500-7749)
 - 7500 — Legs of Speed — data/items/armor/legwear/Legs of Speed.json
+- 7501 — Leather Leggings — data/items/armor/legwear/Leather Leggings.json
 
 #### Shields (7750-7999)
 - 7750 — Tower Shield — data/items/armor/shields/Tower Shield.json
+- 7751 — Heater Shield — data/items/armor/shields/Heater Shield.json
 
 ### Consumables(8000-8999)
 - 8000 — Minor Healing Potion — data/items/consumables/potions/Minor Healing Potion.json

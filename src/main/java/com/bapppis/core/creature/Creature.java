@@ -45,7 +45,8 @@ public abstract class Creature {
     // "monster_goblin")
     private String sprite;
 
-    // Test hook: optional consumer to receive detailed attack reports when an attack occurs.
+    // Test hook: optional consumer to receive detailed attack reports when an
+    // attack occurs.
     // Tests can set Creature.attackListener to capture raw rolls and metadata.
     public static Consumer<AttackReport> attackListener = null;
 
@@ -346,8 +347,10 @@ public abstract class Creature {
         return crit;
     }
 
+    // Store raw crit value (can be negative or >100). Clamping to 0-100 is done
+    // only when the value is used for probability checks.
     public float setCrit(float crit) {
-        this.crit = Math.max(0f, Math.min(100f, crit));
+        this.crit = crit;
         return this.crit;
     }
 
@@ -355,8 +358,10 @@ public abstract class Creature {
         return dodge;
     }
 
+    // Store raw dodge value (can be negative or >100). When used for to-hit
+    // checks the effective dodge will be clamped to 0-80.
     public float setDodge(float dodge) {
-        this.dodge = Math.max(0f, Math.min(100f, dodge));
+        this.dodge = dodge;
         return this.dodge;
     }
 
@@ -364,8 +369,10 @@ public abstract class Creature {
         return block;
     }
 
+    // Store raw block value (can be negative or >100). When used for block
+    // checks the effective block will be clamped to 0-80.
     public float setBlock(float block) {
-        this.block = Math.max(0f, Math.min(100f, block));
+        this.block = block;
         return this.block;
     }
 
@@ -453,22 +460,37 @@ public abstract class Creature {
         int critCount = 0;
         int times = attack.getTimes();
     float baseCrit = this.getCrit();
-    int mod = 0;
-    try { mod = attack.getCritMod(); } catch (Exception e) { mod = 0; }
+        int mod = 0;
+        try {
+            mod = attack.getCritMod();
+        } catch (Exception e) {
+            mod = 0;
+        }
+    // Effective crit chance used in checks is clamped to 0-100
     float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
         for (int i = 0; i < times; i++) {
-            // First roll to-hit against target dodge (0.0-100.0). If roll <= dodge, the hit misses.
+            // First roll to-hit against target dodge (0.0-100.0). If roll <= dodge, the hit
+            // misses.
             float toHitRoll = ThreadLocalRandom.current().nextFloat() * 100f;
-            if (toHitRoll <= target.getDodge()) {
+            // Effective dodge is clamped to 0-80 when checking to-hit
+            float effectiveDodge = Math.max(0f, Math.min(80f, target.getDodge()));
+            if (toHitRoll <= effectiveDodge) {
                 // Missed due to dodge
-                System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName() + " | attack='" + attack.name + "' roll=" + String.format("%.2f", toHitRoll) + " dodge=" + String.format("%.2f", target.getDodge()));
+                System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName() + " | attack='"
+                        + attack.name + "' roll=" + String.format("%.2f", toHitRoll) + " dodge="
+                        + String.format("%.2f", effectiveDodge));
                 continue;
             }
-            // Next roll against block. If roll <= block, the hit is blocked and does no damage.
+            // Next roll against block. If roll <= block, the hit is blocked and does no
+            // damage.
             float blockRoll = ThreadLocalRandom.current().nextFloat() * 100f;
-            if (blockRoll <= target.getBlock()) {
+            // Effective block is clamped to 0-80 when checking block
+            float effectiveBlock = Math.max(0f, Math.min(80f, target.getBlock()));
+            if (blockRoll <= effectiveBlock) {
                 // Hit was blocked
-                System.out.println("Missed (block): " + this.getName() + " -> " + target.getName() + " | attack='" + attack.name + "' roll=" + String.format("%.2f", blockRoll) + " block=" + String.format("%.2f", target.getBlock()));
+                System.out.println("Missed (block): " + this.getName() + " -> " + target.getName() + " | attack='"
+                        + attack.name + "' roll=" + String.format("%.2f", blockRoll) + " block="
+                        + String.format("%.2f", effectiveBlock));
                 continue;
             }
 
@@ -480,8 +502,11 @@ public abstract class Creature {
             hit += Math.max(0, statBonus);
             // Only successful hits count toward physRaw (pre-crit raw) and totals
             physRaw += hit;
-            // Convert critChance (0-100) into a 0.0-1.0 probability and compare with nextFloat()
-            boolean hitCrit = ThreadLocalRandom.current().nextFloat() < (critChance / 100f);
+            // Convert critChance (0-100) into a 0.0-1.0 probability and compare with
+            // nextFloat()
+            // Effective crit chance is clamped 0-100 and converted to 0.0-1.0
+            float effectiveCrit = Math.max(0f, Math.min(100f, critChance));
+            boolean hitCrit = ThreadLocalRandom.current().nextFloat() < (effectiveCrit / 100f);
             if (hitCrit) {
                 critCount++;
                 hit = hit * 2; // double this hit
@@ -491,7 +516,9 @@ public abstract class Creature {
         }
 
         int physAfter = Math.floorDiv(
-                totalPhysBeforeResist * target.getResistance(physicalType == null ? this.defaultDamageType : physicalType), 100);
+                totalPhysBeforeResist
+                        * target.getResistance(physicalType == null ? this.defaultDamageType : physicalType),
+                100);
         int mag = attack.rollMagicDamage();
         int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
 
@@ -519,12 +546,14 @@ public abstract class Creature {
         }
 
         if (magAfter > 0) {
-            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): " + totalPhysBeforeResist + ", magic: " + mag + ", After: "
+            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): "
+                    + totalPhysBeforeResist + ", magic: " + mag + ", After: "
                     + physAfter + ", " + magAfter);
             target.alterHp(-physAfter);
             target.alterHp(-magAfter);
         } else {
-            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): " + totalPhysBeforeResist + ", After: " + physAfter);
+            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): "
+                    + totalPhysBeforeResist + ", After: " + physAfter);
             target.alterHp(-physAfter);
         }
     }
@@ -686,9 +715,12 @@ public abstract class Creature {
                 float eqCrit = (float) eq.getCrit();
                 float eqDodge = (float) eq.getDodge();
                 float eqBlock = (float) eq.getBlock();
-                if (eqCrit != 0f) this.setCrit(Math.max(0f, Math.min(100f, this.getCrit() + eqCrit)));
-                if (eqDodge != 0f) this.setDodge(Math.max(0f, Math.min(100f, this.getDodge() + eqDodge)));
-                if (eqBlock != 0f) this.setBlock(Math.max(0f, Math.min(100f, this.getBlock() + eqBlock)));
+                if (eqCrit != 0f)
+                    this.setCrit(this.getCrit() + eqCrit);
+                if (eqDodge != 0f)
+                    this.setDodge(this.getDodge() + eqDodge);
+                if (eqBlock != 0f)
+                    this.setBlock(this.getBlock() + eqBlock);
             } catch (Exception e) {
                 // Defensive: if getters aren't present, ignore
             }
@@ -728,9 +760,12 @@ public abstract class Creature {
                 float eqCrit = (float) eq.getCrit();
                 float eqDodge = (float) eq.getDodge();
                 float eqBlock = (float) eq.getBlock();
-                if (eqCrit != 0f) this.setCrit(Math.max(0f, Math.min(100f, this.getCrit() - eqCrit)));
-                if (eqDodge != 0f) this.setDodge(Math.max(0f, Math.min(100f, this.getDodge() - eqDodge)));
-                if (eqBlock != 0f) this.setBlock(Math.max(0f, Math.min(100f, this.getBlock() - eqBlock)));
+                if (eqCrit != 0f)
+                    this.setCrit(this.getCrit() - eqCrit);
+                if (eqDodge != 0f)
+                    this.setDodge(this.getDodge() - eqDodge);
+                if (eqBlock != 0f)
+                    this.setBlock(this.getBlock() - eqBlock);
             } catch (Exception e) {
                 // Defensive: if getters aren't present, ignore
             }
