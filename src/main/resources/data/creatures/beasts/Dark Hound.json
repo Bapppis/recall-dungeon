@@ -18,9 +18,9 @@
     "DARKNESS": 80,
     "SLASHING": 90
   },
-  "crit": 5,
-  "dodge": 5,
-  "block": 0,
+  "baseCrit": 5,
+  "baseDodge": 5,
+  "baseBlock": 0,
   "properties": [3000],
 
   "attacks": [

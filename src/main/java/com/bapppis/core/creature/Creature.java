@@ -29,9 +29,18 @@ public abstract class Creature {
     private CreatureType creatureType;
     private EnumMap<Stats, Integer> stats;
     private EnumMap<Resistances, Integer> resistances;
-    private float crit = 5.0f; // Critical hit chance percentage (0-100), 5.0 is the default
-    private float dodge = 5.0f; // Dodge chance percentage (0-100), 5.0 is the default
-    private float block = 5.0f; // Block chance percentage (0-100), 5.0 is the default
+    private float baseCrit;
+    private float baseDodge;
+    private float baseBlock;
+    private float crit; // base-derived critical hit chance percentage (0-100)
+    private float dodge; // base-derived dodge chance percentage (0-80)
+    private float block; // base-derived block chance percentage (0-80)
+    // Equipment aggregates (sum of all equipped item contributions)
+    private final java.util.EnumMap<Stats, Integer> equipmentStats = new java.util.EnumMap<>(Stats.class);
+    private final java.util.EnumMap<Resistances, Integer> equipmentResists = new java.util.EnumMap<>(Resistances.class);
+    private float equipmentCrit = 0f;
+    private float equipmentDodge = 0f;
+    private float equipmentBlock = 0f;
     private HashMap<Integer, Property> buffs = new HashMap<>();
     private HashMap<Integer, Property> debuffs = new HashMap<>();
     private HashMap<Integer, Property> immunities = new HashMap<>();
@@ -145,6 +154,7 @@ public abstract class Creature {
         }
         size = Size.MEDIUM; // default size
         type = Type.ENEMY; // default type
+        recalcDerivedStats();
     }
 
     // --- Getters and Setters ---
@@ -343,8 +353,20 @@ public abstract class Creature {
         resistances.put(resistance, getResistance(resistance) + amount);
     }
 
+    public float getBaseCrit() {
+        return baseCrit;
+    }
+
+    public float getBaseDodge() {
+        return baseDodge;
+    }
+
+    public float getBaseBlock() {
+        return baseBlock;
+    }
+
     public float getCrit() {
-        return crit;
+        return this.crit + this.equipmentCrit;
     }
 
     // Store raw crit value (can be negative or >100). Clamping to 0-100 is done
@@ -355,7 +377,7 @@ public abstract class Creature {
     }
 
     public float getDodge() {
-        return dodge;
+        return this.dodge + this.equipmentDodge;
     }
 
     // Store raw dodge value (can be negative or >100). When used for to-hit
@@ -366,7 +388,7 @@ public abstract class Creature {
     }
 
     public float getBlock() {
-        return block;
+        return this.block + this.equipmentBlock;
     }
 
     // Store raw block value (can be negative or >100). When used for block
@@ -374,6 +396,12 @@ public abstract class Creature {
     public float setBlock(float block) {
         this.block = block;
         return this.block;
+    }
+
+    public void recalcDerivedStats() {
+        float dodgeDelta = 2.5f * (this.getStat(Stats.DEXTERITY) - 10);
+        this.dodge = this.baseDodge + dodgeDelta;
+
     }
 
     public void attack(Creature target) {
@@ -459,15 +487,15 @@ public abstract class Creature {
         int physRaw = 0; // raw sum before crits
         int critCount = 0;
         int times = attack.getTimes();
-    float baseCrit = this.getCrit();
+        float baseCrit = this.getCrit();
         int mod = 0;
         try {
             mod = attack.getCritMod();
         } catch (Exception e) {
             mod = 0;
         }
-    // Effective crit chance used in checks is clamped to 0-100
-    float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
+        // Effective crit chance used in checks is clamped to 0-100
+        float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
         for (int i = 0; i < times; i++) {
             // First roll to-hit against target dodge (0.0-100.0). If roll <= dodge, the hit
             // misses.
@@ -682,94 +710,107 @@ public abstract class Creature {
     }
 
     private void applyItemEffects(Item item) {
-        // Only apply if item is Equipment (has stats/resistances)
-        if (item instanceof com.bapppis.core.item.Equipment) {
-            com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
-            if (eq.getStats() != null) {
-                for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
-                    if (entry.getKey().equalsIgnoreCase("VISION_RANGE")) {
-                        setVisionRange(getVisionRange() + entry.getValue());
-                    } else {
-                        try {
-                            Stats stat = Stats.valueOf(entry.getKey());
-                            modifyStat(stat, entry.getValue());
-                        } catch (IllegalArgumentException e) {
-                            // Ignore unknown stat
-                        }
-                    }
-                }
-            }
-            if (eq.getResistances() != null) {
-                for (java.util.Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
+        if (!(item instanceof com.bapppis.core.item.Equipment))
+            return;
+        com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
+
+        // Stats
+        if (eq.getStats() != null) {
+            for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("VISION_RANGE")) {
+                    setVisionRange(getVisionRange() + entry.getValue());
+                } else {
                     try {
-                        Resistances res = Resistances.valueOf(entry.getKey());
-                        modifyResistance(res, entry.getValue());
+                        Stats stat = Stats.valueOf(entry.getKey());
+                        int prev = equipmentStats.getOrDefault(stat, 0);
+                        equipmentStats.put(stat, prev + entry.getValue());
+                        modifyStat(stat, entry.getValue());
                     } catch (IllegalArgumentException e) {
-                        // Ignore unknown resistance
+                        // ignore unknown stats
                     }
                 }
-            }
-            // Apply crit/dodge/block if present on equipment
-            try {
-                // Equipment currently exposes int getters; cast to float and apply
-                float eqCrit = (float) eq.getCrit();
-                float eqDodge = (float) eq.getDodge();
-                float eqBlock = (float) eq.getBlock();
-                if (eqCrit != 0f)
-                    this.setCrit(this.getCrit() + eqCrit);
-                if (eqDodge != 0f)
-                    this.setDodge(this.getDodge() + eqDodge);
-                if (eqBlock != 0f)
-                    this.setBlock(this.getBlock() + eqBlock);
-            } catch (Exception e) {
-                // Defensive: if getters aren't present, ignore
             }
         }
+
+        // Resistances
+        if (eq.getResistances() != null) {
+            for (java.util.Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
+                try {
+                    Resistances res = Resistances.valueOf(entry.getKey());
+                    int prev = equipmentResists.getOrDefault(res, 0);
+                    equipmentResists.put(res, prev + entry.getValue());
+                    modifyResistance(res, entry.getValue());
+                } catch (IllegalArgumentException e) {
+                    // ignore
+                }
+            }
+        }
+
+        // crit/dodge/block aggregates
+        try {
+            float eqCrit = eq.getCrit();
+            float eqDodge = eq.getDodge();
+            float eqBlock = eq.getBlock();
+            if (eqCrit != 0f) equipmentCrit += eqCrit;
+            if (eqDodge != 0f) equipmentDodge += eqDodge;
+            if (eqBlock != 0f) equipmentBlock += eqBlock;
+        } catch (Exception ignored) {
+        }
+
+        // Recompute derived stats now that stats/equipment changed
+        recalcDerivedStats();
     }
 
     private void removeItemEffects(Item item) {
-        // Only remove if item is Equipment (has stats/resistances)
-        if (item instanceof com.bapppis.core.item.Equipment) {
-            com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
-            if (eq.getStats() != null) {
-                for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
-                    if (entry.getKey().equalsIgnoreCase("VISION_RANGE")) {
-                        setVisionRange(getVisionRange() - entry.getValue());
-                    } else {
-                        try {
-                            Stats stat = Stats.valueOf(entry.getKey());
-                            modifyStat(stat, -entry.getValue());
-                        } catch (IllegalArgumentException e) {
-                            // Ignore unknown stat
-                        }
-                    }
-                }
-            }
-            if (eq.getResistances() != null) {
-                for (java.util.Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
+        if (!(item instanceof com.bapppis.core.item.Equipment))
+            return;
+        com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
+
+        // Stats
+        if (eq.getStats() != null) {
+            for (java.util.Map.Entry<String, Integer> entry : eq.getStats().entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("VISION_RANGE")) {
+                    setVisionRange(getVisionRange() - entry.getValue());
+                } else {
                     try {
-                        Resistances res = Resistances.valueOf(entry.getKey());
-                        modifyResistance(res, -entry.getValue());
+                        Stats stat = Stats.valueOf(entry.getKey());
+                        int prev = equipmentStats.getOrDefault(stat, 0);
+                        equipmentStats.put(stat, prev - entry.getValue());
+                        modifyStat(stat, -entry.getValue());
                     } catch (IllegalArgumentException e) {
-                        // Ignore unknown resistance
+                        // ignore unknown stats
                     }
                 }
-            }
-            // Remove crit/dodge/block if present on equipment
-            try {
-                float eqCrit = (float) eq.getCrit();
-                float eqDodge = (float) eq.getDodge();
-                float eqBlock = (float) eq.getBlock();
-                if (eqCrit != 0f)
-                    this.setCrit(this.getCrit() - eqCrit);
-                if (eqDodge != 0f)
-                    this.setDodge(this.getDodge() - eqDodge);
-                if (eqBlock != 0f)
-                    this.setBlock(this.getBlock() - eqBlock);
-            } catch (Exception e) {
-                // Defensive: if getters aren't present, ignore
             }
         }
+
+        // Resistances
+        if (eq.getResistances() != null) {
+            for (java.util.Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
+                try {
+                    Resistances res = Resistances.valueOf(entry.getKey());
+                    int prev = equipmentResists.getOrDefault(res, 0);
+                    equipmentResists.put(res, prev - entry.getValue());
+                    modifyResistance(res, -entry.getValue());
+                } catch (IllegalArgumentException e) {
+                    // ignore
+                }
+            }
+        }
+
+        // crit/dodge/block aggregates
+        try {
+            float eqCrit = eq.getCrit();
+            float eqDodge = eq.getDodge();
+            float eqBlock = eq.getBlock();
+            if (eqCrit != 0f) equipmentCrit -= eqCrit;
+            if (eqDodge != 0f) equipmentDodge -= eqDodge;
+            if (eqBlock != 0f) equipmentBlock -= eqBlock;
+        } catch (Exception ignored) {
+        }
+
+        // Recompute derived stats now that stats/equipment changed
+        recalcDerivedStats();
     }
 
     public void addProperty(Property property) {
@@ -851,19 +892,11 @@ public abstract class Creature {
     }
 
     public void updateMaxHp() {
-        if (this.getStat(Stats.CONSTITUTION) >= 10) {
-            int bonusHp = this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10); // Each point above 10 gives +1 HP
-                                                                                     // plus level bonus
-            this.setMaxHp(this.maxHp + bonusHp);
-            this.modifyHp(bonusHp);
-        } else {
-            int bonusHp = (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))); // Each point below 10 gives -1
-                                                                                       // max HP
-            if (bonusHp < 0)
-                bonusHp = 1; // Prevent reducing maxHp below base due to low CON
-            this.setMaxHp(this.maxHp + bonusHp);
-            this.modifyHp(bonusHp);
-        }
+        int delta = this.getStat(Stats.CONSTITUTION) - 10;
+        int bonusHp = this.hpLvlBonus + delta;
+        bonusHp = Math.max(1, bonusHp);
+        this.setMaxHp(this.maxHp + bonusHp);
+        this.modifyHp(bonusHp);
     }
 
     public void modifyHp(int amount) {
@@ -886,6 +919,34 @@ public abstract class Creature {
         }
         this.maxHp = Math.max(1, newMaxHp);
         this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
+    }
+
+    /**
+     * Finalize creature fields after loading from JSON.
+     * This includes resetting max HP to base, updating derived HP via
+     * updateMaxHp(),
+     * and converting stored levels into XP so that level-up bonuses are applied
+     * by invoking addXp(tempXp).
+     *
+     * Call this once after Gson has populated fields and after properties/items
+     * (starting equipment) have been applied.
+     */
+    public void finalizeAfterLoad() {
+        int baseHp = this.getBaseHp();
+        this.setMaxHp(baseHp); // Reset max HP to base before applying properties
+        // Recompute max/current HP correctly
+        this.updateMaxHp();
+
+        // Convert existing levels into XP and add them so addXp() handles level-up
+        // logic
+        int tempXp = this.getXp();
+        int lvl = this.getLevel();
+        for (int i = lvl; i > 0; i--) {
+            tempXp += i * 10;
+        }
+        this.setLevel(0);
+        this.setXp(0);
+        this.addXp(tempXp);
     }
 
     @Override

@@ -10,7 +10,7 @@
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {
-    "STRENGTH": 13,
+    "STRENGTH": 12,
     "CONSTITUTION": 12,
     "DEXTERITY": 10,
     "INTELLIGENCE": 7,
@@ -22,10 +22,10 @@
     "NATURE": 90,
     "SLASHING": 120
   },
-  "crit": 10,
-  "dodge": 10,
-  "block": 5,
-  "properties": [2000, 4000, 4002],
+  "baseCrit": 10,
+  "baseDodge": 10,
+  "baseBlock": 5,
+  "properties": [4000, 4002],
 
   "attacks": [
     { "name": "Scratch", "times": 1, "physicalDamageDice": "1d2", "damageType": "SLASHING" }

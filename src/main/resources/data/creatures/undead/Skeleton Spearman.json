@@ -18,9 +18,9 @@
     "BLUDGEONING": 120,
     "SLASHING": 90
   },
-  "crit": 5,
-  "dodge": 5,
-  "block": 20,
+  "baseCrit": 5,
+  "baseDodge": 5,
+  "baseBlock": 20,
   "properties": [3000],
 
   "attacks": [

@@ -17,9 +17,9 @@
     "PIERCING": 120,
     "SLASHING": 90
   },
-  "crit": 10,
-  "dodge": 15,
-  "block": 0,
+  "baseCrit": 10,
+  "baseDodge": 15,
+  "baseBlock": 0,
   "properties": null,
 
   "attacks": [

@@ -18,9 +18,9 @@
     "CHARISMA": 10,
     "LUCK": 1
   },
-  "crit": 5,
-  "dodge": 5,
-  "block": 15,
+  "baseCrit": 5,
+  "baseDodge": 5,
+  "baseBlock": 15,
   "properties": [4001],
 
   "attacks": [

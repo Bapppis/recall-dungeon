@@ -5,7 +5,10 @@
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
   "crit": 5,
-  "dodge": 5,
+  "dodge": 0,
   "block": -15,
+  "stats": {
+    "DEXTERITY": 0
+  },
   "rarity": "LEGENDARY"
 }

@@ -5,7 +5,10 @@
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
   "crit": 5,
-  "dodge": 5,
+  "dodge": 0,
+  "stats": {
+    "DEXTERITY": -1
+  },
   "defense": -15,
   "rarity": "LEGENDARY"
 }

@@ -38,10 +38,10 @@ public class CreatureLoader {
 
         Gson gson = new Gson();
         try (ScanResult scanResult = new ClassGraph()
-        // Scan production creature data and also test fixture package so unit tests
-        // with JSON under com/... are found during test execution.
-        .acceptPaths("data/creatures", "com/bapppis/core/Creature")
-        .scan()) {
+                // Scan production creature data and also test fixture package so unit tests
+                // with JSON under com/... are found during test execution.
+                .acceptPaths("data/creatures", "com/bapppis/core/Creature")
+                .scan()) {
             // Keep track of relative resource paths we've processed so we don't load the
             // same path multiple times when it appears on the classpath (for example
             // when both a source and compiled copy exist). This prevents duplicate-id
@@ -50,7 +50,8 @@ public class CreatureLoader {
             for (Resource resource : scanResult.getAllResources()) {
                 String relPath = resource.getPath();
                 // Skip duplicates of the same relative path
-                if (processedResourcePaths.contains(relPath)) continue;
+                if (processedResourcePaths.contains(relPath))
+                    continue;
                 processedResourcePaths.add(relPath);
                 if (relPath.endsWith(".json")) {
                     try (Reader reader = new InputStreamReader(resource.open())) {
@@ -145,29 +146,15 @@ public class CreatureLoader {
                             }
                             // Load starting inventory and equipment slots from JSON
                             applyStartingItemsFromJson(resource.getPath(), gson, creature);
+
                             // Apply any property effects that modify stats or other attributes
-                            int baseHp = creature.getBaseHp();
-                            creature.setMaxHp(baseHp); // Reset max HP to base before applying properties
-                            //creature.setCurrentHp(baseHp);
-                            creature.updateMaxHp();
-                            int tempXp = creature.getXp();
-                            // Convert all levels to XP and add to tempXp
-                            int lvl = creature.getLevel();
-                            for (int i = lvl; i > 0; i--) {
-                                tempXp += i * 10;
-                            }
-                            creature.setLevel(0); // Reset level to 0 after converting to XP
-                            creature.setXp(0); // Reset XP to 0 before adding
-                            creature.addXp(tempXp); // Add any extra XP specified in JSON
+                            // Finalize creature fields after load (resets HP, converts level->XP, etc.)
+                            creature.finalizeAfterLoad();
+                            creature.recalcDerivedStats();
                             // Index by id (primary) and by name (optional)
                             int cid = creature.getId();
                             if (cid > 0) {
-                                // If we've already indexed this numeric id from a previously
-                                // processed resource, skip the duplicate to avoid overwriting
-                                // and noisy warnings when the same file appears on the
-                                // classpath multiple times (source + compiled).
                                 if (creatureIdMap.containsKey(cid) || playerIdMap.containsKey(cid)) {
-                                    // skip this duplicate resource entirely
                                     continue;
                                 }
                                 if (creature instanceof Player) {
@@ -199,7 +186,8 @@ public class CreatureLoader {
         try (Reader reader = new InputStreamReader(
                 CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
             com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);
-            if (obj == null) return;
+            if (obj == null)
+                return;
             // Inventory array
             if (obj.has("inventory") && obj.get("inventory").isJsonArray()) {
                 for (com.google.gson.JsonElement el : obj.getAsJsonArray("inventory")) {
@@ -218,7 +206,7 @@ public class CreatureLoader {
             }
 
             // Equipment slots: helmet, armor, legwear, weapon, offhand
-            String[] slots = new String[] {"helmet", "armor", "legwear", "weapon", "offhand"};
+            String[] slots = new String[] { "helmet", "armor", "legwear", "weapon", "offhand" };
             for (String slotName : slots) {
                 if (obj.has(slotName) && obj.get(slotName).isJsonPrimitive()) {
                     try {
@@ -260,18 +248,22 @@ public class CreatureLoader {
 
     public static Creature getCreature(String name) {
         Creature c = creatureMap.get(name);
-        if (c != null) return c;
+        if (c != null)
+            return c;
         Creature p = playerMap.get(name);
-        if (p != null) return p;
+        if (p != null)
+            return p;
         // Debug: if not found, list available creature names (helpful for tests)
-        System.out.println("CreatureLoader: lookup failed for '" + name + "'. Available creatures: " + creatureMap.keySet());
+        System.out.println(
+                "CreatureLoader: lookup failed for '" + name + "'. Available creatures: " + creatureMap.keySet());
         System.out.println("CreatureLoader: available players: " + playerMap.keySet());
         return null;
     }
 
     public static Creature getCreatureById(int id) {
         Creature c = creatureIdMap.get(id);
-        if (c != null) return c;
+        if (c != null)
+            return c;
         return playerIdMap.get(id);
     }
 
