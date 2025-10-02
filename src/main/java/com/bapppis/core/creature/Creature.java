@@ -23,6 +23,10 @@ public abstract class Creature {
     private int maxHp;
     private int currentHp;
     private int hpLvlBonus; // Additional HP gained per level
+    private int currentMana;
+    private int maxMana;
+    private int currentStamina;
+    private int maxStamina;
     private Resistances defaultDamageType = Resistances.BLUDGEONING;
     private Size size;
     private Type type;
@@ -249,6 +253,58 @@ public abstract class Creature {
 
     public void setHpLvlBonus(int hpLvlBonus) {
         this.hpLvlBonus = hpLvlBonus;
+    }
+
+    public int getCurrentMana() {
+        return currentMana;
+    }
+
+    public int getMaxMana() {
+        return maxMana;
+    }
+
+    public int getCurrentStamina() {
+        return currentStamina;
+    }
+
+    public int getMaxStamina() {
+        return maxStamina;
+    }
+
+    public void setMaxMana(int maxMana) {
+        if (maxMana < 0) {
+            maxMana = 0; // Ensure maxMana is at least 0
+        }
+        // Preserve the currentMana/maxMana ratio, rounding down
+        double ratio = this.maxMana > 0 ? (double) currentMana / this.maxMana : 1.0;
+        this.maxMana = maxMana;
+        this.currentMana = Math.max(0, (int) (this.maxMana * ratio));
+    }
+
+    public void setCurrentMana(int mana) {
+        this.currentMana = Math.max(0, Math.min(mana, this.maxMana));
+    }
+
+    public void alterMana(int amount) {
+        this.currentMana = Math.max(0, Math.min(this.currentMana + amount, this.maxMana));
+    }
+
+    public void setMaxStamina(int maxStamina) {
+        if (maxStamina < 0) {
+            maxStamina = 0; // Ensure maxStamina is at least 0
+        }
+        // Preserve the currentStamina/maxStamina ratio, rounding down
+        double ratio = this.maxStamina > 0 ? (double) currentStamina / this.maxStamina : 1.0;
+        this.maxStamina = maxStamina;
+        this.currentStamina = Math.max(0, (int) (this.maxStamina * ratio));
+    }
+
+    public void setCurrentStamina(int stamina) {
+        this.currentStamina = Math.max(0, Math.min(stamina, this.maxStamina));
+    }
+
+    public void alterStamina(int amount) {
+        this.currentStamina = Math.max(0, Math.min(this.currentStamina + amount, this.maxStamina));
     }
 
     public Resistances getDefaultDamageType() {
@@ -751,9 +807,12 @@ public abstract class Creature {
             float eqCrit = eq.getCrit();
             float eqDodge = eq.getDodge();
             float eqBlock = eq.getBlock();
-            if (eqCrit != 0f) equipmentCrit += eqCrit;
-            if (eqDodge != 0f) equipmentDodge += eqDodge;
-            if (eqBlock != 0f) equipmentBlock += eqBlock;
+            if (eqCrit != 0f)
+                equipmentCrit += eqCrit;
+            if (eqDodge != 0f)
+                equipmentDodge += eqDodge;
+            if (eqBlock != 0f)
+                equipmentBlock += eqBlock;
         } catch (Exception ignored) {
         }
 
@@ -803,9 +862,12 @@ public abstract class Creature {
             float eqCrit = eq.getCrit();
             float eqDodge = eq.getDodge();
             float eqBlock = eq.getBlock();
-            if (eqCrit != 0f) equipmentCrit -= eqCrit;
-            if (eqDodge != 0f) equipmentDodge -= eqDodge;
-            if (eqBlock != 0f) equipmentBlock -= eqBlock;
+            if (eqCrit != 0f)
+                equipmentCrit -= eqCrit;
+            if (eqDodge != 0f)
+                equipmentDodge -= eqDodge;
+            if (eqBlock != 0f)
+                equipmentBlock -= eqBlock;
         } catch (Exception ignored) {
         }
 
