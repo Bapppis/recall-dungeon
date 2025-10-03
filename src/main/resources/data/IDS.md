@@ -6,6 +6,7 @@ Notes
 - Primary lookup is by id. Names are for display.
 - Duplicate ids are flagged (later load wins at runtime).
 - Missing ids are flagged and should be assigned.
+ - Paths listed here correspond to resources under `src/main/resources/data/**`, which is the root scanned by the loader at runtime.
 
 ## Spells (000-999)
 - [none indexed yet]

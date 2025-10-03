@@ -17,6 +17,9 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 
 ## Table of Contents
 - [Features](#features)
+- [Combat and Stats](#combat-and-stats)
+- [Mana Scaling](#mana-scaling)
+- [Loading and Finalization](#loading-and-finalization)
 - [Tech Stack](#tech-stack)
 - [Wishlist](#wishlist)
 - [Project Structure](#project-structure)
@@ -51,13 +54,14 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Weapons have physical and optional magical damage types (with dice notation, e.g., 2d6)
 - Weapons like creatures have multiple attacks that are decided semi-randomly via weighted randomness
 - Items and equipment can modify stats, resistances, and traits
-- Loot and monster pools work (but not yet fully implemented) this makes possible for unique experiences for every play-through 
+- Loot and monster pools work (but not yet fully implemented) this makes possible for unique experiences for every play-through
 
 ### Combat System
 
 - Turn-based combat loop between player and enemies
 - Player chooses actions (attack, flee, etc.) each turn
 - Dice-based damage calculation (e.g., 2d6 for physical, 1d8 for magic)
+- Damage types interact with creature resistances for a complex, old-school combat system
 - Damage types interact with creature resistances for a complex, old-school combat system
 
 ### Properties & Traits
@@ -84,6 +88,49 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Easily extendable for new commands and actions
 
 -
+## Combat and Stats
+
+- Per-hit resolution order:
+   - To-hit is rolled against the target's dodge first (dodge is clamped to 0–80 at check time).
+   - If it hits, a block check runs (block clamped to 0–80). Blocked hits deal no damage.
+   - Crit is rolled per hit (crit chance clamped to 0–100 at check time).
+- Raw vs effective chances:
+   - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are only clamped when used for probability rolls.
+- Dexterity → Dodge:
+   - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
+- Data-driven attacks:
+   - There is no implicit default unarmed attack. If a creature can attack unarmed, its JSON must include an unarmed attack entry.
+
+---
+
+## Mana Scaling
+
+- Intelligence-based max mana:
+   - Max mana scales from a base value by ±10% per point of INT relative to 10. The result is floored and never below 25.
+   - When max changes (e.g., INT increases/decreases), current mana preserves the same fraction of max (ratio-preserving update).
+- When it updates:
+   - Recomputed during finalizeAfterLoad() and whenever INT changes at runtime via setStat/modifyStat.
+
+---
+
+## Loading and Finalization
+
+- Loader pipeline:
+   - Items load first so starting equipment ids resolve.
+   - Creatures and players load from `src/main/resources/data/creatures/**`. Starting `inventory` and equipment slots (`helmet`, `armor`, `legwear`, `weapon`, `offhand`) are applied.
+   - Properties are applied by id before finalization.
+- FinalizeAfterLoad does the following:
+   - Resets HP to base, then applies level/CON scaling.
+   - Recalculates max mana from INT (floored, min 25) and preserves current mana ratio.
+   - Sets stamina to max.
+   - Converts stored levels to XP so level-up bonuses are applied via XP.
+
+Developer/testing hooks:
+- You can set `Creature.attackListener` to a consumer to receive per-attack roll details (raw, after crit, after resist, crit count, types) for tests or debugging.
+- Combat prints (missed dodge/block, crits) are emitted to console for debugging/tests.
+
+---
+
 ## Tech Stack
 
 - Java 17
@@ -95,9 +142,9 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 ## Roadmap
 - Possibly a class system for players
 - Skills and abilities that can be used in and out of combat
-- Mana, stamina and other resources tied to class abilities, skills and spells 
+- Mana, stamina and other resources tied to class abilities, skills and spells
 - For every player Stat to have a meaningful use.
-- Many choices for player characters who each feel different, fun and balanced within their own play-styles. 
+- Many choices for player characters who each feel different, fun and balanced within their own play-styles.
 - Sprite variety for environment.
 - Gear, armor and weapons would affect how the player looks.
 - Animations for characters and environment.
@@ -105,9 +152,52 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Deepen the element based combat system, for example statuses for bleeding, stuns, shocked etc. Elements would build up to statuses.
 - Interactive grid based world: Explore the dungeon and its many secrets.
 - Making enemies intelligent, having them move around the map searching for the player and making the smarter during the combat.
-- Traps, consumables, events and story elements. (Potions have been implemented) 
+- Traps, consumables, events and story elements. (Potions have been implemented)
 - A story mode and a roguelike mode. More handcrafted elements and story elements in the story mode and a fun roguelike mode with randomized floors, loot and enemies!
 - Sound and music.
+
+---
+
+## Combat and Stats
+
+- Per-hit resolution order:
+   - To-hit is rolled against the target's dodge first (dodge is clamped to 0–80 at check time).
+   - If it hits, a block check runs (block clamped to 0–80). Blocked hits deal no damage.
+   - Crit is rolled per hit (crit chance clamped to 0–100 at check time).
+- Raw vs effective chances:
+   - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are only clamped when used for probability rolls.
+- Dexterity → Dodge:
+   - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
+- Data-driven attacks:
+   - There is no implicit default unarmed attack. If a creature can attack unarmed, its JSON must include an unarmed attack entry.
+
+---
+
+## Mana Scaling
+
+- Intelligence-based max mana:
+   - Max mana scales from a base value by ±10% per point of INT relative to 10. The result is floored and never below 25.
+   - When max changes (e.g., INT increases/decreases), current mana preserves the same fraction of max (ratio-preserving update).
+- When it updates:
+   - Recomputed during finalizeAfterLoad() and whenever INT changes at runtime via setStat/modifyStat.
+
+---
+
+## Loading and Finalization
+
+- Loader pipeline:
+   - Items load first so starting equipment ids resolve.
+   - Creatures and players load from `src/main/resources/data/creatures/**`. Starting `inventory` and equipment slots (`helmet`, `armor`, `legwear`, `weapon`, `offhand`) are applied.
+   - Properties are applied by id before finalization.
+- FinalizeAfterLoad does the following:
+   - Resets HP to base, then applies level/CON scaling.
+   - Recalculates max mana from INT (floored, min 25) and preserves current mana ratio.
+   - Sets stamina to max.
+   - Converts stored levels to XP so level-up bonuses are applied via XP.
+
+Developer/testing hooks:
+- You can set `Creature.attackListener` to a consumer to receive per-attack roll details (raw, after crit, after resist, crit count, types) for tests or debugging.
+- Combat prints (missed dodge/block, crits) are emitted to console for debugging/tests.
 
 ---
 
@@ -128,98 +218,42 @@ recall-dungeon/
 ├─ ASSETS-LICENSE             # CC BY-NC-ND 4.0 (assets)
 ├─ pom.xml                    # Maven build configuration
 ├─ README.md                  # Project overview and docs
-├─ assets/                    # LibGDX runtime assets (skins, fonts, textures)
-│  ├─ uiskin.json
-│  ├─ uiskin.atlas
-   │  │        │  └─ util/
-   │  │        │     └─ Dice.java                # Utility for parsing and rolling NdM-style dice strings
-│  ├─ uiskin.png
-   ├─ main
-   │  ├─ java
-   │  │  └─ com/bapppis
-   │  │     ├─ Main.java
-   │  │     └─ core
-   │  │        ├─ gfx
-   │  │        │  ├─ DesktopLauncher.java     # LibGDX desktop entrypoint
-   │  │        │  ├─ RecallDungeon.java       # LibGDX ApplicationAdapter (UI)
-   │  │        │  └─ MapActor.java            # Scene2D actor that renders the ASCII map
-   │  │        ├─ creature
-   │  │        │  ├─ Creature.java
-   │  │        │  ├─ Enemy.java
-   │  │        │  ├─ CreatureLoader.java
-   │  │        │  └─ player/Player.java
-   │  │        ├─ dungeon
-   │  │        │  ├─ Coordinate.java
-   │  │        │  ├─ Floor.java
-   │  │        │  ├─ Tile.java
-   │  │        │  ├─ MapPrinter.java
-   │  │        │  └─ mapparser/MapParser.java
-   │  │        ├─ event/...
-   │  │        ├─ game
-   │  │        │  ├─ Combat.java
-   │  │        │  ├─ CommandParser.java
-   │  │        │  ├─ Game.java
-   │  │        │  └─ GameState.java
-   │  │        ├─ item/...
-   │  │        ├─ spell
-   │  │        │  └─ Spell.java
-   │  │        └─ property
-   │  │           ├─ PropertyImpl.java
-   │  │           └─ PropertyManager.java
-   │  └─ resources
-   │     └─ assets
-   │        ├─ IDS.md
-   │        ├─ sprite_pngs/
-   │        ├─ sprites/
-   │        ├─ thirdparty/
-   │        └─ tiles/
-   └─ resources
-      ├─ data
-   │  ├─ creatures/
-   │  │  ├─ README.md
-   │  │  ├─ beasts/
-   │  │  ├─ constructs/
-   │  │  ├─ dragons/
-   │  │  ├─ elementals/
-   │  │  ├─ humanoids/
-   │  │  ├─ players/
-   │  │  │  ├─ BigglesTheUnlucky.json
-   │  │  │  └─ CaptainVoss.json
-   │  │  ├─ plants/
-   │  │  ├─ undead/
-   │  │  └─ unknown/
-      │  ├─ floors/
-   │  ├─ loot_pools/
-   │  │  ├─ treasure_chest_basic.json
-   │  │  └─ small_weapon_cache.json
-   │  └─ monster_pools/
-   │     └─ cave_goblins.json
-      │  ├─ items/
-      │  │  ├─ armor/
-      │  │  │  └─ armor/
-      │  │  │     ├─ Armor of bones.json
-      │  │  │     └─ Armor of Water.json
-      │  │  ├─ consumables/
-      │  │  └─ weapons/
-      │  │     ├─ blunt weapons/
-      │  │     ├─ magic weapons/
-      │  │     ├─ piercing weapons/
-      │  │     ├─ ranged weapons/
-      │  │     └─ slash weapons/
-      │  └─ properties/
-      │     ├─ buff/
-      │     ├─ debuff/
-      │     │  └─ Afraid.json
-      │     ├─ immunity/
-      │     └─ trait/
-      │        ├─ Coward.json
-      │        └─ HumanAdaptability.json
-   └─ test
-      ├─ java                    # Unit and integration tests (JUnit)
-      └─ resources
-         └─ assets
-            ├─ floors
-            └─ properties/...
+├─ src/
+│  ├─ main/
+│  │  ├─ java/com/bapppis/core/
+│  │  │  ├─ Main.java
+│  │  │  ├─ core/
+│  │  │  │  ├─ creature/
+│  │  │  │  │  ├─ Creature.java
+│  │  │  │  │  ├─ Enemy.java
+│  │  │  │  │  ├─ CreatureLoader.java
+│  │  │  │  │  └─ player/Player.java
+│  │  │  │  ├─ dungeon/...
+│  │  │  │  ├─ event/...
+│  │  │  │  ├─ game/...
+│  │  │  │  ├─ item/...
+│  │  │  │  ├─ property/...
+│  │  │  │  └─ util/Dice.java
+│  │  │  └─ gfx/
+│  │  │     ├─ DesktopLauncher.java        # LibGDX desktop entrypoint
+│  │  │     ├─ RecallDungeon.java          # LibGDX ApplicationAdapter (UI layer)
+│  │  │     └─ MapActor.java               # Scene2D actor that renders the ASCII map
+│  │  └─ resources/
+│  │     ├─ assets/
+│  │     │  ├─ uiskin.json / .atlas / .png
+│  │     │  ├─ sprite_pngs/
+│  │     │  └─ thirdparty/
+│  │     └─ data/
+│  │        ├─ creatures/
+│  │        ├─ items/
+│  │        ├─ properties/
+│  │        ├─ floors/
+│  │        ├─ loot_pools/
+│  │        └─ monster_pools/
+│  └─ test/
+│     ├─ java                    # Unit and integration tests (JUnit)
+│     └─ resources
+│        └─ assets               # test-only fixtures
 ```
 
 ---
@@ -259,6 +293,7 @@ mvn exec:java -Dexec.mainClass="com.bapppis.core.gfx.DesktopLauncher"
 Tips:
 - Ensure the working directory is the project root so LibGDX sees `assets/`.
 - VS Code users can use `.vscode/launch.json` with `"cwd": "${workspaceFolder}"`.
+ - On Windows PowerShell, when running a single JUnit test method via Maven use quotes, e.g. `mvn -Dtest="ClassName#methodName" test`.
 ---
 
 ## Running Tests
