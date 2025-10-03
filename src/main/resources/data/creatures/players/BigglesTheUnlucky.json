@@ -7,6 +7,8 @@
   "xp": 0,
   "baseHp": 5,
   "hpLvlBonus": 4,
+  "maxMana": 100,
+  "maxStamina": 100,
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {

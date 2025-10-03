@@ -37,11 +37,11 @@ public class CreatureLoader {
         }
 
         Gson gson = new Gson();
-        try (ScanResult scanResult = new ClassGraph()
-                // Scan production creature data and also test fixture package so unit tests
-                // with JSON under com/... are found during test execution.
-                .acceptPaths("data/creatures", "com/bapppis/core/Creature")
-                .scan()) {
+    try (ScanResult scanResult = new ClassGraph()
+        // Scan production creature data and the test fixture package so unit tests
+        // find JSON under com/... during test execution.
+        .acceptPaths("data/creatures", "com/bapppis/core/Creature")
+        .scan()) {
             // Keep track of relative resource paths we've processed so we don't load the
             // same path multiple times when it appears on the classpath (for example
             // when both a source and compiled copy exist). This prevents duplicate-id
@@ -74,7 +74,7 @@ public class CreatureLoader {
                         jsonObj.remove("weapon");
                         jsonObj.remove("offhand");
 
-                        // Try to load as Player, fallback to Enemy
+                        // Try to load as Player when path contains players, otherwise Enemy
                         if (resource.getPath().contains("players")) {
                             creature = gson.fromJson(jsonObj, Player.class);
                         } else {
@@ -134,7 +134,7 @@ public class CreatureLoader {
                             if (creature.getVisionRange() == 0) {
                                 creature.setVisionRange(1);
                             }
-                            // Now apply properties (modifiers will be correct)
+                            // Apply properties (modifiers will be correct)
                             List<Integer> propertyIds = getPropertyIdsFromJson(resource.getPath(), gson);
                             if (propertyIds != null) {
                                 for (Integer pid : propertyIds) {
@@ -147,8 +147,7 @@ public class CreatureLoader {
                             // Load starting inventory and equipment slots from JSON
                             applyStartingItemsFromJson(resource.getPath(), gson, creature);
 
-                            // Apply any property effects that modify stats or other attributes
-                            // Finalize creature fields after load (resets HP, converts level->XP, etc.)
+                            // Finalize creature fields after load (resets HP, recalculates mana, converts level->XP)
                             creature.finalizeAfterLoad();
                             creature.recalcDerivedStats();
                             // Index by id (primary) and by name (optional)

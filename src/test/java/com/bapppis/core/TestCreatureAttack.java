@@ -173,6 +173,54 @@ public class TestCreatureAttack {
         com.bapppis.core.creature.Creature.attackListener = null;
     }
 
+    @Test
+    public void testBigglesUnarmedAttack() {
+        PropertyManager.loadProperties();
+        CreatureLoader.loadCreatures();
+        ItemLoader.loadItems();
+
+        Player biggles = CreatureLoader.getPlayerById(5000);
+        assert biggles != null;
+
+        // Ensure full health and high constitution so HP doesn't drop undesirably
+        biggles.setStat(Stats.CONSTITUTION, 100);
+
+        // If Biggles has a weapon equipped, unequip it
+        Item equippedWeapon = biggles.getEquipped(EquipmentSlot.WEAPON);
+        if (equippedWeapon != null) {
+            // Find the slot that contains this item and unequip it
+            biggles.unequipItem(EquipmentSlot.WEAPON);
+        }
+
+        // Load training dummy as a target
+        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
+        assert dummy != null;
+
+        java.util.concurrent.atomic.AtomicInteger attackCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        // Install listener to capture detailed attack reports
+        com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
+            attackCount.getAndIncrement();
+            // Print for debugging
+            System.out.println("Unarmed attack report: " + rpt.attackName + " physAfter=" + rpt.physAfter
+                    + " damageType=" + rpt.damageType);
+        };
+
+        // Run multiple unarmed attacks
+        int runs = 20;
+        for (int i = 0; i < runs; i++) {
+            // Reset dummy HP so it's always alive
+            dummy.setCurrentHp(dummy.getMaxHp());
+            biggles.attack(dummy);
+        }
+
+        // There should be at least one attack reported
+        assert attackCount.get() > 0 : "Expected at least one unarmed attack report but got 0";
+
+        // Clear listener
+        com.bapppis.core.creature.Creature.attackListener = null;
+    }
+
     // make an assert function for biggles
     private void assertBigglesDefaults(Player biggles) {
         // Implement assertions for Biggles defaults

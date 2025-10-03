@@ -24,10 +24,12 @@ public abstract class Creature {
     private int currentHp;
     private int hpLvlBonus; // Additional HP gained per level
     private int currentMana;
-    private int maxMana;
     private int currentStamina;
-    private int maxStamina;
-    private Resistances defaultDamageType = Resistances.BLUDGEONING;
+    private int maxMana = 100;
+    // Stable base max mana used as the source for INT-based scaling to avoid
+    // compounding
+    private int baseMaxMana = 100;
+    private int maxStamina = 100;
     private Size size;
     private Type type;
     private CreatureType creatureType;
@@ -62,28 +64,6 @@ public abstract class Creature {
     // attack occurs.
     // Tests can set Creature.attackListener to capture raw rolls and metadata.
     public static Consumer<AttackReport> attackListener = null;
-
-    public static class AttackReport {
-        public String attackName;
-        public int physRaw;
-        public int magRaw;
-        /** total physical after crits but before resistances */
-        public int physAfterCritBeforeResist;
-        public int physAfter;
-        public int magAfter;
-        public int times;
-        public String damageType;
-        public String magicType;
-        /** number of individual hit crits in this attack invocation */
-        public int critCount;
-        public boolean isCrit;
-        public Creature attacker;
-        public Creature target;
-    }
-
-    public Inventory getInventory() {
-        return inventory;
-    }
 
     public String getSprite() {
         return sprite;
@@ -138,6 +118,25 @@ public abstract class Creature {
         PIERCING,
         SLASHING,
         TRUE,
+    }
+
+    // --- Nested Types ---
+    public static class AttackReport {
+        public String attackName;
+        public int physRaw;
+        public int magRaw;
+        /** total physical after crits but before resistances */
+        public int physAfterCritBeforeResist;
+        public int physAfter;
+        public int magAfter;
+        public int times;
+        public String damageType;
+        public String magicType;
+        /** number of individual hit crits in this attack invocation */
+        public int critCount;
+        public boolean isCrit;
+        public Creature attacker;
+        public Creature target;
     }
 
     // Dice rolling moved to com.bapppis.core.util.Dice.roll(String)
@@ -263,6 +262,10 @@ public abstract class Creature {
         return maxMana;
     }
 
+    public int getBaseMaxMana() {
+        return baseMaxMana;
+    }
+
     public int getCurrentStamina() {
         return currentStamina;
     }
@@ -278,7 +281,7 @@ public abstract class Creature {
         // Preserve the currentMana/maxMana ratio, rounding down
         double ratio = this.maxMana > 0 ? (double) currentMana / this.maxMana : 1.0;
         this.maxMana = maxMana;
-        this.currentMana = Math.max(0, (int) (this.maxMana * ratio));
+        this.currentMana = Math.max(1, (int) (this.maxMana * ratio));
     }
 
     public void setCurrentMana(int mana) {
@@ -287,6 +290,24 @@ public abstract class Creature {
 
     public void alterMana(int amount) {
         this.currentMana = Math.max(0, Math.min(this.currentMana + amount, this.maxMana));
+    }
+
+    public void updateMaxMana() {
+        // Compute the new max mana from a stable base value so repeated calls don't
+        // compound.
+        int delta = this.getStat(Stats.INTELLIGENCE) - 10;
+        double factor = 1.0;
+        if (delta < 0) {
+            factor = Math.pow(0.9, -delta);
+        } else if (delta > 0) {
+            factor = Math.pow(1.1, delta);
+        }
+        // Always round down and never go below 25. Use baseMaxMana as the stable
+        // source.
+        int newMax = (int) Math.floor(this.getBaseMaxMana() * factor);
+        newMax = Math.max(25, newMax);
+        // Use setMaxMana which preserves currentMana/maxMana ratio
+        this.setMaxMana(newMax);
     }
 
     public void setMaxStamina(int maxStamina) {
@@ -305,14 +326,6 @@ public abstract class Creature {
 
     public void alterStamina(int amount) {
         this.currentStamina = Math.max(0, Math.min(this.currentStamina + amount, this.maxStamina));
-    }
-
-    public Resistances getDefaultDamageType() {
-        return defaultDamageType;
-    }
-
-    public void setDefaultDamageType(Resistances defaultDamageType) {
-        this.defaultDamageType = defaultDamageType;
     }
 
     public Size getSize() {
@@ -388,12 +401,20 @@ public abstract class Creature {
         if (stat == Stats.CONSTITUTION) {
             alterHp();
         }
+        if (stat == Stats.INTELLIGENCE) {
+            // Recompute max mana when INT changes
+            updateMaxMana();
+        }
     }
 
     public void modifyStat(Stats stat, int amount) {
         stats.put(stat, getStat(stat) + amount);
         if (stat == Stats.CONSTITUTION) {
             alterHp();
+        }
+        if (stat == Stats.INTELLIGENCE) {
+            // Recompute max mana when INT changes
+            updateMaxMana();
         }
     }
 
@@ -455,9 +476,13 @@ public abstract class Creature {
     }
 
     public void recalcDerivedStats() {
+        // Base-derived values:
+        // - Crit and Block mirror the raw base values from JSON (equipment added via equipment* accumulators)
+        // - Dodge is baseDodge plus a DEX-derived delta (2.5 per point over/under 10)
+        this.crit = this.baseCrit;
+        this.block = this.baseBlock;
         float dodgeDelta = 2.5f * (this.getStat(Stats.DEXTERITY) - 10);
         this.dodge = this.baseDodge + dodgeDelta;
-
     }
 
     public void attack(Creature target) {
@@ -487,20 +512,8 @@ public abstract class Creature {
             return;
         }
 
-        // Fallback: old unarmed behavior
-        if (this.defaultDamageType == Resistances.BLUDGEONING || this.defaultDamageType == Resistances.PIERCING) {
-            int strMod = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
-            int damage = Dice.roll("1d" + strMod);
-            System.out.println("Unarmed attack: Rolled damage: " + damage);
-            target.alterHp(-damage);
-        } else if (this.defaultDamageType == Resistances.SLASHING) {
-            int dexMod = Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
-            int damage = Dice.roll("1d" + dexMod);
-            System.out.println("Unarmed attack: Rolled damage: " + damage);
-            target.alterHp(-damage);
-        } else {
-            // Fallback logic
-        }
+        // No fallback: if creature has no attacks and no weapon, do nothing.
+        // Player JSONs define a default unarmed attack when appropriate.
     }
 
     private int determineStatBonusForWeapon(Equipment weapon) {
@@ -601,7 +614,7 @@ public abstract class Creature {
 
         int physAfter = Math.floorDiv(
                 totalPhysBeforeResist
-                        * target.getResistance(physicalType == null ? this.defaultDamageType : physicalType),
+                        * (physicalType == null ? 100 : target.getResistance(physicalType)),
                 100);
         int mag = attack.rollMagicDamage();
         int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
@@ -617,7 +630,7 @@ public abstract class Creature {
                 rpt.physAfter = physAfter;
                 rpt.magAfter = magAfter;
                 rpt.times = attack.getTimes();
-                rpt.damageType = (physicalType == null ? this.defaultDamageType.name() : physicalType.name());
+                rpt.damageType = (physicalType == null ? null : physicalType.name());
                 rpt.magicType = (magicType == null ? null : magicType.name());
                 rpt.critCount = critCount;
                 rpt.isCrit = critCount > 0;
@@ -650,6 +663,11 @@ public abstract class Creature {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    // --- Equipment & Inventory ---
+    public Inventory getInventory() {
+        return inventory;
     }
 
     public Item getEquipped(EquipmentSlot slot) {
@@ -985,11 +1003,10 @@ public abstract class Creature {
 
     /**
      * Finalize creature fields after loading from JSON.
-     * This includes resetting max HP to base, updating derived HP via
-     * updateMaxHp(),
-     * and converting stored levels into XP so that level-up bonuses are applied
-     * by invoking addXp(tempXp).
-     *
+     * - Resets max HP to base, then calls updateMaxHp() (level/CON scaling).
+     * - Recomputes max mana from INT via updateMaxMana() (does not force current mana to max).
+     * - Sets stamina to max.
+     * - Converts stored levels into XP so addXp() applies level-up bonuses.
      * Call this once after Gson has populated fields and after properties/items
      * (starting equipment) have been applied.
      */
@@ -998,6 +1015,13 @@ public abstract class Creature {
         this.setMaxHp(baseHp); // Reset max HP to base before applying properties
         // Recompute max/current HP correctly
         this.updateMaxHp();
+
+        // Set mana/stamina to max (recalc maxMana from INT and clamp)
+        // Initialize baseMaxMana from the current maxMana so update uses a stable base
+        this.baseMaxMana = this.maxMana;
+        updateMaxMana();
+        // this.currentMana = this.maxMana;
+        this.currentStamina = this.maxStamina;
 
         // Convert existing levels into XP and add them so addXp() handles level-up
         // logic
@@ -1020,10 +1044,10 @@ public abstract class Creature {
         sb.append("Level: ").append(level).append("\n");
         sb.append("XP: ").append(xp).append("\n");
         sb.append("Base HP: ").append(baseHp).append("\n");
-        sb.append("Max HP: ").append(maxHp).append("\n");
-        sb.append("Current HP: ").append(currentHp).append("\n");
         sb.append("HP Level Bonus: ").append(hpLvlBonus).append("\n");
-        sb.append("Default Damage Type: ").append(defaultDamageType).append("\n");
+        sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("\n");
+        sb.append("Mana: ").append(currentMana).append("/").append(maxMana).append("\n");
+        sb.append("Stamina: ").append(currentStamina).append("/").append(maxStamina).append("\n");
         sb.append("Size: ").append(size).append("\n");
         sb.append("Type: ").append(type).append("\n");
         sb.append("Creature Type: ").append(creatureType).append("\n");
@@ -1034,9 +1058,10 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
-        sb.append("Critical Hit Chance: ").append(crit).append("%\n");
-        sb.append("Dodge Chance: ").append(dodge).append("%\n");
-        sb.append("Block Chance: ").append(block).append("%\n");
+    // Show effective chances including equipment modifiers
+    sb.append("Critical Hit Chance: ").append(getCrit()).append("%\n");
+    sb.append("Dodge Chance: ").append(getDodge()).append("%\n");
+    sb.append("Block Chance: ").append(getBlock()).append("%\n");
         sb.append("Equipment:\n");
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = equipment.get(slot);
