@@ -26,10 +26,9 @@ public abstract class Creature {
     private int currentMana;
     private int currentStamina;
     private int maxMana = 100;
-    // Stable base max mana used as the source for INT-based scaling to avoid
-    // compounding
     private int baseMaxMana = 100;
     private int maxStamina = 100;
+    private int baseMaxStamina = 100;
     private Size size;
     private Type type;
     private CreatureType creatureType;
@@ -274,6 +273,10 @@ public abstract class Creature {
         return maxStamina;
     }
 
+    public int getBaseMaxStamina() {
+        return baseMaxStamina;
+    }
+
     public void setMaxMana(int maxMana) {
         if (maxMana < 0) {
             maxMana = 0; // Ensure maxMana is at least 0
@@ -318,6 +321,24 @@ public abstract class Creature {
         double ratio = this.maxStamina > 0 ? (double) currentStamina / this.maxStamina : 1.0;
         this.maxStamina = maxStamina;
         this.currentStamina = Math.max(0, (int) (this.maxStamina * ratio));
+    }
+
+    public void updateMaxStamina() {
+        // Compute the new max stamina from a stable base value so repeated calls don't
+        // compound.
+        int delta = this.getStat(Stats.CONSTITUTION) - 10;
+        double factor = 1.0;
+        if (delta < 0) {
+            factor = Math.pow(0.9, -delta);
+        } else if (delta > 0) {
+            factor = Math.pow(1.1, delta);
+        }
+        // Always round down and never go below 25. Use baseMaxStamina as the stable
+        // source.
+        int newMax = (int) Math.floor(this.getBaseMaxStamina() * factor);
+        newMax = Math.max(25, newMax);
+        // Use setMaxStamina which preserves currentStamina/maxStamina ratio
+        this.setMaxStamina(newMax);
     }
 
     public void setCurrentStamina(int stamina) {
@@ -400,10 +421,16 @@ public abstract class Creature {
         stats.put(stat, value);
         if (stat == Stats.CONSTITUTION) {
             alterHp();
+            // Recompute max stamina when CON changes
+            updateMaxStamina();
         }
         if (stat == Stats.INTELLIGENCE) {
             // Recompute max mana when INT changes
             updateMaxMana();
+        }
+        if (stat == Stats.LUCK) {
+            // Recompute crit when luck changes
+            recalcDerivedStats();
         }
     }
 
@@ -411,10 +438,16 @@ public abstract class Creature {
         stats.put(stat, getStat(stat) + amount);
         if (stat == Stats.CONSTITUTION) {
             alterHp();
+            // Recompute max stamina when CON changes
+            updateMaxStamina();
         }
         if (stat == Stats.INTELLIGENCE) {
             // Recompute max mana when INT changes
             updateMaxMana();
+        }
+        if (stat == Stats.LUCK) {
+            // Recompute crit when luck changes
+            recalcDerivedStats();
         }
     }
 
@@ -453,6 +486,14 @@ public abstract class Creature {
         return this.crit;
     }
 
+    public void updateCrit() {
+        // Compute the derived crit (no compounding): baseCrit (from JSON) plus
+        // luck-derived bonus. Equipment modifiers are applied separately via
+        // equipmentCrit and added in getCrit().
+        float bonusCrit = 5f * this.getStat(Stats.LUCK);
+        this.crit = this.baseCrit + bonusCrit;
+    }
+
     public float getDodge() {
         return this.dodge + this.equipmentDodge;
     }
@@ -477,9 +518,14 @@ public abstract class Creature {
 
     public void recalcDerivedStats() {
         // Base-derived values:
-        // - Crit and Block mirror the raw base values from JSON (equipment added via equipment* accumulators)
+        // - Crit and Block mirror the raw base values from JSON (equipment added via
+        // equipment* accumulators)
         // - Dodge is baseDodge plus a DEX-derived delta (2.5 per point over/under 10)
-        this.crit = this.baseCrit;
+        // Crit includes luck scaling here so that any time derived stats are
+        // recomputed (for example when equipment changes) the luck bonus is
+        // preserved and equipmentCrit is still added via getCrit().
+        float bonusCrit = 5f * this.getStat(Stats.LUCK);
+        this.crit = this.baseCrit + bonusCrit;
         this.block = this.baseBlock;
         float dodgeDelta = 2.5f * (this.getStat(Stats.DEXTERITY) - 10);
         this.dodge = this.baseDodge + dodgeDelta;
@@ -1004,7 +1050,8 @@ public abstract class Creature {
     /**
      * Finalize creature fields after loading from JSON.
      * - Resets max HP to base, then calls updateMaxHp() (level/CON scaling).
-     * - Recomputes max mana from INT via updateMaxMana() (does not force current mana to max).
+     * - Recomputes max mana from INT via updateMaxMana() (does not force current
+     * mana to max).
      * - Sets stamina to max.
      * - Converts stored levels into XP so addXp() applies level-up bonuses.
      * Call this once after Gson has populated fields and after properties/items
@@ -1017,14 +1064,25 @@ public abstract class Creature {
         this.updateMaxHp();
 
         // Set mana/stamina to max (recalc maxMana from INT and clamp)
-        // Initialize baseMaxMana from the current maxMana so update uses a stable base
-        this.baseMaxMana = this.maxMana;
+        // Initialize baseMaxMana/baseMaxStamina only if they were not provided by JSON
+        // (i.e., still zero or negative). If the JSON contains baseMaxMana/baseMaxStamina
+        // we respect those values. After ensuring base values, recompute derived maxes
+        // and set current to max.
+        if (this.baseMaxMana <= 0) {
+            this.baseMaxMana = this.maxMana;
+        }
         updateMaxMana();
-        // this.currentMana = this.maxMana;
+
+        if (this.baseMaxStamina <= 0) {
+            this.baseMaxStamina = this.maxStamina;
+        }
+        updateMaxStamina();
+
+        this.currentMana = this.maxMana;
         this.currentStamina = this.maxStamina;
 
-        // Convert existing levels into XP and add them so addXp() handles level-up
-        // logic
+        updateCrit();
+
         int tempXp = this.getXp();
         int lvl = this.getLevel();
         for (int i = lvl; i > 0; i--) {
@@ -1058,10 +1116,10 @@ public abstract class Creature {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
         }
         sb.append("-----------------\n");
-    // Show effective chances including equipment modifiers
-    sb.append("Critical Hit Chance: ").append(getCrit()).append("%\n");
-    sb.append("Dodge Chance: ").append(getDodge()).append("%\n");
-    sb.append("Block Chance: ").append(getBlock()).append("%\n");
+        // Show effective chances including equipment modifiers
+        sb.append("Critical Hit Chance: ").append(getCrit()).append("%\n");
+        sb.append("Dodge Chance: ").append(getDodge()).append("%\n");
+        sb.append("Block Chance: ").append(getBlock()).append("%\n");
         sb.append("Equipment:\n");
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = equipment.get(slot);

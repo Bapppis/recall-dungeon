@@ -7,24 +7,24 @@
   "xp": 0,
   "baseHp": 5,
   "hpLvlBonus": 4,
-  "maxMana": 100,
-  "maxStamina": 100,
+  "baseMaxMana": 80,
+  "baseMaxStamina": 100,
   "size": "SMALL",
   "creatureType": "HUMANOID",
   "stats": {
-    "STRENGTH": 12,
-    "CONSTITUTION": 12,
+    "STRENGTH": 10,
+    "CONSTITUTION": 10,
     "DEXTERITY": 10,
     "INTELLIGENCE": 7,
     "WISDOM": 10,
     "CHARISMA": 10,
-    "LUCK": 2
+    "LUCK": 1
   },
   "resistances": {
     "NATURE": 90,
     "SLASHING": 120
   },
-  "baseCrit": 10,
+  "baseCrit": 5,
   "baseDodge": 10,
   "baseBlock": 5,
   "properties": [4000, 4002],

@@ -7,8 +7,8 @@
   "xp": 0,
   "baseHp": 5,
   "hpLvlBonus": 8,
-  "maxMana": 100,
-  "maxStamina": 100,
+  "baseMaxMana": 100,
+  "baseMaxStamina": 100,
   "size": "MEDIUM",
   "creatureType": "HUMANOID",
   "stats": {
@@ -20,7 +20,7 @@
     "CHARISMA": 10,
     "LUCK": 1
   },
-  "baseCrit": 5,
+  "baseCrit": 0,
   "baseDodge": 5,
   "baseBlock": 15,
   "properties": [4001],
