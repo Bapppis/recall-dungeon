@@ -586,9 +586,6 @@ public abstract class Creature {
             applyAttackToTarget(chosen, statBonus, target, physType, magType);
             return;
         }
-
-        // No fallback: if creature has no attacks and no weapon, do nothing.
-        // Player JSONs define a default unarmed attack when appropriate.
     }
 
     private int determineStatBonusForWeapon(Equipment weapon) {
@@ -654,32 +651,32 @@ public abstract class Creature {
                 // We're in the avoidance region; decide whether it's block or dodge
                 if (effectiveDodge >= effectiveBlock) {
                     // Block is the lower subrange [0..effectiveBlock], dodge is above it
-            if (toHitRoll <= effectiveBlock) {
-            System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
-                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                + " block=" + String.format("%.2f", effectiveBlock));
+                    if (toHitRoll <= effectiveBlock) {
+                        System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
+                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
+                                + " block=" + String.format("%.2f", effectiveBlock));
                         continue;
                     } else {
-            System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
-                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                + " dodge=" + String.format("%.2f", effectiveDodge));
+                        System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
+                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
+                                + " dodge=" + String.format("%.2f", effectiveDodge));
                         continue;
                     }
                 } else {
                     // Dodge is the lower subrange [0..effectiveDodge], block is above it
-            if (toHitRoll <= effectiveDodge) {
-            System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
-                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                + " dodge=" + String.format("%.2f", effectiveDodge));
+                    if (toHitRoll <= effectiveDodge) {
+                        System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
+                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
+                                + " dodge=" + String.format("%.2f", effectiveDodge));
                         continue;
                     } else {
-            System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
-                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                + " block=" + String.format("%.2f", effectiveBlock));
+                        System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
+                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
+                                + " block=" + String.format("%.2f", effectiveBlock));
                         continue;
                     }
                 }
@@ -701,7 +698,8 @@ public abstract class Creature {
                 critCount++;
                 hit = hit * 2; // double this hit
                 System.out.println("Critical hit! " + attack.name + " single hit doubled to: " + hit
-                        + " | roll=" + String.format("%.2f", rawToHitRoll) + " rounded=" + toHitRoll + " statBonus=" + statBonus);
+                        + " | roll=" + String.format("%.2f", rawToHitRoll) + " rounded=" + toHitRoll + " statBonus="
+                        + statBonus);
             }
             totalPhysBeforeResist += hit;
         }
@@ -769,10 +767,43 @@ public abstract class Creature {
     }
 
     public void equipItem(Item item) {
+        // Default behavior: treat two-handed items as two-handed; versatile items
+        // default to one-handed unless caller explicitly requests two-handed.
+        boolean requestTwoHanded = false;
+        if (item instanceof com.bapppis.core.item.Equipment) {
+            try {
+                com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
+                requestTwoHanded = eq.isTwoHanded();
+            } catch (Exception ignored) {
+            }
+        }
+        equipItem(item, requestTwoHanded);
+    }
+
+    /**
+     * Equip an item and optionally treat it as two-handed. If the item is
+     * inherently two-handed, it will always be equipped two-handed. If the
+     * item is versatile and requestTwoHanded is true it will be equipped into
+     * both WEAPON and OFFHAND slots (reusing the existing two-handed logic).
+     */
+    public void equipItem(Item item, boolean requestTwoHanded) {
         EquipmentSlot slot = item.getSlot();
         // Remove any existing item in the slot first
         Item oldItem = null;
-        if (item.isTwoHanded()) {
+        boolean willBeTwoHanded = false;
+        try {
+            if (item.isTwoHanded()) {
+                willBeTwoHanded = true;
+            } else if (item instanceof com.bapppis.core.item.Equipment) {
+                com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
+                if (eq.isVersatile() && requestTwoHanded) {
+                    willBeTwoHanded = true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        if (willBeTwoHanded) {
             oldItem = equipment.get(EquipmentSlot.WEAPON);
             if (oldItem != null)
                 unequipItem(EquipmentSlot.WEAPON);
