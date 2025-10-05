@@ -612,31 +612,45 @@ public abstract class Creature {
         // Effective crit chance used in checks is clamped to 0-100
         float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
         for (int i = 0; i < times; i++) {
-            // First roll to-hit against target dodge (0.0-100.0). If roll <= dodge, the hit
-            // misses.
-            float toHitRoll = ThreadLocalRandom.current().nextFloat() * 100f;
-            // Effective dodge is clamped to 0-80 when checking to-hit
-            float effectiveDodge = Math.max(0f, Math.min(80f, target.getDodge()));
-            if (toHitRoll <= effectiveDodge) {
-                // Missed due to dodge
-                System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName() + " | attack='"
-                        + attack.name + "' roll=" + String.format("%.2f", toHitRoll) + " dodge="
-                        + String.format("%.2f", effectiveDodge));
-                continue;
-            }
-            // Next roll against block. If roll <= block, the hit is blocked and does no
-            // damage.
-            float blockRoll = ThreadLocalRandom.current().nextFloat() * 100f;
-            // Effective block is clamped to 0-80 when checking block
-            float effectiveBlock = Math.max(0f, Math.min(80f, target.getBlock()));
-            if (blockRoll <= effectiveBlock) {
-                // Hit was blocked
-                System.out.println("Missed (block): " + this.getName() + " -> " + target.getName() + " | attack='"
-                        + attack.name + "' roll=" + String.format("%.2f", blockRoll) + " block="
-                        + String.format("%.2f", effectiveBlock));
-                continue;
-            }
+            float rawToHitRoll = ThreadLocalRandom.current().nextFloat() * 100f;
+            int toHitRoll = Math.round(rawToHitRoll); // rounded to nearest whole number
+            // Effective dodge/block are clamped to 0-100 for checks
+            float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
+            float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
 
+            // Partition the avoidance window so ranges don't overlap. The higher
+            // of dodge/block occupies the upper portion of the avoidance window.
+            float totalAvoid = Math.min(100f, effectiveDodge + effectiveBlock);
+            if (toHitRoll <= totalAvoid) {
+                // We're in the avoidance region; decide whether it's block or dodge
+                if (effectiveDodge >= effectiveBlock) {
+                    // Block is the lower subrange [0..effectiveBlock], dodge is above it
+                    if (toHitRoll <= effectiveBlock) {
+            System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
+                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " block=" + String.format("%.2f", effectiveBlock));
+                        continue;
+                    } else {
+            System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
+                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " dodge=" + String.format("%.2f", effectiveDodge));
+                        continue;
+                    }
+                } else {
+                    // Dodge is the lower subrange [0..effectiveDodge], block is above it
+            if (toHitRoll <= effectiveDodge) {
+            System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
+                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " dodge=" + String.format("%.2f", effectiveDodge));
+                        continue;
+                    } else {
+            System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
+                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " block=" + String.format("%.2f", effectiveBlock));
+                        continue;
+                    }
+                }
+            }
             int hit = 0;
             if (attack.physicalDamageDice != null && !attack.physicalDamageDice.isBlank()) {
                 // For per-hit dice, roll once per hit.

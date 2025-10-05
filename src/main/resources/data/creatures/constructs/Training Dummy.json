@@ -6,11 +6,13 @@
   "xp": 10,
   "baseHp": 999,
   "hpLvlBonus": 4,
-  "defaultDamageType": "BLUDGEONING",
   "size": "MEDIUM",
   "creatureType": "CONSTRUCT",
+  "baseCrit": 5,
+  "baseDodge": 30,
+  "baseBlock": 10,
   "properties": null,
-  "sprite": "monster_goblin",
+  "sprite": null,
 
   "weapon": null
 }
