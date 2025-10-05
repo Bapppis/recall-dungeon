@@ -11,7 +11,8 @@
   "creatureType": "BEAST",
   "stats": {
     "STRENGTH": 11,
-    "CONSTITUTION": 12
+    "CONSTITUTION": 12,
+    "LUCK": 0
   },
   "resistances": {
     "LIGHT": 120,

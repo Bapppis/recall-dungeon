@@ -11,7 +11,8 @@
   "creatureType": "UNDEAD",
   "stats": {
     "STRENGTH": 11,
-    "DEXTERITY": 12
+    "DEXTERITY": 12,
+    "LUCK": 0
   },
   "resistances": {
     "LIGHT": 110,

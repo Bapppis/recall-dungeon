@@ -10,7 +10,8 @@
   "size": "MEDIUM",
   "creatureType": "UNDEAD",
   "stats": {
-    "STRENGTH": 6
+    "STRENGTH": 6,
+    "LUCK": 0
   },
   "resistances": {
     "LIGHT": 110,
