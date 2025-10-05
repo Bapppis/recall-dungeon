@@ -114,8 +114,8 @@ public class TestCreatureAttack {
         biggles.setStat(Stats.CONSTITUTION, 100);
 
         // Give Falchion of Doom to Biggles and equip it (Falchion id 9800)
-        biggles.addItem(ItemLoader.getItemById(9800));
-        biggles.equipItem(biggles.getInventory().getWeapons().get(1));
+        /* biggles.addItem(ItemLoader.getItemById(9800));
+        biggles.equipItem(biggles.getInventory().getWeapons().get(1)); */
 
         // Load training dummy as a target
         com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);

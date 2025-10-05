@@ -38,8 +38,8 @@ public abstract class Creature {
     private float baseDodge;
     private float baseBlock;
     private float crit; // base-derived critical hit chance percentage (0-100)
-    private float dodge; // base-derived dodge chance percentage (0-80)
-    private float block; // base-derived block chance percentage (0-80)
+    private float dodge; // base-derived dodge chance percentage (0-100)
+    private float block; // base-derived block chance percentage (0-100)
     // Equipment aggregates (sum of all equipped item contributions)
     private final java.util.EnumMap<Stats, Integer> equipmentStats = new java.util.EnumMap<>(Stats.class);
     private final java.util.EnumMap<Resistances, Integer> equipmentResists = new java.util.EnumMap<>(Resistances.class);
@@ -570,7 +570,7 @@ public abstract class Creature {
             if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
                 chosen = chooseAttackFromList(weapon.getAttacks());
                 // stat bonus depends on weapon class/finesse
-                int statBonus = determineStatBonusForWeapon(weapon);
+                int statBonus = determineStatBonusForWeapon(weapon) * 5;
                 applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement());
                 return;
             }
@@ -580,7 +580,7 @@ public abstract class Creature {
         if (this.attacks != null && !this.attacks.isEmpty()) {
             chosen = chooseAttackFromList(this.attacks);
             // For creature attacks, default to strength for physical damage
-            int statBonus = Math.max(1, this.getStatBonus(Stats.STRENGTH));
+            int statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
             Resistances physType = parseResistance(chosen == null ? null : chosen.damageType);
             Resistances magType = parseResistance(chosen == null ? null : chosen.magicDamageType);
             applyAttackToTarget(chosen, statBonus, target, physType, magType);
@@ -593,15 +593,15 @@ public abstract class Creature {
 
     private int determineStatBonusForWeapon(Equipment weapon) {
         if (weapon.isFinesse()) {
-            return Math.max(1, Math.max(this.getStatBonus(Stats.STRENGTH), this.getStatBonus(Stats.DEXTERITY)));
+            return Math.max(0, Math.max(this.getStatBonus(Stats.STRENGTH), this.getStatBonus(Stats.DEXTERITY)));
         }
         switch (weapon.getWeaponClass()) {
             case MELEE:
-                return Math.max(1, this.getStatBonus(Stats.STRENGTH));
+                return Math.max(0, this.getStatBonus(Stats.STRENGTH));
             case RANGED:
-                return Math.max(1, this.getStatBonus(Stats.DEXTERITY));
+                return Math.max(0, this.getStatBonus(Stats.DEXTERITY));
             case MAGIC:
-                return Math.max(1, this.getStatBonus(Stats.INTELLIGENCE));
+                return Math.max(0, this.getStatBonus(Stats.INTELLIGENCE));
             default:
                 return 0;
         }
@@ -642,7 +642,7 @@ public abstract class Creature {
         float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
         for (int i = 0; i < times; i++) {
             float rawToHitRoll = ThreadLocalRandom.current().nextFloat() * 100f;
-            int toHitRoll = Math.round(rawToHitRoll); // rounded to nearest whole number
+            int toHitRoll = Math.round(rawToHitRoll) + statBonus; // rounded to nearest whole number
             // Effective dodge/block are clamped to 0-100 for checks
             float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
             float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
@@ -654,14 +654,16 @@ public abstract class Creature {
                 // We're in the avoidance region; decide whether it's block or dodge
                 if (effectiveDodge >= effectiveBlock) {
                     // Block is the lower subrange [0..effectiveBlock], dodge is above it
-                    if (toHitRoll <= effectiveBlock) {
+            if (toHitRoll <= effectiveBlock) {
             System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
                 + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " rounded=" + toHitRoll + " statBonus=" + statBonus
                 + " block=" + String.format("%.2f", effectiveBlock));
                         continue;
                     } else {
             System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
                 + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " rounded=" + toHitRoll + " statBonus=" + statBonus
                 + " dodge=" + String.format("%.2f", effectiveDodge));
                         continue;
                     }
@@ -670,11 +672,13 @@ public abstract class Creature {
             if (toHitRoll <= effectiveDodge) {
             System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
                 + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " rounded=" + toHitRoll + " statBonus=" + statBonus
                 + " dodge=" + String.format("%.2f", effectiveDodge));
                         continue;
                     } else {
             System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
                 + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
+                + " rounded=" + toHitRoll + " statBonus=" + statBonus
                 + " block=" + String.format("%.2f", effectiveBlock));
                         continue;
                     }
@@ -696,7 +700,8 @@ public abstract class Creature {
             if (hitCrit) {
                 critCount++;
                 hit = hit * 2; // double this hit
-                System.out.println("Critical hit! " + attack.name + " single hit doubled to: " + hit);
+                System.out.println("Critical hit! " + attack.name + " single hit doubled to: " + hit
+                        + " | roll=" + String.format("%.2f", rawToHitRoll) + " rounded=" + toHitRoll + " statBonus=" + statBonus);
             }
             totalPhysBeforeResist += hit;
         }
@@ -1104,7 +1109,8 @@ public abstract class Creature {
 
         // Set mana/stamina to max (recalc maxMana from INT and clamp)
         // Initialize baseMaxMana/baseMaxStamina only if they were not provided by JSON
-        // (i.e., still zero or negative). If the JSON contains baseMaxMana/baseMaxStamina
+        // (i.e., still zero or negative). If the JSON contains
+        // baseMaxMana/baseMaxStamina
         // we respect those values. After ensuring base values, recompute derived maxes
         // and set current to max.
         if (this.baseMaxMana <= 0) {
