@@ -90,12 +90,14 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 -
 ## Combat and Stats
 
-- Per-hit resolution order:
-   - To-hit is rolled against the target's dodge first (dodge is clamped to 0–80 at check time).
-   - If it hits, a block check runs (block clamped to 0–80). Blocked hits deal no damage.
-   - Crit is rolled per hit (crit chance clamped to 0–100 at check time).
+- Per-hit resolution (updated):
+   - Combat now uses a single to-hit roll per attempted hit (0–100). That roll is compared against the target's avoidance window and determines whether the attack misses (due to dodge or block) or proceeds to damage/crit resolution.
+   - Dodge and block are considered parts of a single avoidance region (they are partitioned so the ranges don't overlap). Previously there was a hard cap of 0–80 on dodge/block in the docs; that cap has been removed. Effective dodge/block values are still clamped when used for probability checks (the implementation clamps to 0–100 at check time) and the partitioning logic ensures deterministic outcomes.
+   - If the attack isn't avoided, crit is rolled per successful hit (crit chance clamped to 0–100 at check time).
+
 - Raw vs effective chances:
-   - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are only clamped when used for probability rolls.
+   - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are clamped when used for probability checks.
+
 - Dexterity → Dodge:
    - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
 - Data-driven attacks:

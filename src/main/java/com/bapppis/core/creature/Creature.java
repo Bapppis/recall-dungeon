@@ -46,6 +46,9 @@ public abstract class Creature {
     private float equipmentCrit = 0f;
     private float equipmentDodge = 0f;
     private float equipmentBlock = 0f;
+    // Cached per-stat bonuses (e.g. STR 14 -> +4, WIS 7 -> -3). Luck is special:
+    // its bonus equals the raw luck value (Luck 1 -> 1, Luck 0 -> 0).
+    private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
     private HashMap<Integer, Property> buffs = new HashMap<>();
     private HashMap<Integer, Property> debuffs = new HashMap<>();
     private HashMap<Integer, Property> immunities = new HashMap<>();
@@ -138,8 +141,6 @@ public abstract class Creature {
         public Creature target;
     }
 
-    // Dice rolling moved to com.bapppis.core.util.Dice.roll(String)
-
     // --- Constructor ---
     public Creature() {
         stats = new EnumMap<>(Stats.class);
@@ -150,6 +151,8 @@ public abstract class Creature {
                 stats.put(stat, 10); // other stats default to 10
             }
         }
+        // Initialize cached stat bonuses before derived stats that may rely on them
+        recalcStatBonuses();
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
             resistances.put(res, 100); // default resistance 100%
@@ -298,7 +301,7 @@ public abstract class Creature {
     public void updateMaxMana() {
         // Compute the new max mana from a stable base value so repeated calls don't
         // compound.
-        int delta = this.getStat(Stats.INTELLIGENCE) - 10;
+        int delta = this.getStatBonus(Stats.INTELLIGENCE);
         double factor = 1.0;
         if (delta < 0) {
             factor = Math.pow(0.9, -delta);
@@ -326,7 +329,7 @@ public abstract class Creature {
     public void updateMaxStamina() {
         // Compute the new max stamina from a stable base value so repeated calls don't
         // compound.
-        int delta = this.getStat(Stats.CONSTITUTION) - 10;
+        int delta = this.getStatBonus(Stats.CONSTITUTION);
         double factor = 1.0;
         if (delta < 0) {
             factor = Math.pow(0.9, -delta);
@@ -419,6 +422,8 @@ public abstract class Creature {
 
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
+        // Keep cached bonuses in sync whenever a stat changes
+        recalcStatBonuses();
         if (stat == Stats.CONSTITUTION) {
             alterHp();
             // Recompute max stamina when CON changes
@@ -436,6 +441,8 @@ public abstract class Creature {
 
     public void modifyStat(Stats stat, int amount) {
         stats.put(stat, getStat(stat) + amount);
+        // Keep cached bonuses in sync whenever a stat changes
+        recalcStatBonuses();
         if (stat == Stats.CONSTITUTION) {
             alterHp();
             // Recompute max stamina when CON changes
@@ -490,7 +497,7 @@ public abstract class Creature {
         // Compute the derived crit (no compounding): baseCrit (from JSON) plus
         // luck-derived bonus. Equipment modifiers are applied separately via
         // equipmentCrit and added in getCrit().
-        float bonusCrit = 5f * this.getStat(Stats.LUCK);
+        float bonusCrit = 5f * this.getStatBonus(Stats.LUCK);
         this.crit = this.baseCrit + bonusCrit;
     }
 
@@ -517,6 +524,8 @@ public abstract class Creature {
     }
 
     public void recalcDerivedStats() {
+        // Ensure cached stat bonuses are up-to-date before computing derived values
+        recalcStatBonuses();
         // Base-derived values:
         // - Crit and Block mirror the raw base values from JSON (equipment added via
         // equipment* accumulators)
@@ -524,11 +533,31 @@ public abstract class Creature {
         // Crit includes luck scaling here so that any time derived stats are
         // recomputed (for example when equipment changes) the luck bonus is
         // preserved and equipmentCrit is still added via getCrit().
-        float bonusCrit = 5f * this.getStat(Stats.LUCK);
+        float bonusCrit = 5f * this.getStatBonus(Stats.LUCK);
         this.crit = this.baseCrit + bonusCrit;
         this.block = this.baseBlock;
-        float dodgeDelta = 2.5f * (this.getStat(Stats.DEXTERITY) - 10);
+        float dodgeDelta = 2.5f * this.getStatBonus(Stats.DEXTERITY);
         this.dodge = this.baseDodge + dodgeDelta;
+    }
+
+    /**
+     * Recompute and cache per-stat bonuses used throughout creature logic.
+     * - For most stats: bonus = stat - 10
+     * - For LUCK: bonus = stat
+     */
+    public void recalcStatBonuses() {
+        for (Stats s : Stats.values()) {
+            int raw = this.getStat(s);
+            int bonus = (s == Stats.LUCK) ? raw : (raw - 10);
+            statBonuses.put(s, bonus);
+        }
+    }
+
+    /**
+     * Get the cached stat bonus for a stat. Returns 0 if missing.
+     */
+    public int getStatBonus(Stats s) {
+        return statBonuses.getOrDefault(s, 0);
     }
 
     public void attack(Creature target) {
@@ -551,7 +580,7 @@ public abstract class Creature {
         if (this.attacks != null && !this.attacks.isEmpty()) {
             chosen = chooseAttackFromList(this.attacks);
             // For creature attacks, default to strength for physical damage
-            int statBonus = Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+            int statBonus = Math.max(1, this.getStatBonus(Stats.STRENGTH));
             Resistances physType = parseResistance(chosen == null ? null : chosen.damageType);
             Resistances magType = parseResistance(chosen == null ? null : chosen.magicDamageType);
             applyAttackToTarget(chosen, statBonus, target, physType, magType);
@@ -564,15 +593,15 @@ public abstract class Creature {
 
     private int determineStatBonusForWeapon(Equipment weapon) {
         if (weapon.isFinesse()) {
-            return Math.max(1, Math.max(this.getStat(Stats.STRENGTH) - 10, this.getStat(Stats.DEXTERITY) - 10));
+            return Math.max(1, Math.max(this.getStatBonus(Stats.STRENGTH), this.getStatBonus(Stats.DEXTERITY)));
         }
         switch (weapon.getWeaponClass()) {
             case MELEE:
-                return Math.max(1, this.getStat(Stats.STRENGTH) - 10);
+                return Math.max(1, this.getStatBonus(Stats.STRENGTH));
             case RANGED:
-                return Math.max(1, this.getStat(Stats.DEXTERITY) - 10);
+                return Math.max(1, this.getStatBonus(Stats.DEXTERITY));
             case MAGIC:
-                return Math.max(1, this.getStat(Stats.INTELLIGENCE) - 10);
+                return Math.max(1, this.getStatBonus(Stats.INTELLIGENCE));
             default:
                 return 0;
         }
@@ -1032,7 +1061,7 @@ public abstract class Creature {
     }
 
     public void updateMaxHp() {
-        int delta = this.getStat(Stats.CONSTITUTION) - 10;
+        int delta = this.getStatBonus(Stats.CONSTITUTION);
         int bonusHp = this.hpLvlBonus + delta;
         bonusHp = Math.max(1, bonusHp);
         this.setMaxHp(this.maxHp + bonusHp);
@@ -1051,12 +1080,8 @@ public abstract class Creature {
     public void alterHp() {
         // Preserve currentHp/maxHp ratio when maxHp changes
         double ratio = this.maxHp > 0 ? (double) currentHp / this.maxHp : 1.0;
-        int newMaxHp;
-        if ((this.getStat(Stats.CONSTITUTION) >= 10)) {
-            newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus + (this.getStat(Stats.CONSTITUTION) - 10)));
-        } else {
-            newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus - (10 - this.getStat(Stats.CONSTITUTION))));
-        }
+        int conBonus = this.getStatBonus(Stats.CONSTITUTION);
+        int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus + conBonus));
         this.maxHp = Math.max(1, newMaxHp);
         this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
     }
