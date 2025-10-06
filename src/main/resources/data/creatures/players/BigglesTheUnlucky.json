@@ -27,17 +27,26 @@
   "baseCrit": 5,
   "baseDodge": 10,
   "baseBlock": 5,
-  "properties": [4000, 4002],
-
+  "properties": [
+    4000,
+    4002
+  ],
   "attacks": [
-    { "name": "Scratch", "times": 1, "physicalDamageDice": "1d2", "damageType": "SLASHING" }
+    {
+      "name": "Scratch",
+      "times": 1,
+      "physicalDamageDice": "1d2",
+      "damageType": "SLASHING"
+    }
   ],
   "sprite": "player_biggles",
-
-  "inventory": [8000, 9802],
+  "inventory": [
+    8000,
+    9802
+  ],
   "helmet": 7251,
   "armor": 7003,
   "legwear": null,
-  "weapon": 9803,
+  "weapon": 9600,
   "offhand": null
 }

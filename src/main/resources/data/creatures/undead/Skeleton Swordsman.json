@@ -23,11 +23,25 @@
   "baseCrit": 5,
   "baseDodge": 15,
   "baseBlock": 5,
-  "properties": [3000],
-
+  "properties": [
+    3000
+  ],
   "attacks": [
-    { "name": "Slash", "times": 1, "physicalDamageDice": "1d6+1", "weight": 7, "damageType": "SLASHING" },
-    { "name": "Stab", "times": 1, "physicalDamageDice": "1d6", "critMod": "+10", "weight": 3, "damageType": "PIERCING" }
+    {
+      "name": "Slash",
+      "times": 1,
+      "physicalDamageDice": "1d6+1",
+      "weight": 7,
+      "damageType": "SLASHING"
+    },
+    {
+      "name": "Stab",
+      "times": 1,
+      "physicalDamageDice": "1d6",
+      "critMod": "+10",
+      "weight": 3,
+      "damageType": "PIERCING"
+    }
   ],
   "sprite": null
 }

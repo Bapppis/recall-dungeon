@@ -24,10 +24,32 @@
     "",
     "Shadow Slashes (20%): Deals 9-20 slashing damage and 12-16 darkness damage. This attack has a +5% critical chance."
   ],
-
   "attacks": [
-  { "name": "Double Slash", "times": 2, "physicalDamageDice": "1d6", "magicDamageDice": "1d4", "weight": 4, "damageType": "SLASHING" },
-  { "name": "Big Slash", "times": 1, "physicalDamageDice": "2d6", "magicDamageDice": "1d8", "critMod": "+10", "weight": 4, "damageType": "SLASHING" },
-  { "name": "Shadow Slashes", "times": 4, "physicalDamageDice": "1d3+2", "magicDamageDice": "1d2+2", "critMod": "+5", "weight": 2, "damageType": "SLASHING" }
+    {
+      "name": "Double Slash",
+      "times": 2,
+      "physicalDamageDice": "1d6",
+      "magicDamageDice": "1d4",
+      "weight": 4,
+      "damageType": "SLASHING"
+    },
+    {
+      "name": "Big Slash",
+      "times": 1,
+      "physicalDamageDice": "2d6",
+      "magicDamageDice": "1d8",
+      "critMod": "+10",
+      "weight": 4,
+      "damageType": "SLASHING"
+    },
+    {
+      "name": "Shadow Slashes",
+      "times": 4,
+      "physicalDamageDice": "1d3+2",
+      "magicDamageDice": "1d2+2",
+      "critMod": "+5",
+      "weight": 2,
+      "damageType": "SLASHING"
+    }
   ]
 }

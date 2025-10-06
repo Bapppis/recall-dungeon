@@ -23,7 +23,7 @@ public class TestCommonWeaponsPool {
         Set<String> allowed = new HashSet<>();
         allowed.add("9802"); // Parrying Dagger
         allowed.add("9801"); // Rusty Iron Sword
-        allowed.add("9803"); // Old Bow
+    allowed.add("9600"); // Old Bow
         allowed.add("Parrying Dagger");
         allowed.add("Rusty Iron Sword");
         allowed.add("Old Bow");

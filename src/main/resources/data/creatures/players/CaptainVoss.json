@@ -23,15 +23,23 @@
   "baseCrit": 0,
   "baseDodge": 5,
   "baseBlock": 15,
-  "properties": [4001],
-
-  "attacks": [
-    { "name": "Punch", "times": 1, "physicalDamageDice": "1d3", "damageType": "BLUDGEONING" }
+  "properties": [
+    4001
   ],
-
+  "attacks": [
+    {
+      "name": "Punch",
+      "times": 1,
+      "physicalDamageDice": "1d3",
+      "damageType": "BLUDGEONING"
+    }
+  ],
   "sprite": "player_voss",
-
-  "inventory": [8000, 9803, 7000],
+  "inventory": [
+    8000,
+    9600,
+    7000
+  ],
   "armor": 7002,
   "helmet": null,
   "legwear": 7501,

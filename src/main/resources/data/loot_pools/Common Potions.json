@@ -2,6 +2,11 @@
   "id": "10001",
   "name": "Common Potions",
   "entries": [
-    { "type": "item", "id": "8000", "countMin": 1, "countMax": 1 }
+    {
+      "type": "item",
+      "id": "8000",
+      "countMin": 1,
+      "countMax": 1
+    }
   ]
 }

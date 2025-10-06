@@ -14,6 +14,17 @@ public class Equipment implements Item {
         return attacks;
     }
 
+    // Optional attacks used when a versatile weapon is wielded two-handed.
+    private List<Attack> versatileAttacks;
+
+    public List<Attack> getVersatileAttacks() {
+        return versatileAttacks;
+    }
+
+    public void setVersatileAttacks(List<Attack> versatileAttacks) {
+        this.versatileAttacks = versatileAttacks;
+    }
+
     private String healingDice;
 
     public String getHealingDice() {
@@ -27,7 +38,8 @@ public class Equipment implements Item {
     private int id;
     private String name;
     private String description;
-    // Backwards-compatible: `tooltip` in JSON can be either a single String or an array of Strings.
+    // Backwards-compatible: `tooltip` in JSON can be either a single String or an
+    // array of Strings.
     // We keep the raw value here and normalize in getTooltip().
     private Object tooltip;
     private ItemType itemType;
@@ -82,7 +94,7 @@ public class Equipment implements Item {
     }
 
     public boolean isVersatile() {
-        return versatile;
+        return versatile || (versatileAttacks != null && !versatileAttacks.isEmpty());
     }
 
     public void setVersatile(boolean versatile) {
@@ -109,8 +121,10 @@ public class Equipment implements Item {
 
     @Override
     public String getTooltip() {
-        if (tooltip == null) return null;
-        if (tooltip instanceof String) return (String) tooltip;
+        if (tooltip == null)
+            return null;
+        if (tooltip instanceof String)
+            return (String) tooltip;
         // If the JSON provided an array, Gson will deserialize it as a java.util.List.
         if (tooltip instanceof java.util.List) {
             @SuppressWarnings("unchecked")
@@ -119,8 +133,10 @@ public class Equipment implements Item {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < list.size(); i++) {
                 Object o = list.get(i);
-                if (o != null) sb.append(o.toString());
-                if (i < list.size() - 1) sb.append('\n');
+                if (o != null)
+                    sb.append(o.toString());
+                if (i < list.size() - 1)
+                    sb.append('\n');
             }
             return sb.toString();
         }

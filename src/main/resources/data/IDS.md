@@ -37,6 +37,8 @@ Notes
 - 4002 — Darksight — data/properties/trait/Darksight.json
 
 ## Creatures (5000-6999)
+- 6601 — Skeleton Swordsman — data/creatures/undead/Skeleton Swordsman.json
+### Players (5000-5499)
 ### Players (5000-5499)
 - 5001 — Captain Aldric Voss — data/creatures/players/CaptainVoss.json
 - 5000 — Biggles The Unlucky — data/creatures/players/BigglesTheUnlucky.json
@@ -109,7 +111,7 @@ Notes
 - 9400 — Rusty Iron Spear — data/items/weapons/melee weapons/piercing weapons/Rusty Iron Spear.json
 
 #### Ranged Weapons (9600-9799)
-- 9803 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
+- 9600 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
 
 #### Slash Weapons (9800-9999)
 - 9800 — Falchion of Doom — data/items/weapons/melee weapons/slash weapons/Falchion of Doom.json

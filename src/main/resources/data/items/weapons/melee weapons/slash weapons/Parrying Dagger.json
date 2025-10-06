@@ -4,7 +4,6 @@
   "description": "Not really meant for attacking, you are not even sure how you got it.",
   "weaponClass": "MELEE",
   "damageType": "SLASHING",
-
   "finesse": true,
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
@@ -20,9 +19,21 @@
     "",
     "Stab (30%): Deals 1-6 piercing damage. This attack has a +5% critical chance."
   ],
-
   "attacks": [
-  { "name": "Slashes", "times": 2, "physicalDamageDice": "1d3", "weight": 7, "damageType": "SLASHING" },
-  { "name": "Stab", "times": 1, "physicalDamageDice": "1d6", "critMod": "+5", "weight": 3, "damageType": "PIERCING" }
+    {
+      "name": "Slashes",
+      "times": 2,
+      "physicalDamageDice": "1d3",
+      "weight": 7,
+      "damageType": "SLASHING"
+    },
+    {
+      "name": "Stab",
+      "times": 1,
+      "physicalDamageDice": "1d6",
+      "critMod": "+5",
+      "weight": 3,
+      "damageType": "PIERCING"
+    }
   ]
 }

@@ -22,13 +22,25 @@
   "baseCrit": 5,
   "baseDodge": 5,
   "baseBlock": 20,
-  "properties": [3000],
-
+  "properties": [
+    3000
+  ],
   "attacks": [
-    { "name": "Jab", "times": 1, "physicalDamageDice": "1d6+1", "weight": 6, "damageType": "PIERCING" },
-    { "name": "Swipe", "times": 1, "physicalDamageDice": "1d6", "critMod": "+5", "weight": 4, "damageType": "SLASHING" }
+    {
+      "name": "Jab",
+      "times": 1,
+      "physicalDamageDice": "1d6+1",
+      "weight": 6,
+      "damageType": "PIERCING"
+    },
+    {
+      "name": "Swipe",
+      "times": 1,
+      "physicalDamageDice": "1d6",
+      "critMod": "+5",
+      "weight": 4,
+      "damageType": "SLASHING"
+    }
   ],
   "sprite": null
-
-
 }

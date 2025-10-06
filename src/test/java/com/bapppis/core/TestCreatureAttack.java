@@ -42,8 +42,8 @@ public class TestCreatureAttack {
         CreatureLoader.loadCreatures();
         ItemLoader.loadItems();
 
-    // Load Dark Hound (id 6000)
-    com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(6000);
+        // Load Dark Hound (id 6000)
+        com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(6000);
         assert darkHound != null;
 
         // Load training dummy (id 6100)
@@ -79,12 +79,13 @@ public class TestCreatureAttack {
             int times = timesPerAttack.getOrDefault(name, 1);
             int totalHits = count * times;
             System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
-                + " | TotalHits: " + totalHits + " | PhysTotal: " + physTotals.getOrDefault(name, 0)
-                + " | MagTotal: " + magTotals.getOrDefault(name, 0));
+                    + " | TotalHits: " + totalHits + " | PhysTotal: " + physTotals.getOrDefault(name, 0)
+                    + " | MagTotal: " + magTotals.getOrDefault(name, 0));
         }
         System.out.println("----------------------------------------------");
 
-        // Basic checks (non-fatal): if no attacks were recorded, print a warning but don't fail the test.
+        // Basic checks (non-fatal): if no attacks were recorded, print a warning but
+        // don't fail the test.
         if (counts.size() == 0) {
             System.out.println("Warning: No attacks recorded for Dark Hound; this run produced no attack events.");
         } else {
@@ -110,24 +111,26 @@ public class TestCreatureAttack {
         Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;
 
-        // Ensure full health and high constitution so HP doesn't drop undesirably during test
+        // Ensure full health and high constitution so HP doesn't drop undesirably
+        // during test
         biggles.setStat(Stats.CONSTITUTION, 100);
 
-        // Give Falchion of Doom to Biggles and equip it (Falchion id 9800)
-        /* biggles.addItem(ItemLoader.getItemById(9800));
-        biggles.equipItem(biggles.getInventory().getWeapons().get(1)); */
+        // Testing versatile weapon attacks
+        biggles.addItem(ItemLoader.getItemById(9801)); // Rusty Iron Sword
+        biggles.equipItem(biggles.getInventory().getWeapons().get(1), true);
+        System.out.println(biggles.toString());
 
         // Load training dummy as a target
         com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
         assert dummy != null;
 
         // Prepare counters
-    java.util.Map<String, Integer> counts = new java.util.HashMap<>();
-    java.util.Map<String, Integer> physTotals = new java.util.HashMap<>();
-    java.util.Map<String, Integer> magTotals = new java.util.HashMap<>();
-    java.util.Map<String, String> physTypes = new java.util.HashMap<>();
-    java.util.Map<String, String> magTypes = new java.util.HashMap<>();
-    java.util.Map<String, Integer> timesPerAttack = new java.util.HashMap<>();
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        java.util.Map<String, Integer> physTotals = new java.util.HashMap<>();
+        java.util.Map<String, Integer> magTotals = new java.util.HashMap<>();
+        java.util.Map<String, String> physTypes = new java.util.HashMap<>();
+        java.util.Map<String, String> magTypes = new java.util.HashMap<>();
+        java.util.Map<String, Integer> timesPerAttack = new java.util.HashMap<>();
 
         // Install listener to capture detailed attack reports
         com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
@@ -136,7 +139,8 @@ public class TestCreatureAttack {
             magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
             // Record damage types (first seen)
             physTypes.putIfAbsent(rpt.attackName, rpt.damageType == null ? "UNKNOWN" : rpt.damageType);
-            if (rpt.magicType != null) magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
+            if (rpt.magicType != null)
+                magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
             timesPerAttack.putIfAbsent(rpt.attackName, rpt.times);
         };
 
@@ -149,18 +153,19 @@ public class TestCreatureAttack {
 
         // Print summary
         System.out.println("--- Attack Summary after " + runs + " attacks ---");
-    for (String name : counts.keySet()) {
-        int count = counts.get(name);
-        int times = timesPerAttack.getOrDefault(name, 1);
-        int totalHits = count * times;
-        System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
-            + " | TotalHits: " + totalHits + " | PhysType: " + physTypes.getOrDefault(name, "UNKNOWN")
-            + " | MagType: " + magTypes.getOrDefault(name, "NONE") + " | PhysTotal: "
-            + physTotals.getOrDefault(name, 0) + " | MagTotal: " + magTotals.getOrDefault(name, 0));
-    }
+        for (String name : counts.keySet()) {
+            int count = counts.get(name);
+            int times = timesPerAttack.getOrDefault(name, 1);
+            int totalHits = count * times;
+            System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
+                    + " | TotalHits: " + totalHits + " | PhysType: " + physTypes.getOrDefault(name, "UNKNOWN")
+                    + " | MagType: " + magTypes.getOrDefault(name, "NONE") + " | PhysTotal: "
+                    + physTotals.getOrDefault(name, 0) + " | MagTotal: " + magTotals.getOrDefault(name, 0));
+        }
         System.out.println("----------------------------------------------");
 
-        // Basic sanity: At least one attack type should have occurred and total hits consistent
+        // Basic sanity: At least one attack type should have occurred and total hits
+        // consistent
         assert counts.size() > 0;
         int summedHits = 0;
         for (String name : counts.keySet()) {

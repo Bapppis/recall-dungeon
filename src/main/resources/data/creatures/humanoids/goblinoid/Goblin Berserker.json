@@ -21,10 +21,22 @@
   "baseDodge": 15,
   "baseBlock": 0,
   "properties": null,
-
   "attacks": [
-    { "name": "Axe Chops", "times": 2, "physicalDamageDice": "2d3", "weight": 8, "damageType": "SLASHING" },
-    { "name": "Rampage", "times": 4, "physicalDamageDice": "4d2", "critMod": "+10", "weight": 2, "damageType": "SLASHING" }
+    {
+      "name": "Axe Chops",
+      "times": 2,
+      "physicalDamageDice": "2d3",
+      "weight": 8,
+      "damageType": "SLASHING"
+    },
+    {
+      "name": "Rampage",
+      "times": 4,
+      "physicalDamageDice": "4d2",
+      "critMod": "+10",
+      "weight": 2,
+      "damageType": "SLASHING"
+    }
   ],
   "sprite": "monster_goblin"
 }

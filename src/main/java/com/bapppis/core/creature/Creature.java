@@ -567,8 +567,28 @@ public abstract class Creature {
         Equipment weapon = null;
         if (this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
             weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
-            if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
-                chosen = chooseAttackFromList(weapon.getAttacks());
+            // If the weapon is versatile and is currently wielded two-handed (it also
+            // occupies the OFFHAND slot), prefer the versatileAttacks list. Otherwise
+            // fall back to the weapon's regular attacks.
+            java.util.List<Attack> weaponAttackList = null;
+            try {
+                boolean wieldedTwoHanded = (this.getEquipped(EquipmentSlot.OFFHAND) == weapon) || weapon.isTwoHanded();
+                if (weapon.isVersatile() && wieldedTwoHanded) {
+                    if (weapon.getVersatileAttacks() != null && !weapon.getVersatileAttacks().isEmpty()) {
+                        weaponAttackList = weapon.getVersatileAttacks();
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+
+            if (weaponAttackList == null) {
+                if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
+                    weaponAttackList = weapon.getAttacks();
+                }
+            }
+
+            if (weaponAttackList != null && !weaponAttackList.isEmpty()) {
+                chosen = chooseAttackFromList(weaponAttackList);
                 // stat bonus depends on weapon class/finesse
                 int statBonus = determineStatBonusForWeapon(weapon) * 5;
                 applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement());

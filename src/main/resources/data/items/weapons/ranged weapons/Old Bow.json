@@ -1,5 +1,5 @@
 {
-  "id": 9803,
+  "id": 9600,
   "name": "Old Bow",
   "description": "The bow is past its prime, hopefully it won't break just yet.",
   "weaponClass": "RANGED",
@@ -16,10 +16,28 @@
     "",
     "Perfect Shot (5%): Deals 1-6 true damage. This attack has a +30% critical chance and pierces through anything."
   ],
-
   "attacks": [
-  { "name": "Shoot", "times": 1, "physicalDamageDice": "2d4", "weight": 70, "damageType": "PIERCING" },
-  { "name": "Barrage", "times": 3, "physicalDamageDice": "1d3", "weight": 25, "damageType": "PIERCING" },
-  { "name": "Perfect Shot", "times": 1, "physicalDamageDice": "1d6", "critMod": "+30", "weight": 5, "damageType": "TRUE" }
+    {
+      "name": "Shoot",
+      "times": 1,
+      "physicalDamageDice": "2d4",
+      "weight": 70,
+      "damageType": "PIERCING"
+    },
+    {
+      "name": "Barrage",
+      "times": 3,
+      "physicalDamageDice": "1d3",
+      "weight": 25,
+      "damageType": "PIERCING"
+    },
+    {
+      "name": "Perfect Shot",
+      "times": 1,
+      "physicalDamageDice": "1d6",
+      "critMod": "+30",
+      "weight": 5,
+      "damageType": "TRUE"
+    }
   ]
 }
