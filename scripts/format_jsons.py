@@ -60,6 +60,7 @@ CANON_CREATURE_ORDER: List[str] = [
     "size",
     "level",
     "xp",
+    "enemyXp",
     "visionRange",
     "stats",
     "resistances",

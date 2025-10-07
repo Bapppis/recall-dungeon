@@ -19,6 +19,7 @@ public abstract class Creature {
     private int visionRange = 2; // default vision range
     private int level;
     private int xp;
+    private Integer enemyXp;
     private int baseHp;
     private int maxHp;
     private int currentHp;
@@ -223,6 +224,14 @@ public abstract class Creature {
         } else {
             this.xp = this.xp + xp;
         }
+    }
+
+    public Integer getEnemyXp() {
+        return enemyXp;
+    }
+
+    public void setEnemyXp(Integer enemyXp) {
+        this.enemyXp = enemyXp;
     }
 
     public int getBaseHp() {
@@ -602,7 +611,8 @@ public abstract class Creature {
                 chosen = chooseAttackFromList(weaponAttackList);
                 // stat bonus depends on weapon class/finesse
                 int statBonus = determineStatBonusForWeapon(weapon) * 5;
-                applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement(), weapon);
+                applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement(),
+                        weapon);
                 return;
             }
         }
@@ -735,14 +745,16 @@ public abstract class Creature {
             totalPhysBeforeResist += hit;
         }
 
-    // Compute extra physical damage contributed by the weapon stat and attack.damageMultiplier
-    int physStatBase = 0;
-    int physStatExtra = 0;
-    String physStatChosenName = null;
+        // Compute extra physical damage contributed by the weapon stat and
+        // attack.damageMultiplier
+        int physStatBase = 0;
+        int physStatExtra = 0;
+        String physStatChosenName = null;
         try {
             if (weapon != null) {
                 physStatBase = determineStatBonusForWeapon(weapon);
-                // Determine stat name used for physical multiplier (based on weapon finesse/class)
+                // Determine stat name used for physical multiplier (based on weapon
+                // finesse/class)
                 try {
                     if (weapon.getFinesse()) {
                         // Choose higher of STR/DEX (mirrors determineStatBonusForWeapon)
@@ -780,12 +792,14 @@ public abstract class Creature {
                         * (physicalType == null ? 100 : target.getResistance(physicalType)),
                 100);
         // Roll base magic damage from the attack
-    int mag = attack.rollMagicDamage();
+        int mag = attack.rollMagicDamage();
         // If a weapon with a magic stat is present, compute the weapon's magic-stat
-        // contribution and add it. Formula: floor( weaponMagicStatBonus * 5 * attack.magicDamageMultiplier )
+        // contribution and add it. Formula: floor( weaponMagicStatBonus * 5 *
+        // attack.magicDamageMultiplier )
         try {
             if (weapon != null) {
-                // Support multiple candidate stats. Choose the highest stat-bonus among candidates.
+                // Support multiple candidate stats. Choose the highest stat-bonus among
+                // candidates.
                 com.bapppis.core.creature.Creature.Stats chosen = null;
                 int bestBonus = Integer.MIN_VALUE;
                 if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
@@ -815,7 +829,7 @@ public abstract class Creature {
         } catch (Exception ignored) {
             // be defensive: if anything goes wrong retrieving weapon stat info, skip extra
         }
-    int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
+        int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
 
         // If a test listener is set, populate and send an AttackReport
         try {
@@ -834,7 +848,8 @@ public abstract class Creature {
                 rpt.isCrit = critCount > 0;
                 rpt.attacker = this;
                 rpt.target = target;
-                // Populate debug fields for magic + physical stat and multipliers. Compute defensively
+                // Populate debug fields for magic + physical stat and multipliers. Compute
+                // defensively
                 int reportWeaponStatBonus = 0;
                 int reportMagicExtra = 0;
                 float reportMagicMult = attack.magicDamageMultiplier;
@@ -1325,6 +1340,8 @@ public abstract class Creature {
         sb.append("Vision Range: ").append(visionRange).append("\n");
         sb.append("Level: ").append(level).append("\n");
         sb.append("XP: ").append(xp).append("\n");
+        if (enemyXp != null && enemyXp != 0)
+            sb.append("Enemy XP: ").append(enemyXp).append("\n");
         sb.append("Base HP: ").append(baseHp).append("\n");
         sb.append("HP Level Bonus: ").append(hpLvlBonus).append("\n");
         sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("\n");

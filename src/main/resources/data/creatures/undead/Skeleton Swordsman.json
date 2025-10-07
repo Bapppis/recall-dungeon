@@ -4,7 +4,7 @@
   "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty sword.",
   "creatureType": "UNDEAD",
   "size": "MEDIUM",
-  "xp": 3,
+  "enemyXp": 3,
   "visionRange": 1,
   "stats": {
     "DEXTERITY": 12,
