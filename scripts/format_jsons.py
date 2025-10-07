@@ -1,21 +1,157 @@
 #!/usr/bin/env python3
 """Format all JSON files under src/main/resources/data with 2-space indent.
 
-This is intentionally simple and avoids changing key order.
+Now also enforces a canonical key ordering based on the item's canonical example
+(Falchion of Doom). Any keys not present in the canonical list are appended in
+alphabetical order after the known sequence. For attack objects inside an
+"attacks" array a specialized ordering is applied.
+
+This keeps diffs stable and makes visual comparison easier.
 """
 import json
 from pathlib import Path
+from typing import Dict, Any, List
 
 root = Path(__file__).resolve().parents[1]
 data_dir = root / 'src' / 'main' / 'resources' / 'data'
 
-changed = []
+# Canonical top-level ordering derived from Falchion of Doom.json.
+CANON_TOP_ORDER: List[str] = [
+    "id",
+    "name",
+    "description",
+    "rarity",
+    "itemType",
+    "equipmentSlot",
+    "weaponClass",
+    "twoHanded",
+    "damageType",
+    "magicElement",
+    "magicStatBonuses",  # multi-stat support (array)
+    "magicStatBonus",
+    "stats",
+    "resistances",
+    "dodge",
+    "crit",
+    "block",
+    "tooltip",
+    "attacks",
+]
+
+# Canonical ordering for attack objects (fields optional; absent ones skipped).
+CANON_ATTACK_ORDER: List[str] = [
+    "name",
+    "times",
+    "physicalDamageDice",
+    "magicDamageDice",
+    "damageMultiplier",
+    "magicDamageMultiplier",
+    "critMod",
+    "weight",
+    "damageType",
+]
+
+# Canonical ordering for creature objects (derived from BigglesTheUnlucky.json)
+CANON_CREATURE_ORDER: List[str] = [
+    "id",
+    "name",
+    "description",
+    "creatureType",
+    "size",
+    "level",
+    "xp",
+    "visionRange",
+    "stats",
+    "resistances",
+    "baseBlock",
+    "baseCrit",
+    "baseDodge",
+    "baseHp",
+    "baseMaxMana",
+    "baseMaxStamina",
+    "hpLvlBonus",
+    "helmet",
+    "armor",
+    "legwear",
+    "weapon",
+    "offhand",
+    "inventory",
+    "properties",
+    "attacks",
+    "sprite"
+]
+
+
+def order_keys(obj: Dict[str, Any], order: List[str]) -> Dict[str, Any]:
+    """Return new dict with keys inserted following 'order'; remaining appended alphabetically."""
+    ordered = {}
+    for key in order:
+        if key in obj:
+            ordered[key] = obj[key]
+    # Any remaining keys not in canonical list
+    remaining = sorted(k for k in obj.keys() if k not in ordered)
+    for k in remaining:
+        ordered[k] = obj[k]
+    return ordered
+
+
+def transform(obj: Any, kind: str = None) -> Any:
+    """Recursively transform an object, applying ordering rules at known structures.
+
+    The `kind` parameter is used to select which canonical ordering to apply:
+      - 'item' applies CANON_TOP_ORDER
+      - 'creature' applies CANON_CREATURE_ORDER
+      - None applies no top-level ordering (only attack/inner ordering)
+    """
+    if isinstance(obj, dict):
+        # Apply only the ordering appropriate for this file kind.
+        if kind == 'item' and any(k in obj for k in CANON_TOP_ORDER):
+            obj = order_keys(obj, CANON_TOP_ORDER)
+
+        if kind == 'creature' and any(k in obj for k in CANON_CREATURE_ORDER):
+            obj = order_keys(obj, CANON_CREATURE_ORDER)
+
+        # Recurse into values
+        for k, v in list(obj.items()):
+            if k == "attacks" and isinstance(v, list):
+                new_attacks = []
+                for attack in v:
+                    if isinstance(attack, dict):
+                        attack = order_keys(attack, CANON_ATTACK_ORDER)
+                    new_attacks.append(transform(attack, kind))
+                obj[k] = new_attacks
+            else:
+                obj[k] = transform(v, kind)
+
+        # Additionally sort nested simple dicts like stats/resistances alphabetically for stability.
+        for simple_key in ("stats", "resistances"):
+            if simple_key in obj and isinstance(obj[simple_key], dict):
+                obj[simple_key] = {k: obj[simple_key][k] for k in sorted(obj[simple_key].keys())}
+
+        return obj
+    elif isinstance(obj, list):
+        return [transform(e, kind) for e in obj]
+    else:
+        return obj
+
+
+changed: List[str] = []
 for p in data_dir.rglob('*.json'):
     try:
         text = p.read_text(encoding='utf-8')
-        # load and dump to normalize formatting
         obj = json.loads(text)
-        new_text = json.dumps(obj, ensure_ascii=False, indent=2) + "\n"
+        # Determine file kind by path segments (items vs creatures)
+        rel = p.relative_to(data_dir)
+        parts = rel.parts
+        if parts and parts[0] == 'items':
+            kind = 'item'
+        elif parts and parts[0] == 'creatures':
+            kind = 'creature'
+        else:
+            kind = None
+
+        transformed = transform(obj, kind)
+        new_text = json.dumps(transformed, ensure_ascii=False, indent=2) + "\n"
         if new_text != text:
             p.write_text(new_text, encoding='utf-8')
             changed.append(str(p.relative_to(root)))
@@ -23,8 +159,8 @@ for p in data_dir.rglob('*.json'):
         print(f"Skipping {p}: {e}")
 
 if changed:
-    print('Reformatted files:')
+    print('Reformatted & re-ordered files:')
     for c in changed:
         print(c)
 else:
-    print('No JSON files needed formatting.')
+    print('No JSON files needed formatting/order changes.')

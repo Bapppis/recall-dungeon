@@ -3,28 +3,28 @@
   "name": "Common Treasure Chest",
   "entries": [
     {
-      "type": "pool",
       "id": "10001",
       "name": "Common Potions",
-      "guaranteed": true,
+      "countMax": 1,
       "countMin": 1,
-      "countMax": 1
+      "guaranteed": true,
+      "type": "pool"
     },
     {
-      "type": "pool",
       "id": "10001",
       "name": "Common Potions",
       "chance": 0.2,
+      "countMax": 1,
       "countMin": 1,
-      "countMax": 1
+      "type": "pool"
     },
     {
-      "type": "pool",
       "id": "10000",
       "name": "Common Weapons",
       "chance": 0.5,
+      "countMax": 1,
       "countMin": 1,
-      "countMax": 1
+      "type": "pool"
     }
   ]
 }

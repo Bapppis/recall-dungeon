@@ -2,38 +2,42 @@
   "id": 9802,
   "name": "Parrying Dagger",
   "description": "Not really meant for attacking, you are not even sure how you got it.",
-  "weaponClass": "MELEE",
-  "damageType": "SLASHING",
-  "finesse": true,
+  "rarity": "COMMON",
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
+  "weaponClass": "MELEE",
+  "damageType": "SLASHING",
   "stats": {
     "DEXTERITY": 1
   },
   "resistances": {
     "SLASHING": -10
   },
-  "rarity": "COMMON",
   "tooltip": [
-    "Slashes (70%): Deals 2-6 slashing damage.",
+    "You take 10% less slashing damage while wielding this weapon.",
     "",
-    "Stab (30%): Deals 1-6 piercing damage. This attack has a +5% critical chance."
+    "Slashes (70%): Deals 2-6 + 5 * DEX bonus slashing damage.",
+    "",
+    "Stab (30%): Deals 1-6 + 5 * DEX bonus piercing damage. This attack has a +5% critical chance."
   ],
   "attacks": [
     {
       "name": "Slashes",
-      "times": 2,
+      "damageType": "SLASHING",
+      "damageMultiplier": 0.5,
       "physicalDamageDice": "1d3",
-      "weight": 7,
-      "damageType": "SLASHING"
+      "times": 2,
+      "weight": 7
     },
     {
       "name": "Stab",
-      "times": 1,
-      "physicalDamageDice": "1d6",
+      "damageType": "PIERCING",
       "critMod": "+5",
-      "weight": 3,
-      "damageType": "PIERCING"
+      "damageMultiplier": 1.0,
+      "physicalDamageDice": "1d6",
+      "times": 1,
+      "weight": 3
     }
-  ]
+  ],
+  "finesse": true
 }

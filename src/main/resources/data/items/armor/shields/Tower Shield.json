@@ -2,6 +2,7 @@
   "id": 7750,
   "name": "Tower Shield",
   "description": "A large shield that provides excellent protection at the cost of mobility.",
+  "rarity": "UNCOMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "OFFHAND",
   "stats": {
@@ -12,5 +13,16 @@
     "PIERCING": -15,
     "SLASHING": -40
   },
-  "rarity": "UNCOMMON"
+  "block": 25,
+  "tooltip": [
+    "Your gain 25% block chance while wearing this armor.",
+    "",
+    "Your DEX bonus is decreased by 2 while wearing this armor.",
+    "",
+    "You take 30% less bludgeoning damage while wearing this armor.",
+    "",
+    "You take 15% less piercing damage while wearing this armor.",
+    "",
+    "You take 40% less slashing damage while wearing this armor."
+  ]
 }

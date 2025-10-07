@@ -2,6 +2,7 @@
   "id": 7751,
   "name": "Heater Shield",
   "description": "A small shield that provides decent protection while allowing for greater mobility.",
+  "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "OFFHAND",
   "resistances": {
@@ -9,5 +10,14 @@
     "PIERCING": -5,
     "SLASHING": -15
   },
-  "rarity": "COMMON"
+  "block": 15,
+  "tooltip": [
+    "Your gain 15% block chance while wearing this armor.",
+    "",
+    "You take 10% less bludgeoning damage while wearing this armor.",
+    "",
+    "You take 5% less piercing damage while wearing this armor.",
+    "",
+    "You take 10% less slashing damage while wearing this armor."
+  ]
 }

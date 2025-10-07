@@ -2,10 +2,10 @@
   "id": 8000,
   "name": "Minor Healing Potion",
   "description": "A reddish diluted potion, will heal you somewhat.",
-  "healingDice": "2d4+2",
+  "rarity": "COMMON",
+  "itemType": "CONSUMABLE",
   "tooltip": [
     "Heals 2d4+2 HP when used."
   ],
-  "itemType": "CONSUMABLE",
-  "rarity": "COMMON"
+  "healingDice": "2d4+2"
 }

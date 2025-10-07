@@ -2,13 +2,24 @@
   "id": 7000,
   "name": "Armor of Water",
   "description": "A shimmering blue armor that is hypnotizing to look at.",
+  "rarity": "RARE",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
   "stats": {
-    "INTELLIGENCE": 0
+    "CONSTITUTION": 2,
+    "INTELLIGENCE": 2
   },
   "resistances": {
     "WATER": -50
   },
-  "rarity": "RARE"
+  "block": 20,
+  "tooltip": [
+    "Your gain 20% block chance while wearing this armor.",
+    "",
+    "Your CON bonus is increased by 2 while wearing this armor.",
+    "",
+    "Your INT bonus is increased by 2 while wearing this armor.",
+    "",
+    "You take 50% less water damage while wearing this armor."
+  ]
 }

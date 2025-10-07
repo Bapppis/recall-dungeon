@@ -2,54 +2,62 @@
   "id": 9400,
   "name": "Rusty Iron Spear",
   "description": "Once a proud weapon, now just a rusty relic. The rust could poison someone.",
+  "rarity": "COMMON",
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
   "damageType": "PIERCING",
   "magicElement": "NATURE",
-  "isVersatile": true,
-  "itemType": "WEAPON",
-  "equipmentSlot": "WEAPON",
-  "rarity": "COMMON",
   "tooltip": [
-    "Slash (70%): Deals 1-6 (1-8) slashing damage and 1 (1-2) nature damage.",
+    "Slash (70%): Deals 1-6 + 5 * STR bonus (1-8 + 5 * 1.25 STR bonus) slashing damage and 1 (1-2) nature damage.",
     "",
-    "Thrust (30%): Deals 2-6 (2-8) piercing damage and 1-2 (1-4) nature damage. This attack has a +5% (10%) critical chance."
+    "Thrust (30%): Deals 2-6 + 5 * STR bonus (2-8 + 5 * 1.25 STR bonus) piercing damage and 1-2 (1-4) nature damage. This attack has a +5% (10%) critical chance."
   ],
   "attacks": [
     {
-      "name": "Slash",
-      "times": 2,
-      "physicalDamageDice": "1d6",
+      "name": "Jabs",
+      "damageType": "PIERCING",
+      "damageMultiplier": 0.5,
       "magicDamageDice": "1d1",
-      "weight": 7,
-      "damageType": "SLASHING"
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "1d6",
+      "times": 2,
+      "weight": 7
     },
     {
       "name": "Thrust",
-      "times": 1,
-      "physicalDamageDice": "2d3",
-      "magicDamageDice": "1d2",
+      "damageType": "PIERCING",
       "critMod": "+5",
-      "weight": 3,
-      "damageType": "PIERCING"
+      "damageMultiplier": 1.0,
+      "magicDamageDice": "1d2",
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "2d3",
+      "times": 1,
+      "weight": 3
     }
   ],
+  "versatile": true,
   "versatileAttacks": [
     {
-      "name": "Slash",
-      "times": 2,
-      "physicalDamageDice": "1d8",
+      "name": "Two-handed Jabs",
+      "damageType": "PIERCING",
+      "damageMultiplier": 0.75,
       "magicDamageDice": "1d2",
-      "weight": 7,
-      "damageType": "SLASHING"
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "1d8",
+      "times": 2,
+      "weight": 7
     },
     {
-      "name": "Thrust",
-      "times": 1,
-      "physicalDamageDice": "2d4",
-      "magicDamageDice": "1d4",
+      "name": "Two-handed Thrust",
+      "damageType": "PIERCING",
       "critMod": "+10",
-      "weight": 3,
-      "damageType": "PIERCING"
+      "damageMultiplier": 1.25,
+      "magicDamageDice": "1d4",
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "2d4",
+      "times": 1,
+      "weight": 3
     }
   ]
 }

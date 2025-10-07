@@ -2,13 +2,16 @@
   "id": 7249,
   "name": "Test Armor",
   "description": "Where did you get this?",
+  "rarity": "LEGENDARY",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
-  "crit": 5,
-  "dodge": 0,
-  "block": -15,
   "stats": {
     "DEXTERITY": 0
   },
-  "rarity": "LEGENDARY"
+  "dodge": 0,
+  "crit": 5,
+  "block": -15,
+  "tooltip": [
+    "GIVE IT BACK."
+  ]
 }

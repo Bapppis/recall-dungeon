@@ -9,6 +9,8 @@ public class Attack {
   public String magicDamageDice;
   // Optional override for the magic damage resistance type (e.g. DARKNESS, FIRE)
   public String magicDamageType;
+  public float damageMultiplier;
+  public float magicDamageMultiplier;
   public String damageType;
   public Integer weight;
   // Optional per-attack crit modifier, can be written in JSON as "+5" or "-3" (string)
@@ -42,6 +44,24 @@ public class Attack {
       }
       return 0;
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Attack[");
+    if (name != null) sb.append("name='").append(name).append("', ");
+    sb.append("times=").append(getTimes()).append(", ");
+    if (physicalDamageDice != null && !physicalDamageDice.isBlank()) sb.append("phys='").append(physicalDamageDice).append("', ");
+    if (damageMultiplier != 0) sb.append("physMultiplier=").append(damageMultiplier).append(", ");
+    if (magicDamageDice != null && !magicDamageDice.isBlank()) sb.append("magic='").append(magicDamageDice).append("', ");
+    if (magicDamageType != null && !magicDamageType.isBlank()) sb.append("magicType=").append(magicDamageType).append(", ");
+    if (magicDamageMultiplier != 0) sb.append("magicStatBonus=").append(magicDamageMultiplier).append(", ");
+    if (damageType != null) sb.append("damageType=").append(damageType).append(", ");
+    if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
+    sb.append("weight=").append(getWeight());
+    sb.append("]");
+    return sb.toString();
   }
 
 

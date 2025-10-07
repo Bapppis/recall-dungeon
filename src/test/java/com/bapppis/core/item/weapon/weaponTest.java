@@ -1,0 +1,25 @@
+package com.bapppis.core.item.weapon;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.item.Item;
+import com.bapppis.core.item.ItemLoader;
+import com.bapppis.core.property.PropertyManager;
+
+public class weaponTest {
+    // Test item functionality here
+    @Test
+    public void testItemFunctionality() {
+        PropertyManager.loadProperties();
+        ItemLoader.loadItems();
+        CreatureLoader.loadCreatures();
+        //Player biggles = CreatureLoader.getPlayerById(5000);
+        Item testWeapon = ItemLoader.getItemById(9801); // Rusty Iron Sword
+        System.out.println(testWeapon.toString());
+
+    }
+}

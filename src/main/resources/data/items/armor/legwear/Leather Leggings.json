@@ -2,10 +2,19 @@
   "id": 7501,
   "name": "Leather Leggings",
   "description": "Leg armor made of flexible leather, better than nothing.",
+  "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "LEGWEAR",
   "resistances": {
     "SLASHING": -5
   },
-  "rarity": "COMMON"
+  "dodge": 5,
+  "block": 5,
+  "tooltip": [
+    "Your dodge chance is increased by 5% while wearing this armor.",
+    "",
+    "Your gain 5% block chance while wearing this armor.",
+    "",
+    "You take 5% less slashing damage while wearing this armor."
+  ]
 }

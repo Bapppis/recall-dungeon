@@ -2,10 +2,10 @@
   "id": 8004,
   "name": "Perfect Healing Potion",
   "description": "Only mentioned in legends. This green healing potion seems to have golden flecks swirling within. It heals any wound and injury as long as you are alive. It is said to reverse even undeath, though you haven't the time to test that",
-  "healingDice": "99d20+500",
+  "rarity": "ARTIFACT",
+  "itemType": "CONSUMABLE",
   "tooltip": [
     "Heals you fully when used."
   ],
-  "itemType": "CONSUMABLE",
-  "rarity": "ARTIFACT"
+  "healingDice": "99d20+500"
 }

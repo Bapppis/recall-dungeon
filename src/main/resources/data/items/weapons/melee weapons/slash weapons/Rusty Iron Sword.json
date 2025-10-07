@@ -2,54 +2,66 @@
   "id": 9801,
   "name": "Rusty Iron Sword",
   "description": "A rusty iron sword, worn and weathered from years of neglect. The rust could poison someone.",
+  "rarity": "COMMON",
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
   "damageType": "SLASHING",
   "magicElement": "NATURE",
-  "isVersatile": true,
-  "itemType": "WEAPON",
-  "equipmentSlot": "WEAPON",
-  "rarity": "COMMON",
+  "magicStatBonuses": [
+    "INTELLIGENCE"
+  ],
   "tooltip": [
-    "Slashes (70%): Deals 2-6 (2-8) slashing damage and 1 (1-2) nature damage.",
+    "Slashes (70%): Deals 2-6 + 5 * STR/DEX bonus (2-8 + 5 * 1.25 STR/DEX bonus) slashing damage and 1 (1-2) nature damage.",
     "",
-    "Big Slash (30%): Deals 1-6 piercing damage and 1-2 nature damage. This attack has a +5% (10%) critical chance."
+    "Stab (30%): Deals 1-6 + 5 * STR/DEX bonus (1-8 + 5 * 1.25 STR/DEX bonus) piercing damage and 1-2 (1-4) nature damage. This attack has a +5% (10%) critical chance."
   ],
   "attacks": [
     {
       "name": "Slashes",
-      "times": 2,
-      "physicalDamageDice": "1d3",
+      "damageType": "SLASHING",
+      "damageMultiplier": 0.5,
       "magicDamageDice": "1d1",
-      "weight": 7,
-      "damageType": "SLASHING"
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "1d3",
+      "times": 2,
+      "weight": 7
     },
     {
       "name": "Stab",
-      "times": 1,
-      "physicalDamageDice": "1d6",
-      "magicDamageDice": "1d2",
+      "damageType": "PIERCING",
       "critMod": "+5",
-      "weight": 3,
-      "damageType": "PIERCING"
+      "damageMultiplier": 1.0,
+      "magicDamageDice": "1d2",
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "1d6",
+      "times": 1,
+      "weight": 3
     }
   ],
+  "finesse": true,
+  "versatile": true,
   "versatileAttacks": [
     {
       "name": "Two-handed Slashes",
-      "times": 2,
-      "physicalDamageDice": "1d4",
+      "damageType": "SLASHING",
+      "damageMultiplier": 0.75,
       "magicDamageDice": "1d2",
-      "weight": 7,
-      "damageType": "SLASHING"
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "1d4",
+      "times": 2,
+      "weight": 7
     },
     {
       "name": "Two-handed Stab",
-      "times": 1,
-      "physicalDamageDice": "1d8",
-      "magicDamageDice": "1d4",
+      "damageType": "PIERCING",
       "critMod": "+10",
-      "weight": 3,
-      "damageType": "PIERCING"
+      "damageMultiplier": 1.25,
+      "magicDamageDice": "1d4",
+      "magicDamageMultiplier": 0,
+      "physicalDamageDice": "1d8",
+      "times": 1,
+      "weight": 3
     }
   ]
 }

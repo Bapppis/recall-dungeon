@@ -2,10 +2,21 @@
   "id": 7251,
   "name": "Green Hood",
   "description": "A simple green hood that offers minimal protection.",
+  "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
+  "stats": {
+    "DEXTERITY": 1
+  },
   "resistances": {
     "NATURE": -10
   },
-  "rarity": "COMMON"
+  "dodge": 5,
+  "tooltip": [
+    "Your dodge chance is increased by 5% while wearing this armor.",
+    "",
+    "Your DEX bonus is increased by 1 while wearing this armor.",
+    "",
+    "You take 10% less nature damage while wearing this armor."
+  ]
 }

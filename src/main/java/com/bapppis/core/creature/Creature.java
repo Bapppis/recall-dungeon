@@ -139,6 +139,17 @@ public abstract class Creature {
         public boolean isCrit;
         public Creature attacker;
         public Creature target;
+        // Weapon/attack magic debug fields
+        public int magicStatBonus; // the raw stat bonus used from the weapon (e.g., INT bonus)
+        public int magicStatExtra; // extra magic damage added after multiplier and floor
+        public float magicDamageMultiplier; // attack.magicDamageMultiplier
+        // Weapon/attack physical debug fields
+        public int physStatBase; // base stat bonus used for physical damage (determineStatBonusForWeapon)
+        public int physStatExtra; // extra physical damage added after multiplier and floor
+        public float physDamageMultiplier; // attack.damageMultiplier
+        // Chosen stat names for clarity in tests
+        public String magicStatChosen;
+        public String physStatChosen;
     }
 
     // --- Constructor ---
@@ -573,7 +584,7 @@ public abstract class Creature {
             java.util.List<Attack> weaponAttackList = null;
             try {
                 boolean wieldedTwoHanded = (this.getEquipped(EquipmentSlot.OFFHAND) == weapon) || weapon.isTwoHanded();
-                if (weapon.isVersatile() && wieldedTwoHanded) {
+                if (weapon.getVersatile() && wieldedTwoHanded) {
                     if (weapon.getVersatileAttacks() != null && !weapon.getVersatileAttacks().isEmpty()) {
                         weaponAttackList = weapon.getVersatileAttacks();
                     }
@@ -591,7 +602,7 @@ public abstract class Creature {
                 chosen = chooseAttackFromList(weaponAttackList);
                 // stat bonus depends on weapon class/finesse
                 int statBonus = determineStatBonusForWeapon(weapon) * 5;
-                applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement());
+                applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement(), weapon);
                 return;
             }
         }
@@ -603,13 +614,13 @@ public abstract class Creature {
             int statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
             Resistances physType = parseResistance(chosen == null ? null : chosen.damageType);
             Resistances magType = parseResistance(chosen == null ? null : chosen.magicDamageType);
-            applyAttackToTarget(chosen, statBonus, target, physType, magType);
+            applyAttackToTarget(chosen, statBonus, target, physType, magType, null);
             return;
         }
     }
 
     private int determineStatBonusForWeapon(Equipment weapon) {
-        if (weapon.isFinesse()) {
+        if (weapon.getFinesse()) {
             return Math.max(0, Math.max(this.getStatBonus(Stats.STRENGTH), this.getStatBonus(Stats.DEXTERITY)));
         }
         switch (weapon.getWeaponClass()) {
@@ -640,7 +651,7 @@ public abstract class Creature {
     }
 
     private void applyAttackToTarget(Attack attack, int statBonus, Creature target, Resistances physicalType,
-            Resistances magicType) {
+            Resistances magicType, Equipment weapon) {
         if (attack == null || target == null)
             return;
         // Roll physical damage per-hit and check crit per hit
@@ -724,12 +735,87 @@ public abstract class Creature {
             totalPhysBeforeResist += hit;
         }
 
+    // Compute extra physical damage contributed by the weapon stat and attack.damageMultiplier
+    int physStatBase = 0;
+    int physStatExtra = 0;
+    String physStatChosenName = null;
+        try {
+            if (weapon != null) {
+                physStatBase = determineStatBonusForWeapon(weapon);
+                // Determine stat name used for physical multiplier (based on weapon finesse/class)
+                try {
+                    if (weapon.getFinesse()) {
+                        // Choose higher of STR/DEX (mirrors determineStatBonusForWeapon)
+                        int str = this.getStatBonus(Stats.STRENGTH);
+                        int dex = this.getStatBonus(Stats.DEXTERITY);
+                        physStatChosenName = (str >= dex) ? Stats.STRENGTH.name() : Stats.DEXTERITY.name();
+                    } else {
+                        switch (weapon.getWeaponClass()) {
+                            case MELEE:
+                                physStatChosenName = Stats.STRENGTH.name();
+                                break;
+                            case RANGED:
+                                physStatChosenName = Stats.DEXTERITY.name();
+                                break;
+                            case MAGIC:
+                                physStatChosenName = Stats.INTELLIGENCE.name();
+                                break;
+                            default:
+                                physStatChosenName = null;
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+                double physMult = Math.max(0.0, attack.damageMultiplier);
+                physStatExtra = (int) Math.floor(physStatBase * 5.0 * physMult);
+                if (physStatExtra != 0) {
+                    totalPhysBeforeResist += physStatExtra;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
         int physAfter = Math.floorDiv(
                 totalPhysBeforeResist
                         * (physicalType == null ? 100 : target.getResistance(physicalType)),
                 100);
-        int mag = attack.rollMagicDamage();
-        int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
+        // Roll base magic damage from the attack
+    int mag = attack.rollMagicDamage();
+        // If a weapon with a magic stat is present, compute the weapon's magic-stat
+        // contribution and add it. Formula: floor( weaponMagicStatBonus * 5 * attack.magicDamageMultiplier )
+        try {
+            if (weapon != null) {
+                // Support multiple candidate stats. Choose the highest stat-bonus among candidates.
+                com.bapppis.core.creature.Creature.Stats chosen = null;
+                int bestBonus = Integer.MIN_VALUE;
+                if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
+                    for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
+                        int b = this.getStatBonus(s);
+                        if (b > bestBonus) {
+                            bestBonus = b;
+                            chosen = s;
+                        }
+                    }
+                } else if (weapon.getMagicStatBonus() != null) {
+                    chosen = weapon.getMagicStatBonus();
+                    bestBonus = this.getStatBonus(chosen);
+                }
+                if (chosen != null) {
+                    double mult = Math.max(0.0, attack.magicDamageMultiplier);
+                    int extra = (int) Math.floor(bestBonus * 5.0 * mult);
+                    if (extra != 0) {
+                        mag += extra;
+                    }
+                    // Expose chosen stat in the report via magicStatBonus (uses ordinal value)
+                    // We'll set the readable name later when building the report.
+                    // Temporarily store bestBonus in report-mapped local variable
+                    // (the actual AttackReport population recomputes defensively below).
+                }
+            }
+        } catch (Exception ignored) {
+            // be defensive: if anything goes wrong retrieving weapon stat info, skip extra
+        }
+    int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
 
         // If a test listener is set, populate and send an AttackReport
         try {
@@ -748,6 +834,48 @@ public abstract class Creature {
                 rpt.isCrit = critCount > 0;
                 rpt.attacker = this;
                 rpt.target = target;
+                // Populate debug fields for magic + physical stat and multipliers. Compute defensively
+                int reportWeaponStatBonus = 0;
+                int reportMagicExtra = 0;
+                float reportMagicMult = attack.magicDamageMultiplier;
+                String reportMagicChosen = null;
+                try {
+                    if (weapon != null) {
+                        // Recompute chosen magic stat defensively
+                        com.bapppis.core.creature.Creature.Stats chosen = null;
+                        int bestBonus = Integer.MIN_VALUE;
+                        if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
+                            for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
+                                int b = this.getStatBonus(s);
+                                if (b > bestBonus) {
+                                    bestBonus = b;
+                                    chosen = s;
+                                }
+                            }
+                        } else if (weapon.getMagicStatBonus() != null) {
+                            chosen = weapon.getMagicStatBonus();
+                            bestBonus = this.getStatBonus(chosen);
+                        }
+                        if (chosen != null) {
+                            reportWeaponStatBonus = bestBonus;
+                            double mult = Math.max(0.0, attack.magicDamageMultiplier);
+                            int extra = (int) Math.floor(bestBonus * 5.0 * mult);
+                            reportMagicExtra = extra;
+                            reportMagicChosen = chosen.name();
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+                rpt.magicStatBonus = reportWeaponStatBonus;
+                rpt.magicStatExtra = reportMagicExtra;
+                rpt.magicDamageMultiplier = reportMagicMult;
+                rpt.magicStatChosen = reportMagicChosen;
+
+                // Physical report fields
+                rpt.physStatBase = physStatBase;
+                rpt.physStatExtra = physStatExtra;
+                rpt.physDamageMultiplier = attack.damageMultiplier;
+                rpt.physStatChosen = physStatChosenName;
                 attackListener.accept(rpt);
             }
         } catch (Exception e) {
@@ -816,7 +944,7 @@ public abstract class Creature {
                 willBeTwoHanded = true;
             } else if (item instanceof com.bapppis.core.item.Equipment) {
                 com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
-                if (eq.isVersatile() && requestTwoHanded) {
+                if (eq.getVersatile() && requestTwoHanded) {
                     willBeTwoHanded = true;
                 }
             }

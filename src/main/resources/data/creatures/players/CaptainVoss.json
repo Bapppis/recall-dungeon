@@ -2,47 +2,47 @@
   "id": 5001,
   "name": "Captain Aldric Voss",
   "description": "Captain Voss, a seasoned warrior. Determined to find home and protect his homeland.",
-  "visionRange": 2,
+  "creatureType": "HUMANOID",
+  "size": "MEDIUM",
   "level": 0,
   "xp": 0,
-  "baseHp": 5,
-  "hpLvlBonus": 8,
-  "baseMaxMana": 100,
-  "baseMaxStamina": 100,
-  "size": "MEDIUM",
-  "creatureType": "HUMANOID",
+  "visionRange": 2,
   "stats": {
-    "STRENGTH": 13,
+    "CHARISMA": 10,
     "CONSTITUTION": 12,
     "DEXTERITY": 10,
     "INTELLIGENCE": 10,
-    "WISDOM": 10,
-    "CHARISMA": 10,
-    "LUCK": 1
+    "LUCK": 1,
+    "STRENGTH": 13,
+    "WISDOM": 10
   },
+  "baseBlock": 15,
   "baseCrit": 0,
   "baseDodge": 5,
-  "baseBlock": 15,
+  "baseHp": 5,
+  "baseMaxMana": 100,
+  "baseMaxStamina": 100,
+  "hpLvlBonus": 8,
+  "helmet": null,
+  "armor": 7002,
+  "legwear": 7501,
+  "weapon": 9801,
+  "offhand": 7751,
+  "inventory": [
+    8000,
+    9600,
+    7000
+  ],
   "properties": [
     4001
   ],
   "attacks": [
     {
       "name": "Punch",
-      "times": 1,
+      "damageType": "BLUDGEONING",
       "physicalDamageDice": "1d3",
-      "damageType": "BLUDGEONING"
+      "times": 1
     }
   ],
-  "sprite": "player_voss",
-  "inventory": [
-    8000,
-    9600,
-    7000
-  ],
-  "armor": 7002,
-  "helmet": null,
-  "legwear": 7501,
-  "weapon": 9801,
-  "offhand": 7751
+  "sprite": "player_voss"
 }

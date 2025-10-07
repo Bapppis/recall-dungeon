@@ -2,12 +2,25 @@
   "id": 7250,
   "name": "Crusader Helmet",
   "description": "A helmet worn by the bravest of knights.",
+  "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
   "resistances": {
-    "LIGHT": -20,
+    "BLUDGEONING": -5,
     "DARKNESS": 5,
+    "LIGHT": -20,
     "SLASHING": -25
   },
-  "rarity": "COMMON"
+  "block": 2.5,
+  "tooltip": [
+    "Your gain 2.5% block chance while wearing this armor.",
+    "",
+    "You take 20% less light damage while wearing this armor.",
+    "",
+    "You take 5% more darkness damage while wearing this armor.",
+    "",
+    "You take 5% less bludgeoning damage while wearing this armor.",
+    "",
+    "You take 25% less slashing damage while wearing this armor."
+  ]
 }

@@ -2,6 +2,7 @@
   "id": 7500,
   "name": "Legs of Speed",
   "description": "Lightweight armor that makes the wearer more dexterous.",
+  "rarity": "RARE",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "LEGWEAR",
   "stats": {
@@ -11,5 +12,14 @@
     "BLUDGEONING": -10,
     "SLASHING": -10
   },
-  "rarity": "RARE"
+  "dodge": 15,
+  "tooltip": [
+    "Your dodge chance is increased by 15% while wearing this armor.",
+    "",
+    "Your DEX bonus is increased by 4 while wearing this armor.",
+    "",
+    "You take 10% less bludgeoning damage while wearing this armor.",
+    "",
+    "You take 10% less slashing damage while wearing this armor."
+  ]
 }

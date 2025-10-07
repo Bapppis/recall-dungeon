@@ -1,6 +1,6 @@
 {
   "id": 3005,
   "name": "Corrosion Immunity",
-  "type": "IMMUNITY",
-  "description": "Immunity to the corrosion condition."
+  "description": "Immunity to the corrosion condition.",
+  "type": "IMMUNITY"
 }

@@ -2,13 +2,16 @@
   "id": 7499,
   "name": "Test Helmet",
   "description": "This is not a part of our world.",
+  "rarity": "LEGENDARY",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
-  "crit": 5,
-  "dodge": 0,
   "stats": {
     "DEXTERITY": -1
   },
-  "defense": -15,
-  "rarity": "LEGENDARY"
+  "dodge": 0,
+  "crit": 5,
+  "tooltip": [
+    "THIS DOES NOT BELONG TO YOU"
+  ],
+  "defense": -15
 }

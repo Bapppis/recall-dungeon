@@ -38,9 +38,6 @@ public class Equipment implements Item {
     private int id;
     private String name;
     private String description;
-    // Backwards-compatible: `tooltip` in JSON can be either a single String or an
-    // array of Strings.
-    // We keep the raw value here and normalize in getTooltip().
     private Object tooltip;
     private ItemType itemType;
     private EquipmentSlot equipmentSlot;
@@ -61,6 +58,10 @@ public class Equipment implements Item {
     // Optional: magical element (can be null if not present)
     private com.bapppis.core.creature.Creature.Resistances magicElement;
 
+    private com.bapppis.core.creature.Creature.Stats magicStatBonus;
+    // Optional: allow multiple stats to serve as magic stat bonus candidates
+    private java.util.List<com.bapppis.core.creature.Creature.Stats> magicStatBonuses;
+
     public com.bapppis.core.creature.Creature.Resistances getDamageType() {
         return damageType;
     }
@@ -77,6 +78,22 @@ public class Equipment implements Item {
         this.magicElement = magicElement;
     }
 
+    public com.bapppis.core.creature.Creature.Stats getMagicStatBonus() {
+        return magicStatBonus;
+    }
+
+    public void setMagicStatBonus(com.bapppis.core.creature.Creature.Stats magicStatBonus) {
+        this.magicStatBonus = magicStatBonus;
+    }
+
+    public java.util.List<com.bapppis.core.creature.Creature.Stats> getMagicStatBonuses() {
+        return magicStatBonuses;
+    }
+
+    public void setMagicStatBonuses(java.util.List<com.bapppis.core.creature.Creature.Stats> magicStatBonuses) {
+        this.magicStatBonuses = magicStatBonuses;
+    }
+
     public WeaponClass getWeaponClass() {
         return weaponClass;
     }
@@ -85,7 +102,7 @@ public class Equipment implements Item {
         this.weaponClass = weaponClass;
     }
 
-    public boolean isFinesse() {
+    public boolean getFinesse() {
         return finesse;
     }
 
@@ -93,7 +110,7 @@ public class Equipment implements Item {
         this.finesse = finesse;
     }
 
-    public boolean isVersatile() {
+    public boolean getVersatile() {
         return versatile || (versatileAttacks != null && !versatileAttacks.isEmpty());
     }
 
@@ -258,19 +275,59 @@ public class Equipment implements Item {
 
     @Override
     public String toString() {
-        return "id: " + id + "\n" +
-                "name: '" + name + "'\n" +
-                "description: '" + description + "'\n" +
-                "type: " + itemType + "\n" +
-                "slot: " + equipmentSlot + "\n" +
-                "twoHanded: " + twoHanded + "\n" +
-                "rarity: " + rarity + "\n" +
-                "stats: " + stats + "\n" +
-                "resistances: " + resistances + "\n" +
-                (weaponClass != null ? "weaponClass: " + weaponClass + "\n" : "") +
-                (damageType != null ? "damageType: " + damageType + "\n" : "") +
-                (magicElement != null ? "magicElement: " + magicElement + "\n" : "");
-    }
+        StringBuilder sb = new StringBuilder();
+        sb.append("id: ").append(id).append('\n');
+        sb.append("name: '").append(name).append("'\n");
+        if (description != null && !description.isEmpty()) sb.append("description: '").append(description).append("'\n");
+        sb.append("type: ").append(itemType).append('\n');
+        sb.append("slot: ").append(equipmentSlot).append('\n');
+        sb.append("twoHanded: ").append(twoHanded).append('\n');
+    sb.append("versatile: ").append(getVersatile()).append('\n');
+        sb.append("rarity: ").append(rarity).append('\n');
+        String tt = getTooltip();
+        if (tt != null && !tt.isEmpty()) sb.append("tooltip: ").append(tt.replace("\n", "\\n")).append('\n');
+        if (healingDice != null && !healingDice.isEmpty()) sb.append("healingDice: ").append(healingDice).append('\n');
+        if (stats != null && !stats.isEmpty()) sb.append("stats: ").append(stats).append('\n');
+        if (resistances != null && !resistances.isEmpty()) sb.append("resistances: ").append(resistances).append('\n');
+        sb.append("finesse: ").append(finesse).append('\n');
+        sb.append("crit: ").append(crit).append('\n');
+        sb.append("dodge: ").append(dodge).append('\n');
+        sb.append("block: ").append(block).append('\n');
+        if (weaponClass != null) sb.append("weaponClass: ").append(weaponClass).append('\n');
+        if (damageType != null) sb.append("damageType: ").append(damageType).append('\n');
+    if (magicElement != null) sb.append("magicElement: ").append(magicElement).append('\n');
+    if (magicStatBonus != null) sb.append("magicStatBonus: ").append(magicStatBonus).append('\n');
+    if (magicStatBonuses != null && !magicStatBonuses.isEmpty()) sb.append("magicStatBonuses: ").append(magicStatBonuses).append('\n');
 
-    // We rely on a manually authored `description` field for UI/tooltips.
+        if (attacks != null && !attacks.isEmpty()) {
+            sb.append("attacks:\n");
+            for (Attack a : attacks) {
+                if (a == null) {
+                    sb.append("  - null\n");
+                } else {
+                    String aStr = a.toString();
+                    // indent multi-line attack strings
+                    String[] parts = aStr.split("\n");
+                    sb.append("  - ").append(parts[0]).append('\n');
+                    for (int i = 1; i < parts.length; i++) sb.append("      ").append(parts[i]).append('\n');
+                }
+            }
+        }
+
+        if (versatileAttacks != null && !versatileAttacks.isEmpty()) {
+            sb.append("versatileAttacks:\n");
+            for (Attack a : versatileAttacks) {
+                if (a == null) {
+                    sb.append("  - null\n");
+                } else {
+                    String aStr = a.toString();
+                    String[] parts = aStr.split("\n");
+                    sb.append("  - ").append(parts[0]).append('\n');
+                    for (int i = 1; i < parts.length; i++) sb.append("      ").append(parts[i]).append('\n');
+                }
+            }
+        }
+
+        return sb.toString();
+    }
 }

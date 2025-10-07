@@ -3,25 +3,25 @@
   "name": "Common Weapons",
   "entries": [
     {
-      "type": "item",
       "id": "9802",
       "name": "Parrying Dagger",
+      "countMax": 1,
       "countMin": 1,
-      "countMax": 1
+      "type": "item"
     },
     {
-      "type": "item",
       "id": "9801",
       "name": "Rusty Iron Sword",
+      "countMax": 1,
       "countMin": 1,
-      "countMax": 1
+      "type": "item"
     },
     {
-      "type": "item",
       "id": "9600",
       "name": "Old Bow",
+      "countMax": 1,
       "countMin": 1,
-      "countMax": 1
+      "type": "item"
     }
   ]
 }

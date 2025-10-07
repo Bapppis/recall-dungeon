@@ -118,6 +118,10 @@ public class TestCreatureAttack {
         // Testing versatile weapon attacks
         biggles.addItem(ItemLoader.getItemById(9801)); // Rusty Iron Sword
         biggles.equipItem(biggles.getInventory().getWeapons().get(1), true);
+        //biggles.setStat(Stats.INTELLIGENCE, 20);
+        //biggles.setStat(Stats.CHARISMA, 100);
+        //biggles.setStat(Stats.STRENGTH, 15);
+        //biggles.setStat(Stats.DEXTERITY, 20);
         System.out.println(biggles.toString());
 
         // Load training dummy as a target

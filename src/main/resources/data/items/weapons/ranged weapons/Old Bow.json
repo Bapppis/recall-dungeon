@@ -2,42 +2,47 @@
   "id": 9600,
   "name": "Old Bow",
   "description": "The bow is past its prime, hopefully it won't break just yet.",
-  "weaponClass": "RANGED",
-  "damageType": "PIERCING",
-  "crit": 10,
-  "twoHanded": true,
+  "rarity": "COMMON",
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
-  "rarity": "COMMON",
+  "weaponClass": "RANGED",
+  "twoHanded": true,
+  "damageType": "PIERCING",
+  "crit": 10,
   "tooltip": [
-    "Shoot (70%): Deals 2-8 piercing damage.",
+    "You gain 10% critical chance while wielding this weapon.",
     "",
-    "Barrage (25%): Deals 3-9 piercing damage.",
+    "Shoot (70%): Deals 2-8 + 5 * DEX bonus piercing damage.",
     "",
-    "Perfect Shot (5%): Deals 1-6 true damage. This attack has a +30% critical chance and pierces through anything."
+    "Barrage (25%): Deals 3-9 + 5 * DEX bonus piercing damage.",
+    "",
+    "Perfect Shot (5%): Deals 1-6 + 5 * DEX bonus true damage. This attack has a +30% critical chance and pierces through anything."
   ],
   "attacks": [
     {
       "name": "Shoot",
-      "times": 1,
+      "damageType": "PIERCING",
+      "damageMultiplier": 1.0,
       "physicalDamageDice": "2d4",
-      "weight": 70,
-      "damageType": "PIERCING"
+      "times": 1,
+      "weight": 70
     },
     {
       "name": "Barrage",
-      "times": 3,
+      "damageType": "PIERCING",
+      "damageMultiplier": 0.33,
       "physicalDamageDice": "1d3",
-      "weight": 25,
-      "damageType": "PIERCING"
+      "times": 3,
+      "weight": 25
     },
     {
       "name": "Perfect Shot",
-      "times": 1,
-      "physicalDamageDice": "1d6",
+      "damageType": "TRUE",
       "critMod": "+30",
-      "weight": 5,
-      "damageType": "TRUE"
+      "damageMultiplier": 1.0,
+      "physicalDamageDice": "1d6",
+      "times": 1,
+      "weight": 5
     }
   ]
 }

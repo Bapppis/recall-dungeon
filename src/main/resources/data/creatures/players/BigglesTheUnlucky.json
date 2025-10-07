@@ -2,31 +2,40 @@
   "id": 5000,
   "name": "Biggles The Unlucky",
   "description": "Biggles The Unlucky, a small and unfortunate creature.",
-  "visionRange": 2,
+  "creatureType": "HUMANOID",
+  "size": "SMALL",
   "level": 0,
   "xp": 0,
-  "baseHp": 5,
-  "hpLvlBonus": 4,
-  "baseMaxMana": 80,
-  "baseMaxStamina": 100,
-  "size": "SMALL",
-  "creatureType": "HUMANOID",
+  "visionRange": 2,
   "stats": {
-    "STRENGTH": 10,
+    "CHARISMA": 10,
     "CONSTITUTION": 10,
     "DEXTERITY": 10,
     "INTELLIGENCE": 7,
-    "WISDOM": 10,
-    "CHARISMA": 10,
-    "LUCK": 1
+    "LUCK": 1,
+    "STRENGTH": 10,
+    "WISDOM": 10
   },
   "resistances": {
     "NATURE": 90,
     "SLASHING": 120
   },
+  "baseBlock": 5,
   "baseCrit": 5,
   "baseDodge": 10,
-  "baseBlock": 5,
+  "baseHp": 5,
+  "baseMaxMana": 80,
+  "baseMaxStamina": 100,
+  "hpLvlBonus": 4,
+  "helmet": 7251,
+  "armor": 7003,
+  "legwear": null,
+  "weapon": 9600,
+  "offhand": null,
+  "inventory": [
+    8000,
+    9802
+  ],
   "properties": [
     4000,
     4002
@@ -34,19 +43,10 @@
   "attacks": [
     {
       "name": "Scratch",
-      "times": 1,
+      "damageType": "SLASHING",
       "physicalDamageDice": "1d2",
-      "damageType": "SLASHING"
+      "times": 1
     }
   ],
-  "sprite": "player_biggles",
-  "inventory": [
-    8000,
-    9802
-  ],
-  "helmet": 7251,
-  "armor": 7003,
-  "legwear": null,
-  "weapon": 9600,
-  "offhand": null
+  "sprite": "player_biggles"
 }

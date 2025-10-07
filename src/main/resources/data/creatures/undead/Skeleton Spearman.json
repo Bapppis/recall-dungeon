@@ -2,45 +2,45 @@
   "id": 6600,
   "name": "Skeleton Spearman",
   "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty spear and a shield.",
-  "visionRange": 1,
-  "xp": 3,
-  "baseHp": 5,
-  "hpLvlBonus": 4,
-  "defaultDamageType": "BLUDGEONING",
-  "size": "MEDIUM",
   "creatureType": "UNDEAD",
+  "size": "MEDIUM",
+  "xp": 3,
+  "visionRange": 1,
   "stats": {
-    "STRENGTH": 6,
-    "LUCK": 0
+    "LUCK": 0,
+    "STRENGTH": 6
   },
   "resistances": {
-    "LIGHT": 110,
-    "DARKNESS": 90,
     "BLUDGEONING": 120,
+    "DARKNESS": 90,
+    "LIGHT": 110,
     "SLASHING": 90
   },
+  "baseBlock": 20,
   "baseCrit": 5,
   "baseDodge": 5,
-  "baseBlock": 20,
+  "baseHp": 5,
+  "hpLvlBonus": 4,
   "properties": [
     3000
   ],
   "attacks": [
     {
       "name": "Jab",
-      "times": 1,
+      "damageType": "PIERCING",
       "physicalDamageDice": "1d6+1",
-      "weight": 6,
-      "damageType": "PIERCING"
+      "times": 1,
+      "weight": 6
     },
     {
       "name": "Swipe",
-      "times": 1,
-      "physicalDamageDice": "1d6",
       "critMod": "+5",
-      "weight": 4,
-      "damageType": "SLASHING"
+      "damageType": "SLASHING",
+      "physicalDamageDice": "1d6",
+      "times": 1,
+      "weight": 4
     }
   ],
-  "sprite": null
+  "sprite": null,
+  "defaultDamageType": "BLUDGEONING"
 }
