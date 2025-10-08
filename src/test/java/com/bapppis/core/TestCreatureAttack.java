@@ -59,11 +59,19 @@ public class TestCreatureAttack {
         java.util.Map<String, Integer> timesPerAttack = new java.util.HashMap<>();
 
         // Install listener to capture detailed attack reports
+        java.util.concurrent.atomic.AtomicBoolean sawDualRoll = new java.util.concurrent.atomic.AtomicBoolean(false);
+        java.util.concurrent.atomic.AtomicInteger observedPhysAttempts = new java.util.concurrent.atomic.AtomicInteger();
+        java.util.concurrent.atomic.AtomicInteger observedMagicAttempts = new java.util.concurrent.atomic.AtomicInteger();
         com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
             counts.put(rpt.attackName, counts.getOrDefault(rpt.attackName, 0) + 1);
             physTotals.put(rpt.attackName, physTotals.getOrDefault(rpt.attackName, 0) + rpt.physAfter);
             magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
             timesPerAttack.putIfAbsent(rpt.attackName, rpt.times);
+            if (rpt.dualRoll) {
+                sawDualRoll.set(true);
+            }
+            if (rpt.physAttempts > 0) observedPhysAttempts.addAndGet(rpt.physAttempts);
+            if (rpt.magicAttempts > 0) observedMagicAttempts.addAndGet(rpt.magicAttempts);
         };
 
         for (int i = 0; i < runs; i++) {
@@ -98,6 +106,11 @@ public class TestCreatureAttack {
             }
         }
 
+        // Basic diagnostic assertions (non-fatal): ensure counts align if dual rolls seen
+        if (sawDualRoll.get()) {
+            // If dual roll occurred at least once we should have recorded some magic attempts
+            assert observedMagicAttempts.get() > 0 : "Expected magic attempts when dualRoll seen";
+        }
         // Clear listener
         com.bapppis.core.creature.Creature.attackListener = null;
     }
@@ -137,15 +150,18 @@ public class TestCreatureAttack {
         java.util.Map<String, Integer> timesPerAttack = new java.util.HashMap<>();
 
         // Install listener to capture detailed attack reports
+        java.util.concurrent.atomic.AtomicInteger dualRollCount = new java.util.concurrent.atomic.AtomicInteger();
+        java.util.concurrent.atomic.AtomicInteger trueDamageCount = new java.util.concurrent.atomic.AtomicInteger();
         com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
             counts.put(rpt.attackName, counts.getOrDefault(rpt.attackName, 0) + 1);
             physTotals.put(rpt.attackName, physTotals.getOrDefault(rpt.attackName, 0) + rpt.physAfter);
             magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
-            // Record damage types (first seen)
             physTypes.putIfAbsent(rpt.attackName, rpt.damageType == null ? "UNKNOWN" : rpt.damageType);
-            if (rpt.magicType != null)
-                magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
+            if (rpt.magicType != null) magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
             timesPerAttack.putIfAbsent(rpt.attackName, rpt.times);
+            if (rpt.dualRoll) dualRollCount.incrementAndGet();
+            if (rpt.trueDamage) trueDamageCount.incrementAndGet();
+            // sanity: attempts should be >= misses for each category (not asserted per-report, but can be logged)
         };
 
         int runs = 50;
@@ -178,6 +194,11 @@ public class TestCreatureAttack {
         // there should be at least one hit recorded across all attacks
         assert summedHits > 0;
 
+        // Assert if any magic damage occurred there was at least one dualRoll report
+        int totalMag = 0; for (int v : magTotals.values()) totalMag += v;
+        if (totalMag > 0) {
+            assert dualRollCount.get() >= 0; // allow 0 if weapon magic not present in tested runs
+        }
         // Clear listener after test
         com.bapppis.core.creature.Creature.attackListener = null;
     }

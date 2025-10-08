@@ -4,10 +4,12 @@
   "description": "An enormous fierce hound corrupted by darkness by dark beings and used as loyal pets and protectors. It's claws spread corrupting darkness into whatever they touch.",
   "creatureType": "BEAST",
   "size": "MEDIUM",
+  "level": 1,
   "enemyXp": 5,
   "visionRange": 3,
   "stats": {
     "CONSTITUTION": 12,
+    "WISDOM": 11,
     "LUCK": 0,
     "STRENGTH": 11
   },
@@ -19,6 +21,7 @@
   "baseBlock": 0,
   "baseCrit": 5,
   "baseDodge": 5,
+  "baseMagicResist": 0,
   "baseHp": 12,
   "hpLvlBonus": 4,
   "properties": [

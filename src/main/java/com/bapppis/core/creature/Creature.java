@@ -6,6 +6,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import com.bapppis.core.util.Dice;
+import com.bapppis.core.util.AttackUtil;
+import com.bapppis.core.util.WeaponUtil;
+import com.bapppis.core.util.ResistanceUtil;
 
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.Item;
@@ -38,15 +41,18 @@ public abstract class Creature {
     private float baseCrit;
     private float baseDodge;
     private float baseBlock;
+    private float baseMagicResist;
     private float crit; // base-derived critical hit chance percentage (0-100)
     private float dodge; // base-derived dodge chance percentage (0-100)
     private float block; // base-derived block chance percentage (0-100)
+    private float magicResist; // base-derived magic resist chance percentage (0-100)
     // Equipment aggregates (sum of all equipped item contributions)
     private final java.util.EnumMap<Stats, Integer> equipmentStats = new java.util.EnumMap<>(Stats.class);
     private final java.util.EnumMap<Resistances, Integer> equipmentResists = new java.util.EnumMap<>(Resistances.class);
     private float equipmentCrit = 0f;
     private float equipmentDodge = 0f;
     private float equipmentBlock = 0f;
+    private float equipmentMagicResist = 0f;
     // Cached per-stat bonuses (e.g. STR 14 -> +4, WIS 7 -> -3). Luck is special:
     // its bonus equals the raw luck value (Luck 1 -> 1, Luck 0 -> 0).
     private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
@@ -151,6 +157,17 @@ public abstract class Creature {
         // Chosen stat names for clarity in tests
         public String magicStatChosen;
         public String physStatChosen;
+        // New diagnostic fields for dual-resolution system
+        public int physCritCount; // number of critical physical hits
+        public int magicCritCount; // number of critical magic hits
+        public int physAttempts; // number of physical hit attempts
+        public int physMissDodge; // count of physical misses due to dodge
+        public int physMissBlock; // count of physical misses due to block
+        public int magicAttempts; // number of magic hit attempts
+        public int magicMissDodge; // magic misses due to dodge
+        public int magicMissResist; // magic misses due to magicResist avoidance
+        public boolean dualRoll; // true if both physical and magic parts rolled separately
+        public boolean trueDamage; // true if physicalType classified as TRUE
     }
 
     // --- Constructor ---
@@ -448,10 +465,16 @@ public abstract class Creature {
             alterHp();
             // Recompute max stamina when CON changes
             updateMaxStamina();
+            // Recompute derived stats that depend on CON (e.g., magicResist)
+            recalcDerivedStats();
         }
         if (stat == Stats.INTELLIGENCE) {
             // Recompute max mana when INT changes
             updateMaxMana();
+        }
+        if (stat == Stats.WISDOM) {
+            // WIS affects magic resist; recompute derived stats
+            recalcDerivedStats();
         }
         if (stat == Stats.LUCK) {
             // Recompute crit when luck changes
@@ -467,10 +490,16 @@ public abstract class Creature {
             alterHp();
             // Recompute max stamina when CON changes
             updateMaxStamina();
+            // Recompute derived stats that depend on CON (e.g., magicResist)
+            recalcDerivedStats();
         }
         if (stat == Stats.INTELLIGENCE) {
             // Recompute max mana when INT changes
             updateMaxMana();
+        }
+        if (stat == Stats.WISDOM) {
+            // WIS affects magic resist; recompute derived stats
+            recalcDerivedStats();
         }
         if (stat == Stats.LUCK) {
             // Recompute crit when luck changes
@@ -500,6 +529,10 @@ public abstract class Creature {
 
     public float getBaseBlock() {
         return baseBlock;
+    }
+
+    public float getBaseMagicResist() {
+        return baseMagicResist;
     }
 
     public float getCrit() {
@@ -543,6 +576,15 @@ public abstract class Creature {
         return this.block;
     }
 
+    public float getMagicResist() {
+        return this.magicResist + this.equipmentMagicResist;
+    }
+
+    public float setMagicResist(float magicResist) {
+        this.magicResist = magicResist;
+        return this.magicResist;
+    }
+
     public void recalcDerivedStats() {
         // Ensure cached stat bonuses are up-to-date before computing derived values
         recalcStatBonuses();
@@ -558,6 +600,9 @@ public abstract class Creature {
         this.block = this.baseBlock;
         float dodgeDelta = 2.5f * this.getStatBonus(Stats.DEXTERITY);
         this.dodge = this.baseDodge + dodgeDelta;
+        float magicResistDelta = 5.0f * this.getStatBonus(Stats.WISDOM);
+        magicResistDelta += 2.5f * this.getStatBonus(Stats.CONSTITUTION);
+        this.magicResist = this.baseMagicResist + magicResistDelta;
     }
 
     /**
@@ -608,9 +653,9 @@ public abstract class Creature {
             }
 
             if (weaponAttackList != null && !weaponAttackList.isEmpty()) {
-                chosen = chooseAttackFromList(weaponAttackList);
+                chosen = AttackUtil.chooseAttackFromList(weaponAttackList);
                 // stat bonus depends on weapon class/finesse
-                int statBonus = determineStatBonusForWeapon(weapon) * 5;
+                int statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
                 applyAttackToTarget(chosen, statBonus, target, weapon.getDamageType(), weapon.getMagicElement(),
                         weapon);
                 return;
@@ -619,306 +664,246 @@ public abstract class Creature {
 
         // No weapon attacks — use creature's own attacks if present
         if (this.attacks != null && !this.attacks.isEmpty()) {
-            chosen = chooseAttackFromList(this.attacks);
+            chosen = AttackUtil.chooseAttackFromList(this.attacks);
             // For creature attacks, default to strength for physical damage
             int statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
-            Resistances physType = parseResistance(chosen == null ? null : chosen.damageType);
-            Resistances magType = parseResistance(chosen == null ? null : chosen.magicDamageType);
+            Resistances physType = ResistanceUtil.parse(chosen == null ? null : chosen.damageType);
+            Resistances magType = ResistanceUtil.parse(chosen == null ? null : chosen.magicDamageType);
             applyAttackToTarget(chosen, statBonus, target, physType, magType, null);
             return;
         }
     }
 
-    private int determineStatBonusForWeapon(Equipment weapon) {
-        if (weapon.getFinesse()) {
-            return Math.max(0, Math.max(this.getStatBonus(Stats.STRENGTH), this.getStatBonus(Stats.DEXTERITY)));
-        }
-        switch (weapon.getWeaponClass()) {
-            case MELEE:
-                return Math.max(0, this.getStatBonus(Stats.STRENGTH));
-            case RANGED:
-                return Math.max(0, this.getStatBonus(Stats.DEXTERITY));
-            case MAGIC:
-                return Math.max(0, this.getStatBonus(Stats.INTELLIGENCE));
-            default:
-                return 0;
-        }
-    }
-
-    private Attack chooseAttackFromList(java.util.List<Attack> list) {
-        if (list == null || list.isEmpty())
-            return null;
-        int total = 0;
-        for (Attack a : list)
-            total += a.getWeight();
-        int pick = ThreadLocalRandom.current().nextInt(Math.max(1, total));
-        for (Attack a : list) {
-            pick -= a.getWeight();
-            if (pick < 0)
-                return a;
-        }
-        return list.get(0);
-    }
+    // helper logic moved to util: WeaponUtil.determineWeaponStatBonus and AttackUtil.chooseAttackFromList
 
     private void applyAttackToTarget(Attack attack, int statBonus, Creature target, Resistances physicalType,
             Resistances magicType, Equipment weapon) {
         if (attack == null || target == null)
             return;
-        // Roll physical damage per-hit and check crit per hit
-        int totalPhysBeforeResist = 0; // after applying per-hit crits
-        int physRaw = 0; // raw sum before crits
-        int critCount = 0;
+        // New unified resolution: potentially separate physical and magical rolls.
+        // 1. Resolve physical component (if any and not TRUE magic-only attack)
+    int totalPhysBeforeResist = 0;
+    int physRaw = 0;
+    int physCritCount = 0;
+    int physAfter = 0;
+    int physAttempts = 0; int physMissDodge = 0; int physMissBlock = 0;
         int times = attack.getTimes();
         float baseCrit = this.getCrit();
-        int mod = 0;
-        try {
-            mod = attack.getCritMod();
-        } catch (Exception e) {
-            mod = 0;
-        }
-        // Effective crit chance used in checks is clamped to 0-100
-        float critChance = Math.max(0f, Math.min(100f, baseCrit + mod));
-        for (int i = 0; i < times; i++) {
-            float rawToHitRoll = ThreadLocalRandom.current().nextFloat() * 100f;
-            int toHitRoll = Math.round(rawToHitRoll) + statBonus; // rounded to nearest whole number
-            // Effective dodge/block are clamped to 0-100 for checks
-            float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
-            float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
+        int critMod = 0;
+        try { critMod = attack.getCritMod(); } catch (Exception ignored) {}
+        float critChance = Math.max(0f, Math.min(100f, baseCrit + critMod));
 
-            // Partition the avoidance window so ranges don't overlap. The higher
-            // of dodge/block occupies the upper portion of the avoidance window.
-            float totalAvoid = Math.min(100f, effectiveDodge + effectiveBlock);
-            if (toHitRoll <= totalAvoid) {
-                // We're in the avoidance region; decide whether it's block or dodge
-                if (effectiveDodge >= effectiveBlock) {
-                    // Block is the lower subrange [0..effectiveBlock], dodge is above it
-                    if (toHitRoll <= effectiveBlock) {
-                        System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
-                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                                + " block=" + String.format("%.2f", effectiveBlock));
-                        continue;
-                    } else {
-                        System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
-                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                                + " dodge=" + String.format("%.2f", effectiveDodge));
+        boolean hasPhysical = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
+        boolean isTrue = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.TRUE;
+        if (hasPhysical || isTrue) {
+            for (int i = 0; i < times; i++) {
+                physAttempts++;
+                float rawRoll = ThreadLocalRandom.current().nextFloat() * 100f;
+                int toHit = Math.round(rawRoll) + statBonus;
+                float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
+                float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
+                if (isTrue) {
+                    // TRUE damage ignores block; only dodge check
+                    if (toHit <= effectiveDodge) {
+                        System.out.println("Missed (dodge TRUE): " + this.getName() + " -> " + target.getName());
+                        physMissDodge++;
                         continue;
                     }
                 } else {
-                    // Dodge is the lower subrange [0..effectiveDodge], block is above it
-                    if (toHitRoll <= effectiveDodge) {
-                        System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName()
-                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                                + " dodge=" + String.format("%.2f", effectiveDodge));
-                        continue;
-                    } else {
-                        System.out.println("Missed (block): " + this.getName() + " -> " + target.getName()
-                                + " | attack='" + attack.name + "' roll=" + String.format("%.2f", rawToHitRoll)
-                                + " rounded=" + toHitRoll + " statBonus=" + statBonus
-                                + " block=" + String.format("%.2f", effectiveBlock));
-                        continue;
-                    }
-                }
-            }
-            int hit = 0;
-            if (attack.physicalDamageDice != null && !attack.physicalDamageDice.isBlank()) {
-                // For per-hit dice, roll once per hit.
-                hit = Dice.roll(attack.physicalDamageDice);
-            }
-            hit += Math.max(0, statBonus);
-            // Only successful hits count toward physRaw (pre-crit raw) and totals
-            physRaw += hit;
-            // Convert critChance (0-100) into a 0.0-1.0 probability and compare with
-            // nextFloat()
-            // Effective crit chance is clamped 0-100 and converted to 0.0-1.0
-            float effectiveCrit = Math.max(0f, Math.min(100f, critChance));
-            boolean hitCrit = ThreadLocalRandom.current().nextFloat() < (effectiveCrit / 100f);
-            if (hitCrit) {
-                critCount++;
-                hit = hit * 2; // double this hit
-                System.out.println("Critical hit! " + attack.name + " single hit doubled to: " + hit
-                        + " | roll=" + String.format("%.2f", rawToHitRoll) + " rounded=" + toHitRoll + " statBonus="
-                        + statBonus);
-            }
-            totalPhysBeforeResist += hit;
-        }
-
-        // Compute extra physical damage contributed by the weapon stat and
-        // attack.damageMultiplier
-        int physStatBase = 0;
-        int physStatExtra = 0;
-        String physStatChosenName = null;
-        try {
-            if (weapon != null) {
-                physStatBase = determineStatBonusForWeapon(weapon);
-                // Determine stat name used for physical multiplier (based on weapon
-                // finesse/class)
-                try {
-                    if (weapon.getFinesse()) {
-                        // Choose higher of STR/DEX (mirrors determineStatBonusForWeapon)
-                        int str = this.getStatBonus(Stats.STRENGTH);
-                        int dex = this.getStatBonus(Stats.DEXTERITY);
-                        physStatChosenName = (str >= dex) ? Stats.STRENGTH.name() : Stats.DEXTERITY.name();
-                    } else {
-                        switch (weapon.getWeaponClass()) {
-                            case MELEE:
-                                physStatChosenName = Stats.STRENGTH.name();
-                                break;
-                            case RANGED:
-                                physStatChosenName = Stats.DEXTERITY.name();
-                                break;
-                            case MAGIC:
-                                physStatChosenName = Stats.INTELLIGENCE.name();
-                                break;
-                            default:
-                                physStatChosenName = null;
+                    // Physical: dodge + block partition (same as before)
+                    float totalAvoid = Math.min(100f, effectiveDodge + effectiveBlock);
+                    if (toHit <= totalAvoid) {
+                        if (effectiveDodge >= effectiveBlock) {
+                            if (toHit <= effectiveBlock) {
+                                System.out.println("Missed (block): " + this.getName() + " -> " + target.getName());
+                                physMissBlock++;
+                                continue;
+                            } else {
+                                System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName());
+                                physMissDodge++;
+                                continue;
+                            }
+                        } else {
+                            if (toHit <= effectiveDodge) {
+                                System.out.println("Missed (dodge): " + this.getName() + " -> " + target.getName());
+                                physMissDodge++;
+                                continue;
+                            } else {
+                                System.out.println("Missed (block): " + this.getName() + " -> " + target.getName());
+                                physMissBlock++;
+                                continue;
+                            }
                         }
                     }
-                } catch (Exception ignored) {
                 }
-                double physMult = Math.max(0.0, attack.damageMultiplier);
-                physStatExtra = (int) Math.floor(physStatBase * 5.0 * physMult);
-                if (physStatExtra != 0) {
-                    totalPhysBeforeResist += physStatExtra;
+                int hit = 0;
+                if (attack.physicalDamageDice != null && !attack.physicalDamageDice.isBlank()) {
+                    hit = Dice.roll(attack.physicalDamageDice);
                 }
+                hit += Math.max(0, statBonus);
+                physRaw += hit;
+                float effectiveCrit = critChance;
+                boolean crit = ThreadLocalRandom.current().nextFloat() < (effectiveCrit / 100f);
+                if (crit) {
+                    physCritCount++;
+                    hit *= 2;
+                }
+                totalPhysBeforeResist += hit;
             }
-        } catch (Exception ignored) {
+            // Weapon scaling for physical part
+            int physStatBase = 0; int physStatExtra = 0; // removed unused physStatChosenName
+            try {
+                if (weapon != null) {
+                    physStatBase = WeaponUtil.determineWeaponStatBonus(this, weapon);
+                    try {
+                        // Determine stat name originally; no longer stored
+                        if (weapon.getFinesse()) {
+                            int str = this.getStatBonus(Stats.STRENGTH);
+                            int dex = this.getStatBonus(Stats.DEXTERITY);
+                            // choose higher (not stored)
+                            @SuppressWarnings("unused") String ignoredName = (str >= dex) ? Stats.STRENGTH.name() : Stats.DEXTERITY.name();
+                        } else {
+                            switch (weapon.getWeaponClass()) {
+                                case MELEE: break;
+                                case RANGED: break;
+                                case MAGIC: break;
+                                default: break;
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                    double physMult = Math.max(0.0, attack.damageMultiplier);
+                    physStatExtra = (int)Math.floor(physStatBase * 5.0 * physMult);
+                    if (physStatExtra != 0) totalPhysBeforeResist += physStatExtra;
+                }
+            } catch (Exception ignored) {}
+            int resistValue = (physicalType == null ? 100 : target.getResistance(physicalType));
+            physAfter = Math.floorDiv(totalPhysBeforeResist * resistValue, 100);
+            if (physAfter > 0) target.alterHp(-physAfter);
+            // Listener/report for physical stored later (combine with magic below if needed)
         }
 
-        int physAfter = Math.floorDiv(
-                totalPhysBeforeResist
-                        * (physicalType == null ? 100 : target.getResistance(physicalType)),
-                100);
-        // Roll base magic damage from the attack
-        int mag = attack.rollMagicDamage();
-        // If a weapon with a magic stat is present, compute the weapon's magic-stat
-        // contribution and add it. Formula: floor( weaponMagicStatBonus * 5 *
-        // attack.magicDamageMultiplier )
-        try {
-            if (weapon != null) {
-                // Support multiple candidate stats. Choose the highest stat-bonus among
-                // candidates.
-                com.bapppis.core.creature.Creature.Stats chosen = null;
-                int bestBonus = Integer.MIN_VALUE;
-                if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
-                    for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
-                        int b = this.getStatBonus(s);
-                        if (b > bestBonus) {
-                            bestBonus = b;
-                            chosen = s;
+        // 2. Resolve magic component IF weapon has magic element or attack has magicDamageDice and magicType present
+    int magRaw = 0; int magAfter = 0; int magicCritCount = 0; int magicBeforeResist = 0; int magicStatBonus = 0; int magicStatExtra = 0; float magicMult = attack.magicDamageMultiplier; String magicStatChosenName = null; int magicAttempts=0; int magicMissDodge=0; int magicMissResist=0;
+        boolean hasMagicComponent = (weapon != null && weapon.getMagicElement() != null) || (magicType != null && attack.magicDamageDice != null && !attack.magicDamageDice.isBlank());
+        if (hasMagicComponent && magicType != null) {
+            int magicTimes = attack.getTimes();
+            for (int i = 0; i < magicTimes; i++) {
+                magicAttempts++;
+                float rawRoll = ThreadLocalRandom.current().nextFloat() * 100f;
+                int toHit = Math.round(rawRoll) + statBonus; // reuse statBonus for now
+                float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
+                float effectiveMagicResist = Math.max(0f, Math.min(100f, target.getMagicResist()));
+                // Avoidance window is dodge + magicResist (no block)
+                float totalAvoid = Math.min(100f, effectiveDodge + effectiveMagicResist);
+                if (toHit <= totalAvoid) {
+                    if (effectiveDodge >= effectiveMagicResist) {
+                        if (toHit <= effectiveMagicResist) {
+                            System.out.println("Missed (magicResist): " + this.getName() + " -> " + target.getName());
+                            magicMissResist++;
+                        } else {
+                            System.out.println("Missed (dodge magic): " + this.getName() + " -> " + target.getName());
+                            magicMissDodge++;
+                        }
+                    } else {
+                        if (toHit <= effectiveDodge) {
+                            System.out.println("Missed (dodge magic): " + this.getName() + " -> " + target.getName());
+                            magicMissDodge++;
+                        } else {
+                            System.out.println("Missed (magicResist): " + this.getName() + " -> " + target.getName());
+                            magicMissResist++;
                         }
                     }
-                } else if (weapon.getMagicStatBonus() != null) {
-                    chosen = weapon.getMagicStatBonus();
-                    bestBonus = this.getStatBonus(chosen);
+                    continue;
                 }
-                if (chosen != null) {
-                    double mult = Math.max(0.0, attack.magicDamageMultiplier);
-                    int extra = (int) Math.floor(bestBonus * 5.0 * mult);
-                    if (extra != 0) {
-                        mag += extra;
-                    }
-                    // Expose chosen stat in the report via magicStatBonus (uses ordinal value)
-                    // We'll set the readable name later when building the report.
-                    // Temporarily store bestBonus in report-mapped local variable
-                    // (the actual AttackReport population recomputes defensively below).
+                int hit = 0;
+                if (attack.magicDamageDice != null && !attack.magicDamageDice.isBlank()) {
+                    hit = Dice.roll(attack.magicDamageDice);
                 }
+                hit += Math.max(0, statBonus); // allow stat to influence base magic as before via weapon scaling
+                magRaw += hit;
+                // Magic crit logic: reuse critChance (could later differentiate)
+                float effectiveCrit = critChance;
+                boolean crit = ThreadLocalRandom.current().nextFloat() < (effectiveCrit / 100f);
+                if (crit) {
+                    magicCritCount++;
+                    hit *= 2;
+                }
+                magicBeforeResist += hit;
             }
-        } catch (Exception ignored) {
-            // be defensive: if anything goes wrong retrieving weapon stat info, skip extra
+            // Weapon magic stat scaling
+            try {
+                if (weapon != null) {
+                    com.bapppis.core.creature.Creature.Stats chosen = null; int best = Integer.MIN_VALUE;
+                    if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
+                        for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
+                            int b = this.getStatBonus(s); if (b > best) { best = b; chosen = s; }
+                        }
+                    } else if (weapon.getMagicStatBonus() != null) {
+                        chosen = weapon.getMagicStatBonus(); best = this.getStatBonus(chosen);
+                    }
+                    if (chosen != null) {
+                        magicStatBonus = best;
+                        int extra = (int)Math.floor(best * 5.0 * Math.max(0.0, magicMult));
+                        magicStatExtra = extra;
+                        if (extra != 0) magicBeforeResist += extra;
+                        magicStatChosenName = chosen.name();
+                    }
+                }
+            } catch (Exception ignored) {}
+            int resistValue = target.getResistance(magicType);
+            magAfter = Math.floorDiv(magicBeforeResist * resistValue, 100);
+            if (magAfter > 0) target.alterHp(-magAfter);
         }
-        int magAfter = magicType != null ? Math.floorDiv(mag * target.getResistance(magicType), 100) : 0;
 
-        // If a test listener is set, populate and send an AttackReport
+        // Build and send report if listener active
         try {
             if (attackListener != null) {
                 AttackReport rpt = new AttackReport();
                 rpt.attackName = attack.name;
                 rpt.physRaw = physRaw;
-                rpt.magRaw = mag;
+                rpt.magRaw = magRaw;
                 rpt.physAfterCritBeforeResist = totalPhysBeforeResist;
                 rpt.physAfter = physAfter;
                 rpt.magAfter = magAfter;
                 rpt.times = attack.getTimes();
                 rpt.damageType = (physicalType == null ? null : physicalType.name());
                 rpt.magicType = (magicType == null ? null : magicType.name());
-                rpt.critCount = critCount;
-                rpt.isCrit = critCount > 0;
+                rpt.critCount = physCritCount + magicCritCount; // legacy aggregate
+                rpt.isCrit = (physCritCount + magicCritCount) > 0;
+                rpt.physCritCount = physCritCount;
+                rpt.magicCritCount = magicCritCount;
+                rpt.physAttempts = physAttempts;
+                rpt.physMissDodge = physMissDodge;
+                rpt.physMissBlock = physMissBlock;
+                rpt.magicAttempts = magicAttempts;
+                rpt.magicMissDodge = magicMissDodge;
+                rpt.magicMissResist = magicMissResist;
+                rpt.dualRoll = hasPhysical && hasMagicComponent;
+                rpt.trueDamage = isTrue;
                 rpt.attacker = this;
                 rpt.target = target;
-                // Populate debug fields for magic + physical stat and multipliers. Compute
-                // defensively
-                int reportWeaponStatBonus = 0;
-                int reportMagicExtra = 0;
-                float reportMagicMult = attack.magicDamageMultiplier;
-                String reportMagicChosen = null;
-                try {
-                    if (weapon != null) {
-                        // Recompute chosen magic stat defensively
-                        com.bapppis.core.creature.Creature.Stats chosen = null;
-                        int bestBonus = Integer.MIN_VALUE;
-                        if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
-                            for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
-                                int b = this.getStatBonus(s);
-                                if (b > bestBonus) {
-                                    bestBonus = b;
-                                    chosen = s;
-                                }
-                            }
-                        } else if (weapon.getMagicStatBonus() != null) {
-                            chosen = weapon.getMagicStatBonus();
-                            bestBonus = this.getStatBonus(chosen);
-                        }
-                        if (chosen != null) {
-                            reportWeaponStatBonus = bestBonus;
-                            double mult = Math.max(0.0, attack.magicDamageMultiplier);
-                            int extra = (int) Math.floor(bestBonus * 5.0 * mult);
-                            reportMagicExtra = extra;
-                            reportMagicChosen = chosen.name();
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
-                rpt.magicStatBonus = reportWeaponStatBonus;
-                rpt.magicStatExtra = reportMagicExtra;
-                rpt.magicDamageMultiplier = reportMagicMult;
-                rpt.magicStatChosen = reportMagicChosen;
-
-                // Physical report fields
-                rpt.physStatBase = physStatBase;
-                rpt.physStatExtra = physStatExtra;
+                rpt.magicStatBonus = magicStatBonus;
+                rpt.magicStatExtra = magicStatExtra;
+                rpt.magicDamageMultiplier = magicMult;
+                rpt.magicStatChosen = magicStatChosenName;
+                // Physical debug approximations (we no longer expose physStatBase separately here)
+                rpt.physStatBase = 0; // could compute again if needed
+                rpt.physStatExtra = 0; // ditto
                 rpt.physDamageMultiplier = attack.damageMultiplier;
-                rpt.physStatChosen = physStatChosenName;
+                rpt.physStatChosen = null; // omitted
                 attackListener.accept(rpt);
             }
-        } catch (Exception e) {
-            // ignore listener failures during gameplay
-        }
+        } catch (Exception ignored) {}
 
-        if (magAfter > 0) {
-            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): "
-                    + totalPhysBeforeResist + ", magic: " + mag + ", After: "
-                    + physAfter + ", " + magAfter);
-            target.alterHp(-physAfter);
-            target.alterHp(-magAfter);
-        } else {
-            System.out.println("Attack: " + attack.name + " Rolled physical(total after crits): "
-                    + totalPhysBeforeResist + ", After: " + physAfter);
-            target.alterHp(-physAfter);
+        // Logging summary
+        if (hasPhysical || isTrue) {
+            System.out.println("Attack: " + attack.name + " Physical After: " + physAfter + (magAfter>0? (", Magic After: " + magAfter): ""));
+        } else if (magAfter > 0) {
+            System.out.println("Attack: " + attack.name + " Magic After: " + magAfter);
         }
     }
 
-    private Resistances parseResistance(String s) {
-        if (s == null)
-            return null;
-        try {
-            return Resistances.valueOf(s);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
+    // parseResistance removed; use ResistanceUtil.parse(...) where needed
 
     // --- Equipment & Inventory ---
     public Inventory getInventory() {
@@ -1113,12 +1098,15 @@ public abstract class Creature {
             float eqCrit = eq.getCrit();
             float eqDodge = eq.getDodge();
             float eqBlock = eq.getBlock();
+            float eqMagicResist = eq.getMagicResist();
             if (eqCrit != 0f)
                 equipmentCrit += eqCrit;
             if (eqDodge != 0f)
                 equipmentDodge += eqDodge;
             if (eqBlock != 0f)
                 equipmentBlock += eqBlock;
+            if (eqMagicResist != 0f)
+                equipmentMagicResist += eqMagicResist;
         } catch (Exception ignored) {
         }
 
@@ -1168,12 +1156,15 @@ public abstract class Creature {
             float eqCrit = eq.getCrit();
             float eqDodge = eq.getDodge();
             float eqBlock = eq.getBlock();
+            float eqMagicResist = eq.getMagicResist();
             if (eqCrit != 0f)
                 equipmentCrit -= eqCrit;
             if (eqDodge != 0f)
                 equipmentDodge -= eqDodge;
             if (eqBlock != 0f)
                 equipmentBlock -= eqBlock;
+            if (eqMagicResist != 0f)
+                equipmentMagicResist -= eqMagicResist;
         } catch (Exception ignored) {
         }
 
@@ -1361,6 +1352,7 @@ public abstract class Creature {
         sb.append("Critical Hit Chance: ").append(getCrit()).append("%\n");
         sb.append("Dodge Chance: ").append(getDodge()).append("%\n");
         sb.append("Block Chance: ").append(getBlock()).append("%\n");
+        sb.append("Magic Resistance: ").append(getMagicResist()).append("%\n");
         sb.append("Equipment:\n");
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = equipment.get(slot);

@@ -1,3 +1,4 @@
+# python .\scripts\generate_ids.py --fail-on-range-errors --fail-on-duplicates
 #!/usr/bin/env python3
 """Generate a simple IDS markdown from JSON files under src/main/resources/data.
 

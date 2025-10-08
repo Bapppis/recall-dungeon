@@ -1,3 +1,4 @@
+# python scripts/format_jsons.py
 #!/usr/bin/env python3
 """Format all JSON files under src/main/resources/data with 2-space indent.
 
@@ -67,6 +68,7 @@ CANON_CREATURE_ORDER: List[str] = [
     "baseBlock",
     "baseCrit",
     "baseDodge",
+    "baseMagicResist",
     "baseHp",
     "baseMaxMana",
     "baseMaxStamina",

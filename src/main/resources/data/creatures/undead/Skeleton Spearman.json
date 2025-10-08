@@ -4,6 +4,7 @@
   "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty spear and a shield.",
   "creatureType": "UNDEAD",
   "size": "MEDIUM",
+  "level": 0,
   "enemyXp": 3,
   "visionRange": 1,
   "stats": {
@@ -19,6 +20,7 @@
   "baseBlock": 20,
   "baseCrit": 5,
   "baseDodge": 5,
+  "baseMagicResist": 5,
   "baseHp": 5,
   "hpLvlBonus": 4,
   "properties": [

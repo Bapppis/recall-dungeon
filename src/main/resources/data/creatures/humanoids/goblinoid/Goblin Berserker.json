@@ -4,6 +4,7 @@
   "description": "A small goblin wielding two axes, it is thirsting for blood.",
   "creatureType": "HUMANOID",
   "size": "SMALL",
+  "level": 0,
   "enemyXp": 4,
   "visionRange": 1,
   "stats": {
@@ -18,6 +19,7 @@
   "baseBlock": 0,
   "baseCrit": 5,
   "baseDodge": 15,
+  "baseMagicResist": 0,
   "baseHp": 5,
   "hpLvlBonus": 4,
   "properties": null,
