@@ -3,12 +3,14 @@ package com.bapppis.core.Creature.player;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.lwjgl.system.linux.Stat;
 
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.util.StatUtil;
 
 public class TestBigglesCreation {
     @Test
@@ -28,7 +30,8 @@ public class TestBigglesCreation {
     // helpers (not used directly by the test, kept for convenience)
     private void assertBigglesDefaults(Player biggles) {
         assertEquals("Biggles The Unlucky", biggles.getName());
-        // finalizeAfterLoad applies HP bonuses: baseHp 5 + hpLvlBonus 4 + constitution delta (12 -> +2) => 11
+        // finalizeAfterLoad applies HP bonuses: baseHp 5 + hpLvlBonus 4 + constitution
+        // delta (12 -> +2) => 11
         assertEquals(11, biggles.getMaxHp());
         assertEquals(11, biggles.getCurrentHp());
         assertEquals(com.bapppis.core.creature.Creature.Size.SMALL, biggles.getSize());

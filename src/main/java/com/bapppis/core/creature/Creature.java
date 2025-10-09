@@ -17,7 +17,7 @@ import com.bapppis.core.item.EquipmentSlot;
 
 public abstract class Creature {
     // --- Fields ---
-    private int id; // id set by Gson, no setter
+    private int id;
     private String name;
     private int visionRange = 2; // default vision range
     private int level;
@@ -26,13 +26,16 @@ public abstract class Creature {
     private int baseHp;
     private int maxHp;
     private int currentHp;
-    private int hpLvlBonus; // Additional HP gained per level
+    private int hpLvlBonus;
     private int currentMana;
     private int currentStamina;
     private int maxMana = 100;
     private int baseMaxMana = 100;
     private int maxStamina = 100;
     private int baseMaxStamina = 100;
+    private int baseHpRegen = 0;
+    private int baseStaminaRegen;
+    private int baseManaRegen = 0;
     private Size size;
     private Type type;
     private CreatureType creatureType;
@@ -42,19 +45,25 @@ public abstract class Creature {
     private float baseDodge;
     private float baseBlock;
     private float baseMagicResist;
-    private float crit; // base-derived critical hit chance percentage (0-100)
-    private float dodge; // base-derived dodge chance percentage (0-100)
-    private float block; // base-derived block chance percentage (0-100)
-    private float magicResist; // base-derived magic resist chance percentage (0-100)
+    private int hpRegen;
+    private int staminaRegen;
+    private int manaRegen;
+    private float crit;
+    private float dodge;
+    private float block;
+    private float magicResist;
     // Equipment aggregates (sum of all equipped item contributions)
     private final java.util.EnumMap<Stats, Integer> equipmentStats = new java.util.EnumMap<>(Stats.class);
     private final java.util.EnumMap<Resistances, Integer> equipmentResists = new java.util.EnumMap<>(Resistances.class);
+    private int equipmentHpRegen = 0; // Sum of all equipped item HP regen contributions
+    private int equipmentStaminaRegen = 0; // Sum of all equipped item stamina regen contributions
+    private int equipmentManaRegen = 0; // Sum of all equipped item mana regen contributions
     private float equipmentCrit = 0f;
     private float equipmentDodge = 0f;
     private float equipmentBlock = 0f;
     private float equipmentMagicResist = 0f;
-    // Cached per-stat bonuses (e.g. STR 14 -> +4, WIS 7 -> -3). Luck is special:
-    // its bonus equals the raw luck value (Luck 1 -> 1, Luck 0 -> 0).
+    // Cached per-stat bonuses (e.g. STR 14 -> +4). LUCK bonus equals the raw
+    // luck value.
     private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
     private HashMap<Integer, Property> buffs = new HashMap<>();
     private HashMap<Integer, Property> debuffs = new HashMap<>();
@@ -69,9 +78,7 @@ public abstract class Creature {
     // "monster_goblin")
     private String sprite;
 
-    // Test hook: optional consumer to receive detailed attack reports when an
-    // attack occurs.
-    // Tests can set Creature.attackListener to capture raw rolls and metadata.
+    // Optional test hook to receive detailed attack reports
     public static Consumer<AttackReport> attackListener = null;
 
     public String getSprite() {
@@ -233,14 +240,16 @@ public abstract class Creature {
         if (this.level >= 30) {
             this.level = 30;
             this.xp = 0;
-        } else if (currentXp >= ((this.level + 1) * 10)) {
+            return;
+        }
+        if (currentXp >= ((this.level + 1) * 10)) {
             this.level++;
             this.updateMaxHp();
             currentXp -= ((this.level) * 10);
-            addXp(currentXp); // Recursively add remaining XP
-        } else {
-            this.xp = this.xp + xp;
+            addXp(currentXp); // add remaining XP recursively
+            return;
         }
+        this.xp = currentXp;
     }
 
     public Integer getEnemyXp() {
@@ -361,6 +370,10 @@ public abstract class Creature {
         double ratio = this.maxStamina > 0 ? (double) currentStamina / this.maxStamina : 1.0;
         this.maxStamina = maxStamina;
         this.currentStamina = Math.max(0, (int) (this.maxStamina * ratio));
+        // Recompute baseStaminaRegen from maxStamina so regen follows a percentile of max
+        this.baseStaminaRegen = Math.max(1, Math.floorDiv(this.maxStamina, 5));
+        // Recompute derived stats (including staminaRegen) whenever max stamina changes
+        recalcDerivedStats();
     }
 
     public void updateMaxStamina() {
@@ -383,10 +396,53 @@ public abstract class Creature {
 
     public void setCurrentStamina(int stamina) {
         this.currentStamina = Math.max(0, Math.min(stamina, this.maxStamina));
+        // Recompute derived values when stamina changes
+        recalcDerivedStats();
     }
 
     public void alterStamina(int amount) {
         this.currentStamina = Math.max(0, Math.min(this.currentStamina + amount, this.maxStamina));
+        // Recompute derived values when stamina changes
+        recalcDerivedStats();
+    }
+
+    public int getBaseHpRegen() {
+        return baseHpRegen;
+    }
+
+    public int getBaseStaminaRegen() {
+        return baseStaminaRegen;
+    }
+
+    public int getBaseManaRegen() {
+        return baseManaRegen;
+    }
+
+    public int getHpRegen() {
+        return hpRegen + equipmentHpRegen;
+    }
+
+    public int setHpRegen(int hpRegen) {
+        this.hpRegen = hpRegen;
+        return this.hpRegen;
+    }
+
+    public int getStaminaRegen() {
+        return staminaRegen + equipmentStaminaRegen;
+    }
+
+    public int setStaminaRegen(int staminaRegen) {
+        this.staminaRegen = staminaRegen;
+        return this.staminaRegen;
+    }
+
+    public int getManaRegen() {
+        return manaRegen + equipmentManaRegen;
+    }
+
+    public int setManaRegen(int manaRegen) {
+        this.manaRegen = manaRegen;
+        return this.manaRegen;
     }
 
     public Size getSize() {
@@ -457,6 +513,15 @@ public abstract class Creature {
         return stats.getOrDefault(stat, 0);
     }
 
+    // --- Per-stat convenience getters ---
+    public int getSTR() { return getStat(Stats.STRENGTH); }
+    public int getDEX() { return getStat(Stats.DEXTERITY); }
+    public int getCON() { return getStat(Stats.CONSTITUTION); }
+    public int getINT() { return getStat(Stats.INTELLIGENCE); }
+    public int getWIS() { return getStat(Stats.WISDOM); }
+    public int getCHA() { return getStat(Stats.CHARISMA); }
+    public int getLUCK() { return getStat(Stats.LUCK); }
+
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
         // Keep cached bonuses in sync whenever a stat changes
@@ -506,6 +571,33 @@ public abstract class Creature {
             recalcDerivedStats();
         }
     }
+
+    // --- Stat helper convenience methods ---
+    /**
+     * Generic increase/decrease helpers that delegate to modifyStat so all
+     * derived values and cached bonuses remain consistent.
+     */
+    public void increaseStat(Stats stat) {
+        increaseStat(stat, 1);
+    }
+
+    public void increaseStat(Stats stat, int amount) {
+        if (amount == 0)
+            return;
+        modifyStat(stat, Math.max(0, amount));
+    }
+
+    public void decreaseStat(Stats stat) {
+        decreaseStat(stat, 1);
+    }
+
+    public void decreaseStat(Stats stat, int amount) {
+        if (amount == 0)
+            return;
+        modifyStat(stat, -Math.max(0, amount));
+    }
+
+
 
     public int getResistance(Resistances resistance) {
         return resistances.getOrDefault(resistance, 0);
@@ -601,6 +693,12 @@ public abstract class Creature {
         float dodgeDelta = 2.5f * this.getStatBonus(Stats.DEXTERITY);
         this.dodge = this.baseDodge + dodgeDelta;
         float magicResistDelta = 5.0f * this.getStatBonus(Stats.WISDOM);
+        // Stamina regen = baseStaminaRegen + floor(2.5 * WIS_bonus). The floored
+        // portion has a minimum of 1.
+        int wisBonus = this.getStatBonus(Stats.WISDOM);
+        int extraStamina = (int) Math.floor(2.5 * wisBonus);
+        extraStamina = Math.max(1, extraStamina);
+        this.staminaRegen = this.baseStaminaRegen + extraStamina;
         magicResistDelta += 2.5f * this.getStatBonus(Stats.CONSTITUTION);
         this.magicResist = this.baseMagicResist + magicResistDelta;
     }
@@ -674,7 +772,8 @@ public abstract class Creature {
         }
     }
 
-    // helper logic moved to util: WeaponUtil.determineWeaponStatBonus and AttackUtil.chooseAttackFromList
+    // helper logic moved to util: WeaponUtil.determineWeaponStatBonus and
+    // AttackUtil.chooseAttackFromList
 
     private void applyAttackToTarget(Attack attack, int statBonus, Creature target, Resistances physicalType,
             Resistances magicType, Equipment weapon) {
@@ -682,18 +781,24 @@ public abstract class Creature {
             return;
         // New unified resolution: potentially separate physical and magical rolls.
         // 1. Resolve physical component (if any and not TRUE magic-only attack)
-    int totalPhysBeforeResist = 0;
-    int physRaw = 0;
-    int physCritCount = 0;
-    int physAfter = 0;
-    int physAttempts = 0; int physMissDodge = 0; int physMissBlock = 0;
+        int totalPhysBeforeResist = 0;
+        int physRaw = 0;
+        int physCritCount = 0;
+        int physAfter = 0;
+        int physAttempts = 0;
+        int physMissDodge = 0;
+        int physMissBlock = 0;
         int times = attack.getTimes();
         float baseCrit = this.getCrit();
         int critMod = 0;
-        try { critMod = attack.getCritMod(); } catch (Exception ignored) {}
+        try {
+            critMod = attack.getCritMod();
+        } catch (Exception ignored) {
+        }
         float critChance = Math.max(0f, Math.min(100f, baseCrit + critMod));
 
-        boolean hasPhysical = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
+        boolean hasPhysical = physicalType != null
+                && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
         boolean isTrue = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.TRUE;
         if (hasPhysical || isTrue) {
             for (int i = 0; i < times; i++) {
@@ -751,7 +856,8 @@ public abstract class Creature {
                 totalPhysBeforeResist += hit;
             }
             // Weapon scaling for physical part
-            int physStatBase = 0; int physStatExtra = 0; // removed unused physStatChosenName
+            int physStatBase = 0;
+            int physStatExtra = 0; // removed unused physStatChosenName
             try {
                 if (weapon != null) {
                     physStatBase = WeaponUtil.determineWeaponStatBonus(this, weapon);
@@ -761,30 +867,52 @@ public abstract class Creature {
                             int str = this.getStatBonus(Stats.STRENGTH);
                             int dex = this.getStatBonus(Stats.DEXTERITY);
                             // choose higher (not stored)
-                            @SuppressWarnings("unused") String ignoredName = (str >= dex) ? Stats.STRENGTH.name() : Stats.DEXTERITY.name();
+                            @SuppressWarnings("unused")
+                            String ignoredName = (str >= dex) ? Stats.STRENGTH.name() : Stats.DEXTERITY.name();
                         } else {
                             switch (weapon.getWeaponClass()) {
-                                case MELEE: break;
-                                case RANGED: break;
-                                case MAGIC: break;
-                                default: break;
+                                case MELEE:
+                                    break;
+                                case RANGED:
+                                    break;
+                                case MAGIC:
+                                    break;
+                                default:
+                                    break;
                             }
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                     double physMult = Math.max(0.0, attack.damageMultiplier);
-                    physStatExtra = (int)Math.floor(physStatBase * 5.0 * physMult);
-                    if (physStatExtra != 0) totalPhysBeforeResist += physStatExtra;
+                    physStatExtra = (int) Math.floor(physStatBase * 5.0 * physMult);
+                    if (physStatExtra != 0)
+                        totalPhysBeforeResist += physStatExtra;
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             int resistValue = (physicalType == null ? 100 : target.getResistance(physicalType));
             physAfter = Math.floorDiv(totalPhysBeforeResist * resistValue, 100);
-            if (physAfter > 0) target.alterHp(-physAfter);
-            // Listener/report for physical stored later (combine with magic below if needed)
+            if (physAfter > 0)
+                target.alterHp(-physAfter);
+            // Listener/report for physical stored later (combine with magic below if
+            // needed)
         }
 
-        // 2. Resolve magic component IF weapon has magic element or attack has magicDamageDice and magicType present
-    int magRaw = 0; int magAfter = 0; int magicCritCount = 0; int magicBeforeResist = 0; int magicStatBonus = 0; int magicStatExtra = 0; float magicMult = attack.magicDamageMultiplier; String magicStatChosenName = null; int magicAttempts=0; int magicMissDodge=0; int magicMissResist=0;
-        boolean hasMagicComponent = (weapon != null && weapon.getMagicElement() != null) || (magicType != null && attack.magicDamageDice != null && !attack.magicDamageDice.isBlank());
+        // 2. Resolve magic component IF weapon has magic element or attack has
+        // magicDamageDice and magicType present
+        int magRaw = 0;
+        int magAfter = 0;
+        int magicCritCount = 0;
+        int magicBeforeResist = 0;
+        int magicStatBonus = 0;
+        int magicStatExtra = 0;
+        float magicMult = attack.magicDamageMultiplier;
+        String magicStatChosenName = null;
+        int magicAttempts = 0;
+        int magicMissDodge = 0;
+        int magicMissResist = 0;
+        boolean hasMagicComponent = (weapon != null && weapon.getMagicElement() != null)
+                || (magicType != null && attack.magicDamageDice != null && !attack.magicDamageDice.isBlank());
         if (hasMagicComponent && magicType != null) {
             int magicTimes = attack.getTimes();
             for (int i = 0; i < magicTimes; i++) {
@@ -833,26 +961,35 @@ public abstract class Creature {
             // Weapon magic stat scaling
             try {
                 if (weapon != null) {
-                    com.bapppis.core.creature.Creature.Stats chosen = null; int best = Integer.MIN_VALUE;
+                    com.bapppis.core.creature.Creature.Stats chosen = null;
+                    int best = Integer.MIN_VALUE;
                     if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
                         for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
-                            int b = this.getStatBonus(s); if (b > best) { best = b; chosen = s; }
+                            int b = this.getStatBonus(s);
+                            if (b > best) {
+                                best = b;
+                                chosen = s;
+                            }
                         }
                     } else if (weapon.getMagicStatBonus() != null) {
-                        chosen = weapon.getMagicStatBonus(); best = this.getStatBonus(chosen);
+                        chosen = weapon.getMagicStatBonus();
+                        best = this.getStatBonus(chosen);
                     }
                     if (chosen != null) {
                         magicStatBonus = best;
-                        int extra = (int)Math.floor(best * 5.0 * Math.max(0.0, magicMult));
+                        int extra = (int) Math.floor(best * 5.0 * Math.max(0.0, magicMult));
                         magicStatExtra = extra;
-                        if (extra != 0) magicBeforeResist += extra;
+                        if (extra != 0)
+                            magicBeforeResist += extra;
                         magicStatChosenName = chosen.name();
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             int resistValue = target.getResistance(magicType);
             magAfter = Math.floorDiv(magicBeforeResist * resistValue, 100);
-            if (magAfter > 0) target.alterHp(-magAfter);
+            if (magAfter > 0)
+                target.alterHp(-magAfter);
         }
 
         // Build and send report if listener active
@@ -886,18 +1023,21 @@ public abstract class Creature {
                 rpt.magicStatExtra = magicStatExtra;
                 rpt.magicDamageMultiplier = magicMult;
                 rpt.magicStatChosen = magicStatChosenName;
-                // Physical debug approximations (we no longer expose physStatBase separately here)
+                // Physical debug approximations (we no longer expose physStatBase separately
+                // here)
                 rpt.physStatBase = 0; // could compute again if needed
                 rpt.physStatExtra = 0; // ditto
                 rpt.physDamageMultiplier = attack.damageMultiplier;
                 rpt.physStatChosen = null; // omitted
                 attackListener.accept(rpt);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         // Logging summary
         if (hasPhysical || isTrue) {
-            System.out.println("Attack: " + attack.name + " Physical After: " + physAfter + (magAfter>0? (", Magic After: " + magAfter): ""));
+            System.out.println("Attack: " + attack.name + " Physical After: " + physAfter
+                    + (magAfter > 0 ? (", Magic After: " + magAfter) : ""));
         } else if (magAfter > 0) {
             System.out.println("Attack: " + attack.name + " Magic After: " + magAfter);
         }
@@ -1095,10 +1235,19 @@ public abstract class Creature {
 
         // crit/dodge/block aggregates
         try {
+            int eqHpRegen = eq.getHpRegen();
+            int eqStaminaRegen = eq.getStaminaRegen();
+            int eqManaRegen = eq.getManaRegen();
             float eqCrit = eq.getCrit();
             float eqDodge = eq.getDodge();
             float eqBlock = eq.getBlock();
             float eqMagicResist = eq.getMagicResist();
+            if (eqHpRegen != 0)
+                equipmentHpRegen += eqHpRegen;
+            if (eqStaminaRegen != 0)
+                equipmentStaminaRegen += eqStaminaRegen;
+            if (eqManaRegen != 0)
+                equipmentManaRegen += eqManaRegen;
             if (eqCrit != 0f)
                 equipmentCrit += eqCrit;
             if (eqDodge != 0f)
@@ -1153,18 +1302,27 @@ public abstract class Creature {
 
         // crit/dodge/block aggregates
         try {
+            int eqHpRegen = eq.getHpRegen();
+            int eqStaminaRegen = eq.getStaminaRegen();
+            int eqManaRegen = eq.getManaRegen();
             float eqCrit = eq.getCrit();
             float eqDodge = eq.getDodge();
             float eqBlock = eq.getBlock();
             float eqMagicResist = eq.getMagicResist();
+            if (eqHpRegen != 0)
+                equipmentHpRegen += eqHpRegen;
+            if (eqStaminaRegen != 0)
+                equipmentStaminaRegen += eqStaminaRegen;
+            if (eqManaRegen != 0)
+                equipmentManaRegen += eqManaRegen;
             if (eqCrit != 0f)
-                equipmentCrit -= eqCrit;
+                equipmentCrit += eqCrit;
             if (eqDodge != 0f)
-                equipmentDodge -= eqDodge;
+                equipmentDodge += eqDodge;
             if (eqBlock != 0f)
-                equipmentBlock -= eqBlock;
+                equipmentBlock += eqBlock;
             if (eqMagicResist != 0f)
-                equipmentMagicResist -= eqMagicResist;
+                equipmentMagicResist += eqMagicResist;
         } catch (Exception ignored) {
         }
 
@@ -1298,15 +1456,22 @@ public abstract class Creature {
         // baseMaxMana/baseMaxStamina
         // we respect those values. After ensuring base values, recompute derived maxes
         // and set current to max.
-        if (this.baseMaxMana <= 0) {
-            this.baseMaxMana = this.maxMana;
-        }
-        updateMaxMana();
 
         if (this.baseMaxStamina <= 0) {
             this.baseMaxStamina = this.maxStamina;
         }
         updateMaxStamina();
+
+        if (this.baseStaminaRegen <= 0) {
+            this.baseStaminaRegen = Math.max(1, Math.floorDiv(this.baseMaxStamina, 5));
+            this.staminaRegen = this.baseStaminaRegen;
+        }
+
+        if (this.baseMaxMana <= 0) {
+            this.baseMaxMana = this.maxMana;
+        }
+
+        updateMaxMana();
 
         this.currentMana = this.maxMana;
         this.currentStamina = this.maxStamina;
@@ -1326,67 +1491,63 @@ public abstract class Creature {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Creature: ").append(name).append("\n");
-        sb.append("Id: ").append(id).append("\n");
-        sb.append("Vision Range: ").append(visionRange).append("\n");
-        sb.append("Level: ").append(level).append("\n");
-        sb.append("XP: ").append(xp).append("\n");
-        if (enemyXp != null && enemyXp != 0)
-            sb.append("Enemy XP: ").append(enemyXp).append("\n");
-        sb.append("Base HP: ").append(baseHp).append("\n");
-        sb.append("HP Level Bonus: ").append(hpLvlBonus).append("\n");
-        sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("\n");
-        sb.append("Mana: ").append(currentMana).append("/").append(maxMana).append("\n");
-        sb.append("Stamina: ").append(currentStamina).append("/").append(maxStamina).append("\n");
-        sb.append("Size: ").append(size).append("\n");
-        sb.append("Type: ").append(type).append("\n");
-        sb.append("Creature Type: ").append(creatureType).append("\n");
-        sb.append("Stats: ").append(stats).append("\n");
-        sb.append("-----------------\n");
-        sb.append("Resistances:\n");
+        sb.append("Creature: ").append(name == null ? "<unnamed>" : name).append(" (").append(id).append(")\n");
+        sb.append("Level: ").append(level).append(" ").append(type == null ? "" : type.name()).append(" ").append(creatureType == null ? "" : creatureType.name()).append("\n");
+
+        // Health / resources
+        sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("  (HP regen: ").append(getHpRegen()).append("/s)").append("\n");
+        sb.append("Mana: ").append(currentMana).append("/").append(maxMana).append("  (Mana regen: ").append(getManaRegen()).append("/s)").append("\n");
+        sb.append("Stamina: ").append(currentStamina).append("/").append(maxStamina).append("  (Stamina regen: ").append(getStaminaRegen()).append("/s)").append("\n");
+
+        // Basic stats on one line for quick scanning
+        sb.append("Stats: ")
+                .append("STR ").append(getSTR()).append("  ")
+                .append("DEX ").append(getDEX()).append("  ")
+                .append("CON ").append(getCON()).append("  ")
+                .append("INT ").append(getINT()).append("  ")
+                .append("WIS ").append(getWIS()).append("  ")
+                .append("CHA ").append(getCHA()).append("  ")
+                .append("LUCK ").append(getLUCK()).append("\n");
+
+        // Resistances (condensed)
+        sb.append("Resists: ");
+        boolean first = true;
         for (Entry<Resistances, Integer> entry : resistances.entrySet()) {
-            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("%\n");
+            if (!first) sb.append(", ");
+            sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append("%");
+            first = false;
         }
-        sb.append("-----------------\n");
-        // Show effective chances including equipment modifiers
-        sb.append("Critical Hit Chance: ").append(getCrit()).append("%\n");
-        sb.append("Dodge Chance: ").append(getDodge()).append("%\n");
-        sb.append("Block Chance: ").append(getBlock()).append("%\n");
-        sb.append("Magic Resistance: ").append(getMagicResist()).append("%\n");
+        sb.append("\n");
+
+        // Combat chances
+        sb.append("Crit: ").append(getCrit()).append("%  ")
+                .append("Dodge: ").append(getDodge()).append("%  ")
+                .append("Block: ").append(getBlock()).append("%  ")
+                .append("MagicResist: ").append(getMagicResist()).append("%\n");
+
+        // Equipped items (one per slot)
         sb.append("Equipment:\n");
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = equipment.get(slot);
-            sb.append(slot.name()).append(": ");
-            if (equipped != null) {
-                sb.append(equipped.getName());
-            } else {
-                sb.append("Empty");
-            }
-            sb.append("\n");
+            sb.append("  ").append(slot.name()).append(": ");
+            sb.append(equipped == null ? "Empty" : equipped.getName()).append("\n");
         }
-        sb.append("-----------------\n");
-        sb.append(printProperties());
-        sb.append("-----------------\n");
-        sb.append("Inventory:\n");
-        sb.append("Weapons: ").append(listInventoryItems(inventory.getWeapons())).append("\n");
-        sb.append("Offhands: ").append(listInventoryItems(inventory.getOffhands())).append("\n");
-        sb.append("Helmets: ").append(listInventoryItems(inventory.getHelmets())).append("\n");
-        sb.append("Armor: ").append(listInventoryItems(inventory.getArmors())).append("\n");
-        sb.append("Legwear: ").append(listInventoryItems(inventory.getLegwear())).append("\n");
-        sb.append("Consumables: ").append(listInventoryItems(inventory.getConsumables())).append("\n");
-        sb.append("Misc: ").append(listInventoryItems(inventory.getMisc())).append("\n");
-        return sb.toString();
-    }
 
-    private String listInventoryItems(java.util.List<Item> items) {
-        if (items.isEmpty())
-            return "Empty";
-        StringBuilder sb = new StringBuilder();
-        for (Item item : items) {
-            sb.append(item.getName()).append(", ");
-        }
-        if (sb.length() > 2)
-            sb.setLength(sb.length() - 2); // Remove trailing comma
+        // Properties summary and inventory counts
+        sb.append("Properties: ")
+                .append("Buffs=").append(buffs.size()).append(" ")
+                .append("Debuffs=").append(debuffs.size()).append(" ")
+                .append("Immunities=").append(immunities.size()).append(" ")
+                .append("Traits=").append(traits.size()).append("\n");
+
+        sb.append("Inventory counts: ")
+                .append("Weapons=").append(inventory.getWeapons().size()).append(", ")
+                .append("Offhands=").append(inventory.getOffhands().size()).append(", ")
+                .append("Helmets=").append(inventory.getHelmets().size()).append(", ")
+                .append("Armor=").append(inventory.getArmors().size()).append(", ")
+                .append("Consumables=").append(inventory.getConsumables().size()).append(", ")
+                .append("Misc=").append(inventory.getMisc().size()).append("\n");
+
         return sb.toString();
     }
 }

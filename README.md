@@ -16,9 +16,9 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 ---
 
 ## Table of Contents
+
 - [Features](#features)
 - [Combat and Stats](#combat-and-stats)
-- [Mana Scaling](#mana-scaling)
 - [Loading and Finalization](#loading-and-finalization)
 - [Tech Stack](#tech-stack)
 - [Wishlist](#wishlist)
@@ -33,7 +33,9 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - [Story](#story)
 
 ---
+
 ## Features
+
 ### Turn-based Dungeon Exploration
 
 - Procedurally loaded dungeon floors with fog-of-war (undiscovered tiles are hidden until explored)
@@ -45,6 +47,10 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Multiple creature types (players, enemies, beasts, undead, etc.)
 - Creatures have stats (Strength, Dexterity, Constitution, etc.) and resistances (Fire, Ice, Bludgeoning, etc.)
 - Level and XP system with customizable XP progression
+- Runtime utilities: `com.bapppis.core.util` contains helper classes used by gameplay and tests. Notable ones:
+  - `StatUtil` — static helpers to increase/decrease stats safely (clamps decreases to not go below zero).
+  - `Dice` — rolls dice strings (e.g., "2d6").
+  - `AttackUtil` / `WeaponUtil` / `ResistanceUtil` — helpers that choose attacks, compute weapon stat bonuses, and classify/parse resistances.
 
 ### Inventory & Equipment
 
@@ -58,11 +64,15 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 
 ### Combat System
 
-- Turn-based combat loop between player and enemies
-- Player chooses actions (attack, flee, etc.) each turn
-- Dice-based damage calculation (e.g., 2d6 for physical, 1d8 for magic)
-- Damage types interact with creature resistances for a complex, old-school combat system
-- Damage types interact with creature resistances for a complex, old-school combat system
+- Turn-based combat loop between player and enemies. The combat resolution was refactored to separate physical and magical components and to make testing deterministic.
+- Player chooses actions (attack, flee, etc.) each turn (the game also exposes a non-interactive mode for automated tests).
+- Dice-based damage calculation (e.g., 2d6 for physical, 1d8 for magic).
+- Attack resolution (current model):
+  - Each attempted hit rolls a single to-hit value (0–100) and compares it to the target's avoidance window.
+  - Physical hits use a dodge+block partition (block prevents damage like armor); TRUE-type physical damage ignores block and only checks dodge.
+  - Magical hits use dodge + magic resist as the avoidance window (no block).
+  - Weapons with a magic element can trigger a dual-resolution attack: physical and magical parts are resolved independently and reported separately.
+  - Crits are rolled per successful hit and are included in detailed `AttackReport` objects emitted via `Creature.attackListener` (useful for tests).
 
 ### Properties & Traits
 
@@ -88,48 +98,61 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 - Easily extendable for new commands and actions
 
 -
+
 ## Combat and Stats
 
 - Per-hit resolution (updated):
-   - Combat now uses a single to-hit roll per attempted hit (0–100). That roll is compared against the target's avoidance window and determines whether the attack misses (due to dodge or block) or proceeds to damage/crit resolution.
-   - Dodge and block are considered parts of a single avoidance region (they are partitioned so the ranges don't overlap). Previously there was a hard cap of 0–80 on dodge/block in the docs; that cap has been removed. Effective dodge/block values are still clamped when used for probability checks (the implementation clamps to 0–100 at check time) and the partitioning logic ensures deterministic outcomes.
-   - If the attack isn't avoided, crit is rolled per successful hit (crit chance clamped to 0–100 at check time).
+
+  - Combat now uses a single to-hit roll per attempted hit (0–100). That roll is compared against the target's avoidance window and determines whether the attack misses (due to dodge or block) or proceeds to damage/crit resolution.
+  - Dodge and block are considered parts of a single avoidance region (they are partitioned so the ranges don't overlap). Previously there was a hard cap of 0–80 on dodge/block in the docs; that cap has been removed. Effective dodge/block values are still clamped when used for probability checks (the implementation clamps to 0–100 at check time) and the partitioning logic ensures deterministic outcomes.
+  - If the attack isn't avoided, crit is rolled per successful hit (crit chance clamped to 0–100 at check time).
 
 - Raw vs effective chances:
-   - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are clamped when used for probability checks.
+
+  - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are clamped when used for probability checks.
 
 - Dexterity → Dodge:
-   - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
+  - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
+- Dexterity → Dodge:
+- Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
 - Data-driven attacks:
-   - There is no implicit default unarmed attack. If a creature can attack unarmed, its JSON must include an unarmed attack entry.
+  - There is no implicit default unarmed attack. If a creature can attack unarmed, its JSON must include an unarmed attack entry.
 
 ---
 
-## Mana Scaling
+## Mana & Stamina Scaling
 
 - Intelligence-based max mana:
-   - Max mana scales from a base value by ±10% per point of INT relative to 10. The result is floored and never below 25.
-   - When max changes (e.g., INT increases/decreases), current mana preserves the same fraction of max (ratio-preserving update).
+
+  - Max mana scales from a base value by ±10% per point of INT relative to 10. The result is floored and never below 25.
+  - When max changes (e.g., INT increases/decreases), current mana preserves the same fraction of max (ratio-preserving update).
+
+- Stamina regeneration:
+  - Base stamina regen is derived from max stamina as floor(maxStamina / 5). On top of that, creatures gain an extra stamina component computed as floor(2.5 \* WIS_bonus) where WIS_bonus = (WIS - 10) (LUCK is treated differently). That floored extra has a minimum of 1.
+  - Equipment may provide additional regen contributions (aggregated per creature).
 - When it updates:
-   - Recomputed during finalizeAfterLoad() and whenever INT changes at runtime via setStat/modifyStat.
+  - Recomputed during finalizeAfterLoad() and whenever INT changes at runtime via setStat/modifyStat.
 
 ---
 
 ## Loading and Finalization
 
 - Loader pipeline:
-   - Items load first so starting equipment ids resolve.
-   - Creatures and players load from `src/main/resources/data/creatures/**`. Starting `inventory` and equipment slots (`helmet`, `armor`, `legwear`, `weapon`, `offhand`) are applied.
-   - Properties are applied by id before finalization.
-- FinalizeAfterLoad does the following:
-   - Resets HP to base, then applies level/CON scaling.
-   - Recalculates max mana from INT (floored, min 25) and preserves current mana ratio.
-   - Sets stamina to max.
-   - Converts stored levels to XP so level-up bonuses are applied via XP.
+
+  - Items load first so starting equipment ids resolve.
+  - Creatures and players load from `src/main/resources/data/creatures/**`. Starting `inventory` and equipment slots (`helmet`, `armor`, `legwear`, `weapon`, `offhand`) are applied.
+  - Properties are applied by id before finalization.
+
+- `finalizeAfterLoad()` responsibilities:
+  - Resets HP to base and applies level/CON scaling.
+  - Recomputes max mana from INT and preserves current mana ratio.
+  - Sets stamina to max and initializes stamina regen from base and WIS-derived components.
+  - Converts stored levels to XP so level-up bonuses are applied via `addXp()`.
 
 Developer/testing hooks:
-- You can set `Creature.attackListener` to a consumer to receive per-attack roll details (raw, after crit, after resist, crit count, types) for tests or debugging.
-- Combat prints (missed dodge/block, crits) are emitted to console for debugging/tests.
+
+- `Creature.attackListener` — set this to a `Consumer<AttackReport>` to receive detailed per-attack reports (raw rolls, crit counts, after-resist damage, per-component diagnostics). Very useful for deterministic unit tests.
+- Non-interactive combat: the combat code supports programmatic/non-interactive runs to make tests and CI deterministic.
 
 ---
 
@@ -142,6 +165,7 @@ Developer/testing hooks:
 - JUnit 5 (testing)
 
 ## Roadmap
+
 - Possibly a class system for players
 - Skills and abilities that can be used in and out of combat
 - Mana, stamina and other resources tied to class abilities, skills and spells
@@ -163,47 +187,39 @@ Developer/testing hooks:
 ## Combat and Stats
 
 - Per-hit resolution order:
-   - To-hit is rolled against the target's dodge first (dodge is clamped to 0–80 at check time).
-   - If it hits, a block check runs (block clamped to 0–80). Blocked hits deal no damage.
-   - Crit is rolled per hit (crit chance clamped to 0–100 at check time).
+  - To-hit is rolled against the target's dodge first (dodge is clamped to 0–80 at check time).
+  - If it hits, a block check runs (block clamped to 0–80). Blocked hits deal no damage.
+  - Crit is rolled per hit (crit chance clamped to 0–100 at check time).
 - Raw vs effective chances:
-   - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are only clamped when used for probability rolls.
+  - Raw crit/dodge/block values are stored unclamped and include equipment modifiers; they are only clamped when used for probability rolls.
 - Dexterity → Dodge:
-   - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
+  - Dodge = baseDodge + 2.5 × (DEX − 10). Negative DEX reduces dodge; positive DEX increases it.
 - Data-driven attacks:
-   - There is no implicit default unarmed attack. If a creature can attack unarmed, its JSON must include an unarmed attack entry.
-
----
-
-## Mana Scaling
-
-- Intelligence-based max mana:
-   - Max mana scales from a base value by ±10% per point of INT relative to 10. The result is floored and never below 25.
-   - When max changes (e.g., INT increases/decreases), current mana preserves the same fraction of max (ratio-preserving update).
-- When it updates:
-   - Recomputed during finalizeAfterLoad() and whenever INT changes at runtime via setStat/modifyStat.
+  - There is no implicit default unarmed attack. If a creature can attack unarmed, its JSON must include an unarmed attack entry.
 
 ---
 
 ## Loading and Finalization
 
 - Loader pipeline:
-   - Items load first so starting equipment ids resolve.
-   - Creatures and players load from `src/main/resources/data/creatures/**`. Starting `inventory` and equipment slots (`helmet`, `armor`, `legwear`, `weapon`, `offhand`) are applied.
-   - Properties are applied by id before finalization.
+  - Items load first so starting equipment ids resolve.
+  - Creatures and players load from `src/main/resources/data/creatures/**`. Starting `inventory` and equipment slots (`helmet`, `armor`, `legwear`, `weapon`, `offhand`) are applied.
+  - Properties are applied by id before finalization.
 - FinalizeAfterLoad does the following:
-   - Resets HP to base, then applies level/CON scaling.
-   - Recalculates max mana from INT (floored, min 25) and preserves current mana ratio.
-   - Sets stamina to max.
-   - Converts stored levels to XP so level-up bonuses are applied via XP.
+  - Resets HP to base, then applies level/CON scaling.
+  - Recalculates max mana from INT (floored, min 25) and preserves current mana ratio.
+  - Sets stamina to max.
+  - Converts stored levels to XP so level-up bonuses are applied via XP.
 
 Developer/testing hooks:
+
 - You can set `Creature.attackListener` to a consumer to receive per-attack roll details (raw, after crit, after resist, crit count, types) for tests or debugging.
 - Combat prints (missed dodge/block, crits) are emitted to console for debugging/tests.
 
 ---
 
 ## Wishlist
+
 - Interesting story/lore.
 - Balanced and fun gameplay.
 - A huge compendium of armor, weapons, items and monsters.
@@ -213,13 +229,12 @@ Developer/testing hooks:
 ---
 
 ## Project Structure
-
 ```
 recall-dungeon/
-├─ LICENSE                    # MIT License (code)
-├─ ASSETS-LICENSE             # CC BY-NC-ND 4.0 (assets)
-├─ pom.xml                    # Maven build configuration
-├─ README.md                  # Project overview and docs
+├─ LICENSE                       # MIT License (code)
+├─ ASSETS-LICENSE                # CC BY-NC-ND 4.0 (assets)
+├─ pom.xml                       # Maven build configuration
+├─ README.md                     # Project overview and docs
 ├─ src/
 │  ├─ main/
 │  │  ├─ java/com/bapppis/core/
@@ -230,12 +245,17 @@ recall-dungeon/
 │  │  │  │  │  ├─ Enemy.java
 │  │  │  │  │  ├─ CreatureLoader.java
 │  │  │  │  │  └─ player/Player.java
-│  │  │  │  ├─ dungeon/...
-│  │  │  │  ├─ event/...
-│  │  │  │  ├─ game/...
-│  │  │  │  ├─ item/...
-│  │  │  │  ├─ property/...
-│  │  │  │  └─ util/Dice.java
+│  │  │  │  ├─ dungeon/
+│  │  │  │  ├─ event/
+│  │  │  │  ├─ game/
+│  │  │  │  ├─ item/
+│  │  │  │  ├─ property/
+│  │  │  │  └─ util/
+│  │  │  │     ├─ Dice.java
+│  │  │  │     ├─ AttackUtil.java
+│  │  │  │     ├─ WeaponUtil.java
+│  │  │  │     ├─ ResistanceUtil.java
+│  │  │  │     └─ StatUtil.java
 │  │  │  └─ gfx/
 │  │  │     ├─ DesktopLauncher.java        # LibGDX desktop entrypoint
 │  │  │     ├─ RecallDungeon.java          # LibGDX ApplicationAdapter (UI layer)
@@ -253,9 +273,11 @@ recall-dungeon/
 │  │        ├─ loot_pools/
 │  │        └─ monster_pools/
 │  └─ test/
-│     ├─ java                    # Unit and integration tests (JUnit)
-│     └─ resources
-│        └─ assets               # test-only fixtures
+│     ├─ java/com/bapppis/            # Unit and integration tests (JUnit)
+│     └─ resources/
+│        └─ assets/                   # test-only fixtures
+├─ scripts/                          # helper scripts (formatters, etc.)
+└─ target/                           # build output (Maven)
 ```
 
 ---
@@ -271,6 +293,7 @@ recall-dungeon/
 ## Setup & Installation
 
 1. **Clone the repository:**
+
    ```sh
    git clone https://github.com/Bapppis/recall-dungeon.git
    cd recall-dungeon
@@ -293,9 +316,11 @@ mvn exec:java -Dexec.mainClass="com.bapppis.core.gfx.DesktopLauncher"
 ```
 
 Tips:
+
 - Ensure the working directory is the project root so LibGDX sees `assets/`.
 - VS Code users can use `.vscode/launch.json` with `"cwd": "${workspaceFolder}"`.
- - On Windows PowerShell, when running a single JUnit test method via Maven use quotes, e.g. `mvn -Dtest="ClassName#methodName" test`.
+- On Windows PowerShell, when running a single JUnit test method via Maven use quotes, e.g. `mvn -Dtest="ClassName#methodName" test`.
+
 ---
 
 ## Running Tests
@@ -317,6 +342,7 @@ mvn test
 - If you have feedback, ideas, questions, general curiosity, feel free to message me!
 - Email: Heinonen.sasha@gmail.com
 - Discord: Bappis
+
 ---
 
 ## License
@@ -357,7 +383,7 @@ This repository contains two categories of non-code assets:
 
 - **Project assets (my own):** All other non-code assets created for this project (images, JSON data files, fonts, floor definitions, etc.) are licensed under **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY‑NC‑ND 4.0)** and are stored in `src/main/resources/assets/` and the top-level `assets/` folder.
 
-   Note: You have added two third-party sprite packs into `src/main/resources/assets/thirdparty/` and recorded them in `ATTRIBUTION.md`. Those sprite packs are not authored by me and are licensed by their respective authors (see `ATTRIBUTION.md` and the files under `assets/thirdparty/` for exact license text). When distributing this project, follow the license terms in those packs and include their license files and attribution as required.
+  Note: You have added two third-party sprite packs into `src/main/resources/assets/thirdparty/` and recorded them in `ATTRIBUTION.md`. Those sprite packs are not authored by me and are licensed by their respective authors (see `ATTRIBUTION.md` and the files under `assets/thirdparty/` for exact license text). When distributing this project, follow the license terms in those packs and include their license files and attribution as required.
 
 Key points about this mixed licensing:
 
@@ -366,10 +392,11 @@ Key points about this mixed licensing:
 - If you want to keep the CC BY‑NC‑ND assets in the repository for development but avoid accidental inclusion in commercial distributions, remove them from the distribution package (or from Git tracking) and rely on VisUI or replacement assets in released builds.
 
 Project-owned JSON data files
+
 - The JSON files that define creatures, floors, items and properties (the structured game data under `src/main/resources/assets/creatures/`, `floors/`, `items/`, and `properties/`) are authored by the project and licensed under **CC BY‑NC‑ND 4.0**. This means:
-   - You may share and redistribute them for non-commercial use.
-   - You must give attribution when required by the CC terms.
-   - You may not use them in commercial products or redistribute modified versions for commercial use.
+  - You may share and redistribute them for non-commercial use.
+  - You must give attribution when required by the CC terms.
+  - You may not use them in commercial products or redistribute modified versions for commercial use.
 
 Project data location
 

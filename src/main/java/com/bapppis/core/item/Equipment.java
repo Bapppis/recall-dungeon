@@ -198,11 +198,39 @@ public class Equipment implements Item {
         return stats;
     }
 
+    // Regens
+    private int hpRegen = 0;
+    private int staminaRegen = 0;
+    private int manaRegen = 0;
     // Optional defensive/offensive chance modifiers applied while equipped
     private float crit = 0f; // Crit chance between 0 and 100
     private float dodge = 0f; // Dodge chance between 0 and 100
     private float block = 0f; // Block chance between 0 and 100
     private float magicResist = 0f; // Magic resist between 0 and 100
+
+    public int getHpRegen() {
+        return hpRegen;
+    }
+
+    public void setHpRegen(int hpRegen) {
+        this.hpRegen = Math.max(0, hpRegen);
+    }
+
+    public int getStaminaRegen() {
+        return staminaRegen;
+    }
+
+    public void setStaminaRegen(int staminaRegen) {
+        this.staminaRegen = Math.max(0, staminaRegen);
+    }
+
+    public int getManaRegen() {
+        return manaRegen;
+    }
+
+    public void setManaRegen(int manaRegen) {
+        this.manaRegen = Math.max(0, manaRegen);
+    }
 
     public float getCrit() {
         return crit;

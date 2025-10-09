@@ -8,13 +8,12 @@
   "stats": {
     "DEXTERITY": -1
   },
-  "block": 0,
   "dodge": 0,
   "crit": 5,
-  "magicResist": -10,
-
+  "block": 0,
   "tooltip": [
     "THIS DOES NOT BELONG TO YOU"
   ],
-  "defense": -15
+  "defense": -15,
+  "magicResist": -10
 }

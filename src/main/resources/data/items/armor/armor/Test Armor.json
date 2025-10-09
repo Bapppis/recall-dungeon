@@ -8,11 +8,11 @@
   "stats": {
     "DEXTERITY": 0
   },
-  "block": -15,
   "dodge": 0,
   "crit": 5,
-  "magicResist": -10.5,
+  "block": -15,
   "tooltip": [
     "GIVE IT BACK."
-  ]
+  ],
+  "magicResist": -10.5
 }

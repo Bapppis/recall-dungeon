@@ -9,9 +9,9 @@
   "visionRange": 3,
   "stats": {
     "CONSTITUTION": 12,
-    "WISDOM": 11,
     "LUCK": 0,
-    "STRENGTH": 11
+    "STRENGTH": 11,
+    "WISDOM": 11
   },
   "resistances": {
     "DARKNESS": 80,
