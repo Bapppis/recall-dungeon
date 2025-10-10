@@ -9,6 +9,8 @@ import com.bapppis.core.util.Dice;
 import com.bapppis.core.util.AttackUtil;
 import com.bapppis.core.util.WeaponUtil;
 import com.bapppis.core.util.ResistanceUtil;
+import com.bapppis.core.util.LevelUtil;
+import com.bapppis.core.util.StatUtil;
 
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.Item;
@@ -62,6 +64,7 @@ public abstract class Creature {
     private float equipmentDodge = 0f;
     private float equipmentBlock = 0f;
     private float equipmentMagicResist = 0f;
+    private int statPoints = 0;
     // Cached per-stat bonuses (e.g. STR 14 -> +4). LUCK bonus equals the raw
     // luck value.
     private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
@@ -237,19 +240,28 @@ public abstract class Creature {
 
     public void addXp(int xp) {
         int currentXp = this.xp + xp;
-        if (this.level >= 30) {
-            this.level = 30;
+        if (this.level >= LevelUtil.getMaxLevel()) {
+            this.level = LevelUtil.getMaxLevel();
             this.xp = 0;
             return;
         }
-        if (currentXp >= ((this.level + 1) * 10)) {
-            this.level++;
-            this.updateMaxHp();
-            currentXp -= ((this.level) * 10);
-            addXp(currentXp); // add remaining XP recursively
+        if (currentXp >= LevelUtil.xpForNextLevel(this.level)) {
+            levelUp(currentXp);
             return;
         }
         this.xp = currentXp;
+    }
+
+    public void levelUp(int xp) {
+        xp -= LevelUtil.xpForNextLevel(this.level);
+        this.level++;
+
+        this.addStatPoint();
+        this.addStatPoint();
+        this.updateMaxHp();
+
+        this.xp = 0;
+        addXp(xp);
     }
 
     public Integer getEnemyXp() {
@@ -288,10 +300,6 @@ public abstract class Creature {
 
     public void setCurrentHp(int hp) {
         this.currentHp = Math.max(0, hp);
-    }
-
-    public void alterHp(int amount) {
-        this.currentHp = Math.max(0, this.currentHp + amount);
     }
 
     public int getHpLvlBonus() {
@@ -340,7 +348,8 @@ public abstract class Creature {
         this.currentMana = Math.max(0, Math.min(mana, this.maxMana));
     }
 
-    public void alterMana(int amount) {
+    // Delta-style modifier that clamps into [0, maxMana]
+    public void modifyMana(int amount) {
         this.currentMana = Math.max(0, Math.min(this.currentMana + amount, this.maxMana));
     }
 
@@ -370,7 +379,8 @@ public abstract class Creature {
         double ratio = this.maxStamina > 0 ? (double) currentStamina / this.maxStamina : 1.0;
         this.maxStamina = maxStamina;
         this.currentStamina = Math.max(0, (int) (this.maxStamina * ratio));
-        // Recompute baseStaminaRegen from maxStamina so regen follows a percentile of max
+        // Recompute baseStaminaRegen from maxStamina so regen follows a percentile of
+        // max
         this.baseStaminaRegen = Math.max(1, Math.floorDiv(this.maxStamina, 5));
         // Recompute derived stats (including staminaRegen) whenever max stamina changes
         recalcDerivedStats();
@@ -400,7 +410,8 @@ public abstract class Creature {
         recalcDerivedStats();
     }
 
-    public void alterStamina(int amount) {
+    // Delta-style modifier that clamps into [0, maxStamina]
+    public void modifyStamina(int amount) {
         this.currentStamina = Math.max(0, Math.min(this.currentStamina + amount, this.maxStamina));
         // Recompute derived values when stamina changes
         recalcDerivedStats();
@@ -514,20 +525,40 @@ public abstract class Creature {
     }
 
     // --- Per-stat convenience getters ---
-    public int getSTR() { return getStat(Stats.STRENGTH); }
-    public int getDEX() { return getStat(Stats.DEXTERITY); }
-    public int getCON() { return getStat(Stats.CONSTITUTION); }
-    public int getINT() { return getStat(Stats.INTELLIGENCE); }
-    public int getWIS() { return getStat(Stats.WISDOM); }
-    public int getCHA() { return getStat(Stats.CHARISMA); }
-    public int getLUCK() { return getStat(Stats.LUCK); }
+    public int getSTR() {
+        return getStat(Stats.STRENGTH);
+    }
+
+    public int getDEX() {
+        return getStat(Stats.DEXTERITY);
+    }
+
+    public int getCON() {
+        return getStat(Stats.CONSTITUTION);
+    }
+
+    public int getINT() {
+        return getStat(Stats.INTELLIGENCE);
+    }
+
+    public int getWIS() {
+        return getStat(Stats.WISDOM);
+    }
+
+    public int getCHA() {
+        return getStat(Stats.CHARISMA);
+    }
+
+    public int getLUCK() {
+        return getStat(Stats.LUCK);
+    }
 
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
         // Keep cached bonuses in sync whenever a stat changes
         recalcStatBonuses();
         if (stat == Stats.CONSTITUTION) {
-            alterHp();
+            recalcMaxHp();
             // Recompute max stamina when CON changes
             updateMaxStamina();
             // Recompute derived stats that depend on CON (e.g., magicResist)
@@ -552,7 +583,7 @@ public abstract class Creature {
         // Keep cached bonuses in sync whenever a stat changes
         recalcStatBonuses();
         if (stat == Stats.CONSTITUTION) {
-            alterHp();
+            recalcMaxHp();
             // Recompute max stamina when CON changes
             updateMaxStamina();
             // Recompute derived stats that depend on CON (e.g., magicResist)
@@ -578,26 +609,20 @@ public abstract class Creature {
      * derived values and cached bonuses remain consistent.
      */
     public void increaseStat(Stats stat) {
-        increaseStat(stat, 1);
+        StatUtil.increaseStat(this, stat, 1);
     }
 
     public void increaseStat(Stats stat, int amount) {
-        if (amount == 0)
-            return;
-        modifyStat(stat, Math.max(0, amount));
+        StatUtil.increaseStat(this, stat, amount);
     }
 
     public void decreaseStat(Stats stat) {
-        decreaseStat(stat, 1);
+        StatUtil.decreaseStat(this, stat, 1);
     }
 
     public void decreaseStat(Stats stat, int amount) {
-        if (amount == 0)
-            return;
-        modifyStat(stat, -Math.max(0, amount));
+        StatUtil.decreaseStat(this, stat, amount);
     }
-
-
 
     public int getResistance(Resistances resistance) {
         return resistances.getOrDefault(resistance, 0);
@@ -677,6 +702,31 @@ public abstract class Creature {
         return this.magicResist;
     }
 
+    private int getStatPoints() {
+        return statPoints;
+    }
+
+    public void setStatPoints(int statPoints, int amount) {
+        this.statPoints = statPoints + amount;
+    }
+
+    public void addStatPoint() {
+        this.statPoints += 1;
+    }
+
+    public void removeStatPoint() {
+        if (this.statPoints > 0) {
+            this.statPoints -= 1;
+        }
+    }
+
+    public void spendStatPoint(Stats stat) {
+        if (this.statPoints > 0) {
+            this.statPoints -= 1;
+            increaseStat(stat);
+        }
+    }
+
     public void recalcDerivedStats() {
         // Ensure cached stat bonuses are up-to-date before computing derived values
         recalcStatBonuses();
@@ -693,8 +743,6 @@ public abstract class Creature {
         float dodgeDelta = 2.5f * this.getStatBonus(Stats.DEXTERITY);
         this.dodge = this.baseDodge + dodgeDelta;
         float magicResistDelta = 5.0f * this.getStatBonus(Stats.WISDOM);
-        // Stamina regen = baseStaminaRegen + floor(2.5 * WIS_bonus). The floored
-        // portion has a minimum of 1.
         int wisBonus = this.getStatBonus(Stats.WISDOM);
         int extraStamina = (int) Math.floor(2.5 * wisBonus);
         extraStamina = Math.max(1, extraStamina);
@@ -893,7 +941,7 @@ public abstract class Creature {
             int resistValue = (physicalType == null ? 100 : target.getResistance(physicalType));
             physAfter = Math.floorDiv(totalPhysBeforeResist * resistValue, 100);
             if (physAfter > 0)
-                target.alterHp(-physAfter);
+                target.modifyHp(-physAfter);
             // Listener/report for physical stored later (combine with magic below if
             // needed)
         }
@@ -989,7 +1037,7 @@ public abstract class Creature {
             int resistValue = target.getResistance(magicType);
             magAfter = Math.floorDiv(magicBeforeResist * resistValue, 100);
             if (magAfter > 0)
-                target.alterHp(-magAfter);
+                target.modifyHp(-magAfter);
         }
 
         // Build and send report if listener active
@@ -1425,7 +1473,47 @@ public abstract class Creature {
         }
     }
 
-    public void alterHp() {
+    public void passTurn() {
+        // Regen health/mana/stamina
+        this.modifyHp(this.getHpRegen());
+        this.modifyMana(this.getManaRegen());
+        this.modifyStamina(this.getStaminaRegen());
+    }
+
+    /*
+     * public void passTurn() {
+     * // Apply buffs/debuffs effects
+     * for (Property buff : buffs.values()) {
+     * buff.onTurn(this);
+     * }
+     * for (Property debuff : debuffs.values()) {
+     * debuff.onTurn(this);
+     * }
+     * // Decrease duration and remove expired
+     * java.util.List<Integer> toRemove = new java.util.ArrayList<>();
+     * for (Property buff : buffs.values()) {
+     * if (buff.getDuration() > 0) {
+     * buff.setDuration(buff.getDuration() - 1);
+     * if (buff.getDuration() == 0) {
+     * toRemove.add(buff.getId());
+     * }
+     * }
+     * }
+     * for (Property debuff : debuffs.values()) {
+     * if (debuff.getDuration() > 0) {
+     * debuff.setDuration(debuff.getDuration() - 1);
+     * if (debuff.getDuration() == 0) {
+     * toRemove.add(debuff.getId());
+     * }
+     * }
+     * }
+     * for (int id : toRemove) {
+     * removeProperty(id);
+     * }
+     * }
+     */
+
+    public void recalcMaxHp() {
         // Preserve currentHp/maxHp ratio when maxHp changes
         double ratio = this.maxHp > 0 ? (double) currentHp / this.maxHp : 1.0;
         int conBonus = this.getStatBonus(Stats.CONSTITUTION);
@@ -1478,11 +1566,7 @@ public abstract class Creature {
 
         updateCrit();
 
-        int tempXp = this.getXp();
-        int lvl = this.getLevel();
-        for (int i = lvl; i > 0; i--) {
-            tempXp += i * 10;
-        }
+        int tempXp = this.getXp() + LevelUtil.totalXpForLevel(this.getLevel());
         this.setLevel(0);
         this.setXp(0);
         this.addXp(tempXp);
@@ -1491,13 +1575,18 @@ public abstract class Creature {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Creature: ").append(name == null ? "<unnamed>" : name).append(" (").append(id).append(")\n");
-        sb.append("Level: ").append(level).append(" ").append(type == null ? "" : type.name()).append(" ").append(creatureType == null ? "" : creatureType.name()).append("\n");
+        sb.append("Creature: ").append(name == null ? "<unnamed>" : name).append(" (Id:").append(id).append(")\n");
+        sb.append("Level: ").append(level).append(" (").append("XP: ").append(getXp()).append("/")
+                .append(LevelUtil.xpForNextLevel(level)).append(") ")
+                .append(creatureType == null ? "" : creatureType.name()).append("\n");
 
         // Health / resources
-        sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("  (HP regen: ").append(getHpRegen()).append("/s)").append("\n");
-        sb.append("Mana: ").append(currentMana).append("/").append(maxMana).append("  (Mana regen: ").append(getManaRegen()).append("/s)").append("\n");
-        sb.append("Stamina: ").append(currentStamina).append("/").append(maxStamina).append("  (Stamina regen: ").append(getStaminaRegen()).append("/s)").append("\n");
+        sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("  (HP regen: ").append(getHpRegen())
+                .append("/s)").append("\n");
+        sb.append("Mana: ").append(currentMana).append("/").append(maxMana).append("  (Mana regen: ")
+                .append(getManaRegen()).append("/s)").append("\n");
+        sb.append("Stamina: ").append(currentStamina).append("/").append(maxStamina).append("  (Stamina regen: ")
+                .append(getStaminaRegen()).append("/s)").append("\n");
 
         // Basic stats on one line for quick scanning
         sb.append("Stats: ")
@@ -1513,7 +1602,8 @@ public abstract class Creature {
         sb.append("Resists: ");
         boolean first = true;
         for (Entry<Resistances, Integer> entry : resistances.entrySet()) {
-            if (!first) sb.append(", ");
+            if (!first)
+                sb.append(", ");
             sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append("%");
             first = false;
         }

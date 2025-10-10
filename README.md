@@ -251,11 +251,12 @@ recall-dungeon/
 │  │  │  │  ├─ item/
 │  │  │  │  ├─ property/
 │  │  │  │  └─ util/
-│  │  │  │     ├─ Dice.java
 │  │  │  │     ├─ AttackUtil.java
-│  │  │  │     ├─ WeaponUtil.java
+│  │  │  │     ├─ Dice.java
+│  │  │  │     ├─ LevelUtil.java
 │  │  │  │     ├─ ResistanceUtil.java
-│  │  │  │     └─ StatUtil.java
+│  │  │  │     ├─ StatUtil.java
+│  │  │  │     └─ WeaponUtil.java
 │  │  │  └─ gfx/
 │  │  │     ├─ DesktopLauncher.java        # LibGDX desktop entrypoint
 │  │  │     ├─ RecallDungeon.java          # LibGDX ApplicationAdapter (UI layer)

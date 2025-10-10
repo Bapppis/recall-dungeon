@@ -11,6 +11,7 @@ import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.property.PropertyManager;
 import com.bapppis.core.util.StatUtil;
+import com.bapppis.core.util.LevelUtil;
 
 public class TestBigglesCreation {
     @Test
@@ -24,7 +25,7 @@ public class TestBigglesCreation {
         assert biggles != null;
 
         // Print for visual inspection (keeps the original intent)
-        System.out.println(biggles.toString());
+        /* System.out.println(biggles.toString()); */
     }
 
     // helpers (not used directly by the test, kept for convenience)

@@ -53,9 +53,11 @@ public final class StatUtil {
 
     public static void decreaseStat(Creature c, Creature.Stats stat, int amount) {
         if (c == null || amount <= 0) return;
-        // Ensure stat doesn't go below zero: compute current and clamp
+        // Ensure stat doesn't drop below 1: compute current and clamp
         int current = c.getStat(stat);
-        int toSubtract = Math.min(Math.max(0, amount), current);
+        int minAllowed = 1;
+        int maxSub = Math.max(0, current - minAllowed); // most we can subtract
+        int toSubtract = Math.min(Math.max(0, amount), maxSub);
         if (toSubtract == 0) return;
         c.modifyStat(stat, -toSubtract);
     }
