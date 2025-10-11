@@ -1,6 +1,6 @@
 {
-  "id": 3010,
+  "id": 1010,
   "name": "Silence Immunity",
   "description": "Immunity to the silence condition.",
-  "type": "IMMUNITY"
+  "type": "BUFF"
 }

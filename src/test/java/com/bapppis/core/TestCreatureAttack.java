@@ -10,15 +10,12 @@ import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.EquipmentSlot;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
-import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.AllLoaders;
 
 public class TestCreatureAttack {
-    // Test player creation logic here
     @Test
     public void testPlayerCreation() {
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
-        ItemLoader.loadItems();
+    AllLoaders.loadAll();
 
         // Make the player Biggles
         Player biggles = CreatureLoader.getPlayerById(5000);
@@ -38,9 +35,7 @@ public class TestCreatureAttack {
 
     @Test
     public void testDarkHoundVsTrainingDummyMultipleAttacks() {
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
-        ItemLoader.loadItems();
+    AllLoaders.loadAll();
 
         // Load Dark Hound (id 6000)
         com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(6000);
@@ -117,9 +112,7 @@ public class TestCreatureAttack {
 
     @Test
     public void testBigglesVsTrainingDummyMultipleAttacks() {
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
-        ItemLoader.loadItems();
+    AllLoaders.loadAll();
 
         Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;
@@ -205,9 +198,7 @@ public class TestCreatureAttack {
 
     @Test
     public void testBigglesUnarmedAttack() {
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
-        ItemLoader.loadItems();
+    AllLoaders.loadAll();
 
         Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;

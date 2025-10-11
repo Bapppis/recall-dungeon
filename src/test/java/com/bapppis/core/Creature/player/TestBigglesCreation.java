@@ -6,19 +6,19 @@ import org.junit.jupiter.api.Test;
 import org.lwjgl.system.linux.Stat;
 
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.ItemLoader;
-import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.property.PropertyLoader;
 import com.bapppis.core.util.StatUtil;
 import com.bapppis.core.util.LevelUtil;
 
 public class TestBigglesCreation {
     @Test
     public void testBigglesCreation() {
-        PropertyManager.loadProperties();
-        ItemLoader.loadItems();
-        CreatureLoader.loadCreatures();
+        // Use AllLoaders to initialize all asset loaders
+        AllLoaders.loadAll();
 
         Player biggles = CreatureLoader.getPlayerById(5000);
         // Sanity check — test will fail fast if loading didn't work

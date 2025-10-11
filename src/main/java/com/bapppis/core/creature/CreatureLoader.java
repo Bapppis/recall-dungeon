@@ -1,6 +1,6 @@
 package com.bapppis.core.creature;
 
-import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.property.PropertyLoader;
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
@@ -138,7 +138,7 @@ public class CreatureLoader {
                             List<Integer> propertyIds = getPropertyIdsFromJson(resource.getPath(), gson);
                             if (propertyIds != null) {
                                 for (Integer pid : propertyIds) {
-                                    Property prop = PropertyManager.getProperty(pid);
+                                    Property prop = PropertyLoader.getProperty(pid);
                                     if (prop != null) {
                                         creature.addProperty(prop);
                                     }

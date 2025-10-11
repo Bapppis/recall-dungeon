@@ -1,6 +1,6 @@
 {
-  "id": 3002,
+  "id": 1002,
   "name": "Blind Immunity",
   "description": "Immunity to the blind condition.",
-  "type": "IMMUNITY"
+  "type": "BUFF"
 }

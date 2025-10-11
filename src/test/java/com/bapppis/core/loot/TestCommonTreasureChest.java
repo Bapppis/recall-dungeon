@@ -7,13 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
-import com.bapppis.core.item.ItemLoader;
+import com.bapppis.core.AllLoaders;
 
 public class TestCommonTreasureChest {
 
     @Test
     public void testChestBehavior() {
-        ItemLoader.loadItems();
+        AllLoaders.loadAll();
         LootManager manager = new LootManager();
         manager.loadDefaults();
 
@@ -46,9 +46,12 @@ public class TestCommonTreasureChest {
                     }
                 }
             }
-            if (seenPotion) potions.incrementAndGet();
-            if (potionCount >= 2) twoPotions.incrementAndGet();
-            if (seenWeapon) weapons.incrementAndGet();
+            if (seenPotion)
+                potions.incrementAndGet();
+            if (potionCount >= 2)
+                twoPotions.incrementAndGet();
+            if (seenWeapon)
+                weapons.incrementAndGet();
         }
 
         System.out.println("Potions seen: " + potions.get() + " / " + iterations);

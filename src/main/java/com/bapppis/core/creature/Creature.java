@@ -70,7 +70,6 @@ public abstract class Creature {
     private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
     private HashMap<Integer, Property> buffs = new HashMap<>();
     private HashMap<Integer, Property> debuffs = new HashMap<>();
-    private HashMap<Integer, Property> immunities = new HashMap<>();
     private HashMap<Integer, Property> traits = new HashMap<>();
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
@@ -496,10 +495,6 @@ public abstract class Creature {
         return debuffs;
     }
 
-    public HashMap<Integer, Property> getImmunities() {
-        return immunities;
-    }
-
     public HashMap<Integer, Property> getTraits() {
         return traits;
     }
@@ -510,10 +505,6 @@ public abstract class Creature {
 
     public Property getDebuff(int id) {
         return debuffs.get(id);
-    }
-
-    public Property getImmunity(int id) {
-        return immunities.get(id);
     }
 
     public Property getTrait(int id) {
@@ -579,6 +570,7 @@ public abstract class Creature {
     }
 
     public void modifyStat(Stats stat, int amount) {
+        com.bapppis.core.util.DebugLog.debug("modifyStat called: " + stat + " amount=" + amount + " on " + this.getName());
         stats.put(stat, getStat(stat) + amount);
         // Keep cached bonuses in sync whenever a stat changes
         recalcStatBonuses();
@@ -1380,31 +1372,37 @@ public abstract class Creature {
 
     public void addProperty(Property property) {
         int id = property.getId();
-        if (id >= 1000 && id < 2000) {
+    // Debug: print active property ids and current STR/DEX before applying
+    com.bapppis.core.util.DebugLog.debug("addProperty called for id=" + id + " name='" + property.getName() + "' on " + this.getName());
+    com.bapppis.core.util.DebugLog.debug(" Active traits=" + this.traits.keySet() + " active buffs=" + this.buffs.keySet() + " active debuffs=" + this.debuffs.keySet());
+    com.bapppis.core.util.DebugLog.debug(" Stats before: STR=" + this.getSTR() + " DEX=" + this.getDEX());
+        // Only apply if not already present to avoid double-applying effects
+        if (id >= 1000 && id < 2333) {
+            if (buffs.containsKey(id)) return;
             buffs.put(id, property);
-        } else if (id >= 2000 && id < 3000) {
+        } else if (id >= 2333 && id < 3666) {
+            if (debuffs.containsKey(id)) return;
             debuffs.put(id, property);
-        } else if (id >= 3000 && id < 4000) {
-            immunities.put(id, property);
-        } else if (id >= 4000 && id < 5000) {
+        } else if (id >= 3666 && id < 5000) {
+            if (traits.containsKey(id)) return;
             traits.put(id, property);
         }
         // Apply property effects
         property.onApply(this);
+        // Debug: print stats after applying and the property lists
+        com.bapppis.core.util.DebugLog.debug(" Stats after: STR=" + this.getSTR() + " DEX=" + this.getDEX());
+        com.bapppis.core.util.DebugLog.debug(" Active traits=" + this.traits.keySet() + " active buffs=" + this.buffs.keySet() + " active debuffs=" + this.debuffs.keySet());
     }
 
     public void removeProperty(int id) {
         Property property = null;
-        if (id >= 1000 && id < 2000) {
+        if (id >= 1000 && id < 2333) {
             property = buffs.get(id);
             buffs.remove(id);
-        } else if (id >= 2000 && id < 3000) {
+        } else if (id >= 2333 && id < 3666) {
             property = debuffs.get(id);
             debuffs.remove(id);
-        } else if (id >= 3000 && id < 4000) {
-            property = immunities.get(id);
-            immunities.remove(id);
-        } else if (id >= 4000 && id < 5000) {
+        } else if (id >= 3666 && id < 5000) {
             property = traits.get(id);
             traits.remove(id);
         }
@@ -1423,12 +1421,6 @@ public abstract class Creature {
         for (Property debuff : debuffs.values()) {
             System.out.println(" - " + debuff);
         }
-
-        System.out.println("Immunities:");
-        for (Property immunity : immunities.values()) {
-            System.out.println(" - " + immunity);
-        }
-
         System.out.println("Traits:");
         for (Property trait : traits.values()) {
             System.out.println(" - " + trait);
@@ -1444,10 +1436,6 @@ public abstract class Creature {
         sb.append("Debuffs:\n");
         for (Property debuff : debuffs.values()) {
             sb.append(" - ").append(debuff).append("\n");
-        }
-        sb.append("Immunities:\n");
-        for (Property immunity : immunities.values()) {
-            sb.append(" - ").append(immunity).append("\n");
         }
         sb.append("Traits:\n");
         for (Property trait : traits.values()) {
@@ -1627,7 +1615,6 @@ public abstract class Creature {
         sb.append("Properties: ")
                 .append("Buffs=").append(buffs.size()).append(" ")
                 .append("Debuffs=").append(debuffs.size()).append(" ")
-                .append("Immunities=").append(immunities.size()).append(" ")
                 .append("Traits=").append(traits.size()).append("\n");
 
         sb.append("Inventory counts: ")

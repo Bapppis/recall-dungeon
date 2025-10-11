@@ -11,6 +11,10 @@ public class MapParserTestUtil
  {
     public void copyStreamToFile(InputStream inputStream, String outputFilePath) {
         System.out.println("Copying map symbols to output file...");
+        if (inputStream == null) {
+            System.err.println("Input stream was null; resource not found. Aborting copy.");
+            return;
+        }
         try (
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))

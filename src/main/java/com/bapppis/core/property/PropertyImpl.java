@@ -29,6 +29,18 @@ public class PropertyImpl implements Property {
     public Map<com.bapppis.core.creature.Creature.Resistances, Integer> getResistanceModifiers() { return resistanceModifiers; }
     public Integer getVisionRangeModifier() { return visionRange; }
 
+    // Copy constructor to allow creating specific subclass instances
+    public PropertyImpl(PropertyImpl other) {
+        if (other == null) return;
+        this.id = other.id;
+        this.name = other.name;
+        this.type = other.type;
+        this.description = other.description;
+        this.statModifiers = other.statModifiers;
+        this.resistanceModifiers = other.resistanceModifiers;
+        this.visionRange = other.visionRange;
+    }
+
     @Override
     public void onApply(Creature creature) {
         if (statModifiers != null) {

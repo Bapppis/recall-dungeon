@@ -13,9 +13,7 @@ public class Main {
         System.out.println("Welcome to the world of Aurum!");
         System.out.println("---------------------------------------------------------");
 
-        com.bapppis.core.property.PropertyManager.loadProperties();
-        com.bapppis.core.creature.CreatureLoader.loadCreatures();
-        com.bapppis.core.item.ItemLoader.loadItems();
+    com.bapppis.core.AllLoaders.loadAll();
         // Testing combat
         Player biggles = (Player) CreatureLoader.getCreatureById(5000);
         // Give Falchion of Doom to Biggles and equip it

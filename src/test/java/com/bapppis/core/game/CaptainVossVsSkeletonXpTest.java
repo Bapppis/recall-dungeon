@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.player.Player;
@@ -13,7 +14,7 @@ public class CaptainVossVsSkeletonXpTest {
     @Test
     public void testXpTransferOnKill() {
         // Load data
-        CreatureLoader.loadCreatures();
+        AllLoaders.loadAll();
 
         // Get Captain Voss (player) and Skeleton Swordsman (enemy)
         Player voss = CreatureLoader.getPlayerById(5001);

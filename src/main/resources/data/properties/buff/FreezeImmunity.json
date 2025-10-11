@@ -1,6 +1,6 @@
 {
-  "id": 3007,
+  "id": 1007,
   "name": "Freeze Immunity",
   "description": "Immunity to the freeze condition.",
-  "type": "IMMUNITY"
+  "type": "BUFF"
 }

@@ -1,6 +1,6 @@
 {
-  "id": 3001,
+  "id": 1001,
   "name": "Bleed Immunity",
-  "type": "IMMUNITY",
+  "type": "BUFF",
   "description": "Immunity to the bleed condition."
 }

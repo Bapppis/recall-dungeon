@@ -4,17 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.player.Player;
-import com.bapppis.core.property.PropertyManager;
 
 public class ItemTest {
     // Test item functionality here
     @Test
     public void testItemFunctionality() {
-        PropertyManager.loadProperties();
-        ItemLoader.loadItems();
-        CreatureLoader.loadCreatures();
+        AllLoaders.loadAll();
         Player biggles = CreatureLoader.getPlayerById(5000);
         System.out.println("Stats before equipping items:");
         float critBefore = biggles.getCrit();
@@ -38,11 +36,13 @@ public class ItemTest {
         System.out.println("Dodge: " + dodgeAfterEquip);
         System.out.println("Block: " + blockAfterEquip);
         System.out.println("Magic Resist: " + magicResistAfterEquip);
-        //System.out.println("Biggles Dex " + biggles.getStat(com.bapppis.core.creature.Creature.Stats.DEXTERITY));
+        // System.out.println("Biggles Dex " +
+        // biggles.getStat(com.bapppis.core.creature.Creature.Stats.DEXTERITY));
         // Sanity: values should change after equipping equipment
         // (equipment in fixtures increases crit and dodge; block may go negative)
-        //org.junit.jupiter.api.Assertions.assertNotEquals(critBefore, critAfterEquip);
-        //org.junit.jupiter.api.Assertions.assertNotEquals(dodgeBefore, dodgeAfterEquip);
+        // org.junit.jupiter.api.Assertions.assertNotEquals(critBefore, critAfterEquip);
+        // org.junit.jupiter.api.Assertions.assertNotEquals(dodgeBefore,
+        // dodgeAfterEquip);
         biggles.unequipItem(EquipmentSlot.ARMOR); // Unequip Test Armor
         biggles.unequipItem(EquipmentSlot.HELMET); // Unequip Test Helmet
         System.out.println("Stats after Unequipping items:");
@@ -55,8 +55,10 @@ public class ItemTest {
         System.out.println("Block: " + blockAfterUnequip);
         System.out.println("Magic Resist: " + magicResistAfterUnequip);
         // After unequip, raw values should be restored to their before values
-        /* assertEquals(critBefore, critAfterUnequip, 0.0001f);
-        assertEquals(dodgeBefore, dodgeAfterUnequip, 0.0001f);
-        assertEquals(blockBefore, blockAfterUnequip, 0.0001f); */
+        /*
+         * assertEquals(critBefore, critAfterUnequip, 0.0001f);
+         * assertEquals(dodgeBefore, dodgeAfterUnequip, 0.0001f);
+         * assertEquals(blockBefore, blockAfterUnequip, 0.0001f);
+         */
     }
 }

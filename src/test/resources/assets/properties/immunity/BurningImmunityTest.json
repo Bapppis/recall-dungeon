@@ -1,6 +1,6 @@
 {
-  "id": 3003,
+  "id": 1003,
   "name": "Burning Immunity",
-  "type": "IMMUNITY",
+  "type": "BUFF",
   "description": "Immunity to the burning condition."
 }

@@ -12,29 +12,26 @@ Notes
 - [none indexed yet]
 
 ## Properties (1000-4999)
-### Buff (1000–1999)
-- [none indexed yet]
+### Buff (1000-2332)
+- 1000 — Afraid Immunity — data/properties/buff/AfraidImmunity.json
+- 1001 — Bleed Immunity — data/properties/buff/BleedImmunity.json
+- 1002 — Blind Immunity — data/properties/buff/BlindImmunity.json
+- 1003 — Burning Immunity — data/properties/buff/BurningImmunity.json
+- 1004 — Concussion Immunity — data/properties/buff/ConcussionImmunity.json
+- 1005 — Corrosion Immunity — data/properties/buff/CorrosionImmunity.json
+- 1006 — Exposed Immunity — data/properties/buff/ExposedImmunity.json
+- 1007 — Freeze Immunity — data/properties/buff/FreezeImmunity.json
+- 1008 — InstaKill Immunity — data/properties/buff/InstaKillImmunity.json
+- 1009 — Jolt Immunity — data/properties/buff/JoltImmunity.json
+- 1010 — Silence Immunity — data/properties/buff/SilenceImmunity.json
 
-### Debuff (2000–2999)
-- 2000 — Afraid — data/properties/debuff/Afraid.json
+### Debuff (2333-3665)
+- 2333 — Afraid — data/properties/debuff/Afraid.json
 
-### Immunity (3000–3999)
-- 3000 — Afraid Immunity — data/properties/immunity/AfraidImmunity.json
-- 3001 — Bleed Immunity — data/properties/immunity/BleedImmunity.json
-- 3002 — Blind Immunity — data/properties/immunity/BlindImmunity.json
-- 3003 — Burning Immunity — data/properties/immunity/BurningImmunity.json
-- 3004 — Concussion Immunity — data/properties/immunity/ConcussionImmunity.json
-- 3005 — Corrosion Immunity — data/properties/immunity/CorrosionImmunity.json
-- 3006 — Exposed Immunity — data/properties/immunity/ExposedImmunity.json
-- 3007 — Freeze Immunity — data/properties/immunity/FreezeImmunity.json
-- 3008 — InstaKill Immunity — data/properties/immunity/InstaKillImmunity.json
-- 3009 — Jolt Immunity — data/properties/immunity/JoltImmunity.json
-- 3010 — Silence Immunity — data/properties/immunity/SilenceImmunity.json
-
-### Trait (4000–4999)
-- 4000 — Coward — data/properties/trait/Coward.json
-- 4001 — Human Adaptability — data/properties/trait/HumanAdaptability.json
-- 4002 — Darksight — data/properties/trait/Darksight.json
+### Trait (3666–4999)
+- 3666 — Coward — data/properties/trait/Coward.json
+- 3667 — Human Adaptability — data/properties/trait/HumanAdaptability.json
+- 3668 — Darksight — data/properties/trait/Darksight.json
 
 ## Creatures (5000-6999)
 - 6601 — Skeleton Swordsman — data/creatures/undead/Skeleton Swordsman.json

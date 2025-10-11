@@ -20,7 +20,7 @@ import com.kotcrab.vis.ui.widget.VisList;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.player.Player;
-import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.AllLoaders;
 
 public class RecallDungeon extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -48,10 +48,8 @@ public class RecallDungeon extends ApplicationAdapter {
         // use VisUI runtime skin where needed via VisUI.getSkin()
 
         Gdx.input.setInputProcessor(stage);
-        // Load properties and creatures once at startup so selection UI has data
-        ItemLoader.loadItems();
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
+        // Load all assets once at startup so selection UI has data
+        AllLoaders.loadAll();
 
         showMainMenu();
     }

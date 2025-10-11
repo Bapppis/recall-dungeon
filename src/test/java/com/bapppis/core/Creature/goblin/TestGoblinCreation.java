@@ -6,14 +6,15 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.property.PropertyLoader;
+import com.bapppis.core.AllLoaders;
+
 
 public class TestGoblinCreation {
     @Test
     public void testGoblinCreationAndProperties() {
-        // Load properties and creatures
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
+        // Load all assets (properties, items, loot pools, creatures)
+    AllLoaders.loadAll();
 
         // Fetch goblin by name
         Creature goblin = CreatureLoader.getCreature("Billy the Goblin");
@@ -31,9 +32,9 @@ public class TestGoblinCreation {
 
         System.out.println(goblin.toString());
 
-        // Remove Coward (4000) and add Afraid (2000, no stat modifiers)
-        goblin.removeProperty(4000);
-        goblin.addProperty(PropertyManager.getProperty(2000));
+    // Remove Coward (3666) and add Afraid (2333, no stat modifiers)
+    goblin.removeProperty(3666);
+         goblin.addProperty(PropertyLoader.getProperty(2333));
 
         // Back to base stats
         assertEquals(10, goblin.getStat(Creature.Stats.STRENGTH));

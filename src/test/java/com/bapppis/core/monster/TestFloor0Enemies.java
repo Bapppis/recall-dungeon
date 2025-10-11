@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import com.bapppis.core.AllLoaders;
 
-import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.AllLoaders;
 import com.bapppis.core.loot.LootManager;
-import com.bapppis.core.loot.LootManager.Spawn;
 
 public class TestFloor0Enemies {
 
     @Test
     public void testFloor0Distribution() {
         // Ensure creatures are loaded so ids/names resolve if needed
-        CreatureLoader.loadCreatures();
+        AllLoaders.loadAll();
 
         LootManager manager = new LootManager();
         manager.loadDefaults();
@@ -25,7 +25,7 @@ public class TestFloor0Enemies {
         AtomicInteger spearman = new AtomicInteger(0);
         AtomicInteger swordsman = new AtomicInteger(0);
         AtomicInteger hound = new AtomicInteger(0);
-            AtomicInteger goblin = new AtomicInteger(0);
+        AtomicInteger goblin = new AtomicInteger(0);
 
         for (int i = 0; i < iterations; i++) {
             List<LootManager.Spawn> spawns = manager.samplePool("11000");
@@ -33,10 +33,14 @@ public class TestFloor0Enemies {
                 // try to parse numeric id
                 try {
                     int mid = Integer.parseInt(s.id);
-                    if (mid == 6600) spearman.incrementAndGet();
-                    else if (mid == 6601) swordsman.incrementAndGet();
-                    else if (mid == 6400) goblin.incrementAndGet();
-                    else if (mid == 6000) hound.incrementAndGet();
+                    if (mid == 6600)
+                        spearman.incrementAndGet();
+                    else if (mid == 6601)
+                        swordsman.incrementAndGet();
+                    else if (mid == 6400)
+                        goblin.incrementAndGet();
+                    else if (mid == 6000)
+                        hound.incrementAndGet();
                 } catch (Exception ex) {
                     // ignore non-numeric ids
                 }
@@ -51,7 +55,8 @@ public class TestFloor0Enemies {
         int skeletons = spearman.get() + swordsman.get();
         int total = skeletons + goblin.get() + hound.get();
         System.out.println("Total observed: " + total);
-        // Expected rough ratios: skeletons ~ 20/36 (~55%), goblin ~5/36 (~14%), hound ~1/36 (~3%)
+        // Expected rough ratios: skeletons ~ 20/36 (~55%), goblin ~5/36 (~14%), hound
+        // ~1/36 (~3%)
         assertTrue(skeletons >= iterations * 0.45, "Skeletons should be the majority");
         assertTrue(goblin.get() >= iterations * 0.10, "Goblin should appear around ~14% of the time");
         assertTrue(hound.get() >= iterations * 0.02, "Dark Hound should appear occasionally (~3%)");

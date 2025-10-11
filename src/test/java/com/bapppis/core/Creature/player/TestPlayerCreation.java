@@ -7,14 +7,13 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
-import com.bapppis.core.property.PropertyManager;
+import com.bapppis.core.AllLoaders;
 
 public class TestPlayerCreation {
     // Test player creation logic here
     @Test
     public void testPlayerCreation() {
-        PropertyManager.loadProperties();
-        CreatureLoader.loadCreatures();
+        AllLoaders.loadAll();
         // Make the player Voss
     Player captainVoss = CreatureLoader.getPlayerById(5001);
         assert captainVoss != null;
@@ -23,7 +22,7 @@ public class TestPlayerCreation {
         System.out.println(captainVoss.toString());
 
         /* captainVoss.removeProperty(4001);
-        captainVoss.addProperty(PropertyManager.getProperty(2000)); // Add a debuff
+    captainVoss.addProperty(PropertyLoader.getProperty(2333)); // Add a debuff
         assertCaptainVossDebuffed(captainVoss);
         System.out.println(captainVoss.toString()); */
 

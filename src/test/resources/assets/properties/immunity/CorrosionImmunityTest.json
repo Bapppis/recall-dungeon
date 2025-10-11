@@ -1,6 +1,6 @@
 {
-  "id": 3005,
+  "id": 1005,
   "name": "Corrosion Immunity",
-  "type": "IMMUNITY",
+  "type": "BUFF",
   "description": "Immunity to the corrosion condition."
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.bapppis.core.AllLoaders;
 import com.bapppis.core.item.ItemLoader;
 
 public class TestCommonWeaponsPool {
@@ -15,7 +16,7 @@ public class TestCommonWeaponsPool {
     @Test
     public void testCommonWeaponsPoolGeneratesExpectedItems() {
         // Load items and pools
-        ItemLoader.loadItems();
+        AllLoaders.loadAll();
         LootManager manager = new LootManager();
         manager.loadDefaults();
 
@@ -23,7 +24,7 @@ public class TestCommonWeaponsPool {
         Set<String> allowed = new HashSet<>();
         allowed.add("9802"); // Parrying Dagger
         allowed.add("9801"); // Rusty Iron Sword
-    allowed.add("9600"); // Old Bow
+        allowed.add("9600"); // Old Bow
         allowed.add("Parrying Dagger");
         allowed.add("Rusty Iron Sword");
         allowed.add("Old Bow");

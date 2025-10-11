@@ -1,6 +1,6 @@
 {
-  "id": 3000,
+  "id": 1000,
   "name": "Afraid Immunity",
-  "type": "IMMUNITY",
+  "type": "BUFF",
   "description": "Immunity to the afraid condition."
 }
