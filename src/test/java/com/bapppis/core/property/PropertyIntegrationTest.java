@@ -36,13 +36,11 @@ public class PropertyIntegrationTest {
         assertNotNull(coward, "Coward property (3666) must be present in loader");
         // Debug: ensure property has expected id/type/stat modifiers
         System.out.println("Coward object: id=" + coward.getId() + ", type=" + coward.getType() + ", name=" + coward.getName());
-        if (coward instanceof com.bapppis.core.property.PropertyImpl) {
-            com.bapppis.core.property.PropertyImpl pi = (com.bapppis.core.property.PropertyImpl) coward;
-            System.out.println("Coward statModifiers: " + pi.getStatModifiers());
-            assertNotNull(pi.getStatModifiers(), "Coward.statModifiers must not be null");
-            assertTrue(pi.getStatModifiers().containsKey(com.bapppis.core.creature.Creature.Stats.STRENGTH), "Coward must modify STRENGTH");
-            assertTrue(pi.getStatModifiers().containsKey(com.bapppis.core.creature.Creature.Stats.DEXTERITY), "Coward must modify DEXTERITY");
-        }
+        // Use the Property API to inspect the stat modifiers (no concrete type assumptions)
+        System.out.println("Coward statModifiers: " + coward.getStatModifiers());
+        assertNotNull(coward.getStatModifiers(), "Coward.statModifiers must not be null");
+        assertTrue(coward.getStatModifiers().containsKey(com.bapppis.core.creature.Creature.Stats.STRENGTH), "Coward must modify STRENGTH");
+        assertTrue(coward.getStatModifiers().containsKey(com.bapppis.core.creature.Creature.Stats.DEXTERITY), "Coward must modify DEXTERITY");
 
         biggles.addProperty(coward);
         System.out.println("After adding Coward:\n" + biggles);

@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.io.InputStreamReader;
+ 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
-import java.io.Reader;
+ 
+import com.google.gson.reflect.TypeToken;
 
 public class PropertyLoader {
     private static final HashMap<Integer, Property> propertyMap = new HashMap<>();
@@ -21,12 +22,27 @@ public class PropertyLoader {
         .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
-                    try (Reader reader = new InputStreamReader(resource.open())) {
-                        PropertyImpl property = gson.fromJson(reader, PropertyImpl.class);
-                        if (property != null) {
-                            Property propInstance = null;
-                            // Prefer explicit type from JSON
-                            PropertyType t = property.getType();
+                    try {
+                        // Read the resource fully into a String so we can parse it multiple times
+                        String json;
+                        try (java.io.InputStream is = resource.open();
+                             java.util.Scanner s = new java.util.Scanner(is, java.nio.charset.StandardCharsets.UTF_8.name())) {
+                            s.useDelimiter("\\A");
+                            json = s.hasNext() ? s.next() : "";
+                        }
+
+                        // Read JSON into a generic map first to inspect the `type` field without binding
+                        java.util.Map<String, Object> temp = gson.fromJson(json, new TypeToken<java.util.Map<String, Object>>(){}.getType());
+                        if (temp != null) {
+                            PropertyType t = null;
+                            if (temp.containsKey("type") && temp.get("type") != null) {
+                                try {
+                                    t = PropertyType.valueOf(temp.get("type").toString());
+                                } catch (IllegalArgumentException ignored) {
+                                    t = null;
+                                }
+                            }
+
                             if (t == null) {
                                 // Fallback: infer from the resource path (folder names)
                                 String path = resource.getPath();
@@ -39,15 +55,21 @@ public class PropertyLoader {
                                 }
                             }
 
+                            Property propInstance = null;
+                            // Parse the JSON string into the appropriate concrete class now that we know the type
                             if (t == PropertyType.BUFF) {
-                                propInstance = new BuffProperty(property);
+                                BuffProperty bp = gson.fromJson(json, BuffProperty.class);
+                                propInstance = (bp != null) ? bp : new BuffProperty();
                             } else if (t == PropertyType.DEBUFF) {
-                                propInstance = new DebuffProperty(property);
+                                DebuffProperty dp = gson.fromJson(json, DebuffProperty.class);
+                                propInstance = (dp != null) ? dp : new DebuffProperty();
                             } else if (t == PropertyType.TRAIT) {
-                                propInstance = new TraitProperty(property);
+                                TraitProperty tp = gson.fromJson(json, TraitProperty.class);
+                                propInstance = (tp != null) ? tp : new TraitProperty();
                             } else {
-                                // Fallback to raw impl if we can't classify
-                                propInstance = property;
+                                // If we couldn't classify, fall back to trait as a safe default
+                                TraitProperty tp = gson.fromJson(json, TraitProperty.class);
+                                propInstance = (tp != null) ? tp : new TraitProperty();
                             }
 
                             propertyMap.put(propInstance.getId(), propInstance);

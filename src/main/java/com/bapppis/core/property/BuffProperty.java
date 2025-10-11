@@ -2,8 +2,11 @@ package com.bapppis.core.property;
 
 import com.bapppis.core.creature.Creature;
 
-public class BuffProperty extends PropertyImpl {
-    public BuffProperty(PropertyImpl base) { super(base); }
+public class BuffProperty extends Property {
+    // No-arg constructor for Gson
+    public BuffProperty() { super(); }
+
+    public BuffProperty(Property base) { super(base); }
 
     @Override
     public void onApply(Creature creature) {

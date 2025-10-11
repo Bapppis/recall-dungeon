@@ -2,8 +2,11 @@ package com.bapppis.core.property;
 
 import com.bapppis.core.creature.Creature;
 
-public class TraitProperty extends PropertyImpl {
-    public TraitProperty(PropertyImpl base) { super(base); }
+public class TraitProperty extends Property {
+    // No-arg constructor for Gson
+    public TraitProperty() { super(); }
+
+    public TraitProperty(Property base) { super(base); }
 
     @Override
     public void onApply(Creature creature) {
