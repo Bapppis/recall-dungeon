@@ -8,14 +8,14 @@
   "enemyXp": 5,
   "visionRange": 3,
   "stats": {
-    "CONSTITUTION": 12,
-    "LUCK": 0,
     "STRENGTH": 11,
-    "WISDOM": 11
+    "CONSTITUTION": 12,
+    "WISDOM": 11,
+    "LUCK": 0
   },
   "resistances": {
-    "DARKNESS": 80,
     "LIGHT": 120,
+    "DARKNESS": 80,
     "SLASHING": 90
   },
   "baseBlock": 0,

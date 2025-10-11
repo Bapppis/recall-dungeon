@@ -8,9 +8,9 @@
   "enemyXp": 4,
   "visionRange": 1,
   "stats": {
-    "CONSTITUTION": 12,
+    "STRENGTH": 11,
     "DEXTERITY": 11,
-    "STRENGTH": 11
+    "CONSTITUTION": 12
   },
   "resistances": {
     "PIERCING": 120,

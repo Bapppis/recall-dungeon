@@ -43,6 +43,7 @@ public class PropertyImpl implements Property {
 
     @Override
     public void onApply(Creature creature) {
+
         if (statModifiers != null) {
             for (Map.Entry<Creature.Stats, Integer> entry : statModifiers.entrySet()) {
                 creature.modifyStat(entry.getKey(), entry.getValue());

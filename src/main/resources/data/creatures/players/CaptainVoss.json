@@ -8,13 +8,13 @@
   "xp": 0,
   "visionRange": 2,
   "stats": {
-    "CHARISMA": 10,
-    "CONSTITUTION": 12,
-    "DEXTERITY": 10,
-    "INTELLIGENCE": 10,
-    "LUCK": 1,
     "STRENGTH": 13,
-    "WISDOM": 10
+    "DEXTERITY": 10,
+    "CONSTITUTION": 12,
+    "INTELLIGENCE": 10,
+    "WISDOM": 10,
+    "CHARISMA": 10,
+    "LUCK": 1
   },
   "baseBlock": 15,
   "baseCrit": 0,

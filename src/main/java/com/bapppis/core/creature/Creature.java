@@ -570,7 +570,7 @@ public abstract class Creature {
     }
 
     public void modifyStat(Stats stat, int amount) {
-        com.bapppis.core.util.DebugLog.debug("modifyStat called: " + stat + " amount=" + amount + " on " + this.getName());
+        System.out.println("modifyStat called: " + stat + " amount=" + amount + " on " + this.getName());
         stats.put(stat, getStat(stat) + amount);
         // Keep cached bonuses in sync whenever a stat changes
         recalcStatBonuses();
@@ -1372,10 +1372,6 @@ public abstract class Creature {
 
     public void addProperty(Property property) {
         int id = property.getId();
-    // Debug: print active property ids and current STR/DEX before applying
-    com.bapppis.core.util.DebugLog.debug("addProperty called for id=" + id + " name='" + property.getName() + "' on " + this.getName());
-    com.bapppis.core.util.DebugLog.debug(" Active traits=" + this.traits.keySet() + " active buffs=" + this.buffs.keySet() + " active debuffs=" + this.debuffs.keySet());
-    com.bapppis.core.util.DebugLog.debug(" Stats before: STR=" + this.getSTR() + " DEX=" + this.getDEX());
         // Only apply if not already present to avoid double-applying effects
         if (id >= 1000 && id < 2333) {
             if (buffs.containsKey(id)) return;
@@ -1389,9 +1385,6 @@ public abstract class Creature {
         }
         // Apply property effects
         property.onApply(this);
-        // Debug: print stats after applying and the property lists
-        com.bapppis.core.util.DebugLog.debug(" Stats after: STR=" + this.getSTR() + " DEX=" + this.getDEX());
-        com.bapppis.core.util.DebugLog.debug(" Active traits=" + this.traits.keySet() + " active buffs=" + this.buffs.keySet() + " active debuffs=" + this.debuffs.keySet());
     }
 
     public void removeProperty(int id) {

@@ -87,6 +87,32 @@ CANON_CREATURE_ORDER: List[str] = [
     "sprite"
 ]
 
+# Canonical ordering for creature stats and resistances
+CANON_CREATURE_STATS: List[str] = [
+    "STRENGTH",
+    "DEXTERITY",
+    "CONSTITUTION",
+    "INTELLIGENCE",
+    "WISDOM",
+    "CHARISMA",
+    "LUCK",
+]
+
+CANON_CREATURE_RESISTS: List[str] = [
+    "FIRE",
+    "WATER",
+    "WIND",
+    "ICE",
+    "NATURE",
+    "LIGHTNING",
+    "LIGHT",
+    "DARKNESS",
+    "BLUDGEONING",
+    "PIERCING",
+    "SLASHING",
+    "TRUE",
+]
+
 
 def order_keys(obj: Dict[str, Any], order: List[str]) -> Dict[str, Any]:
     """Return new dict with keys inserted following 'order'; remaining appended alphabetically."""
@@ -129,10 +155,31 @@ def transform(obj: Any, kind: str = None) -> Any:
             else:
                 obj[k] = transform(v, kind)
 
-        # Additionally sort nested simple dicts like stats/resistances alphabetically for stability.
-        for simple_key in ("stats", "resistances"):
-            if simple_key in obj and isinstance(obj[simple_key], dict):
-                obj[simple_key] = {k: obj[simple_key][k] for k in sorted(obj[simple_key].keys())}
+        # Additionally sort nested simple dicts like stats/resistances.
+        # For creature files, use canonical ordering; otherwise fall back to alphabetical.
+        if kind == 'creature':
+            if 'stats' in obj and isinstance(obj['stats'], dict):
+                ordered_stats = {}
+                for k in CANON_CREATURE_STATS:
+                    if k in obj['stats']:
+                        ordered_stats[k] = obj['stats'][k]
+                # Any remaining keys appended alphabetically
+                for k in sorted(k for k in obj['stats'].keys() if k not in ordered_stats):
+                    ordered_stats[k] = obj['stats'][k]
+                obj['stats'] = ordered_stats
+
+            if 'resistances' in obj and isinstance(obj['resistances'], dict):
+                ordered_res = {}
+                for k in CANON_CREATURE_RESISTS:
+                    if k in obj['resistances']:
+                        ordered_res[k] = obj['resistances'][k]
+                for k in sorted(k for k in obj['resistances'].keys() if k not in ordered_res):
+                    ordered_res[k] = obj['resistances'][k]
+                obj['resistances'] = ordered_res
+        else:
+            for simple_key in ("stats", "resistances"):
+                if simple_key in obj and isinstance(obj[simple_key], dict):
+                    obj[simple_key] = {k: obj[simple_key][k] for k in sorted(obj[simple_key].keys())}
 
         return obj
     elif isinstance(obj, list):

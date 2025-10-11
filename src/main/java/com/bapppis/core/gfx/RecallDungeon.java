@@ -49,7 +49,11 @@ public class RecallDungeon extends ApplicationAdapter {
 
         Gdx.input.setInputProcessor(stage);
         // Load all assets once at startup so selection UI has data
-        AllLoaders.loadAll();
+        try {
+            AllLoaders.loadAll();
+        } catch (Exception e) {
+            Gdx.app.error("RecallDungeon", "Error loading assets at startup", e);
+        }
 
         showMainMenu();
     }
@@ -87,9 +91,12 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Build a list of player names from loaded players
-        java.util.List<Player> players = CreatureLoader.getAllPlayers();
-        String[] names = players.stream().map(Player::getName).toArray(String[]::new);
+    // Build a list of player names from loaded players
+    java.util.List<Player> tmpPlayers = CreatureLoader.getAllPlayers();
+    final java.util.List<Player> players = (tmpPlayers == null)
+        ? java.util.Collections.emptyList()
+        : tmpPlayers;
+        final String[] names = players.stream().map(p -> p == null ? "<unknown>" : p.getName()).toArray(String[]::new);
 
         VisList<String> list = new VisList<>();
         list.setItems(names);
@@ -104,6 +111,8 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (idx < 0 || idx >= players.size())
                     return;
                 Player selected = players.get(idx);
+                // Ensure global game state is set immediately so UI reflects selection
+                com.bapppis.core.game.Game.selectPlayer(selected);
                 Gdx.app.log("RecallDungeon",
                         "Selected player index=" + idx + " id=" + selected.getId() + " name=" + selected.getName());
                 // Initialize game and start its internal command loop (non-blocking)
@@ -890,10 +899,9 @@ public class RecallDungeon extends ApplicationAdapter {
             Gdx.app.error("RecallDungeon", "Error shutting down game", e);
         }
 
-        batch.dispose();
-        font.dispose();
-        if (mapFont != null)
-            mapFont.dispose();
+        if (batch != null) try { batch.dispose(); } catch (Exception ignored) {}
+        if (font != null) try { font.dispose(); } catch (Exception ignored) {}
+        if (mapFont != null) try { mapFont.dispose(); } catch (Exception ignored) {}
         // dispose atlas or any textures loaded when creating MapActor
         try {
             if (mapActor != null) {
@@ -920,7 +928,7 @@ public class RecallDungeon extends ApplicationAdapter {
         } catch (Exception e) {
             // ignore - best effort dispose
         }
-        stage.dispose();
+    if (stage != null) try { stage.dispose(); } catch (Exception ignored) {}
         if (VisUI.isLoaded())
             VisUI.dispose();
     }
