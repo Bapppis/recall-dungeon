@@ -437,6 +437,10 @@ public abstract class Creature {
         return this.hpRegen;
     }
 
+    public void modifyHpRegen(int delta) {
+        this.hpRegen += delta;
+    }
+
     public int getStaminaRegen() {
         return staminaRegen + equipmentStaminaRegen;
     }
@@ -570,7 +574,6 @@ public abstract class Creature {
     }
 
     public void modifyStat(Stats stat, int amount) {
-        System.out.println("modifyStat called: " + stat + " amount=" + amount + " on " + this.getName());
         stats.put(stat, getStat(stat) + amount);
         // Keep cached bonuses in sync whenever a stat changes
         recalcStatBonuses();
@@ -1371,20 +1374,57 @@ public abstract class Creature {
     }
 
     public void addProperty(Property property) {
-        int id = property.getId();
-        // Only apply if not already present to avoid double-applying effects
-        if (id >= 1000 && id < 2333) {
-            if (buffs.containsKey(id)) return;
-            buffs.put(id, property);
-        } else if (id >= 2333 && id < 3666) {
-            if (debuffs.containsKey(id)) return;
-            debuffs.put(id, property);
-        } else if (id >= 3666 && id < 5000) {
-            if (traits.containsKey(id)) return;
-            traits.put(id, property);
+        if (property == null) {
+            return;
         }
-        // Apply property effects
-        property.onApply(this);
+        int id = property.getId();
+        // Avoid double-applying the same property id
+        if ((id >= 1000 && id < 2333 && buffs.containsKey(id))
+                || (id >= 2333 && id < 3666 && debuffs.containsKey(id))
+                || (id >= 3666 && id < 5000 && traits.containsKey(id))) {
+            return;
+        }
+
+        // Create a per-creature copy so mutable fields (like duration) are not shared
+        Property instanceToApply = property;
+        try {
+            if (property instanceof com.bapppis.core.property.BuffProperty) {
+                instanceToApply = new com.bapppis.core.property.BuffProperty(property);
+            } else if (property instanceof com.bapppis.core.property.DebuffProperty) {
+                instanceToApply = new com.bapppis.core.property.DebuffProperty(property);
+            } else if (property instanceof com.bapppis.core.property.TraitProperty) {
+                instanceToApply = new com.bapppis.core.property.TraitProperty(property);
+            }
+        } catch (Exception ignored) {
+            // If copying fails for any reason, fall back to using the shared instance
+            instanceToApply = property;
+        }
+
+        // Store the per-creature instance and apply its effects
+        if (id >= 1000 && id < 2333) {
+            buffs.put(id, instanceToApply);
+        } else if (id >= 2333 && id < 3666) {
+            debuffs.put(id, instanceToApply);
+        } else if (id >= 3666 && id < 5000) {
+            traits.put(id, instanceToApply);
+        }
+
+        instanceToApply.onApply(this);
+    }
+
+    /**
+     * Convenience overload: look up a property by id via PropertyLoader and apply it.
+     * If the id is unknown this is a no-op.
+     */
+    public void addProperty(int id) {
+        try {
+            com.bapppis.core.property.Property prop = com.bapppis.core.property.PropertyLoader.getProperty(id);
+            if (prop != null) {
+                addProperty(prop);
+            }
+        } catch (Exception ignored) {
+            // Defensive: if PropertyLoader isn't available or throws, silently ignore
+        }
     }
 
     public void removeProperty(int id) {
@@ -1421,20 +1461,168 @@ public abstract class Creature {
     }
 
     public String printProperties() {
+        // Preserve the existing single-column output for callers that rely on it.
         StringBuilder sb = new StringBuilder();
         sb.append("Buffs:\n");
         for (Property buff : buffs.values()) {
-            sb.append(" - ").append(buff).append("\n");
+            sb.append("  ").append(formatPropertySummary(buff)).append("\n");
+            String tt = buff.getTooltip();
+            if (tt != null && !tt.isBlank()) {
+                // indent tooltip lines for readability
+                String[] parts = tt.split("\\n");
+                for (String line : parts) {
+                    sb.append("    tooltip: ").append(line).append("\n");
+                }
+            }
         }
         sb.append("Debuffs:\n");
         for (Property debuff : debuffs.values()) {
-            sb.append(" - ").append(debuff).append("\n");
+            sb.append("  ").append(formatPropertySummary(debuff)).append("\n");
+            String tt = debuff.getTooltip();
+            if (tt != null && !tt.isBlank()) {
+                String[] parts = tt.split("\\n");
+                for (String line : parts) {
+                    sb.append("    tooltip: ").append(line).append("\n");
+                }
+            }
         }
         sb.append("Traits:\n");
         for (Property trait : traits.values()) {
-            sb.append(" - ").append(trait).append("\n");
+            sb.append("  ").append(formatPropertySummary(trait)).append("\n");
+            String tt = trait.getTooltip();
+            if (tt != null && !tt.isBlank()) {
+                String[] parts = tt.split("\\n");
+                for (String line : parts) {
+                    sb.append("    tooltip: ").append(line).append("\n");
+                }
+            }
         }
         return sb.toString();
+    }
+
+    /**
+     * Return a formatted properties dump with the given number of columns per
+     * row. Columns will be aligned by padding the text so the output is easy to
+     * scan in a console. If columns &lt;= 1 the output will fall back to the
+     * single-column `printProperties()` format.
+     */
+    public String printProperties(int columns) {
+        if (columns <= 1) {
+            return printProperties();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Buffs:\n");
+        sb.append(formatPropertiesInColumns(buffs.values(), columns));
+
+        sb.append("Debuffs:\n");
+        sb.append(formatPropertiesInColumns(debuffs.values(), columns));
+
+        sb.append("Traits:\n");
+        sb.append(formatPropertiesInColumns(traits.values(), columns));
+
+        return sb.toString();
+    }
+
+    /**
+     * Helper that lays out the provided properties collection into `columns`
+     * aligned columns. Each property uses its `toString()` as the cell content.
+     */
+    private String formatPropertiesInColumns(java.util.Collection<Property> props, int columns) {
+        StringBuilder sb = new StringBuilder();
+        if (props == null || props.isEmpty()) {
+            sb.append("  (none)\n");
+            return sb.toString();
+        }
+
+        java.util.List<String> cells = new java.util.ArrayList<>();
+        int maxCellLen = 0;
+        for (Property p : props) {
+            String s = formatPropertySummary(p);
+            // For multi-column compact output include a one-line tooltip snippet (first line)
+            try {
+                String tt = p.getTooltip();
+                if (tt != null && !tt.isBlank()) {
+                    String first = tt.split("\\n")[0];
+                    // append a short snippet, truncating if very long
+                    String snippet = first.length() > 40 ? first.substring(0, 37) + "..." : first;
+                    s = s + " - " + snippet;
+                }
+            } catch (Exception ignored) {
+            }
+            cells.add(s);
+            if (s.length() > maxCellLen)
+                maxCellLen = s.length();
+        }
+
+        // Pad each cell to maxCellLen and arrange into rows
+        int idx = 0;
+        for (String cell : cells) {
+            String padded = String.format("  %-" + maxCellLen + "s", cell);
+            sb.append(padded);
+            idx++;
+            if (idx % columns == 0) {
+                sb.append('\n');
+            } else {
+                sb.append("   "); // small gap between columns
+            }
+        }
+        if (idx % columns != 0) {
+            sb.append('\n');
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Build a compact, human-friendly single-line summary for a property.
+     * Format: "Name (id)[: description] [duration=5] [stats=...] [resists=...]"
+     */
+    private String formatPropertySummary(Property p) {
+        if (p == null) return "<null>";
+        StringBuilder s = new StringBuilder();
+        String name = p.getName() == null ? "<unnamed>" : p.getName();
+        s.append(name).append(" (").append(p.getId()).append(")");
+        String desc = p.getDescription();
+        if (desc != null && !desc.isBlank()) {
+            s.append(": ").append(desc);
+        }
+
+        // duration for buffs/debuffs
+        try {
+            if (p instanceof com.bapppis.core.property.BuffProperty) {
+                Integer d = ((com.bapppis.core.property.BuffProperty) p).getDuration();
+                if (d != null) s.append(" [dur=").append(d).append("]");
+                try {
+                    Integer hr = ((com.bapppis.core.property.BuffProperty) p).getHpRegen();
+                    if (hr != null && hr != 0) s.append(" [hpRegen=").append(hr).append("]");
+                } catch (Exception ignored) {}
+            } else if (p instanceof com.bapppis.core.property.DebuffProperty) {
+                Integer d = ((com.bapppis.core.property.DebuffProperty) p).getDuration();
+                if (d != null) s.append(" [dur=").append(d).append("]");
+                try {
+                    Integer hr = ((com.bapppis.core.property.DebuffProperty) p).getHpRegen();
+                    if (hr != null && hr != 0) s.append(" [hpRegen=").append(hr).append("]");
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception ignored) {
+        }
+
+        // stat modifiers (if any) and resistances appended succinctly
+        try {
+            if (p.getStatModifiers() != null && !p.getStatModifiers().isEmpty()) {
+                s.append(" stats=").append(p.getStatModifiers().toString());
+            }
+            if (p.getResistanceModifiers() != null && !p.getResistanceModifiers().isEmpty()) {
+                s.append(" resists=").append(p.getResistanceModifiers().toString());
+            }
+            if (p.getVisionRangeModifier() != null) {
+                s.append(" visionRange=").append(p.getVisionRangeModifier());
+            }
+        } catch (Exception ignored) {
+        }
+
+        return s.toString();
     }
 
     public void updateMaxHp() {
@@ -1454,45 +1642,60 @@ public abstract class Creature {
         }
     }
 
-    public void passTurn() {
+    public void tickProperties() {
         // Regen health/mana/stamina
         this.modifyHp(this.getHpRegen());
         this.modifyMana(this.getManaRegen());
         this.modifyStamina(this.getStaminaRegen());
-    }
+        // Fast-path: nothing to do if no timed properties present
+        if ((buffs == null || buffs.isEmpty()) && (debuffs == null || debuffs.isEmpty())) {
+            return;
+        }
 
-    /*
-     * public void passTurn() {
-     * // Apply buffs/debuffs effects
-     * for (Property buff : buffs.values()) {
-     * buff.onTurn(this);
-     * }
-     * for (Property debuff : debuffs.values()) {
-     * debuff.onTurn(this);
-     * }
-     * // Decrease duration and remove expired
-     * java.util.List<Integer> toRemove = new java.util.ArrayList<>();
-     * for (Property buff : buffs.values()) {
-     * if (buff.getDuration() > 0) {
-     * buff.setDuration(buff.getDuration() - 1);
-     * if (buff.getDuration() == 0) {
-     * toRemove.add(buff.getId());
-     * }
-     * }
-     * }
-     * for (Property debuff : debuffs.values()) {
-     * if (debuff.getDuration() > 0) {
-     * debuff.setDuration(debuff.getDuration() - 1);
-     * if (debuff.getDuration() == 0) {
-     * toRemove.add(debuff.getId());
-     * }
-     * }
-     * }
-     * for (int id : toRemove) {
-     * removeProperty(id);
-     * }
-     * }
-     */
+        java.util.List<Integer> toRemove = null; // allocate lazily
+
+        // Buffs: call onTick first, then decrement duration if applicable
+        for (java.util.Map.Entry<Integer, Property> e : buffs.entrySet()) {
+            Property prop = e.getValue();
+            prop.onTick(this);
+            if (prop instanceof com.bapppis.core.property.BuffProperty) {
+                com.bapppis.core.property.BuffProperty b = (com.bapppis.core.property.BuffProperty) prop;
+                Integer d = b.getDuration();
+                if (d != null && d > 0) {
+                    b.setDuration(d - 1);
+                    if (b.getDuration() != null && b.getDuration() <= 0) {
+                        if (toRemove == null)
+                            toRemove = new java.util.ArrayList<>();
+                        toRemove.add(e.getKey());
+                    }
+                }
+            }
+        }
+
+        // Debuffs: same as buffs
+        for (java.util.Map.Entry<Integer, Property> e : debuffs.entrySet()) {
+            Property prop = e.getValue();
+            prop.onTick(this);
+            if (prop instanceof com.bapppis.core.property.DebuffProperty) {
+                com.bapppis.core.property.DebuffProperty db = (com.bapppis.core.property.DebuffProperty) prop;
+                Integer d = db.getDuration();
+                if (d != null && d > 0) {
+                    db.setDuration(d - 1);
+                    if (db.getDuration() != null && db.getDuration() <= 0) {
+                        if (toRemove == null)
+                            toRemove = new java.util.ArrayList<>();
+                        toRemove.add(e.getKey());
+                    }
+                }
+            }
+        }
+
+        if (toRemove != null) {
+            for (int id : toRemove) {
+                removeProperty(id);
+            }
+        }
+    }
 
     public void recalcMaxHp() {
         // Preserve currentHp/maxHp ratio when maxHp changes

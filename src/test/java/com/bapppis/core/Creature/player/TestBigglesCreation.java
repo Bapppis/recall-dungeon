@@ -24,8 +24,7 @@ public class TestBigglesCreation {
         // Sanity check — test will fail fast if loading didn't work
         assert biggles != null;
 
-        // Print for visual inspection (keeps the original intent)
-        /* System.out.println(biggles.toString()); */
+        System.out.println(biggles.toString());
     }
 
     // helpers (not used directly by the test, kept for convenience)

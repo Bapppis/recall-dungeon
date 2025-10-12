@@ -18,4 +18,9 @@ public class TraitProperty extends Property {
     public void onRemove(Creature creature) {
         super.onRemove(creature);
     }
+
+    @Override
+    public String toString() {
+        return "Trait" + super.toString().replaceFirst("Property", "");
+    }
 }
