@@ -33,7 +33,7 @@ public class ItemLoader {
                                 itemIdMap.put(id, item);
                             }
                             if (name != null && !name.isEmpty()) {
-                                itemNameMap.put(name, item);
+                                itemNameMap.put(name.trim().toLowerCase(), item);
                             }
                         }
                     } catch (Exception e) {
@@ -50,10 +50,17 @@ public class ItemLoader {
     }
 
     public static Item getItemByName(String name) {
-        return itemNameMap.get(name);
+        if (name == null) return null;
+        return itemNameMap.get(name.trim().toLowerCase());
     }
 
     public static List<Item> getAllItems() {
         return new ArrayList<>(itemIdMap.values());
+    }
+
+    public static java.util.List<String> getAllItemNames() {
+        java.util.List<String> names = new java.util.ArrayList<>(itemNameMap.keySet());
+        java.util.Collections.sort(names);
+        return names;
     }
 }

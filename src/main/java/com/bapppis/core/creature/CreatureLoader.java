@@ -165,10 +165,11 @@ public class CreatureLoader {
 
                             String cname = creature.getName();
                             if (cname != null && !cname.isEmpty()) {
+                                String key = cname.trim().toLowerCase();
                                 if (creature instanceof Player) {
-                                    playerMap.put(cname, (Player) creature);
+                                    playerMap.put(key, (Player) creature);
                                 } else {
-                                    creatureMap.put(cname, creature);
+                                    creatureMap.put(key, creature);
                                 }
                             }
                         }
@@ -246,15 +247,16 @@ public class CreatureLoader {
     }
 
     public static Creature getCreature(String name) {
-        Creature c = creatureMap.get(name);
+        if (name == null) return null;
+        String key = name.trim().toLowerCase();
+        Creature c = creatureMap.get(key);
         if (c != null)
             return c;
-        Creature p = playerMap.get(name);
+        Creature p = playerMap.get(key);
         if (p != null)
             return p;
         // Debug: if not found, list available creature names (helpful for tests)
-        System.out.println(
-                "CreatureLoader: lookup failed for '" + name + "'. Available creatures: " + creatureMap.keySet());
+        System.out.println("CreatureLoader: lookup failed for '" + name + "'. Available creatures: " + creatureMap.keySet());
         System.out.println("CreatureLoader: available players: " + playerMap.keySet());
         return null;
     }

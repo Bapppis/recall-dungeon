@@ -1,0 +1,11 @@
+{
+  "id": 1013,
+  "name": "Mana Regen 1",
+  "description": "Restores mana over time.",
+  "duration": 5,
+  "manaRegen": 10,
+  "tooltip": [
+    "You regenerate 10 MP every turn."
+  ],
+  "type": "BUFF"
+}

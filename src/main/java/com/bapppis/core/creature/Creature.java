@@ -441,6 +441,14 @@ public abstract class Creature {
         this.hpRegen += delta;
     }
 
+    public void modifyManaRegen(int delta) {
+        this.manaRegen += delta;
+    }
+
+    public void modifyStaminaRegen(int delta) {
+        this.staminaRegen += delta;
+    }
+
     public int getStaminaRegen() {
         return staminaRegen + equipmentStaminaRegen;
     }
@@ -1388,16 +1396,11 @@ public abstract class Creature {
         // Create a per-creature copy so mutable fields (like duration) are not shared
         Property instanceToApply = property;
         try {
-            if (property instanceof com.bapppis.core.property.BuffProperty) {
-                instanceToApply = new com.bapppis.core.property.BuffProperty(property);
-            } else if (property instanceof com.bapppis.core.property.DebuffProperty) {
-                instanceToApply = new com.bapppis.core.property.DebuffProperty(property);
-            } else if (property instanceof com.bapppis.core.property.TraitProperty) {
-                instanceToApply = new com.bapppis.core.property.TraitProperty(property);
+            if (property != null) {
+                instanceToApply = property.copy();
             }
         } catch (Exception ignored) {
-            // If copying fails for any reason, fall back to using the shared instance
-            instanceToApply = property;
+            instanceToApply = property; // fallback to shared instance
         }
 
         // Store the per-creature instance and apply its effects
@@ -1425,6 +1428,27 @@ public abstract class Creature {
         } catch (Exception ignored) {
             // Defensive: if PropertyLoader isn't available or throws, silently ignore
         }
+    }
+
+    /**
+     * Convenience overload: look up a property by its human name (case-insensitive)
+     * and apply it. If the name is numeric this will fall back to id lookup.
+     * Returns true if a property was found and applied, false otherwise.
+     */
+    public boolean addProperty(String name) {
+        if (name == null || name.isBlank()) return false;
+        // numeric fallback
+        String t = name.trim();
+        try {
+            int id = Integer.parseInt(t);
+            com.bapppis.core.property.Property p = com.bapppis.core.property.PropertyLoader.getProperty(id);
+            if (p != null) { addProperty(p); return true; }
+        } catch (NumberFormatException ignored) {
+        }
+
+        com.bapppis.core.property.Property p = com.bapppis.core.property.PropertyLoader.getPropertyByName(name);
+        if (p != null) { addProperty(p); return true; }
+        return false;
     }
 
     public void removeProperty(int id) {
@@ -1588,25 +1612,15 @@ public abstract class Creature {
             s.append(": ").append(desc);
         }
 
-        // duration for buffs/debuffs
-        try {
-            if (p instanceof com.bapppis.core.property.BuffProperty) {
-                Integer d = ((com.bapppis.core.property.BuffProperty) p).getDuration();
-                if (d != null) s.append(" [dur=").append(d).append("]");
-                try {
-                    Integer hr = ((com.bapppis.core.property.BuffProperty) p).getHpRegen();
-                    if (hr != null && hr != 0) s.append(" [hpRegen=").append(hr).append("]");
-                } catch (Exception ignored) {}
-            } else if (p instanceof com.bapppis.core.property.DebuffProperty) {
-                Integer d = ((com.bapppis.core.property.DebuffProperty) p).getDuration();
-                if (d != null) s.append(" [dur=").append(d).append("]");
-                try {
-                    Integer hr = ((com.bapppis.core.property.DebuffProperty) p).getHpRegen();
-                    if (hr != null && hr != 0) s.append(" [hpRegen=").append(hr).append("]");
-                } catch (Exception ignored) {}
-            }
-        } catch (Exception ignored) {
-        }
+        // duration and regen deltas (unified)
+        Integer d = p.getDuration();
+        if (d != null) s.append(" [dur=").append(d).append("]");
+        Integer hr = p.getHpRegen();
+        if (hr != null && hr != 0) s.append(" [hpRegen=").append(hr).append("]");
+        Integer mr = p.getManaRegen();
+        if (mr != null && mr != 0) s.append(" [manaRegen=").append(mr).append("]");
+        Integer sr = p.getStaminaRegen();
+        if (sr != null && sr != 0) s.append(" [staminaRegen=").append(sr).append("]");
 
         // stat modifiers (if any) and resistances appended succinctly
         try {
@@ -1658,16 +1672,13 @@ public abstract class Creature {
         for (java.util.Map.Entry<Integer, Property> e : buffs.entrySet()) {
             Property prop = e.getValue();
             prop.onTick(this);
-            if (prop instanceof com.bapppis.core.property.BuffProperty) {
-                com.bapppis.core.property.BuffProperty b = (com.bapppis.core.property.BuffProperty) prop;
-                Integer d = b.getDuration();
-                if (d != null && d > 0) {
-                    b.setDuration(d - 1);
-                    if (b.getDuration() != null && b.getDuration() <= 0) {
-                        if (toRemove == null)
-                            toRemove = new java.util.ArrayList<>();
-                        toRemove.add(e.getKey());
-                    }
+            Integer d = prop.getDuration();
+            if (d != null && d > 0) {
+                prop.setDuration(d - 1);
+                if (prop.getDuration() != null && prop.getDuration() <= 0) {
+                    if (toRemove == null)
+                        toRemove = new java.util.ArrayList<>();
+                    toRemove.add(e.getKey());
                 }
             }
         }
@@ -1676,16 +1687,13 @@ public abstract class Creature {
         for (java.util.Map.Entry<Integer, Property> e : debuffs.entrySet()) {
             Property prop = e.getValue();
             prop.onTick(this);
-            if (prop instanceof com.bapppis.core.property.DebuffProperty) {
-                com.bapppis.core.property.DebuffProperty db = (com.bapppis.core.property.DebuffProperty) prop;
-                Integer d = db.getDuration();
-                if (d != null && d > 0) {
-                    db.setDuration(d - 1);
-                    if (db.getDuration() != null && db.getDuration() <= 0) {
-                        if (toRemove == null)
-                            toRemove = new java.util.ArrayList<>();
-                        toRemove.add(e.getKey());
-                    }
+            Integer d2 = prop.getDuration();
+            if (d2 != null && d2 > 0) {
+                prop.setDuration(d2 - 1);
+                if (prop.getDuration() != null && prop.getDuration() <= 0) {
+                    if (toRemove == null)
+                        toRemove = new java.util.ArrayList<>();
+                    toRemove.add(e.getKey());
                 }
             }
         }

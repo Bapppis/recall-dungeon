@@ -16,6 +16,7 @@ public class PropertyLoaderTest {
         // basic sanity checks
         assertEquals(3666, p.getId());
         assertNotNull(p.getName(), "Coward should have a name");
-        assertTrue(p instanceof TraitProperty, "Coward should deserialize as a TraitProperty");
+    assertTrue(p instanceof Property, "Coward should deserialize to a Property instance");
+    assertEquals(PropertyType.TRAIT, p.getType(), "Coward should have type TRAIT");
     }
 }

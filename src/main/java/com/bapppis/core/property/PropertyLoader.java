@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class PropertyLoader {
     private static final HashMap<Integer, Property> propertyMap = new HashMap<>();
+    private static final HashMap<String, Property> propertyNameMap = new HashMap<>();
 
     public static void loadProperties() {
         Gson gson = new Gson();
@@ -55,24 +56,29 @@ public class PropertyLoader {
                                 }
                             }
 
-                            Property propInstance = null;
-                            // Parse the JSON string into the appropriate concrete class now that we know the type
-                            if (t == PropertyType.BUFF) {
-                                BuffProperty bp = gson.fromJson(json, BuffProperty.class);
-                                propInstance = (bp != null) ? bp : new BuffProperty();
-                            } else if (t == PropertyType.DEBUFF) {
-                                DebuffProperty dp = gson.fromJson(json, DebuffProperty.class);
-                                propInstance = (dp != null) ? dp : new DebuffProperty();
-                            } else if (t == PropertyType.TRAIT) {
-                                TraitProperty tp = gson.fromJson(json, TraitProperty.class);
-                                propInstance = (tp != null) ? tp : new TraitProperty();
-                            } else {
-                                // If we couldn't classify, fall back to trait as a safe default
-                                TraitProperty tp = gson.fromJson(json, TraitProperty.class);
-                                propInstance = (tp != null) ? tp : new TraitProperty();
+                            // Deserialize into unified Property class
+                            Property propInstance = gson.fromJson(json, Property.class);
+                            if (propInstance == null) {
+                                propInstance = new Property();
                             }
-
+                            // Ensure type is set (either from JSON or inferred path)
+                            if (propInstance.getType() == null && t != null) {
+                                try { propInstance.setType(t); } catch (Exception ignored) {}
+                            }
                             propertyMap.put(propInstance.getId(), propInstance);
+                            // normalized name map (trim + lowercase)
+                            try {
+                                String n = propInstance.getName();
+                                if (n != null && !n.isBlank()) {
+                                    String key = n.trim().toLowerCase();
+                                    if (!propertyNameMap.containsKey(key)) {
+                                        propertyNameMap.put(key, propInstance);
+                                    } else {
+                                        // collision: keep first, but log once
+                                        System.out.println("PropertyLoader: duplicate property name '" + n + "' in " + resource.getPath() + " - keeping first");
+                                    }
+                                }
+                            } catch (Exception ignored) {}
                         }
                         //System.out.println("Loaded property: " + property.getId() + " from " + resource.getPath());
                     } catch (Exception e) {
@@ -88,6 +94,17 @@ public class PropertyLoader {
 
     public static Property getProperty(int id) {
         return propertyMap.get(id);
+    }
+
+    public static Property getPropertyByName(String name) {
+        if (name == null) return null;
+        return propertyNameMap.get(name.trim().toLowerCase());
+    }
+
+    public static java.util.List<String> getAllPropertyNames() {
+        java.util.List<String> names = new java.util.ArrayList<>(propertyNameMap.keySet());
+        java.util.Collections.sort(names);
+        return names;
     }
 
     public static Collection<Property> getAllProperties() {

@@ -24,10 +24,12 @@ Notes
 - 1008 — InstaKill Immunity — data/properties/buff/InstaKillImmunity.json
 - 1009 — Jolt Immunity — data/properties/buff/JoltImmunity.json
 - 1010 — Silence Immunity — data/properties/buff/SilenceImmunity.json
-- 1011 — Health Regen — data/properties/buff/HealthRegen.json
+- 1011 — Health Regen — data/properties/buff/HealthRegen1.json
+- 1012 — Health Regen — data/properties/buff/HealthRegen2.json
 
 ### Debuff (2333-3665)
 - 2333 — Afraid — data/properties/debuff/Afraid.json
+- 2334 — Bleed — data/properties/debuff/Bleed1.json
 
 ### Trait (3666–4999)
 - 3666 — Coward — data/properties/trait/Coward.json

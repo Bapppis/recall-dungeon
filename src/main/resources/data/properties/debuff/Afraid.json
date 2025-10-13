@@ -1,7 +1,8 @@
 {
   "id": 2333,
   "name": "Afraid",
-  "description": "Unable to act and weaker to darkness",
+  "description": "Unable to act properly and weaker to darkness",
+  "duration": 3,
   "resistances": {
     "DARKNESS": 50
   },
