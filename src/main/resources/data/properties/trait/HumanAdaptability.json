@@ -2,6 +2,7 @@
   "id": 3667,
   "name": "Human Adaptability",
   "description": "Increases every stat by one except luck.",
+  "type": "TRAIT",
   "statModifiers": {
     "STRENGTH": 1,
     "DEXTERITY": 1,
@@ -9,6 +10,5 @@
     "INTELLIGENCE": 1,
     "WISDOM": 1,
     "CHARISMA": 1
-  },
-  "type": "TRAIT"
+  }
 }

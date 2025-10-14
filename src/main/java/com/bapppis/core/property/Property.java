@@ -25,6 +25,23 @@ public class Property {
     private Integer hpRegen;
     private Integer manaRegen;
     private Integer staminaRegen;
+    // Optional derived stat deltas (can be positive or negative)
+    private Float crit;
+    private Float dodge;
+    private Float block;
+    private Float magicResist;
+    // Optional max pools deltas (positive or negative)
+    private Integer maxHp;
+    private Integer maxStamina;
+    private Integer maxMana;
+    // Optional max pools percentage multipliers (e.g. 0.5 reduces to 50%, 1.5 increases by 50%)
+    private Float maxHpPercentage;
+    private Float maxStaminaPercentage;
+    private Float maxManaPercentage;
+    // Transient fields to store computed per-instance deltas when a percentage is applied
+    private transient Integer appliedMaxHpDelta = null;
+    private transient Integer appliedMaxStaminaDelta = null;
+    private transient Integer appliedMaxManaDelta = null;
 
     protected Property() {
         // default constructor for Gson
@@ -46,6 +63,20 @@ public class Property {
         this.hpRegen = other.hpRegen;
         this.manaRegen = other.manaRegen;
         this.staminaRegen = other.staminaRegen;
+        this.crit = other.crit;
+        this.dodge = other.dodge;
+        this.block = other.block;
+        this.magicResist = other.magicResist;
+        this.maxHp = other.maxHp;
+        this.maxStamina = other.maxStamina;
+        this.maxMana = other.maxMana;
+        this.maxHpPercentage = other.maxHpPercentage;
+        this.maxStaminaPercentage = other.maxStaminaPercentage;
+        this.maxManaPercentage = other.maxManaPercentage;
+        // Do NOT copy transient applied deltas - they are per-instance
+        this.appliedMaxHpDelta = null;
+        this.appliedMaxStaminaDelta = null;
+        this.appliedMaxManaDelta = null;
     }
 
     /** Public factory to create a per-creature copy. */
@@ -76,6 +107,27 @@ public class Property {
     public void setManaRegen(Integer manaRegen) { this.manaRegen = manaRegen; }
     public Integer getStaminaRegen() { return staminaRegen; }
     public void setStaminaRegen(Integer staminaRegen) { this.staminaRegen = staminaRegen; }
+    public Float getCrit() { return crit; }
+    public void setCrit(Float crit) { this.crit = crit; }
+    public Float getDodge() { return dodge; }
+    public void setDodge(Float dodge) { this.dodge = dodge; }
+    public Float getBlock() { return block; }
+    public void setBlock(Float block) { this.block = block; }
+    public Float getMagicResist() { return magicResist; }
+    public void setMagicResist(Float magicResist) { this.magicResist = magicResist; }
+
+    public Integer getMaxHp() { return maxHp; }
+    public void setMaxHp(Integer maxHp) { this.maxHp = maxHp; }
+    public Integer getMaxStamina() { return maxStamina; }
+    public void setMaxStamina(Integer maxStamina) { this.maxStamina = maxStamina; }
+    public Integer getMaxMana() { return maxMana; }
+    public void setMaxMana(Integer maxMana) { this.maxMana = maxMana; }
+    public Float getMaxHpPercentage() { return maxHpPercentage; }
+    public void setMaxHpPercentage(Float maxHpPercentage) { this.maxHpPercentage = maxHpPercentage; }
+    public Float getMaxStaminaPercentage() { return maxStaminaPercentage; }
+    public void setMaxStaminaPercentage(Float maxStaminaPercentage) { this.maxStaminaPercentage = maxStaminaPercentage; }
+    public Float getMaxManaPercentage() { return maxManaPercentage; }
+    public void setMaxManaPercentage(Float maxManaPercentage) { this.maxManaPercentage = maxManaPercentage; }
 
     /**
      * Return tooltip text if present. Mirrors the logic in `Equipment.getTooltip()`
@@ -142,6 +194,69 @@ public class Property {
         if (staminaRegen != null && staminaRegen != 0) {
             creature.modifyStaminaRegen(staminaRegen);
         }
+        // Apply derived stat deltas
+        if (crit != null && crit != 0f) {
+            creature.modifyPropertyCrit(crit);
+        }
+        if (dodge != null && dodge != 0f) {
+            creature.modifyPropertyDodge(dodge);
+        }
+        if (block != null && block != 0f) {
+            creature.modifyPropertyBlock(block);
+        }
+        if (magicResist != null && magicResist != 0f) {
+            creature.modifyPropertyMagicResist(magicResist);
+        }
+        // Apply max pool deltas
+        if (maxHp != null && maxHp != 0) {
+            creature.setMaxHp(creature.getMaxHp() + maxHp);
+        }
+        // Apply percentage multiplier to maxHp if present. Compute delta as
+        // floor(currentMaxHp * (percentage - 1)). Store delta in transient
+        // field so we can revert exactly on removal.
+        if (maxHpPercentage != null) {
+            int current = creature.getMaxHp();
+            double multiplier = maxHpPercentage.doubleValue();
+            // Desired new max = floor(current * multiplier)
+            int newMax = (int) Math.floor(current * multiplier);
+            int delta = newMax - current;
+            if (delta != 0) {
+                creature.setMaxHp(current + delta);
+                this.appliedMaxHpDelta = delta;
+            } else {
+                this.appliedMaxHpDelta = 0;
+            }
+        }
+        if (maxStamina != null && maxStamina != 0) {
+            creature.setMaxStamina(creature.getMaxStamina() + maxStamina);
+        }
+        if (maxStaminaPercentage != null) {
+            int current = creature.getMaxStamina();
+            double multiplier = maxStaminaPercentage.doubleValue();
+            int newMax = (int) Math.floor(current * multiplier);
+            int delta = newMax - current;
+            if (delta != 0) {
+                creature.setMaxStamina(current + delta);
+                this.appliedMaxStaminaDelta = delta;
+            } else {
+                this.appliedMaxStaminaDelta = 0;
+            }
+        }
+        if (maxMana != null && maxMana != 0) {
+            creature.setMaxMana(creature.getMaxMana() + maxMana);
+        }
+        if (maxManaPercentage != null) {
+            int current = creature.getMaxMana();
+            double multiplier = maxManaPercentage.doubleValue();
+            int newMax = (int) Math.floor(current * multiplier);
+            int delta = newMax - current;
+            if (delta != 0) {
+                creature.setMaxMana(current + delta);
+                this.appliedMaxManaDelta = delta;
+            } else {
+                this.appliedMaxManaDelta = 0;
+            }
+        }
     }
 
     /**
@@ -169,6 +284,42 @@ public class Property {
         }
         if (staminaRegen != null && staminaRegen != 0) {
             creature.modifyStaminaRegen(-staminaRegen);
+        }
+        // Revert derived stat deltas
+        if (crit != null && crit != 0f) {
+            creature.modifyPropertyCrit(-crit);
+        }
+        if (dodge != null && dodge != 0f) {
+            creature.modifyPropertyDodge(-dodge);
+        }
+        if (block != null && block != 0f) {
+            creature.modifyPropertyBlock(-block);
+        }
+        if (magicResist != null && magicResist != 0f) {
+            creature.modifyPropertyMagicResist(-magicResist);
+        }
+        // Revert max pool deltas
+        if (maxHp != null && maxHp != 0) {
+            creature.setMaxHp(creature.getMaxHp() - maxHp);
+        }
+        // Revert percentage-applied deltas if they were computed when applied.
+        if (this.appliedMaxHpDelta != null) {
+            creature.setMaxHp(creature.getMaxHp() - this.appliedMaxHpDelta);
+            this.appliedMaxHpDelta = null;
+        }
+        if (maxStamina != null && maxStamina != 0) {
+            creature.setMaxStamina(creature.getMaxStamina() - maxStamina);
+        }
+        if (this.appliedMaxStaminaDelta != null) {
+            creature.setMaxStamina(creature.getMaxStamina() - this.appliedMaxStaminaDelta);
+            this.appliedMaxStaminaDelta = null;
+        }
+        if (maxMana != null && maxMana != 0) {
+            creature.setMaxMana(creature.getMaxMana() - maxMana);
+        }
+        if (this.appliedMaxManaDelta != null) {
+            creature.setMaxMana(creature.getMaxMana() - this.appliedMaxManaDelta);
+            this.appliedMaxManaDelta = null;
         }
     }
 

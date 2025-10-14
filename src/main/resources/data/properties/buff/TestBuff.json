@@ -1,0 +1,46 @@
+{
+  "id": 2332,
+  "name": "Test Buff",
+  "description": "A buff used for testing purposes.",
+  "duration": 5,
+  "maxHpPercentage": 1.5,
+  "maxStaminaPercentage": 1.5,
+  "maxManaPercentage": 1.5,
+  "maxHp": 5,
+  "maxStamina": 5,
+  "maxMana": 5,
+  "hpRegen": 5,
+  "staminaRegen": 5,
+  "manaRegen": 5,
+  "crit": 5,
+  "dodge": 5,
+  "block": 5,
+  "magicResist": 5,
+  "stats": {
+    "STRENGTH": 1,
+    "DEXTERITY": 1,
+    "CONSTITUTION": 1,
+    "INTELLIGENCE": 1,
+    "WISDOM": 1,
+    "CHARISMA": 1,
+    "LUCK": 1
+  },
+  "resistances": {
+    "FIRE": -5,
+    "WATER": -5,
+    "WIND": -5,
+    "ICE": -5,
+    "NATURE": -5,
+    "LIGHTNING": -5,
+    "LIGHT": -5,
+    "DARKNESS": -5,
+    "BLUDGEONING": -5,
+    "PIERCING": -5,
+    "SLASHING": -5,
+    "TRUE": -5
+  },
+  "tooltip": [
+    "Touched by the gods."
+  ],
+  "type": "BUFF"
+}

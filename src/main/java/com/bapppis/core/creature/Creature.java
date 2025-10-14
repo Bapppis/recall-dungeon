@@ -64,6 +64,11 @@ public abstract class Creature {
     private float equipmentDodge = 0f;
     private float equipmentBlock = 0f;
     private float equipmentMagicResist = 0f;
+    // Property-derived accumulators (sum of applied property deltas)
+    private float propertyCrit = 0f;
+    private float propertyDodge = 0f;
+    private float propertyBlock = 0f;
+    private float propertyMagicResist = 0f;
     private int statPoints = 0;
     // Cached per-stat bonuses (e.g. STR 14 -> +4). LUCK bonus equals the raw
     // luck value.
@@ -656,7 +661,7 @@ public abstract class Creature {
     }
 
     public float getCrit() {
-        return this.crit + this.equipmentCrit;
+        return this.crit + this.equipmentCrit + this.propertyCrit;
     }
 
     // Store raw crit value (can be negative or >100). Clamping to 0-100 is done
@@ -675,7 +680,7 @@ public abstract class Creature {
     }
 
     public float getDodge() {
-        return this.dodge + this.equipmentDodge;
+        return this.dodge + this.equipmentDodge + this.propertyDodge;
     }
 
     // Store raw dodge value (can be negative or >100). When used for to-hit
@@ -686,7 +691,7 @@ public abstract class Creature {
     }
 
     public float getBlock() {
-        return this.block + this.equipmentBlock;
+        return this.block + this.equipmentBlock + this.propertyBlock;
     }
 
     // Store raw block value (can be negative or >100). When used for block
@@ -697,7 +702,24 @@ public abstract class Creature {
     }
 
     public float getMagicResist() {
-        return this.magicResist + this.equipmentMagicResist;
+        return this.magicResist + this.equipmentMagicResist + this.propertyMagicResist;
+    }
+
+    // Methods for properties to modify property-derived accumulators
+    public void modifyPropertyCrit(float delta) {
+        this.propertyCrit += delta;
+    }
+
+    public void modifyPropertyDodge(float delta) {
+        this.propertyDodge += delta;
+    }
+
+    public void modifyPropertyBlock(float delta) {
+        this.propertyBlock += delta;
+    }
+
+    public void modifyPropertyMagicResist(float delta) {
+        this.propertyMagicResist += delta;
     }
 
     public float setMagicResist(float magicResist) {
@@ -1416,7 +1438,8 @@ public abstract class Creature {
     }
 
     /**
-     * Convenience overload: look up a property by id via PropertyLoader and apply it.
+     * Convenience overload: look up a property by id via PropertyLoader and apply
+     * it.
      * If the id is unknown this is a no-op.
      */
     public void addProperty(int id) {
@@ -1436,18 +1459,25 @@ public abstract class Creature {
      * Returns true if a property was found and applied, false otherwise.
      */
     public boolean addProperty(String name) {
-        if (name == null || name.isBlank()) return false;
+        if (name == null || name.isBlank())
+            return false;
         // numeric fallback
         String t = name.trim();
         try {
             int id = Integer.parseInt(t);
             com.bapppis.core.property.Property p = com.bapppis.core.property.PropertyLoader.getProperty(id);
-            if (p != null) { addProperty(p); return true; }
+            if (p != null) {
+                addProperty(p);
+                return true;
+            }
         } catch (NumberFormatException ignored) {
         }
 
         com.bapppis.core.property.Property p = com.bapppis.core.property.PropertyLoader.getPropertyByName(name);
-        if (p != null) { addProperty(p); return true; }
+        if (p != null) {
+            addProperty(p);
+            return true;
+        }
         return false;
     }
 
@@ -1563,7 +1593,8 @@ public abstract class Creature {
         int maxCellLen = 0;
         for (Property p : props) {
             String s = formatPropertySummary(p);
-            // For multi-column compact output include a one-line tooltip snippet (first line)
+            // For multi-column compact output include a one-line tooltip snippet (first
+            // line)
             try {
                 String tt = p.getTooltip();
                 if (tt != null && !tt.isBlank()) {
@@ -1603,7 +1634,8 @@ public abstract class Creature {
      * Format: "Name (id)[: description] [duration=5] [stats=...] [resists=...]"
      */
     private String formatPropertySummary(Property p) {
-        if (p == null) return "<null>";
+        if (p == null)
+            return "<null>";
         StringBuilder s = new StringBuilder();
         String name = p.getName() == null ? "<unnamed>" : p.getName();
         s.append(name).append(" (").append(p.getId()).append(")");
@@ -1614,13 +1646,17 @@ public abstract class Creature {
 
         // duration and regen deltas (unified)
         Integer d = p.getDuration();
-        if (d != null) s.append(" [dur=").append(d).append("]");
+        if (d != null)
+            s.append(" [dur=").append(d).append("]");
         Integer hr = p.getHpRegen();
-        if (hr != null && hr != 0) s.append(" [hpRegen=").append(hr).append("]");
+        if (hr != null && hr != 0)
+            s.append(" [hpRegen=").append(hr).append("]");
         Integer mr = p.getManaRegen();
-        if (mr != null && mr != 0) s.append(" [manaRegen=").append(mr).append("]");
+        if (mr != null && mr != 0)
+            s.append(" [manaRegen=").append(mr).append("]");
         Integer sr = p.getStaminaRegen();
-        if (sr != null && sr != 0) s.append(" [staminaRegen=").append(sr).append("]");
+        if (sr != null && sr != 0)
+            s.append(" [staminaRegen=").append(sr).append("]");
 
         // stat modifiers (if any) and resistances appended succinctly
         try {
@@ -1729,13 +1765,6 @@ public abstract class Creature {
         this.setMaxHp(baseHp); // Reset max HP to base before applying properties
         // Recompute max/current HP correctly
         this.updateMaxHp();
-
-        // Set mana/stamina to max (recalc maxMana from INT and clamp)
-        // Initialize baseMaxMana/baseMaxStamina only if they were not provided by JSON
-        // (i.e., still zero or negative). If the JSON contains
-        // baseMaxMana/baseMaxStamina
-        // we respect those values. After ensuring base values, recompute derived maxes
-        // and set current to max.
 
         if (this.baseMaxStamina <= 0) {
             this.baseMaxStamina = this.maxStamina;

@@ -2,9 +2,9 @@
   "id": 3666,
   "name": "Coward",
   "description": "Decreases strength by 2 and increases dexterity by 2.",
+  "type": "TRAIT",
   "statModifiers": {
     "STRENGTH": -2,
     "DEXTERITY": 2
-  },
-  "type": "TRAIT"
+  }
 }

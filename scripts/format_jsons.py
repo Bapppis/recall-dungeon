@@ -113,6 +113,31 @@ CANON_CREATURE_RESISTS: List[str] = [
     "TRUE",
 ]
 
+# Canonical top-level ordering for properties (derived from TestDebuff.json)
+CANON_PROPERTY_ORDER: List[str] = [
+    "id",
+    "name",
+    "description",
+    "duration",
+    "maxHpPercentage",
+    "maxStaminaPercentage",
+    "maxManaPercentage",
+    "maxHp",
+    "maxStamina",
+    "maxMana",
+    "hpRegen",
+    "staminaRegen",
+    "manaRegen",
+    "crit",
+    "dodge",
+    "block",
+    "magicResist",
+    "stats",
+    "resistances",
+    "tooltip",
+    "type",
+]
+
 
 def order_keys(obj: Dict[str, Any], order: List[str]) -> Dict[str, Any]:
     """Return new dict with keys inserted following 'order'; remaining appended alphabetically."""
@@ -143,6 +168,9 @@ def transform(obj: Any, kind: str = None) -> Any:
         if kind == 'creature' and any(k in obj for k in CANON_CREATURE_ORDER):
             obj = order_keys(obj, CANON_CREATURE_ORDER)
 
+        if kind == 'property' and any(k in obj for k in CANON_PROPERTY_ORDER):
+            obj = order_keys(obj, CANON_PROPERTY_ORDER)
+
         # Recurse into values
         for k, v in list(obj.items()):
             if k == "attacks" and isinstance(v, list):
@@ -156,8 +184,8 @@ def transform(obj: Any, kind: str = None) -> Any:
                 obj[k] = transform(v, kind)
 
         # Additionally sort nested simple dicts like stats/resistances.
-        # For creature files, use canonical ordering; otherwise fall back to alphabetical.
-        if kind == 'creature':
+        # For creature and property files, use canonical ordering; otherwise fall back to alphabetical.
+        if kind in ('creature', 'property'):
             if 'stats' in obj and isinstance(obj['stats'], dict):
                 ordered_stats = {}
                 for k in CANON_CREATURE_STATS:
@@ -200,6 +228,8 @@ for p in data_dir.rglob('*.json'):
             kind = 'item'
         elif parts and parts[0] == 'creatures':
             kind = 'creature'
+        elif parts and parts[0] == 'properties':
+            kind = 'property'
         else:
             kind = None
 

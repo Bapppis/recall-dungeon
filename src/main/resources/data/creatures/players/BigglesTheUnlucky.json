@@ -17,8 +17,18 @@
     "LUCK": 1
   },
   "resistances": {
+    "FIRE": 100,
+    "WATER": 100,
+    "WIND": 100,
+    "ICE": 100,
     "NATURE": 90,
-    "SLASHING": 120
+    "LIGHTNING": 100,
+    "LIGHT": 100,
+    "DARKNESS": 100,
+    "BLUDGEONING": 100,
+    "PIERCING": 100,
+    "SLASHING": 120,
+    "TRUE": 100
   },
   "baseBlock": 5,
   "baseCrit": 5,
