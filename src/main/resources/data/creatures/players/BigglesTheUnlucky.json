@@ -34,6 +34,8 @@
   "baseCrit": 5,
   "baseDodge": 10,
   "baseMagicResist": 5,
+  "accuracy": null,
+  "magicAccuracy": null,
   "baseHp": 5,
   "baseMaxMana": 80,
   "baseMaxStamina": 100,

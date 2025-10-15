@@ -15,6 +15,10 @@ public class Attack {
   public Integer weight;
   // Optional per-attack crit modifier, can be written in JSON as "+5" or "-3" (string)
   public String critMod;
+  // Optional per-attack accuracy modifiers (integers). These are added to
+  // the attacker's accuracy when resolving to-hit for this attack only.
+  public Integer accuracy;
+  public Integer magicAccuracy;
 
   public int getTimes() {
     return times == null ? 1 : times;
@@ -46,6 +50,14 @@ public class Attack {
     }
   }
 
+  public int getAccuracy() {
+    return accuracy == null ? 0 : accuracy.intValue();
+  }
+
+  public int getMagicAccuracy() {
+    return magicAccuracy == null ? 0 : magicAccuracy.intValue();
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -58,7 +70,9 @@ public class Attack {
     if (magicDamageType != null && !magicDamageType.isBlank()) sb.append("magicType=").append(magicDamageType).append(", ");
     if (magicDamageMultiplier != 0) sb.append("magicStatBonus=").append(magicDamageMultiplier).append(", ");
     if (damageType != null) sb.append("damageType=").append(damageType).append(", ");
-    if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
+  if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
+  if (accuracy != null) sb.append("accuracy=").append(accuracy).append(", ");
+  if (magicAccuracy != null) sb.append("magicAccuracy=").append(magicAccuracy).append(", ");
     sb.append("weight=").append(getWeight());
     sb.append("]");
     return sb.toString();

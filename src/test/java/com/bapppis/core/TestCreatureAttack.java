@@ -15,7 +15,7 @@ import com.bapppis.core.AllLoaders;
 public class TestCreatureAttack {
     @Test
     public void testPlayerCreation() {
-    AllLoaders.loadAll();
+        AllLoaders.loadAll();
 
         // Make the player Biggles
         Player biggles = CreatureLoader.getPlayerById(5000);
@@ -35,7 +35,7 @@ public class TestCreatureAttack {
 
     @Test
     public void testDarkHoundVsTrainingDummyMultipleAttacks() {
-    AllLoaders.loadAll();
+        AllLoaders.loadAll();
 
         // Load Dark Hound (id 6000)
         com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(6000);
@@ -57,7 +57,7 @@ public class TestCreatureAttack {
         java.util.concurrent.atomic.AtomicBoolean sawDualRoll = new java.util.concurrent.atomic.AtomicBoolean(false);
         java.util.concurrent.atomic.AtomicInteger observedPhysAttempts = new java.util.concurrent.atomic.AtomicInteger();
         java.util.concurrent.atomic.AtomicInteger observedMagicAttempts = new java.util.concurrent.atomic.AtomicInteger();
-        com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
+        com.bapppis.core.combat.AttackEngine.attackListener = (rpt) -> {
             counts.put(rpt.attackName, counts.getOrDefault(rpt.attackName, 0) + 1);
             physTotals.put(rpt.attackName, physTotals.getOrDefault(rpt.attackName, 0) + rpt.physAfter);
             magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
@@ -65,8 +65,10 @@ public class TestCreatureAttack {
             if (rpt.dualRoll) {
                 sawDualRoll.set(true);
             }
-            if (rpt.physAttempts > 0) observedPhysAttempts.addAndGet(rpt.physAttempts);
-            if (rpt.magicAttempts > 0) observedMagicAttempts.addAndGet(rpt.magicAttempts);
+            if (rpt.physAttempts > 0)
+                observedPhysAttempts.addAndGet(rpt.physAttempts);
+            if (rpt.magicAttempts > 0)
+                observedMagicAttempts.addAndGet(rpt.magicAttempts);
         };
 
         for (int i = 0; i < runs; i++) {
@@ -101,18 +103,20 @@ public class TestCreatureAttack {
             }
         }
 
-        // Basic diagnostic assertions (non-fatal): ensure counts align if dual rolls seen
+        // Basic diagnostic assertions (non-fatal): ensure counts align if dual rolls
+        // seen
         if (sawDualRoll.get()) {
-            // If dual roll occurred at least once we should have recorded some magic attempts
+            // If dual roll occurred at least once we should have recorded some magic
+            // attempts
             assert observedMagicAttempts.get() > 0 : "Expected magic attempts when dualRoll seen";
         }
         // Clear listener
-        com.bapppis.core.creature.Creature.attackListener = null;
+        com.bapppis.core.combat.AttackEngine.attackListener = null;
     }
 
     @Test
     public void testBigglesVsTrainingDummyMultipleAttacks() {
-    AllLoaders.loadAll();
+        AllLoaders.loadAll();
 
         Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;
@@ -124,10 +128,10 @@ public class TestCreatureAttack {
         // Testing versatile weapon attacks
         biggles.addItem(ItemLoader.getItemById(9801)); // Rusty Iron Sword
         biggles.equipItem(biggles.getInventory().getWeapons().get(1), true);
-        //biggles.setStat(Stats.INTELLIGENCE, 20);
-        //biggles.setStat(Stats.CHARISMA, 100);
-        //biggles.setStat(Stats.STRENGTH, 15);
-        //biggles.setStat(Stats.DEXTERITY, 20);
+        // biggles.setStat(Stats.INTELLIGENCE, 20);
+        // biggles.setStat(Stats.CHARISMA, 100);
+        // biggles.setStat(Stats.STRENGTH, 15);
+        // biggles.setStat(Stats.DEXTERITY, 20);
         System.out.println(biggles.toString());
 
         // Load training dummy as a target
@@ -145,16 +149,20 @@ public class TestCreatureAttack {
         // Install listener to capture detailed attack reports
         java.util.concurrent.atomic.AtomicInteger dualRollCount = new java.util.concurrent.atomic.AtomicInteger();
         java.util.concurrent.atomic.AtomicInteger trueDamageCount = new java.util.concurrent.atomic.AtomicInteger();
-        com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
+        com.bapppis.core.combat.AttackEngine.attackListener = (rpt) -> {
             counts.put(rpt.attackName, counts.getOrDefault(rpt.attackName, 0) + 1);
             physTotals.put(rpt.attackName, physTotals.getOrDefault(rpt.attackName, 0) + rpt.physAfter);
             magTotals.put(rpt.attackName, magTotals.getOrDefault(rpt.attackName, 0) + rpt.magAfter);
             physTypes.putIfAbsent(rpt.attackName, rpt.damageType == null ? "UNKNOWN" : rpt.damageType);
-            if (rpt.magicType != null) magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
+            if (rpt.magicType != null)
+                magTypes.putIfAbsent(rpt.attackName, rpt.magicType);
             timesPerAttack.putIfAbsent(rpt.attackName, rpt.times);
-            if (rpt.dualRoll) dualRollCount.incrementAndGet();
-            if (rpt.trueDamage) trueDamageCount.incrementAndGet();
-            // sanity: attempts should be >= misses for each category (not asserted per-report, but can be logged)
+            if (rpt.dualRoll)
+                dualRollCount.incrementAndGet();
+            if (rpt.trueDamage)
+                trueDamageCount.incrementAndGet();
+            // sanity: attempts should be >= misses for each category (not asserted
+            // per-report, but can be logged)
         };
 
         int runs = 50;
@@ -188,17 +196,19 @@ public class TestCreatureAttack {
         assert summedHits > 0;
 
         // Assert if any magic damage occurred there was at least one dualRoll report
-        int totalMag = 0; for (int v : magTotals.values()) totalMag += v;
+        int totalMag = 0;
+        for (int v : magTotals.values())
+            totalMag += v;
         if (totalMag > 0) {
             assert dualRollCount.get() >= 0; // allow 0 if weapon magic not present in tested runs
         }
         // Clear listener after test
-        com.bapppis.core.creature.Creature.attackListener = null;
+        com.bapppis.core.combat.AttackEngine.attackListener = null;
     }
 
     @Test
     public void testBigglesUnarmedAttack() {
-    AllLoaders.loadAll();
+        AllLoaders.loadAll();
 
         Player biggles = CreatureLoader.getPlayerById(5000);
         assert biggles != null;
@@ -220,7 +230,7 @@ public class TestCreatureAttack {
         java.util.concurrent.atomic.AtomicInteger attackCount = new java.util.concurrent.atomic.AtomicInteger(0);
 
         // Install listener to capture detailed attack reports
-        com.bapppis.core.creature.Creature.attackListener = (rpt) -> {
+        com.bapppis.core.combat.AttackEngine.attackListener = (rpt) -> {
             attackCount.getAndIncrement();
             // Print for debugging
             System.out.println("Unarmed attack report: " + rpt.attackName + " physAfter=" + rpt.physAfter
@@ -239,7 +249,7 @@ public class TestCreatureAttack {
         assert attackCount.get() > 0 : "Expected at least one unarmed attack report but got 0";
 
         // Clear listener
-        com.bapppis.core.creature.Creature.attackListener = null;
+        com.bapppis.core.combat.AttackEngine.attackListener = null;
     }
 
     // make an assert function for biggles

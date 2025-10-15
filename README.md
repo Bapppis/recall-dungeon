@@ -240,19 +240,45 @@ recall-dungeon/
 │  │  ├─ java/com/bapppis/core/
 │  │  │  ├─ Main.java
 │  │  │  ├─ core/
+│  │  │  │  ├─ AllLoaders.java
 │  │  │  │  ├─ creature/
+│  │  │  │  │  ├─ Attack.java
 │  │  │  │  │  ├─ Creature.java
-│  │  │  │  │  ├─ Enemy.java
 │  │  │  │  │  ├─ CreatureLoader.java
-│  │  │  │  │  └─ player/Player.java
+│  │  │  │  │  ├─ Enemy.java
+│  │  │  │  │  ├─ EquipmentManager.java
+│  │  │  │  │  ├─ Inventory.java
+│  │  │  │  │  ├─ PropertyManager.java
+│  │  │  │  │  └─ player/
 │  │  │  │  ├─ dungeon/
 │  │  │  │  ├─ event/
 │  │  │  │  ├─ game/
+│  │  │  │  ├─ combat/
+│  │  │  │  │  ├─ AttackEngine.java
+│  │  │  │  │  ├─ DefaultRandomProvider.java
+│  │  │  │  │  └─ RandomProvider.java
+│  │  │  │  ├─ gfx/
+│  │  │  │  │  ├─ DesktopLauncher.java
+│  │  │  │  │  ├─ MapActor.java
+│  │  │  │  │  └─ RecallDungeon.java
 │  │  │  │  ├─ item/
+│  │  │  │  │  ├─ Equipment.java
+│  │  │  │  │  ├─ EquipmentSlot.java
+│  │  │  │  │  ├─ Item.java
+│  │  │  │  │  ├─ ItemLoader.java
+│  │  │  │  │  ├─ ItemType.java
+│  │  │  │  │  ├─ Rarity.java
+│  │  │  │  │  └─ WeaponClass.java
+│  │  │  │  ├─ loot/
 │  │  │  │  ├─ property/
+│  │  │  │  │  ├─ Property.java
+│  │  │  │  │  ├─ PropertyLoader.java
+│  │  │  │  │  ├─ PropertyType.java
+│  │  │  │  │  └─ ResistanceMapDeserializer.java
+│  │  │  │  ├─ spell/
 │  │  │  │  └─ util/
-│  │  │  │     ├─ DebugLog.java
 │  │  │  │     ├─ AttackUtil.java
+│  │  │  │     ├─ DebugLog.java
 │  │  │  │     ├─ Dice.java
 │  │  │  │     ├─ LevelUtil.java
 │  │  │  │     ├─ ResistanceUtil.java

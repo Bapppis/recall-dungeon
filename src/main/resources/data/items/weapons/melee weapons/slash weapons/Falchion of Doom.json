@@ -10,8 +10,7 @@
   "damageType": "SLASHING",
   "magicElement": "DARKNESS",
   "magicStatBonuses": [
-    "CHARISMA",
-    "INTELLIGENCE"
+    "CHARISMA"
   ],
   "stats": {
     "STRENGTH": 2
@@ -21,6 +20,8 @@
   },
   "crit": 15,
   "block": 10,
+  "accuracy": 1,
+  "magicAccuracy": 1,
   "tooltip": [
     "You gain 15% critical chance while wielding this weapon.",
     "",
@@ -40,6 +41,8 @@
     {
       "name": "Double Slash",
       "damageType": "SLASHING",
+      "accuracy": null,
+      "magicAccuracy": null,
       "damageMultiplier": 0.5,
       "magicDamageDice": "1d4",
       "magicDamageMultiplier": 0.5,
@@ -50,6 +53,8 @@
     {
       "name": "Big Slash",
       "damageType": "SLASHING",
+      "accuracy": null,
+      "magicAccuracy": null,
       "critMod": "+10",
       "damageMultiplier": 1.0,
       "magicDamageDice": "1d8",
@@ -61,6 +66,8 @@
     {
       "name": "Shadow Slashes",
       "damageType": "SLASHING",
+      "accuracy": null,
+      "magicAccuracy": null,
       "critMod": "+5",
       "damageMultiplier": 0.25,
       "magicDamageDice": "1d2+2",

@@ -30,6 +30,9 @@ public class Property {
     private Float dodge;
     private Float block;
     private Float magicResist;
+    // Optional accuracy modifiers added to to-hit rolls
+    private Integer accuracy;
+    private Integer magicAccuracy;
     // Optional max pools deltas (positive or negative)
     private Integer maxHp;
     private Integer maxStamina;
@@ -115,6 +118,10 @@ public class Property {
     public void setBlock(Float block) { this.block = block; }
     public Float getMagicResist() { return magicResist; }
     public void setMagicResist(Float magicResist) { this.magicResist = magicResist; }
+    public Integer getAccuracy() { return accuracy; }
+    public void setAccuracy(Integer accuracy) { this.accuracy = accuracy; }
+    public Integer getMagicAccuracy() { return magicAccuracy; }
+    public void setMagicAccuracy(Integer magicAccuracy) { this.magicAccuracy = magicAccuracy; }
 
     public Integer getMaxHp() { return maxHp; }
     public void setMaxHp(Integer maxHp) { this.maxHp = maxHp; }
@@ -207,6 +214,13 @@ public class Property {
         if (magicResist != null && magicResist != 0f) {
             creature.modifyPropertyMagicResist(magicResist);
         }
+        // Apply accuracy modifiers if present
+        if (accuracy != null && accuracy != 0) {
+            creature.modifyPropertyAccuracy(accuracy);
+        }
+        if (magicAccuracy != null && magicAccuracy != 0) {
+            creature.modifyPropertyMagicAccuracy(magicAccuracy);
+        }
         // Apply max pool deltas
         if (maxHp != null && maxHp != 0) {
             creature.setMaxHp(creature.getMaxHp() + maxHp);
@@ -295,8 +309,17 @@ public class Property {
         if (block != null && block != 0f) {
             creature.modifyPropertyBlock(-block);
         }
+        // Revert property accuracy modifiers if any (handled in onApply when present)
+        // No-op here because Property currently models statModifiers as enum-keyed map and
+        // the per-property accuracy fields were not modeled separately.
         if (magicResist != null && magicResist != 0f) {
             creature.modifyPropertyMagicResist(-magicResist);
+        }
+        if (accuracy != null && accuracy != 0) {
+            creature.modifyPropertyAccuracy(-accuracy);
+        }
+        if (magicAccuracy != null && magicAccuracy != 0) {
+            creature.modifyPropertyMagicAccuracy(-magicAccuracy);
         }
         // Revert max pool deltas
         if (maxHp != null && maxHp != 0) {
