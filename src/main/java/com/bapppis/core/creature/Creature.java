@@ -143,47 +143,6 @@ public abstract class Creature {
         TRUE,
     }
 
-    // --- Nested Types ---
-    public static class AttackReport {
-        public String attackName;
-        public int physRaw;
-        public int magRaw;
-        /** total physical after crits but before resistances */
-        public int physAfterCritBeforeResist;
-        public int physAfter;
-        public int magAfter;
-        public int times;
-        public String damageType;
-        public String magicType;
-        /** number of individual hit crits in this attack invocation */
-        public int critCount;
-        public boolean isCrit;
-        public Creature attacker;
-        public Creature target;
-        // Weapon/attack magic debug fields
-        public int magicStatBonus; // the raw stat bonus used from the weapon (e.g., INT bonus)
-        public int magicStatExtra; // extra magic damage added after multiplier and floor
-        public float magicDamageMultiplier; // attack.magicDamageMultiplier
-        // Weapon/attack physical debug fields
-        public int physStatBase; // base stat bonus used for physical damage (determineStatBonusForWeapon)
-        public int physStatExtra; // extra physical damage added after multiplier and floor
-        public float physDamageMultiplier; // attack.damageMultiplier
-        // Chosen stat names for clarity in tests
-        public String magicStatChosen;
-        public String physStatChosen;
-        // New diagnostic fields for dual-resolution system
-        public int physCritCount; // number of critical physical hits
-        public int magicCritCount; // number of critical magic hits
-        public int physAttempts; // number of physical hit attempts
-        public int physMissDodge; // count of physical misses due to dodge
-        public int physMissBlock; // count of physical misses due to block
-        public int magicAttempts; // number of magic hit attempts
-        public int magicMissDodge; // magic misses due to dodge
-        public int magicMissResist; // magic misses due to magicResist avoidance
-        public boolean dualRoll; // true if both physical and magic parts rolled separately
-        public boolean trueDamage; // true if physicalType classified as TRUE
-    }
-
     // --- Constructor ---
     public Creature() {
         stats = new EnumMap<>(Stats.class);

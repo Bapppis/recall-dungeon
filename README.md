@@ -72,7 +72,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
   - Physical hits use a dodge+block partition (block prevents damage like armor); TRUE-type physical damage ignores block and only checks dodge.
   - Magical hits use dodge + magic resist as the avoidance window (no block).
   - Weapons with a magic element can trigger a dual-resolution attack: physical and magical parts are resolved independently and reported separately.
-  - Crits are rolled per successful hit and are included in detailed `AttackReport` objects emitted via `Creature.attackListener` (useful for tests).
+  - Crits are rolled per successful hit and are included in detailed `AttackEngine.AttackReport` objects emitted via `AttackEngine.attackListener` (useful for tests).
 
 ### Properties & Traits
 
@@ -151,7 +151,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus.
 
 Developer/testing hooks:
 
-- `Creature.attackListener` — set this to a `Consumer<AttackReport>` to receive detailed per-attack reports (raw rolls, crit counts, after-resist damage, per-component diagnostics). Very useful for deterministic unit tests.
+- `AttackEngine.attackListener` — set this to a `Consumer<AttackEngine.AttackReport>` to receive detailed per-attack reports (raw rolls, crit counts, after-resist damage, per-component diagnostics). Very useful for deterministic unit tests.
 - Non-interactive combat: the combat code supports programmatic/non-interactive runs to make tests and CI deterministic.
 
 ---
@@ -213,7 +213,7 @@ Developer/testing hooks:
 
 Developer/testing hooks:
 
-- You can set `Creature.attackListener` to a consumer to receive per-attack roll details (raw, after crit, after resist, crit count, types) for tests or debugging.
+- You can set `AttackEngine.attackListener` to a consumer to receive per-attack roll details (raw, after crit, after resist, crit count, types) for tests or debugging.
 - Combat prints (missed dodge/block, crits) are emitted to console for debugging/tests.
 
 ---
