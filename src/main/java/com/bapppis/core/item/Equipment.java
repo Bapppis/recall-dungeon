@@ -2,6 +2,8 @@ package com.bapppis.core.item;
 
 import com.bapppis.core.creature.Attack;
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.Resistances;
+import com.bapppis.core.Stats;
 import com.bapppis.core.util.Dice;
 
 import java.util.List;
@@ -53,44 +55,44 @@ public class Equipment implements Item {
     private WeaponClass weaponClass = WeaponClass.MELEE;
 
     // Always required: one of BLUDGEONING, PIERCING, SLASHING
-    private com.bapppis.core.creature.Creature.Resistances damageType;
+    private Resistances damageType;
 
     // Optional: magical element (can be null if not present)
-    private com.bapppis.core.creature.Creature.Resistances magicElement;
+    private Resistances magicElement;
 
-    private com.bapppis.core.creature.Creature.Stats magicStatBonus;
+    private Stats magicStatBonus;
     // Optional: allow multiple stats to serve as magic stat bonus candidates
-    private java.util.List<com.bapppis.core.creature.Creature.Stats> magicStatBonuses;
+    private java.util.List<Stats> magicStatBonuses;
 
-    public com.bapppis.core.creature.Creature.Resistances getDamageType() {
+    public Resistances getDamageType() {
         return damageType;
     }
 
-    public void setDamageType(com.bapppis.core.creature.Creature.Resistances damageType) {
+    public void setDamageType(Resistances damageType) {
         this.damageType = damageType;
     }
 
-    public com.bapppis.core.creature.Creature.Resistances getMagicElement() {
+    public Resistances getMagicElement() {
         return magicElement;
     }
 
-    public void setMagicElement(com.bapppis.core.creature.Creature.Resistances magicElement) {
+    public void setMagicElement(Resistances magicElement) {
         this.magicElement = magicElement;
     }
 
-    public com.bapppis.core.creature.Creature.Stats getMagicStatBonus() {
+    public Stats getMagicStatBonus() {
         return magicStatBonus;
     }
 
-    public void setMagicStatBonus(com.bapppis.core.creature.Creature.Stats magicStatBonus) {
+    public void setMagicStatBonus(Stats magicStatBonus) {
         this.magicStatBonus = magicStatBonus;
     }
 
-    public java.util.List<com.bapppis.core.creature.Creature.Stats> getMagicStatBonuses() {
+    public java.util.List<Stats> getMagicStatBonuses() {
         return magicStatBonuses;
     }
 
-    public void setMagicStatBonuses(java.util.List<com.bapppis.core.creature.Creature.Stats> magicStatBonuses) {
+    public void setMagicStatBonuses(java.util.List<Stats> magicStatBonuses) {
         this.magicStatBonuses = magicStatBonuses;
     }
 

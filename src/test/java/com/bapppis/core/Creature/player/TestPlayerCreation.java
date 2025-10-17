@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.Creature.Stats;
+import com.bapppis.core.Stats;
 import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.AllLoaders;
 
@@ -37,16 +37,16 @@ public class TestPlayerCreation {
         assertEquals("Captain Aldric Voss", captainVoss.getName());
         assertEquals(30, captainVoss.getMaxHp());
         assertEquals(30, captainVoss.getCurrentHp());
-        assertEquals(com.bapppis.core.creature.Creature.Size.MEDIUM, captainVoss.getSize());
-        assertEquals(com.bapppis.core.creature.Creature.Type.PLAYER, captainVoss.getType());
-        assertEquals(com.bapppis.core.creature.Creature.CreatureType.HUMANOID, captainVoss.getCreatureType());
-        assertEquals(14, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.STRENGTH));
-        assertEquals(11, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.DEXTERITY));
-        assertEquals(13, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.CONSTITUTION));
-        assertEquals(11, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.INTELLIGENCE));
-        assertEquals(11, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.WISDOM));
-        assertEquals(11, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.CHARISMA));
-        assertEquals(1, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.LUCK));
+        assertEquals(com.bapppis.core.Size.MEDIUM, captainVoss.getSize());
+        assertEquals(com.bapppis.core.Type.PLAYER, captainVoss.getType());
+        assertEquals(com.bapppis.core.CreatureType.HUMANOID, captainVoss.getCreatureType());
+    assertEquals(14, captainVoss.getStat(Stats.STRENGTH));
+    assertEquals(11, captainVoss.getStat(Stats.DEXTERITY));
+    assertEquals(13, captainVoss.getStat(Stats.CONSTITUTION));
+    assertEquals(11, captainVoss.getStat(Stats.INTELLIGENCE));
+    assertEquals(11, captainVoss.getStat(Stats.WISDOM));
+    assertEquals(11, captainVoss.getStat(Stats.CHARISMA));
+    assertEquals(1, captainVoss.getStat(Stats.LUCK));
     }
 
     private void assertCaptainVossDebuffed(Player captainVoss) {
@@ -54,15 +54,15 @@ public class TestPlayerCreation {
         assertEquals("Captain Aldric Voss", captainVoss.getName());
         assertEquals(30, captainVoss.getMaxHp());
         assertEquals(30, captainVoss.getCurrentHp());
-        assertEquals(com.bapppis.core.creature.Creature.Size.MEDIUM, captainVoss.getSize());
-        assertEquals(com.bapppis.core.creature.Creature.Type.PLAYER, captainVoss.getType());
-        assertEquals(com.bapppis.core.creature.Creature.CreatureType.HUMANOID, captainVoss.getCreatureType());
-        assertEquals(13, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.STRENGTH));
-        assertEquals(10, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.DEXTERITY));
-        assertEquals(12, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.CONSTITUTION));
-        assertEquals(10, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.INTELLIGENCE));
-        assertEquals(10, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.WISDOM));
-        assertEquals(10, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.CHARISMA));
-        assertEquals(1, captainVoss.getStat(com.bapppis.core.creature.Creature.Stats.LUCK));
+        assertEquals(com.bapppis.core.Size.MEDIUM, captainVoss.getSize());
+        assertEquals(com.bapppis.core.Type.PLAYER, captainVoss.getType());
+        assertEquals(com.bapppis.core.CreatureType.HUMANOID, captainVoss.getCreatureType());
+    assertEquals(13, captainVoss.getStat(Stats.STRENGTH));
+    assertEquals(10, captainVoss.getStat(Stats.DEXTERITY));
+    assertEquals(12, captainVoss.getStat(Stats.CONSTITUTION));
+    assertEquals(10, captainVoss.getStat(Stats.INTELLIGENCE));
+    assertEquals(10, captainVoss.getStat(Stats.WISDOM));
+    assertEquals(10, captainVoss.getStat(Stats.CHARISMA));
+    assertEquals(1, captainVoss.getStat(Stats.LUCK));
     }
 }

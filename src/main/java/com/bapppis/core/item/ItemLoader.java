@@ -1,6 +1,5 @@
 package com.bapppis.core.item;
 
-import com.google.gson.Gson;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
@@ -18,7 +17,10 @@ public class ItemLoader {
         itemIdMap.clear();
         itemNameMap.clear();
 
-        Gson gson = new Gson();
+    com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+        .registerTypeAdapter(com.bapppis.core.Resistances.class,
+            new com.bapppis.core.util.ResistancesDeserializer())
+        .create();
     try (ScanResult scanResult = new ClassGraph()
         .acceptPaths("data/items") // Scan all item folders
         .scan()) {

@@ -3,16 +3,9 @@ package com.bapppis.core.Creature.player;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.lwjgl.system.linux.Stat;
-
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.AllLoaders;
-import com.bapppis.core.creature.Creature.Stats;
 import com.bapppis.core.creature.player.Player;
-import com.bapppis.core.item.ItemLoader;
-import com.bapppis.core.property.PropertyLoader;
-import com.bapppis.core.util.StatUtil;
-import com.bapppis.core.util.LevelUtil;
 
 public class TestBigglesCreation {
     @Test
@@ -34,21 +27,21 @@ public class TestBigglesCreation {
         // delta (12 -> +2) => 11
         assertEquals(11, biggles.getMaxHp());
         assertEquals(11, biggles.getCurrentHp());
-        assertEquals(com.bapppis.core.creature.Creature.Size.SMALL, biggles.getSize());
-        assertEquals(com.bapppis.core.creature.Creature.Type.PLAYER, biggles.getType());
-        assertEquals(com.bapppis.core.creature.Creature.CreatureType.HUMANOID, biggles.getCreatureType());
-        assertEquals(7, biggles.getStat(com.bapppis.core.creature.Creature.Stats.INTELLIGENCE));
-        assertEquals(2, biggles.getStat(com.bapppis.core.creature.Creature.Stats.LUCK));
+        assertEquals(com.bapppis.core.Size.SMALL, biggles.getSize());
+        assertEquals(com.bapppis.core.Type.PLAYER, biggles.getType());
+        assertEquals(com.bapppis.core.CreatureType.HUMANOID, biggles.getCreatureType());
+    assertEquals(7, biggles.getStat(com.bapppis.core.Stats.INTELLIGENCE));
+    assertEquals(2, biggles.getStat(com.bapppis.core.Stats.LUCK));
     }
 
     private void assertBigglesDebuffed(Player biggles) {
         assertEquals("Biggles The Unlucky", biggles.getName());
         assertEquals(11, biggles.getMaxHp());
         assertEquals(11, biggles.getCurrentHp());
-        assertEquals(com.bapppis.core.creature.Creature.Size.SMALL, biggles.getSize());
-        assertEquals(com.bapppis.core.creature.Creature.Type.PLAYER, biggles.getType());
-        assertEquals(com.bapppis.core.creature.Creature.CreatureType.HUMANOID, biggles.getCreatureType());
-        assertEquals(6, biggles.getStat(com.bapppis.core.creature.Creature.Stats.INTELLIGENCE));
-        assertEquals(1, biggles.getStat(com.bapppis.core.creature.Creature.Stats.LUCK));
+        assertEquals(com.bapppis.core.Size.SMALL, biggles.getSize());
+        assertEquals(com.bapppis.core.Type.PLAYER, biggles.getType());
+        assertEquals(com.bapppis.core.CreatureType.HUMANOID, biggles.getCreatureType());
+    assertEquals(6, biggles.getStat(com.bapppis.core.Stats.INTELLIGENCE));
+    assertEquals(1, biggles.getStat(com.bapppis.core.Stats.LUCK));
     }
 }

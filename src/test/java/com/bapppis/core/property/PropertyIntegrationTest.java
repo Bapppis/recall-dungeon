@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.Stats;
 
 public class PropertyIntegrationTest {
 
@@ -39,8 +40,8 @@ public class PropertyIntegrationTest {
         // Use the Property API to inspect the stat modifiers (no concrete type assumptions)
         System.out.println("Coward statModifiers: " + coward.getStatModifiers());
         assertNotNull(coward.getStatModifiers(), "Coward.statModifiers must not be null");
-        assertTrue(coward.getStatModifiers().containsKey(com.bapppis.core.creature.Creature.Stats.STRENGTH), "Coward must modify STRENGTH");
-        assertTrue(coward.getStatModifiers().containsKey(com.bapppis.core.creature.Creature.Stats.DEXTERITY), "Coward must modify DEXTERITY");
+    assertTrue(coward.getStatModifiers().containsKey(Stats.STRENGTH), "Coward must modify STRENGTH");
+    assertTrue(coward.getStatModifiers().containsKey(Stats.DEXTERITY), "Coward must modify DEXTERITY");
 
         biggles.addProperty(coward);
         System.out.println("After adding Coward:\n" + biggles);

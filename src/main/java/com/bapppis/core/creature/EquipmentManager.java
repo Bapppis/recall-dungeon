@@ -5,6 +5,8 @@ import com.bapppis.core.item.Item;
 import com.bapppis.core.item.EquipmentSlot;
 
 import java.util.Map;
+import com.bapppis.core.Resistances;
+import com.bapppis.core.Stats;
 
 /**
  * Helper that centralizes equipment slot management and application/removal of
@@ -175,7 +177,7 @@ class EquipmentManager {
                         } else if (key.equalsIgnoreCase("MAGIC_ACCURACY")) {
                             creature.adjustEquipmentMagicAccuracy(entry.getValue());
                         } else {
-                            Creature.Stats stat = Creature.Stats.valueOf(key);
+                            Stats stat = Stats.valueOf(key);
                             creature.adjustEquipmentStat(stat, entry.getValue());
                             creature.modifyStat(stat, entry.getValue());
                         }
@@ -190,7 +192,7 @@ class EquipmentManager {
         if (eq.getResistances() != null) {
             for (Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
                 try {
-                    Creature.Resistances res = Creature.Resistances.valueOf(entry.getKey());
+                    Resistances res = Resistances.valueOf(entry.getKey());
                     creature.adjustEquipmentResist(res, entry.getValue());
                     creature.modifyResistance(res, entry.getValue());
                 } catch (IllegalArgumentException e) {
@@ -247,7 +249,7 @@ class EquipmentManager {
                         } else if (key.equalsIgnoreCase("MAGIC_ACCURACY")) {
                             creature.adjustEquipmentMagicAccuracy(-entry.getValue());
                         } else {
-                            Creature.Stats stat = Creature.Stats.valueOf(key);
+                            Stats stat = Stats.valueOf(key);
                             creature.adjustEquipmentStat(stat, -entry.getValue());
                             creature.modifyStat(stat, -entry.getValue());
                         }
@@ -262,7 +264,7 @@ class EquipmentManager {
         if (eq.getResistances() != null) {
             for (Map.Entry<String, Integer> entry : eq.getResistances().entrySet()) {
                 try {
-                    Creature.Resistances res = Creature.Resistances.valueOf(entry.getKey());
+                    Resistances res = Resistances.valueOf(entry.getKey());
                     creature.adjustEquipmentResist(res, -entry.getValue());
                     creature.modifyResistance(res, -entry.getValue());
                 } catch (IllegalArgumentException e) {

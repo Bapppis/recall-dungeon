@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.Stats;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
@@ -40,22 +41,22 @@ public class NameLookupTest {
     try { biggles.removeProperty(coward.getId()); } catch (Exception ignored) {}
 
     // Record base STR/DEX
-    int baseStr = biggles.getStat(Creature.Stats.STRENGTH);
-    int baseDex = biggles.getStat(Creature.Stats.DEXTERITY);
+    int baseStr = biggles.getStat(Stats.STRENGTH);
+    int baseDex = biggles.getStat(Stats.DEXTERITY);
 
     // Add property by name (string) using the new convenience method
     boolean added = biggles.addProperty("Coward");
     assertTrue(added, "addProperty by name should return true when found");
 
     // After applying Coward, STR should be decreased (Coward JSON reduces STR by 2)
-    int newStr = biggles.getStat(Creature.Stats.STRENGTH);
-    int newDex = biggles.getStat(Creature.Stats.DEXTERITY);
+    int newStr = biggles.getStat(Stats.STRENGTH);
+    int newDex = biggles.getStat(Stats.DEXTERITY);
     assertEquals(baseStr - 2, newStr, "STR should be reduced by Coward property");
     assertEquals(baseDex + 2, newDex, "DEX should be increased by Coward property");
 
     // Clean up: remove by id and verify stats restored
     biggles.removeProperty(coward.getId());
-    assertEquals(baseStr, biggles.getStat(Creature.Stats.STRENGTH));
-    assertEquals(baseDex, biggles.getStat(Creature.Stats.DEXTERITY));
+    assertEquals(baseStr, biggles.getStat(Stats.STRENGTH));
+    assertEquals(baseDex, biggles.getStat(Stats.DEXTERITY));
     }
 }

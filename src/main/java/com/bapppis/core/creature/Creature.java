@@ -10,6 +10,11 @@ import com.bapppis.core.util.LevelUtil;
 import com.bapppis.core.util.StatUtil;
 
 import com.bapppis.core.property.Property;
+import com.bapppis.core.CreatureType;
+import com.bapppis.core.Resistances;
+import com.bapppis.core.Size;
+import com.bapppis.core.Stats;
+import com.bapppis.core.Type;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.EquipmentSlot;
@@ -92,56 +97,6 @@ public abstract class Creature {
         return sprite;
     }
 
-    // --- Enums ---
-    public enum Size {
-        SMALL,
-        MEDIUM,
-        LARGE,
-        HUGE,
-        GARGANTUAN,
-    }
-
-    public enum Type {
-        PLAYER,
-        NPC,
-        ENEMY,
-    }
-
-    public enum CreatureType {
-        BEAST,
-        CONSTRUCT,
-        DRAGON,
-        ELEMENTAL,
-        HUMANOID,
-        PLANT,
-        UNDEAD,
-        UNKNOWN,
-    }
-
-    public enum Stats {
-        STRENGTH,
-        DEXTERITY,
-        CONSTITUTION,
-        INTELLIGENCE,
-        WISDOM,
-        CHARISMA,
-        LUCK,
-    }
-
-    public enum Resistances {
-        FIRE,
-        WATER,
-        WIND,
-        ICE,
-        NATURE,
-        LIGHTNING,
-        LIGHT,
-        DARKNESS,
-        BLUDGEONING,
-        PIERCING,
-        SLASHING,
-        TRUE,
-    }
 
     // --- Constructor ---
     public Creature() {
@@ -810,8 +765,8 @@ public abstract class Creature {
             chosen = AttackUtil.chooseAttackFromList(this.attacks);
             // For creature attacks, default to strength for physical damage
             int statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
-            Resistances physType = ResistanceUtil.parse(chosen == null ? null : chosen.damageType);
-            Resistances magType = ResistanceUtil.parse(chosen == null ? null : chosen.magicDamageType);
+            Resistances physType = (chosen == null ? null : chosen.getDamageTypeEnum());
+            Resistances magType = (chosen == null ? null : chosen.getMagicDamageTypeEnum());
             com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, chosen, statBonus, target, physType,
                     magType, null);
             return;
@@ -1113,6 +1068,7 @@ public abstract class Creature {
         sb.append("Creature: ").append(name == null ? "<unnamed>" : name).append(" (Id:").append(id).append(")\n");
         sb.append("Level: ").append(level).append(" (").append("XP: ").append(getXp()).append("/")
                 .append(LevelUtil.xpForNextLevel(level)).append(") ")
+                .append(this.getSize() == null ? "" : this.getSize().name()).append(" ")
                 .append(creatureType == null ? "" : creatureType.name()).append("\n");
 
         // Health / resources

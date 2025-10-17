@@ -2,9 +2,7 @@ package com.bapppis.core.creature;
 
 import com.bapppis.core.property.PropertyLoader;
 import com.bapppis.core.property.Property;
-import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
-import com.google.gson.Gson;
 import com.bapppis.core.creature.player.Player;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
@@ -36,7 +34,10 @@ public class CreatureLoader {
             // ignore if items already loaded or loading fails here
         }
 
-        Gson gson = new Gson();
+    com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+        .registerTypeAdapter(com.bapppis.core.Resistances.class,
+            new com.bapppis.core.util.ResistancesDeserializer())
+        .create();
     try (ScanResult scanResult = new ClassGraph()
         // Scan production creature data and the test fixture package so unit tests
         // find JSON under com/... during test execution.
@@ -85,25 +86,25 @@ public class CreatureLoader {
                             // Determine creature type based on id ranges when available
                             int cidForType = creature.getId();
                             if (cidForType >= 5000 && cidForType < 6000) {
-                                creature.setType(Creature.Type.PLAYER);
+                                creature.setType(com.bapppis.core.Type.PLAYER);
                             } else if (cidForType >= 6000 && cidForType < 7000) {
-                                creature.setType(Creature.Type.ENEMY);
+                                creature.setType(com.bapppis.core.Type.ENEMY);
                             }
                             // Ensure all stats are set to defaults if missing
                             // Only set default if stat key is missing from the map
                             @SuppressWarnings("unchecked")
-                            EnumMap<Creature.Stats, Integer> statMap = null;
+                            EnumMap<com.bapppis.core.Stats, Integer> statMap = null;
                             try {
                                 java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
                                 statsField.setAccessible(true);
-                                statMap = (EnumMap<Creature.Stats, Integer>) statsField.get(creature);
+                                statMap = (EnumMap<com.bapppis.core.Stats, Integer>) statsField.get(creature);
                             } catch (Exception e) {
                                 // Should not happen
                             }
                             if (statMap != null) {
-                                for (Creature.Stats stat : Creature.Stats.values()) {
+                                for (com.bapppis.core.Stats stat : com.bapppis.core.Stats.values()) {
                                     if (!statMap.containsKey(stat)) {
-                                        if (stat == Creature.Stats.LUCK) {
+                                        if (stat == com.bapppis.core.Stats.LUCK) {
                                             creature.setStat(stat, 1);
                                         } else {
                                             creature.setStat(stat, 10);
@@ -113,16 +114,16 @@ public class CreatureLoader {
                             }
                             // Ensure all resistances are set to 100 unless provided
                             @SuppressWarnings("unchecked")
-                            EnumMap<Creature.Resistances, Integer> resistMap = null;
+                            EnumMap<com.bapppis.core.Resistances, Integer> resistMap = null;
                             try {
                                 java.lang.reflect.Field resistField = Creature.class.getDeclaredField("resistances");
                                 resistField.setAccessible(true);
-                                resistMap = (EnumMap<Creature.Resistances, Integer>) resistField.get(creature);
+                                resistMap = (EnumMap<com.bapppis.core.Resistances, Integer>) resistField.get(creature);
                             } catch (Exception e) {
                                 // Should not happen
                             }
                             if (resistMap != null) {
-                                for (Creature.Resistances res : Creature.Resistances.values()) {
+                                for (com.bapppis.core.Resistances res : com.bapppis.core.Resistances.values()) {
                                     if (!resistMap.containsKey(res)) {
                                         creature.setResistance(res, 100);
                                     }
@@ -182,7 +183,7 @@ public class CreatureLoader {
         }
     }
 
-    private static void applyStartingItemsFromJson(String resourcePath, Gson gson, Creature creature) {
+    private static void applyStartingItemsFromJson(String resourcePath, com.google.gson.Gson gson, Creature creature) {
         try (Reader reader = new InputStreamReader(
                 CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
             com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);
@@ -229,7 +230,7 @@ public class CreatureLoader {
     }
 
     // Helper to extract property IDs from JSON
-    private static List<Integer> getPropertyIdsFromJson(String resourcePath, Gson gson) {
+    private static List<Integer> getPropertyIdsFromJson(String resourcePath, com.google.gson.Gson gson) {
         try (Reader reader = new InputStreamReader(
                 CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
             com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);

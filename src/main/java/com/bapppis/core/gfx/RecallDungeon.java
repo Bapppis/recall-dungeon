@@ -7,12 +7,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import com.badlogic.gdx.scenes.scene2d.Stage;
-// import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.bapppis.core.game.Game;
-import com.bapppis.core.item.ItemLoader;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisTextButton;
@@ -91,11 +89,9 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-    // Build a list of player names from loaded players
-    java.util.List<Player> tmpPlayers = CreatureLoader.getAllPlayers();
-    final java.util.List<Player> players = (tmpPlayers == null)
-        ? java.util.Collections.emptyList()
-        : tmpPlayers;
+        // Build a list of player names from loaded players
+        java.util.List<Player> tmpPlayers = CreatureLoader.getAllPlayers();
+        final java.util.List<Player> players = (tmpPlayers == null) ? java.util.Collections.emptyList() : tmpPlayers;
         final String[] names = players.stream().map(p -> p == null ? "<unknown>" : p.getName()).toArray(String[]::new);
 
         VisList<String> list = new VisList<>();
@@ -124,15 +120,18 @@ public class RecallDungeon extends ApplicationAdapter {
                 stage.getRoot().setUserObject(game);
                 showFloorView();
                 // Spawn a goblin for quick combat testing (id 6400)
-                /* try {
-                    com.bapppis.core.creature.Creature goblin = com.bapppis.core.creature.CreatureLoader
-                            .getCreatureById(6400);
-                    if (goblin != null) {
-                        showCombatView(goblin);
-                    }
-                } catch (Exception e) {
-                    Gdx.app.error("RecallDungeon", "Error spawning test goblin", e);
-                } */
+                /*
+                 * try {
+                 * com.bapppis.core.creature.Creature goblin =
+                 * com.bapppis.core.creature.CreatureLoader
+                 * .getCreatureById(6400);
+                 * if (goblin != null) {
+                 * showCombatView(goblin);
+                 * }
+                 * } catch (Exception e) {
+                 * Gdx.app.error("RecallDungeon", "Error spawning test goblin", e);
+                 * }
+                 */
             }
         });
 
@@ -155,8 +154,7 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Center area: map label inside a scroll pane
-        // Try to use a bundled bitmap font (prefer smaller/monospaced if present).
+        // Choose a font for the map if available
         BitmapFont chosen = null;
         try {
             if (Gdx.files.internal("font-small.fnt").exists()) {
@@ -167,136 +165,17 @@ public class RecallDungeon extends ApplicationAdapter {
         } catch (Exception e) {
             Gdx.app.log("RecallDungeon", "Error loading bitmap font for map", e);
         }
-        if (chosen == null)
-            chosen = font; // fallback to default
-        // keep track so we can dispose only if it's different from the main `font`
-        mapFont = chosen != font ? chosen : null;
 
-        // Attempt to load a sprite atlas from packaged assets. If present, MapActor
-        // will draw sprites for mapped characters, otherwise fall back to text.
-        com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = null;
-        try {
-            if (Gdx.files.internal("assets/sprites.atlas").exists()) {
-                atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("assets/sprites.atlas"));
-                Gdx.app.log("RecallDungeon", "Loaded assets/sprites.atlas");
-            } else if (Gdx.files.internal("sprites.atlas").exists()) {
-                atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("sprites.atlas"));
-                Gdx.app.log("RecallDungeon", "Loaded sprites.atlas from project root");
-            }
-        } catch (Exception e) {
-            Gdx.app.error("RecallDungeon", "Error loading sprites atlas", e);
-            atlas = null;
-        }
-
-        // load mapping from assets/tiles.json if present, otherwise fall back to defaults
+        // Minimal, robust mapping: provide sensible defaults so UI compiles and runs
         java.util.Map<Character, String> charToRegion = new java.util.HashMap<>();
-        try {
-            if (Gdx.files.internal("assets/tiles.json").exists()) {
-                String json = Gdx.files.internal("assets/tiles.json").readString();
-                com.badlogic.gdx.utils.JsonReader jr = new com.badlogic.gdx.utils.JsonReader();
-                com.badlogic.gdx.utils.JsonValue root = jr.parse(json);
-                com.badlogic.gdx.utils.JsonValue mappings = root.get("mappings");
-                if (mappings != null) {
-                    for (com.badlogic.gdx.utils.JsonValue entry = mappings.child; entry != null; entry = entry.next) {
-                        String key = entry.name();
-                        if (key != null && key.length() > 0) {
-                            char ch = key.charAt(0);
-                            String region = entry.asString();
-                            charToRegion.put(ch, region);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Gdx.app.error("RecallDungeon", "Error parsing assets/tiles.json", e);
-        }
-        if (charToRegion.isEmpty()) {
-            charToRegion.put('#', "wall");
-            charToRegion.put('.', "floor");
-            charToRegion.put('^', "stairs_up");
-            charToRegion.put('v', "stairs_down");
-            // default player sprite key: use a generic player_default region if available
-            charToRegion.put('P', "player_default");
-        }
+        charToRegion.put('#', "wall");
+        charToRegion.put('.', "floor");
+        charToRegion.put('^', "stairs_up");
+        charToRegion.put('v', "stairs_down");
+        charToRegion.put('P', "player_default");
 
-        // If atlas missing, try to load individual PNGs named after region (e.g. floor.png)
         java.util.Map<Character, com.badlogic.gdx.graphics.g2d.TextureRegion> charTextureRegions = new java.util.HashMap<>();
-        java.util.List<com.badlogic.gdx.graphics.Texture> createdTextures = new java.util.ArrayList<>();
-        if (atlas == null) {
-            for (java.util.Map.Entry<Character, String> e : charToRegion.entrySet()) {
-                String fileName = e.getValue() + ".png"; // e.g. floor.png
-                try {
-                    if (Gdx.files.internal(fileName).exists()) {
-                        com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal(fileName));
-                        createdTextures.add(t);
-                        com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
-                        charTextureRegions.put(e.getKey(), tr);
-                        Gdx.app.log("RecallDungeon", "Loaded texture for " + e.getKey() + " -> " + fileName);
-                    } else if (Gdx.files.internal("assets/" + fileName).exists()) {
-                        com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("assets/" + fileName));
-                        createdTextures.add(t);
-                        com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
-                        charTextureRegions.put(e.getKey(), tr);
-                        Gdx.app.log("RecallDungeon", "Loaded texture for " + e.getKey() + " -> assets/" + fileName);
-                    }
-                } catch (Exception ex) {
-                    Gdx.app.error("RecallDungeon", "Error loading texture " + fileName, ex);
-                }
-            }
-        }
-
-        // --- Runtime override: prefer player-specific sprite for 'P' ---
-        try {
-            com.bapppis.core.creature.player.Player current = com.bapppis.core.game.GameState.getPlayer();
-            if (current != null) {
-                String spriteKey = current.getSprite();
-                if (spriteKey != null && !spriteKey.trim().isEmpty()) {
-                    // if atlas contains region, use it
-                    if (atlas != null && atlas.findRegion(spriteKey) != null) {
-                        charToRegion.put('P', spriteKey);
-                        Gdx.app.log("RecallDungeon", "Player sprite mapping from creature: 'P' -> " + spriteKey + " (atlas)");
-                    } else {
-                        // try to load PNG from sprite_pngs or assets/sprite_pngs
-                        String pngName = spriteKey + ".png";
-                        boolean loaded = false;
-                        try {
-                            if (Gdx.files.internal("sprite_pngs/" + pngName).exists()) {
-                                com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("sprite_pngs/" + pngName));
-                                createdTextures.add(t);
-                                com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
-                                charTextureRegions.put('P', tr);
-                                charToRegion.put('P', spriteKey);
-                                loaded = true;
-                                Gdx.app.log("RecallDungeon", "Loaded player PNG sprite for P -> sprite_pngs/" + pngName);
-                            } else if (Gdx.files.internal("assets/sprite_pngs/" + pngName).exists()) {
-                                com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("assets/sprite_pngs/" + pngName));
-                                createdTextures.add(t);
-                                com.badlogic.gdx.graphics.g2d.TextureRegion tr = new com.badlogic.gdx.graphics.g2d.TextureRegion(t);
-                                charTextureRegions.put('P', tr);
-                                charToRegion.put('P', spriteKey);
-                                loaded = true;
-                                Gdx.app.log("RecallDungeon", "Loaded player PNG sprite for P -> assets/sprite_pngs/" + pngName);
-                            }
-                        } catch (Exception ex) {
-                            Gdx.app.error("RecallDungeon", "Error loading player PNG sprite " + pngName, ex);
-                        }
-                        if (!loaded) {
-                            // fallback: attempt to use atlas region if present, otherwise revert to 'player_default'
-                            if (atlas != null && atlas.findRegion(spriteKey) != null) {
-                                charToRegion.put('P', spriteKey);
-                                Gdx.app.log("RecallDungeon", "Set player sprite mapping to 'P' -> " + spriteKey + " (atlas only)");
-                            } else {
-                                charToRegion.put('P', "player_default");
-                                Gdx.app.log("RecallDungeon", "Player sprite unavailable, falling back to 'player_default' for 'P'");
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Gdx.app.error("RecallDungeon", "Error assigning player sprite mapping", ex);
-        }
-        // --- end runtime override ---
+        com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = null; // atlas optional
 
         mapActor = new com.bapppis.core.gfx.MapActor(chosen, atlas, charToRegion, charTextureRegions);
         // Put the actor inside a container table cell and center it. Don't force fill
@@ -459,9 +338,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     levelLabel.setText("Level: " + p.getLevel());
                 if (statsLabel != null) {
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.Creature.Stats s : com.bapppis.core.creature.Creature.Stats
-                            .values()) {
-                        if (s == com.bapppis.core.creature.Creature.Stats.LUCK)
+                    for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
+                        if (s == com.bapppis.core.Stats.LUCK)
                             continue; // skip luck
                         sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
                     }
@@ -469,9 +347,8 @@ public class RecallDungeon extends ApplicationAdapter {
                 }
                 if (resistLabel != null) {
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.Creature.Resistances r : com.bapppis.core.creature.Creature.Resistances
-                            .values()) {
-                        if (r == com.bapppis.core.creature.Creature.Resistances.TRUE)
+                    for (com.bapppis.core.Resistances r : com.bapppis.core.Resistances.values()) {
+                        if (r == com.bapppis.core.Resistances.TRUE)
                             continue; // hide TRUE
                         sb.append(r.name()).append(": ").append(p.getResistance(r)).append('%').append('\n');
                     }
@@ -587,16 +464,15 @@ public class RecallDungeon extends ApplicationAdapter {
             hpLabel.setText("HP: " + p.getCurrentHp() + "/" + p.getMaxHp());
             levelLabel.setText("Level: " + p.getLevel());
             StringBuilder sb = new StringBuilder();
-            for (com.bapppis.core.creature.Creature.Stats s : com.bapppis.core.creature.Creature.Stats.values()) {
-                if (s == com.bapppis.core.creature.Creature.Stats.LUCK)
+            for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
+                if (s == com.bapppis.core.Stats.LUCK)
                     continue;
                 sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
             }
             statsLabel.setText(sb.toString());
             StringBuilder rs = new StringBuilder();
-            for (com.bapppis.core.creature.Creature.Resistances r : com.bapppis.core.creature.Creature.Resistances
-                    .values()) {
-                if (r == com.bapppis.core.creature.Creature.Resistances.TRUE)
+            for (com.bapppis.core.Resistances r : com.bapppis.core.Resistances.values()) {
+                if (r == com.bapppis.core.Resistances.TRUE)
                     continue;
                 rs.append(r.name()).append(": ").append(p.getResistance(r)).append('%').append('\n');
             }
@@ -620,13 +496,12 @@ public class RecallDungeon extends ApplicationAdapter {
             enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
             enemyLevel.setText("Level: " + enemy.getLevel());
             StringBuilder sb = new StringBuilder();
-            for (com.bapppis.core.creature.Creature.Stats s : com.bapppis.core.creature.Creature.Stats.values()) {
+            for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
                 sb.append(s.name()).append(": ").append(enemy.getStat(s)).append('\n');
             }
             enemyStats.setText(sb.toString());
             StringBuilder rs = new StringBuilder();
-            for (com.bapppis.core.creature.Creature.Resistances r : com.bapppis.core.creature.Creature.Resistances
-                    .values()) {
+            for (com.bapppis.core.Resistances r : com.bapppis.core.Resistances.values()) {
                 rs.append(r.name()).append(": ").append(enemy.getResistance(r)).append('%').append('\n');
             }
             enemyResists.setText(rs.toString());
@@ -657,17 +532,15 @@ public class RecallDungeon extends ApplicationAdapter {
                     hpLabel.setText("HP: " + pp.getCurrentHp() + "/" + pp.getMaxHp());
                     levelLabel.setText("Level: " + pp.getLevel());
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.Creature.Stats s : com.bapppis.core.creature.Creature.Stats
-                            .values()) {
-                        if (s == com.bapppis.core.creature.Creature.Stats.LUCK)
+                    for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
+                        if (s == com.bapppis.core.Stats.LUCK)
                             continue;
                         sb.append(s.name()).append(": ").append(pp.getStat(s)).append('\n');
                     }
                     statsLabel.setText(sb.toString());
                     StringBuilder rs = new StringBuilder();
-                    for (com.bapppis.core.creature.Creature.Resistances r : com.bapppis.core.creature.Creature.Resistances
-                            .values()) {
-                        if (r == com.bapppis.core.creature.Creature.Resistances.TRUE)
+                    for (com.bapppis.core.Resistances r : com.bapppis.core.Resistances.values()) {
+                        if (r == com.bapppis.core.Resistances.TRUE)
                             continue;
                         rs.append(r.name()).append(": ").append(pp.getResistance(r)).append('%').append('\n');
                     }
@@ -676,14 +549,12 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (enemy != null) {
                     enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.Creature.Stats s : com.bapppis.core.creature.Creature.Stats
-                            .values()) {
+                    for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
                         sb.append(s.name()).append(": ").append(enemy.getStat(s)).append('\n');
                     }
                     enemyStats.setText(sb.toString());
                     StringBuilder rs2 = new StringBuilder();
-                    for (com.bapppis.core.creature.Creature.Resistances r : com.bapppis.core.creature.Creature.Resistances
-                            .values()) {
+                    for (com.bapppis.core.Resistances r : com.bapppis.core.Resistances.values()) {
                         rs2.append(r.name()).append(": ").append(enemy.getResistance(r)).append('%').append('\n');
                     }
                     enemyResists.setText(rs2.toString());
@@ -899,9 +770,21 @@ public class RecallDungeon extends ApplicationAdapter {
             Gdx.app.error("RecallDungeon", "Error shutting down game", e);
         }
 
-        if (batch != null) try { batch.dispose(); } catch (Exception ignored) {}
-        if (font != null) try { font.dispose(); } catch (Exception ignored) {}
-        if (mapFont != null) try { mapFont.dispose(); } catch (Exception ignored) {}
+        if (batch != null)
+            try {
+                batch.dispose();
+            } catch (Exception ignored) {
+            }
+        if (font != null)
+            try {
+                font.dispose();
+            } catch (Exception ignored) {
+            }
+        if (mapFont != null)
+            try {
+                mapFont.dispose();
+            } catch (Exception ignored) {
+            }
         // dispose atlas or any textures loaded when creating MapActor
         try {
             if (mapActor != null) {
@@ -911,7 +794,8 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (a instanceof com.badlogic.gdx.graphics.g2d.TextureAtlas) {
                     ((com.badlogic.gdx.graphics.g2d.TextureAtlas) a).dispose();
                 }
-                java.lang.reflect.Field fTexMap = com.bapppis.core.gfx.MapActor.class.getDeclaredField("charTextureRegions");
+                java.lang.reflect.Field fTexMap = com.bapppis.core.gfx.MapActor.class
+                        .getDeclaredField("charTextureRegions");
                 fTexMap.setAccessible(true);
                 Object tm = fTexMap.get(mapActor);
                 if (tm instanceof java.util.Map) {
@@ -920,7 +804,11 @@ public class RecallDungeon extends ApplicationAdapter {
                         if (v instanceof com.badlogic.gdx.graphics.g2d.TextureRegion) {
                             com.badlogic.gdx.graphics.g2d.TextureRegion tr = (com.badlogic.gdx.graphics.g2d.TextureRegion) v;
                             com.badlogic.gdx.graphics.Texture tex = tr.getTexture();
-                            if (tex != null) try { tex.dispose(); } catch (Exception ex) {}
+                            if (tex != null)
+                                try {
+                                    tex.dispose();
+                                } catch (Exception ex) {
+                                }
                         }
                     }
                 }
@@ -928,14 +816,13 @@ public class RecallDungeon extends ApplicationAdapter {
         } catch (Exception e) {
             // ignore - best effort dispose
         }
-    if (stage != null) try { stage.dispose(); } catch (Exception ignored) {}
+        if (stage != null)
+            try {
+                stage.dispose();
+            } catch (Exception ignored) {
+            }
         if (VisUI.isLoaded())
             VisUI.dispose();
     }
 
-    // simple name -> key sanitizer: lowercase, replace non-alnum with '_'
-    private static String sanitize(String s) {
-        if (s == null) return "";
-        return s.toLowerCase().replaceAll("[^a-z0-9]+", "_");
-    }
 }

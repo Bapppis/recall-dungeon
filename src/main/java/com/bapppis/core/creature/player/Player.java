@@ -3,7 +3,6 @@ package com.bapppis.core.creature.player;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.item.Item;
-import com.google.gson.Gson;
 
 public class Player extends Creature {
     // current position on the floor (null until placed/spawned)
@@ -16,7 +15,10 @@ public class Player extends Creature {
     }
 
     public static Player fromJson(String json) {
-        Gson gson = new Gson();
+    com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+        .registerTypeAdapter(com.bapppis.core.Resistances.class,
+            new com.bapppis.core.util.ResistancesDeserializer())
+        .create();
         return gson.fromJson(json, Player.class);
     }
 

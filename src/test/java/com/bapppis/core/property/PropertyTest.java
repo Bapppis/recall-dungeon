@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.Creature.Resistances;
+import com.bapppis.core.Resistances;
 
 public class PropertyTest {
 

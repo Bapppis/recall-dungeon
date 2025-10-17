@@ -1,12 +1,14 @@
 package com.bapppis.core.property;
 
+import com.bapppis.core.Resistances;
+import com.bapppis.core.Stats;
 import com.bapppis.core.creature.Creature;
 import com.google.gson.annotations.SerializedName;
 import java.util.Map;
 
 public class Property {
     @SerializedName("resistances")
-    private Map<Creature.Resistances, Integer> resistanceModifiers;
+    private Map<Resistances, Integer> resistanceModifiers;
 
     @SerializedName("visionRange")
     private Integer visionRange;
@@ -15,7 +17,7 @@ public class Property {
     private String name;
     private PropertyType type;
     private String description;
-    private Map<Creature.Stats, Integer> statModifiers;
+    private Map<Stats, Integer> statModifiers;
     // Tooltip can be either a String or an array in JSON; preserve raw object and
     // provide a helper to produce a joined string like Equipment.getTooltip().
     private Object tooltip;
@@ -161,11 +163,11 @@ public class Property {
         return tooltip.toString();
     }
 
-    public Map<Creature.Stats, Integer> getStatModifiers() {
+    public Map<Stats, Integer> getStatModifiers() {
         return statModifiers;
     }
 
-    public Map<Creature.Resistances, Integer> getResistanceModifiers() {
+    public Map<Resistances, Integer> getResistanceModifiers() {
         return resistanceModifiers;
     }
 
@@ -179,12 +181,12 @@ public class Property {
      */
     public void onApply(Creature creature) {
         if (statModifiers != null) {
-            for (Map.Entry<Creature.Stats, Integer> entry : statModifiers.entrySet()) {
+            for (Map.Entry<Stats, Integer> entry : statModifiers.entrySet()) {
                 creature.modifyStat(entry.getKey(), entry.getValue());
             }
         }
         if (resistanceModifiers != null) {
-            for (Map.Entry<Creature.Resistances, Integer> entry : resistanceModifiers.entrySet()) {
+            for (Map.Entry<Resistances, Integer> entry : resistanceModifiers.entrySet()) {
                 creature.modifyResistance(entry.getKey(), entry.getValue());
             }
         }
@@ -278,12 +280,12 @@ public class Property {
      */
     public void onRemove(Creature creature) {
         if (statModifiers != null) {
-            for (Map.Entry<Creature.Stats, Integer> entry : statModifiers.entrySet()) {
+            for (Map.Entry<Stats, Integer> entry : statModifiers.entrySet()) {
                 creature.modifyStat(entry.getKey(), -entry.getValue());
             }
         }
         if (resistanceModifiers != null) {
-            for (Map.Entry<Creature.Resistances, Integer> entry : resistanceModifiers.entrySet()) {
+            for (Map.Entry<Resistances, Integer> entry : resistanceModifiers.entrySet()) {
                 creature.modifyResistance(entry.getKey(), -entry.getValue());
             }
         }

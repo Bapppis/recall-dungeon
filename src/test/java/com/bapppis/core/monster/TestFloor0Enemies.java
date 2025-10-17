@@ -7,8 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
-
-import com.bapppis.core.AllLoaders;
 import com.bapppis.core.loot.LootManager;
 
 public class TestFloor0Enemies {

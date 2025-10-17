@@ -2,7 +2,7 @@ package com.bapppis.core.combat;
 
 import com.bapppis.core.creature.Attack;
 import com.bapppis.core.creature.Creature;
-import com.bapppis.core.creature.Creature.Resistances;
+import com.bapppis.core.Resistances;
 import com.bapppis.core.item.Equipment;
 import com.bapppis.core.util.Dice;
 import com.bapppis.core.util.ResistanceUtil;
@@ -81,8 +81,8 @@ public final class AttackEngine {
         }
         float critChance = Math.max(0f, Math.min(100f, baseCrit + critMod));
 
-        boolean hasPhysical = physicalType != null
-                && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
+    boolean hasPhysical = physicalType != null
+        && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
         boolean isTrue = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.TRUE;
         if (hasPhysical || isTrue) {
             for (int i = 0; i < times; i++) {
@@ -149,10 +149,11 @@ public final class AttackEngine {
                 }
             } catch (Exception ignored) {
             }
-            int resistValue = (physicalType == null ? 100 : target.getResistance(physicalType));
-            physAfter = Math.floorDiv(totalPhysBeforeResist * resistValue, 100);
-            if (physAfter > 0)
+            // Use ResistanceUtil to calculate damage after resistance (handles nulls safely)
+            physAfter = ResistanceUtil.getDamageAfterResistance(target, totalPhysBeforeResist, physicalType);
+            if (physAfter > 0) {
                 target.modifyHp(-physAfter);
+            }
         }
 
         int magRaw = 0;
@@ -171,10 +172,10 @@ public final class AttackEngine {
         if (hasMagicComponent && magicType != null) {
             try {
                 if (weapon != null) {
-                    com.bapppis.core.creature.Creature.Stats chosen = null;
+                    com.bapppis.core.Stats chosen = null;
                     int best = Integer.MIN_VALUE;
                     if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
-                        for (com.bapppis.core.creature.Creature.Stats s : weapon.getMagicStatBonuses()) {
+                        for (com.bapppis.core.Stats s : weapon.getMagicStatBonuses()) {
                             int b = attacker.getStatBonus(s);
                             if (b > best) {
                                 best = b;
@@ -247,10 +248,11 @@ public final class AttackEngine {
                 magicBeforeResist += hit;
             }
 
-            int resistValue = target.getResistance(magicType);
-            magAfter = Math.floorDiv(magicBeforeResist * resistValue, 100);
-            if (magAfter > 0)
+            // Use ResistanceUtil for magic damage as well. This keeps logic centralized.
+            magAfter = ResistanceUtil.getDamageAfterResistance(target, magicBeforeResist, magicType);
+            if (magAfter > 0) {
                 target.modifyHp(-magAfter);
+            }
         }
 
         try {

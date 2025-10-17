@@ -1,6 +1,5 @@
 package com.bapppis.core.loot;
 
-import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 import java.io.File;
@@ -12,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LootPoolLoader {
-    private static final Gson GSON = new Gson();
+    private static final com.google.gson.Gson GSON = new com.google.gson.GsonBuilder()
+        .registerTypeAdapter(com.bapppis.core.Resistances.class,
+            new com.bapppis.core.util.ResistancesDeserializer())
+        .create();
 
     public static List<LootPool> loadPoolsFromResources(String resourceDir) {
         List<LootPool> result = new ArrayList<>();

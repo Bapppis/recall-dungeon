@@ -1,4 +1,6 @@
 package com.bapppis.core.creature;
+
+import com.bapppis.core.Resistances;
 import com.bapppis.core.util.Dice;
 
 public class Attack {
@@ -8,10 +10,10 @@ public class Attack {
   public String physicalDamageDice;
   public String magicDamageDice;
   // Optional override for the magic damage resistance type (e.g. DARKNESS, FIRE)
-  public String magicDamageType;
+  public Resistances magicDamageType;
   public float damageMultiplier;
   public float magicDamageMultiplier;
-  public String damageType;
+  public Resistances damageType;
   public Integer weight;
   // Optional per-attack crit modifier, can be written in JSON as "+5" or "-3" (string)
   public String critMod;
@@ -58,6 +60,24 @@ public class Attack {
     return magicAccuracy == null ? 0 : magicAccuracy.intValue();
   }
 
+  /**
+   * Returns the physical damage type as a `Creature.Resistances` enum using
+   * the tolerant parser in `ResistanceUtil`. Keeps JSON format compatible
+   * (string values) while giving callers a typesafe enum view.
+   */
+  // Keep convenience getters returning the enum directly (null if not set)
+  public Resistances getDamageTypeEnum() {
+    return this.damageType;
+  }
+
+  /**
+   * Returns the magic damage type as a `Creature.Resistances` enum using
+   * the tolerant parser in `ResistanceUtil`.
+   */
+  public Resistances getMagicDamageTypeEnum() {
+    return this.magicDamageType;
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -67,9 +87,9 @@ public class Attack {
     if (physicalDamageDice != null && !physicalDamageDice.isBlank()) sb.append("phys='").append(physicalDamageDice).append("', ");
     if (damageMultiplier != 0) sb.append("physMultiplier=").append(damageMultiplier).append(", ");
     if (magicDamageDice != null && !magicDamageDice.isBlank()) sb.append("magic='").append(magicDamageDice).append("', ");
-    if (magicDamageType != null && !magicDamageType.isBlank()) sb.append("magicType=").append(magicDamageType).append(", ");
+  if (magicDamageType != null) sb.append("magicType=").append(magicDamageType.name()).append(", ");
     if (magicDamageMultiplier != 0) sb.append("magicStatBonus=").append(magicDamageMultiplier).append(", ");
-    if (damageType != null) sb.append("damageType=").append(damageType).append(", ");
+  if (damageType != null) sb.append("damageType=").append(damageType.name()).append(", ");
   if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
   if (accuracy != null) sb.append("accuracy=").append(accuracy).append(", ");
   if (magicAccuracy != null) sb.append("magicAccuracy=").append(magicAccuracy).append(", ");

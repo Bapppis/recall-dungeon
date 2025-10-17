@@ -22,13 +22,13 @@ public class TestGoblinCreation {
 
         // Defaults after applying Coward (STR -2, DEX +2)
         assertEquals("Billy the Goblin", goblin.getName());
-        assertEquals(8, goblin.getStat(Creature.Stats.STRENGTH));
-        assertEquals(12, goblin.getStat(Creature.Stats.DEXTERITY));
-        assertEquals(10, goblin.getStat(Creature.Stats.CONSTITUTION));
-        assertEquals(10, goblin.getStat(Creature.Stats.INTELLIGENCE));
-        assertEquals(10, goblin.getStat(Creature.Stats.WISDOM));
-        assertEquals(10, goblin.getStat(Creature.Stats.CHARISMA));
-        assertEquals(1, goblin.getStat(Creature.Stats.LUCK));
+    assertEquals(8, goblin.getStat(com.bapppis.core.Stats.STRENGTH));
+    assertEquals(12, goblin.getStat(com.bapppis.core.Stats.DEXTERITY));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.CONSTITUTION));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.INTELLIGENCE));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.WISDOM));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.CHARISMA));
+    assertEquals(1, goblin.getStat(com.bapppis.core.Stats.LUCK));
 
         System.out.println(goblin.toString());
 
@@ -37,16 +37,16 @@ public class TestGoblinCreation {
          goblin.addProperty(PropertyLoader.getProperty(2333));
 
         // Back to base stats
-        assertEquals(10, goblin.getStat(Creature.Stats.STRENGTH));
-        assertEquals(10, goblin.getStat(Creature.Stats.DEXTERITY));
-        assertEquals(10, goblin.getStat(Creature.Stats.CONSTITUTION));
-        assertEquals(10, goblin.getStat(Creature.Stats.INTELLIGENCE));
-        assertEquals(10, goblin.getStat(Creature.Stats.WISDOM));
-        assertEquals(10, goblin.getStat(Creature.Stats.CHARISMA));
-        assertEquals(1, goblin.getStat(Creature.Stats.LUCK));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.STRENGTH));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.DEXTERITY));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.CONSTITUTION));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.INTELLIGENCE));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.WISDOM));
+    assertEquals(10, goblin.getStat(com.bapppis.core.Stats.CHARISMA));
+    assertEquals(1, goblin.getStat(com.bapppis.core.Stats.LUCK));
 
         // Goblin should be an enemy by default
-        assertEquals(Creature.Type.ENEMY, goblin.getType());
+        assertEquals(com.bapppis.core.Type.ENEMY, goblin.getType());
 
         System.out.println(goblin.toString());
     }

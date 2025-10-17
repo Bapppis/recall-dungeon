@@ -241,6 +241,11 @@ recall-dungeon/
 │  │  │  ├─ Main.java
 │  │  │  ├─ core/
 │  │  │  │  ├─ AllLoaders.java
+│  │  │  │  ├─ CreatureType.java
+│  │  │  │  ├─ Resistances.java
+│  │  │  │  ├─ Size.java
+│  │  │  │  ├─ Stats.java
+│  │  │  │  ├─ Type.java
 │  │  │  │  ├─ creature/
 │  │  │  │  │  ├─ Attack.java
 │  │  │  │  │  ├─ Creature.java
@@ -282,6 +287,7 @@ recall-dungeon/
 │  │  │  │     ├─ Dice.java
 │  │  │  │     ├─ LevelUtil.java
 │  │  │  │     ├─ ResistanceUtil.java
+│  │  │  │     ├─ ResistancesDeserializer.java
 │  │  │  │     ├─ StatUtil.java
 │  │  │  │     └─ WeaponUtil.java
 │  │  │  └─ gfx/
