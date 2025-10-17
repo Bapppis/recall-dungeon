@@ -4,11 +4,15 @@ package com.bapppis.core.game;
 import java.util.Scanner;
 
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.util.DebugLog;
 
 public class Combat {
+    // Quick local toggle example (uncomment to enable debug output for this class):
+    // DebugLog.DEBUG = true; // <-- uncomment during local debugging to see Combat debug
+    @SuppressWarnings("resource")
     public static void startCombat(Creature player, Creature enemy) {
         // Default interactive combat (keeps existing behavior)
-        System.out.println("Combat starts: " + player.getName() + " vs " + enemy.getName());
+        DebugLog.debug("Combat starts: " + player.getName() + " vs " + enemy.getName());
         Scanner scanner = new Scanner(System.in);
         while (player.getCurrentHp() > 0 && enemy.getCurrentHp() > 0) {
             // Player's turn: prompt for action
@@ -29,7 +33,7 @@ public class Combat {
                 player.attack(enemy);
             }
             if (enemy.getCurrentHp() <= 0) {
-                System.out.println(enemy.getName() + " is defeated!");
+                DebugLog.debug(enemy.getName() + " is defeated!");
                 handleEnemyDefeated(player, enemy);
                 break;
             }
@@ -37,15 +41,15 @@ public class Combat {
             // Enemy's turn (if not dead)
             enemy.attack(player);
             if (player.getCurrentHp() <= 0) {
-                System.out.println(player.getName() + " is defeated!");
+                DebugLog.debug(player.getName() + " is defeated!");
                 break;
             }
 
             // Print status after each round
-            System.out.println(player.getName() + ": " + player.getCurrentHp() + " HP");
-            System.out.println(enemy.getName() + ": " + enemy.getCurrentHp() + " HP");
+            DebugLog.debug(player.getName() + ": " + player.getCurrentHp() + " HP");
+            DebugLog.debug(enemy.getName() + ": " + enemy.getCurrentHp() + " HP");
         }
-        System.out.println("Combat ends.");
+        DebugLog.debug("Combat ends.");
     }
 
     /**
@@ -57,12 +61,12 @@ public class Combat {
             startCombat(player, enemy);
             return;
         }
-        System.out.println("Combat starts (auto): " + player.getName() + " vs " + enemy.getName());
+        DebugLog.debug("Combat starts (auto): " + player.getName() + " vs " + enemy.getName());
         while (player.getCurrentHp() > 0 && enemy.getCurrentHp() > 0) {
             // Player auto-attacks
             player.attack(enemy);
             if (enemy.getCurrentHp() <= 0) {
-                System.out.println(enemy.getName() + " is defeated!");
+                DebugLog.debug(enemy.getName() + " is defeated!");
                 handleEnemyDefeated(player, enemy);
                 break;
             }
@@ -70,11 +74,11 @@ public class Combat {
             // Enemy's turn (if not dead)
             enemy.attack(player);
             if (player.getCurrentHp() <= 0) {
-                System.out.println(player.getName() + " is defeated!");
+                DebugLog.debug(player.getName() + " is defeated!");
                 break;
             }
         }
-        System.out.println("Combat ends.");
+        DebugLog.debug("Combat ends.");
     }
 
     private static void handleEnemyDefeated(Creature player, Creature enemy) {
@@ -83,7 +87,7 @@ public class Combat {
             Integer enemyXp = enemy.getEnemyXp();
             if (enemyXp != null && enemyXp > 0) {
                 player.addXp(enemyXp);
-                System.out.println(player.getName() + " gains " + enemyXp + " XP (now " + player.getXp() + ").");
+                DebugLog.debug(player.getName() + " gains " + enemyXp + " XP (now " + player.getXp() + ").");
             }
         } catch (Exception ignored) {
         }

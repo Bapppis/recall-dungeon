@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.Resistances;
 
-public class PropertyTest {
+public class ManualPropertyTest {
 
     @Test
     public void testAddRemoveCowardOnBiggles() {
@@ -20,10 +19,11 @@ public class PropertyTest {
         Creature biggles = CreatureLoader.getCreatureById(5000);
         System.out.println(biggles);
         System.out.println("After Debuffs-------------------------------------");
-        biggles.addProperty("test debuff");
+        biggles.addProperty("Necrotic Plague");
         System.out.println(biggles);
+        biggles.tickProperties();
         // after deleting the debuff, stats should revert to original values
-        biggles.removeProperty(3665);
+        biggles.removeProperty(2335);
         System.out.println("After Removing Debuff-------------------------------------");
         System.out.println(biggles);
     }

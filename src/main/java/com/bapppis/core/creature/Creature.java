@@ -10,6 +10,7 @@ import com.bapppis.core.util.LevelUtil;
 import com.bapppis.core.util.StatUtil;
 
 import com.bapppis.core.property.Property;
+import com.google.gson.Gson;
 import com.bapppis.core.CreatureType;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.Size;
@@ -865,6 +866,166 @@ public abstract class Creature {
     }
 
     /**
+     * Convenience: add an item to inventory by human name or numeric id string.
+     * Looks up the template via ItemLoader and deep-copies it before adding.
+     */
+    public boolean addItemByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        String t = name.trim();
+        com.bapppis.core.item.Item template = null;
+        try {
+            int id = Integer.parseInt(t);
+            template = com.bapppis.core.item.ItemLoader.getItemById(id);
+        } catch (NumberFormatException ignored) {
+        }
+        if (template == null) template = com.bapppis.core.item.ItemLoader.getItemByName(name);
+        if (template == null) return false;
+        try {
+            Gson g = new Gson();
+            com.bapppis.core.item.Item copy = g.fromJson(g.toJson(template), template.getClass());
+            return this.getInventory().addItem(copy);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Convenience: equip an item by name (will add a copy to inventory then equip it).
+     */
+    public boolean equipItemByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        boolean added = addItemByName(name);
+        if (!added) return false;
+        // Find the newly added item in inventory (by name, case-insensitive) and equip it
+        try {
+            for (com.bapppis.core.item.Item it : getInventory().getWeapons()) {
+                if (it.getName() != null && it.getName().equalsIgnoreCase(name.trim())) {
+                    equipItem(it);
+                    return true;
+                }
+            }
+            for (com.bapppis.core.item.Item it : getInventory().getOffhands()) {
+                if (it.getName() != null && it.getName().equalsIgnoreCase(name.trim())) {
+                    equipItem(it);
+                    return true;
+                }
+            }
+            for (com.bapppis.core.item.Item it : getInventory().getHelmets()) {
+                if (it.getName() != null && it.getName().equalsIgnoreCase(name.trim())) {
+                    equipItem(it);
+                    return true;
+                }
+            }
+            for (com.bapppis.core.item.Item it : getInventory().getArmors()) {
+                if (it.getName() != null && it.getName().equalsIgnoreCase(name.trim())) {
+                    equipItem(it);
+                    return true;
+                }
+            }
+            for (com.bapppis.core.item.Item it : getInventory().getLegwear()) {
+                if (it.getName() != null && it.getName().equalsIgnoreCase(name.trim())) {
+                    equipItem(it);
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /**
+     * Consume a consumable item from inventory by name or numeric id string.
+     * Returns true if a consumable was found and consumed.
+     */
+    public boolean consumeItemByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        String t = name.trim();
+        try {
+            // try numeric id match first
+            try {
+                int id = Integer.parseInt(t);
+                for (com.bapppis.core.item.Item it : getInventory().getConsumables()) {
+                    if (it.getId() == id) {
+                        try { it.onApply(this); } catch (Exception ignored) {}
+                        getInventory().removeItem(it);
+                        return true;
+                    }
+                }
+            } catch (NumberFormatException ignored) {}
+
+            for (com.bapppis.core.item.Item it : getInventory().getConsumables()) {
+                if (it.getName() != null && it.getName().equalsIgnoreCase(t)) {
+                    try { it.onApply(this); } catch (Exception ignored) {}
+                    getInventory().removeItem(it);
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /**
+     * Drop an item from inventory by name or id. Placeholder: this removes the
+     * item from inventory but does not place it into any world/floor. Returns
+     * true if an item was removed.
+     */
+    public boolean dropItemByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        String t = name.trim();
+        try {
+            try {
+                int id = Integer.parseInt(t);
+                // search all containers
+                java.util.List<java.util.List<com.bapppis.core.item.Item>> containers = java.util.Arrays.asList(
+                    getInventory().getWeapons(), getInventory().getOffhands(), getInventory().getHelmets(),
+                    getInventory().getArmors(), getInventory().getLegwear(), getInventory().getConsumables(),
+                    getInventory().getMisc());
+                for (java.util.List<com.bapppis.core.item.Item> cont : containers) {
+                    for (com.bapppis.core.item.Item it : cont) {
+                        if (it.getId() == id) {
+                            getInventory().removeItem(it);
+                            // System.out.println("Dropped: " + it.getName() + " (placeholder, no world placement)");
+                            return true;
+                        }
+                    }
+                }
+            } catch (NumberFormatException ignored) {}
+
+            java.util.List<java.util.List<com.bapppis.core.item.Item>> containers = java.util.Arrays.asList(
+                getInventory().getWeapons(), getInventory().getOffhands(), getInventory().getHelmets(),
+                getInventory().getArmors(), getInventory().getLegwear(), getInventory().getConsumables(),
+                getInventory().getMisc());
+            for (java.util.List<com.bapppis.core.item.Item> cont : containers) {
+                for (com.bapppis.core.item.Item it : cont) {
+                    if (it.getName() != null && it.getName().equalsIgnoreCase(t)) {
+                        getInventory().removeItem(it);
+                        // System.out.println("Dropped: " + it.getName() + " (placeholder, no world placement)");
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /**
+     * Unequip an item by its human name if currently equipped.
+     */
+    public boolean unequipItemByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        String t = name.trim();
+        try {
+            for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
+                com.bapppis.core.item.Item eq = this.getEquipped(slot);
+                if (eq != null && eq.getName() != null && eq.getName().equalsIgnoreCase(t)) {
+                    this.unequipItem(slot);
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /**
      * Equip an item and optionally treat it as two-handed. If the item is
      * inherently two-handed, it will always be equipped two-handed. If the
      * item is versatile and requestTwoHanded is true it will be equipped into
@@ -906,6 +1067,11 @@ public abstract class Creature {
 
     public void printStatusEffects() {
         propertyManager.printStatusEffects();
+    }
+
+
+    public boolean removeProperty(String name) {
+        return propertyManager.removeByName(name);
     }
 
     public String printProperties() {

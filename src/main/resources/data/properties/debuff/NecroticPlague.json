@@ -1,0 +1,12 @@
+{
+  "id": 2335,
+  "name": "Necrotic Plague",
+  "description": "A debuff that saps the life force of the target.",
+  "duration": 3,
+  "damageType": "DARKNESS",
+  "damageDice": "1d5",
+  "tooltip": [
+    "You take 1-5 damage at the start of your turn."
+  ],
+  "type": "DEBUFF"
+}

@@ -16,7 +16,9 @@ public class weaponTest {
         AllLoaders.loadAll();
         //Player biggles = CreatureLoader.getPlayerById(5000);
         Item testWeapon = ItemLoader.getItemById(9801); // Rusty Iron Sword
-        System.out.println(testWeapon.toString());
+        // System.out.println(testWeapon.toString());
+        // Minimal assertion to keep test meaningful
+        assertEquals("Rusty Iron Sword", testWeapon.getName());
 
     }
 }

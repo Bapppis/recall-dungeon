@@ -167,10 +167,17 @@ public class CreatureLoader {
                             String cname = creature.getName();
                             if (cname != null && !cname.isEmpty()) {
                                 String key = cname.trim().toLowerCase();
+                                String keyNoSpace = key.replaceAll("\\s+", "");
                                 if (creature instanceof Player) {
                                     playerMap.put(key, (Player) creature);
+                                    if (!playerMap.containsKey(keyNoSpace)) {
+                                        playerMap.put(keyNoSpace, (Player) creature);
+                                    }
                                 } else {
                                     creatureMap.put(key, creature);
+                                    if (!creatureMap.containsKey(keyNoSpace)) {
+                                        creatureMap.put(keyNoSpace, creature);
+                                    }
                                 }
                             }
                         }
@@ -251,15 +258,14 @@ public class CreatureLoader {
         if (name == null) return null;
         String key = name.trim().toLowerCase();
         Creature c = creatureMap.get(key);
-        if (c != null)
-            return c;
+        if (c != null) return c;
         Creature p = playerMap.get(key);
-        if (p != null)
-            return p;
-        // Debug: if not found, list available creature names (helpful for tests)
-        System.out.println("CreatureLoader: lookup failed for '" + name + "'. Available creatures: " + creatureMap.keySet());
-        System.out.println("CreatureLoader: available players: " + playerMap.keySet());
-        return null;
+        if (p != null) return p;
+        // try space-free variant
+        String keyNoSpace = key.replaceAll("\\s+", "");
+        c = creatureMap.get(keyNoSpace);
+        if (c != null) return c;
+        return playerMap.get(keyNoSpace);
     }
 
     public static Creature getCreatureById(int id) {
@@ -267,6 +273,61 @@ public class CreatureLoader {
         if (c != null)
             return c;
         return playerIdMap.get(id);
+    }
+
+    /**
+     * Create a deep-copy spawn of the creature template looked up by name or id.
+     * Returns null if no matching template found.
+     */
+    public static Creature spawnCreatureByName(String name) {
+        if (name == null || name.isBlank()) return null;
+        String t = name.trim();
+        try {
+            int id = Integer.parseInt(t);
+            Creature tmpl = getCreatureById(id);
+            if (tmpl == null) return null;
+            // Use a Gson instance that excludes the 'propertyManager' field during
+            // serialization to avoid serializing the back-reference to the creature
+            // (which causes infinite recursion). The new instance will create its
+            // own PropertyManager in the constructor when deserialized.
+            com.google.gson.Gson g = new com.google.gson.GsonBuilder()
+                .addSerializationExclusionStrategy(new com.google.gson.ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
+                        return "propertyManager".equals(f.getName());
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> clazz) {
+                        return false;
+                    }
+                }).create();
+            Creature copy = g.fromJson(g.toJson(tmpl), tmpl.getClass());
+            copy.finalizeAfterLoad();
+            return copy;
+        } catch (NumberFormatException ignored) {
+        }
+        Creature tmpl = getCreature(name);
+        if (tmpl == null) return null;
+        try {
+            com.google.gson.Gson g = new com.google.gson.GsonBuilder()
+                .addSerializationExclusionStrategy(new com.google.gson.ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
+                        return "propertyManager".equals(f.getName());
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> clazz) {
+                        return false;
+                    }
+                }).create();
+            Creature copy = g.fromJson(g.toJson(tmpl), tmpl.getClass());
+            copy.finalizeAfterLoad();
+            return copy;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static List<Creature> getAllCreatures() {

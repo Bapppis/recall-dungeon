@@ -3,6 +3,8 @@ package com.bapppis.core.property;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.Stats;
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.util.Dice;
+import com.bapppis.core.util.ResistanceUtil;
 import com.google.gson.annotations.SerializedName;
 import java.util.Map;
 
@@ -21,8 +23,11 @@ public class Property {
     // Tooltip can be either a String or an array in JSON; preserve raw object and
     // provide a helper to produce a joined string like Equipment.getTooltip().
     private Object tooltip;
-    // Optional duration (turns). Null => permanent (traits, permanent buffs/debuffs)
+    // Optional duration (turns). Null => permanent (traits, permanent
+    // buffs/debuffs)
     private Integer duration;
+    private Resistances damageType;
+    private String damageDice;
     // Optional regen deltas per turn (can be negative for debuffs)
     private Integer hpRegen;
     private Integer manaRegen;
@@ -39,11 +44,13 @@ public class Property {
     private Integer maxHp;
     private Integer maxStamina;
     private Integer maxMana;
-    // Optional max pools percentage multipliers (e.g. 0.5 reduces to 50%, 1.5 increases by 50%)
+    // Optional max pools percentage multipliers (e.g. 0.5 reduces to 50%, 1.5
+    // increases by 50%)
     private Float maxHpPercentage;
     private Float maxStaminaPercentage;
     private Float maxManaPercentage;
-    // Transient fields to store computed per-instance deltas when a percentage is applied
+    // Transient fields to store computed per-instance deltas when a percentage is
+    // applied
     private transient Integer appliedMaxHpDelta = null;
     private transient Integer appliedMaxStaminaDelta = null;
     private transient Integer appliedMaxManaDelta = null;
@@ -60,6 +67,8 @@ public class Property {
         this.name = other.name;
         this.type = other.type;
         this.description = other.description;
+        this.damageType = other.damageType;
+        this.damageDice = other.damageDice;
         this.statModifiers = other.statModifiers;
         this.resistanceModifiers = other.resistanceModifiers;
         this.visionRange = other.visionRange;
@@ -101,42 +110,157 @@ public class Property {
         return description;
     }
 
-    public PropertyType getType() { return type; }
-    public void setType(PropertyType type) { this.type = type; }
+    public PropertyType getType() {
+        return type;
+    }
 
-    public Integer getDuration() { return duration; }
-    public void setDuration(Integer duration) { this.duration = duration; }
-    public Integer getHpRegen() { return hpRegen; }
-    public void setHpRegen(Integer hpRegen) { this.hpRegen = hpRegen; }
-    public Integer getManaRegen() { return manaRegen; }
-    public void setManaRegen(Integer manaRegen) { this.manaRegen = manaRegen; }
-    public Integer getStaminaRegen() { return staminaRegen; }
-    public void setStaminaRegen(Integer staminaRegen) { this.staminaRegen = staminaRegen; }
-    public Float getCrit() { return crit; }
-    public void setCrit(Float crit) { this.crit = crit; }
-    public Float getDodge() { return dodge; }
-    public void setDodge(Float dodge) { this.dodge = dodge; }
-    public Float getBlock() { return block; }
-    public void setBlock(Float block) { this.block = block; }
-    public Float getMagicResist() { return magicResist; }
-    public void setMagicResist(Float magicResist) { this.magicResist = magicResist; }
-    public Integer getAccuracy() { return accuracy; }
-    public void setAccuracy(Integer accuracy) { this.accuracy = accuracy; }
-    public Integer getMagicAccuracy() { return magicAccuracy; }
-    public void setMagicAccuracy(Integer magicAccuracy) { this.magicAccuracy = magicAccuracy; }
+    public void setType(PropertyType type) {
+        this.type = type;
+    }
 
-    public Integer getMaxHp() { return maxHp; }
-    public void setMaxHp(Integer maxHp) { this.maxHp = maxHp; }
-    public Integer getMaxStamina() { return maxStamina; }
-    public void setMaxStamina(Integer maxStamina) { this.maxStamina = maxStamina; }
-    public Integer getMaxMana() { return maxMana; }
-    public void setMaxMana(Integer maxMana) { this.maxMana = maxMana; }
-    public Float getMaxHpPercentage() { return maxHpPercentage; }
-    public void setMaxHpPercentage(Float maxHpPercentage) { this.maxHpPercentage = maxHpPercentage; }
-    public Float getMaxStaminaPercentage() { return maxStaminaPercentage; }
-    public void setMaxStaminaPercentage(Float maxStaminaPercentage) { this.maxStaminaPercentage = maxStaminaPercentage; }
-    public Float getMaxManaPercentage() { return maxManaPercentage; }
-    public void setMaxManaPercentage(Float maxManaPercentage) { this.maxManaPercentage = maxManaPercentage; }
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Resistances getDamageType() {
+        return damageType;
+    }
+
+    public void setDamageType(Resistances damageType) {
+        this.damageType = damageType;
+    }
+
+    public String getDamageDice() {
+        return damageDice;
+    }
+
+    public void setDamageDice(String damageDice) {
+        this.damageDice = damageDice;
+    }
+
+    public Integer getHpRegen() {
+        return hpRegen;
+    }
+
+    public void setHpRegen(Integer hpRegen) {
+        this.hpRegen = hpRegen;
+    }
+
+    public Integer getManaRegen() {
+        return manaRegen;
+    }
+
+    public void setManaRegen(Integer manaRegen) {
+        this.manaRegen = manaRegen;
+    }
+
+    public Integer getStaminaRegen() {
+        return staminaRegen;
+    }
+
+    public void setStaminaRegen(Integer staminaRegen) {
+        this.staminaRegen = staminaRegen;
+    }
+
+    public Float getCrit() {
+        return crit;
+    }
+
+    public void setCrit(Float crit) {
+        this.crit = crit;
+    }
+
+    public Float getDodge() {
+        return dodge;
+    }
+
+    public void setDodge(Float dodge) {
+        this.dodge = dodge;
+    }
+
+    public Float getBlock() {
+        return block;
+    }
+
+    public void setBlock(Float block) {
+        this.block = block;
+    }
+
+    public Float getMagicResist() {
+        return magicResist;
+    }
+
+    public void setMagicResist(Float magicResist) {
+        this.magicResist = magicResist;
+    }
+
+    public Integer getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(Integer accuracy) {
+        this.accuracy = accuracy;
+    }
+
+    public Integer getMagicAccuracy() {
+        return magicAccuracy;
+    }
+
+    public void setMagicAccuracy(Integer magicAccuracy) {
+        this.magicAccuracy = magicAccuracy;
+    }
+
+    public Integer getMaxHp() {
+        return maxHp;
+    }
+
+    public void setMaxHp(Integer maxHp) {
+        this.maxHp = maxHp;
+    }
+
+    public Integer getMaxStamina() {
+        return maxStamina;
+    }
+
+    public void setMaxStamina(Integer maxStamina) {
+        this.maxStamina = maxStamina;
+    }
+
+    public Integer getMaxMana() {
+        return maxMana;
+    }
+
+    public void setMaxMana(Integer maxMana) {
+        this.maxMana = maxMana;
+    }
+
+    public Float getMaxHpPercentage() {
+        return maxHpPercentage;
+    }
+
+    public void setMaxHpPercentage(Float maxHpPercentage) {
+        this.maxHpPercentage = maxHpPercentage;
+    }
+
+    public Float getMaxStaminaPercentage() {
+        return maxStaminaPercentage;
+    }
+
+    public void setMaxStaminaPercentage(Float maxStaminaPercentage) {
+        this.maxStaminaPercentage = maxStaminaPercentage;
+    }
+
+    public Float getMaxManaPercentage() {
+        return maxManaPercentage;
+    }
+
+    public void setMaxManaPercentage(Float maxManaPercentage) {
+        this.maxManaPercentage = maxManaPercentage;
+    }
 
     /**
      * Return tooltip text if present. Mirrors the logic in `Equipment.getTooltip()`
@@ -312,7 +436,8 @@ public class Property {
             creature.modifyPropertyBlock(-block);
         }
         // Revert property accuracy modifiers if any (handled in onApply when present)
-        // No-op here because Property currently models statModifiers as enum-keyed map and
+        // No-op here because Property currently models statModifiers as enum-keyed map
+        // and
         // the per-property accuracy fields were not modeled separately.
         if (magicResist != null && magicResist != 0f) {
             creature.modifyPropertyMagicResist(-magicResist);
@@ -353,16 +478,36 @@ public class Property {
      * (e.g. buff/debuff) can override to perform per-turn effects.
      */
     public void onTick(Creature creature) {
-        // no-op by default
+        if (damageDice != null && !damageDice.isBlank()) {
+            try {
+                int raw = Dice.roll(damageDice); // adjust if Dice API differs
+                int after = ResistanceUtil.getDamageAfterResistance(creature, raw, damageType);
+                if (after > 0) {
+                    creature.modifyHp(-after);
+                }
+            } catch (Exception ignored) {
+                // Swallow to avoid ticking from crashing the game; log if desired.
+            }
+        }
+        // Also apply flat hpRegen (positive heals, negative damages) per tick.
+        if (hpRegen != null && hpRegen != 0) {
+            creature.modifyHp(hpRegen);
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Property[id=").append(id)
-          .append(", name=").append(name == null ? "<unnamed>" : name)
-          .append(", type=").append(type == null ? "<unknown>" : type.name())
-          .append("]");
+                .append(", name=").append(name == null ? "<unnamed>" : name)
+                .append(", type=").append(type == null ? "<unknown>" : type.name())
+                .append("]");
+        if (damageDice != null && !damageDice.isEmpty()) {
+            sb.append(" damageDice=").append(damageDice);
+        }
+        if (damageType != null) {
+            sb.append(" damageType=").append(damageType.name());
+        }
         if (statModifiers != null && !statModifiers.isEmpty()) {
             sb.append(" stats=").append(statModifiers.toString());
         }

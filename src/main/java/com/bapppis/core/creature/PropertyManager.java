@@ -121,6 +121,37 @@ public class PropertyManager {
         }
     }
 
+    /**
+     * Remove a currently-applied property by human name (case-insensitive)
+     * or by numeric id string. Returns true if a property was found and removed.
+     */
+    public boolean removeByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        String t = name.trim();
+        // Try numeric id first
+        try {
+            int id = Integer.parseInt(t);
+            if (buffs.containsKey(id) || debuffs.containsKey(id) || traits.containsKey(id)) {
+                remove(id);
+                return true;
+            }
+            return false;
+        } catch (NumberFormatException ignored) {
+        }
+
+        try {
+            Property p = com.bapppis.core.property.PropertyLoader.getPropertyByName(name);
+            if (p == null) return false;
+            int id = p.getId();
+            if (buffs.containsKey(id) || debuffs.containsKey(id) || traits.containsKey(id)) {
+                remove(id);
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
     /** Tick all properties: onTick then decrement durations and remove expired. */
     public void tick() {
         // Regen resources first

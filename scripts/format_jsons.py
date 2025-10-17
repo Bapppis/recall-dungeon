@@ -125,6 +125,8 @@ CANON_PROPERTY_ORDER: List[str] = [
     "name",
     "description",
     "duration",
+    "damageType",
+    "damageDice",
     "maxHpPercentage",
     "maxStaminaPercentage",
     "maxManaPercentage",

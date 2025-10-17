@@ -35,7 +35,7 @@ public class TestCommonWeaponsPool {
             // should not be empty and should only contain allowed references
             assertTrue(spawns.size() >= 1, "Expected at least one spawn");
             for (LootManager.Spawn s : spawns) {
-                System.out.println("Spawned: " + s.type + " -> " + s.id);
+                // System.out.println("Spawned: " + s.type + " -> " + s.id);
                 assertTrue(allowed.contains(s.id), "Spawn produced unexpected id: " + s.id);
             }
         }

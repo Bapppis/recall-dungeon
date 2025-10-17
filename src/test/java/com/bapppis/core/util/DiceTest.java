@@ -44,19 +44,19 @@ public class DiceTest {
 
     @Test
     public void testPrintSampleRolls() {
-        System.out.println("--- Sample Dice Rolls (visible in console) ---");
+        // System.out.println("--- Sample Dice Rolls (visible in console) ---");
         int a = Dice.roll("1d6");
-        System.out.println("1d6 -> " + a);
+        // System.out.println("1d6 -> " + a);
         assertTrue(a >= 1 && a <= 6);
 
         int b = Dice.roll("2d4+1");
-        System.out.println("2d4+1 -> " + b);
+        // System.out.println("2d4+1 -> " + b);
         // 2d4 range is 2-8, plus 1 => 3-9
         assertTrue(b >= 3 && b <= 9);
 
         int c = Dice.roll("3d1");
-        System.out.println("3d1 -> " + c);
+        // System.out.println("3d1 -> " + c);
         assertEquals(3, c);
-        System.out.println("---------------------------------------------");
+        // System.out.println("---------------------------------------------");
     }
 }

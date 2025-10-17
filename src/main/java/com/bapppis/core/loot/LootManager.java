@@ -75,6 +75,15 @@ public class LootManager {
         return out;
     }
 
+    /**
+     * Convenience: sample a pool by human name (case-insensitive). Returns an
+     * empty list if poolName is unknown.
+     */
+    public List<Spawn> samplePoolByName(String poolName) {
+        if (poolName == null) return new ArrayList<>();
+        return samplePool(poolName.toLowerCase());
+    }
+
     // Helper to append spawn(s) for an entry to the output list
     private void handleEntrySpawn(List<Spawn> out, LootPool.Entry chosen) {
         int min = chosen.countMin != null ? chosen.countMin : 1;

@@ -10,9 +10,9 @@ import java.io.FileWriter;
 public class MapParserTestUtil
  {
     public void copyStreamToFile(InputStream inputStream, String outputFilePath) {
-        System.out.println("Copying map symbols to output file...");
+        // System.out.println("Copying map symbols to output file...");
         if (inputStream == null) {
-            System.err.println("Input stream was null; resource not found. Aborting copy.");
+            // System.err.println("Input stream was null; resource not found. Aborting copy.");
             return;
         }
         try (
@@ -23,10 +23,10 @@ public class MapParserTestUtil
             while ((symbol = reader.read()) != -1) {
                 writer.write(symbol);
             }
-            System.out.println("Done! Output written to: " + outputFilePath);
+            // System.out.println("Done! Output written to: " + outputFilePath);
         } catch (IOException e) {
-            System.err.println("Error during copy");
-            e.printStackTrace();
+            // System.err.println("Error during copy");
+            // e.printStackTrace();
         }
     }
 }

@@ -45,14 +45,15 @@ public class TestFloor0Enemies {
             }
         }
 
-        System.out.println("Spearman: " + spearman.get());
-        System.out.println("Swordsman: " + swordsman.get());
-        System.out.println("Goblin: " + goblin.get());
-        System.out.println("Hound: " + hound.get());
+    // System.out.println("Spearman: " + spearman.get());
+    // System.out.println("Swordsman: " + swordsman.get());
+    // System.out.println("Goblin: " + goblin.get());
+    // System.out.println("Hound: " + hound.get());
 
         int skeletons = spearman.get() + swordsman.get();
-        int total = skeletons + goblin.get() + hound.get();
-        System.out.println("Total observed: " + total);
+    int total = skeletons + goblin.get() + hound.get();
+    // System.out.println("Total observed: " + total);
+    assertTrue(total == iterations, "Total observed should equal iterations when exactly one spawn per sample is added");
         // Expected rough ratios: skeletons ~ 20/36 (~55%), goblin ~5/36 (~14%), hound
         // ~1/36 (~3%)
         assertTrue(skeletons >= iterations * 0.45, "Skeletons should be the majority");

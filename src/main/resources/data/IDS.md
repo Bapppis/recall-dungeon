@@ -33,6 +33,7 @@ Notes
 ### Debuff (2333-3665)
 - 2333 — Afraid — data/properties/debuff/Afraid.json
 - 2334 — Bleed — data/properties/debuff/Bleed1.json
+- 2335 — Necrotic Plague — data/properties/debuff/NecroticPlague.json
 - 3665 — Test Debuff — data/properties/debuff/TestDebuff.json
 
 ### Trait (3666–4999)

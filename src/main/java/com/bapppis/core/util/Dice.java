@@ -21,6 +21,8 @@ public final class Dice {
         int sides = Integer.parseInt(m.group(2));
         int modifier = 0;
         if (m.group(3) != null) modifier = Integer.parseInt(m.group(3));
+        // Guard against invalid values like 0 dice or 0 sides (e.g., "0d6", "1d0")
+        if (num <= 0 || sides <= 0) return 0;
         int total = 0;
         for (int i = 0; i < num; i++) {
             total += ThreadLocalRandom.current().nextInt(1, sides + 1);

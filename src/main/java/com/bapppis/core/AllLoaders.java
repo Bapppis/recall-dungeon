@@ -16,36 +16,47 @@ public class AllLoaders {
      * Order matters: properties and items should be loaded before creatures.
      */
     public static void loadAll() {
-        // Properties provide the definitions used by creatures
-        try {
-            PropertyLoader.loadProperties();
-        } catch (Exception e) {
-            System.err.println("Warning: PropertyLoader.loadProperties() failed");
-            e.printStackTrace();
-        }
+        // Synchronized loading to avoid races across tests/threads.
+        synchronized (AllLoaders.class) {
+            if (LoadedState.loaded) {
+                return;
+            }
 
-        // Items are used by creatures for starting inventory/equipment
-        try {
-            ItemLoader.loadItems();
-        } catch (Exception e) {
-            System.err.println("Warning: ItemLoader.loadItems() failed");
-            e.printStackTrace();
-        }
+            try {
+                PropertyLoader.loadProperties();
+            } catch (Exception e) {
+                System.err.println("Warning: PropertyLoader.loadProperties() failed");
+                e.printStackTrace();
+            }
 
-        // Loot pools are independent but nice to load early
-        try {
-            LootPoolLoader.loadPoolsFromResources("loot_pools");
-        } catch (Exception e) {
-            System.err.println("Warning: LootPoolLoader.loadPoolsFromResources() failed");
-            e.printStackTrace();
-        }
+            try {
+                ItemLoader.loadItems();
+            } catch (Exception e) {
+                System.err.println("Warning: ItemLoader.loadItems() failed");
+                e.printStackTrace();
+            }
 
-        // Finally creatures (they rely on items/properties)
-        try {
-            CreatureLoader.loadCreatures();
-        } catch (Exception e) {
-            System.err.println("Warning: CreatureLoader.loadCreatures() failed");
-            e.printStackTrace();
+            try {
+                LootPoolLoader.loadPoolsFromResources("loot_pools");
+            } catch (Exception e) {
+                System.err.println("Warning: LootPoolLoader.loadPoolsFromResources() failed");
+                e.printStackTrace();
+            }
+
+            try {
+                CreatureLoader.loadCreatures();
+            } catch (Exception e) {
+                System.err.println("Warning: CreatureLoader.loadCreatures() failed");
+                e.printStackTrace();
+            }
+
+            // Mark loaded so future calls are fast
+            LoadedState.loaded = true;
         }
     }
+}
+
+class LoadedState {
+    // volatile to ensure visibility across threads
+    static volatile boolean loaded = false;
 }

@@ -26,7 +26,7 @@ public class PropertyLoader {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
                     try {
-                        // Read the resource fully into a String so we can parse it multiple times
+                        // Read the resource fully into a String so we can parse it
                         String json;
                         try (java.io.InputStream is = resource.open();
                                 java.util.Scanner s = new java.util.Scanner(is,
@@ -80,13 +80,11 @@ public class PropertyLoader {
                                 String n = propInstance.getName();
                                 if (n != null && !n.isBlank()) {
                                     String key = n.trim().toLowerCase();
-                                    if (!propertyNameMap.containsKey(key)) {
-                                        propertyNameMap.put(key, propInstance);
-                                    } else {
-                                        // collision: keep first, but log once
-                                        System.out.println("PropertyLoader: duplicate property name '" + n + "' in "
-                                                + resource.getPath() + " - keeping first");
-                                    }
+                                    String keyNoSpace = key.replaceAll("\\s+", "");
+
+                                    // keep first occurrence by name; also register space-free variant
+                                    propertyNameMap.putIfAbsent(key, propInstance);
+                                    propertyNameMap.putIfAbsent(keyNoSpace, propInstance);
                                 }
                             } catch (Exception ignored) {
                             }
@@ -94,15 +92,15 @@ public class PropertyLoader {
                         // System.out.println("Loaded property: " + property.getId() + " from " +
                         // resource.getPath());
                     } catch (Exception e) {
-                        System.out.println("Error loading property from: " + resource.getPath());
-                        e.printStackTrace();
+                        // System.out.println("Error loading property from: " + resource.getPath());
+                        // e.printStackTrace();
                     }
                 }
             }
         }
     }
 
-    // Removed recursive loader; now using explicit file paths
+    // Accessors
 
     public static Property getProperty(int id) {
         return propertyMap.get(id);
@@ -111,7 +109,11 @@ public class PropertyLoader {
     public static Property getPropertyByName(String name) {
         if (name == null)
             return null;
-        return propertyNameMap.get(name.trim().toLowerCase());
+        String key = name.trim().toLowerCase();
+        Property p = propertyNameMap.get(key);
+        if (p != null) return p;
+        String keyNoSpace = key.replaceAll("\\s+", "");
+        return propertyNameMap.get(keyNoSpace);
     }
 
     public static java.util.List<String> getAllPropertyNames() {

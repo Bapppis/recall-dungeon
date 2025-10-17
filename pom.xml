@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -47,7 +47,6 @@
             <version>1.13.1</version>
             <classifier>natives-desktop</classifier>
         </dependency>
-        <!-- VisUI UI toolkit used by the provided uiskin.json -->
         <dependency>
             <groupId>com.kotcrab.vis</groupId>
             <artifactId>vis-ui</artifactId>
@@ -56,13 +55,11 @@
     </dependencies>
 
     <build>
-        <!-- Ensure runtime assets (e.g., LibGDX skins) are on the classpath -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>false</filtering>
             </resource>
-            <!-- Include the top-level assets/ so Gdx.files.internal("uiskin.json") can find it -->
             <resource>
                 <directory>assets</directory>
                 <filtering>false</filtering>
@@ -78,19 +75,67 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+            <!-- Register src/manual-test/java as test source for IDE visibility -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <execution>
+                        <id>add-manual-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/manual-test/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
-                    <!-- Print test System.out/err to console instead of redirecting to files -->
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
-                    <!-- Keep a short summary in console -->
                     <printSummary>true</printSummary>
+                    <!-- Exclude manual tests from default test runs -->
+                    <excludes>
+                        <exclude>**/manual-test/**/*Test.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Profile to run manual tests -->
+        <profile>
+            <id>manual-tests</id>
+            <build>
+                <plugins>
+                    <!-- Override surefire to INCLUDE manual tests when this profile is active -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.2.5</version>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                            <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                            <printSummary>true</printSummary>
+                            <!-- Clear excludes to run ALL tests including manual ones -->
+                            <excludes>
+                                <exclude></exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

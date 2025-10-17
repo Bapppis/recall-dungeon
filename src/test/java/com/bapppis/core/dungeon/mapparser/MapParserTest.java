@@ -8,7 +8,7 @@ public class MapParserTest {
 
     @Test
     public void testParseStream() {
-        System.out.println("---------------------Map Parser---------------------");
+    // System.out.println("---------------------Map Parser---------------------");
 
         MapParserTestUtil mapParserTestUtil = new MapParserTestUtil();
         String resourceName = "floor(20x20).txt";

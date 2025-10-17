@@ -54,9 +54,9 @@ public class TestCommonTreasureChest {
                 weapons.incrementAndGet();
         }
 
-        System.out.println("Potions seen: " + potions.get() + " / " + iterations);
-        System.out.println("Two potions seen: " + twoPotions.get() + " / " + iterations);
-        System.out.println("Weapons seen: " + weapons.get() + " / " + iterations);
+    // System.out.println("Potions seen: " + potions.get() + " / " + iterations);
+    // System.out.println("Two potions seen: " + twoPotions.get() + " / " + iterations);
+    // System.out.println("Weapons seen: " + weapons.get() + " / " + iterations);
 
         // Basic sanity checks
         assertTrue(potions.get() >= iterations * 0.7, "Most chests should have at least one potion (guaranteed)");

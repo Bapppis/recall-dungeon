@@ -32,13 +32,13 @@ public class CaptainVossVsSkeletonXpTest {
         // Run combat - this will transfer totalXp on enemy defeat (auto-attack to avoid
         // interactive prompt)
         // Level and xp before combat
-        System.out.println("Before Combat: Voss Level " + voss.getLevel() + ", XP " + voss.getXp());
+    // System.out.println("Before Combat: Voss Level " + voss.getLevel() + ", XP " + voss.getXp());
         Combat.startCombat(voss, skeleton, true);
 
         // After combat, player's XP should have increased by skeleton.enemyXp
         int after = voss.getXp();
         Integer expectedGain = skeleton.getEnemyXp() == null ? 0 : skeleton.getEnemyXp();
         assertEquals(before + expectedGain.intValue(), after);
-        System.out.println("After Combat: Voss Level " + voss.getLevel() + ", XP " + voss.getXp());
+    // System.out.println("After Combat: Voss Level " + voss.getLevel() + ", XP " + voss.getXp());
     }
 }

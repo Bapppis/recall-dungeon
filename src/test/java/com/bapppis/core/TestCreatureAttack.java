@@ -23,13 +23,13 @@ public class TestCreatureAttack {
         // Give Falchion of Doom to Biggles and equip it
         biggles.addItem(ItemLoader.getItemById(9800)); // Falchion of Doom
         biggles.equipItem(biggles.getInventory().getWeapons().get(1)); // Equip Falchion of Doom
-        System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
+    // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
         biggles.attack(biggles); // Self-attack for testing
-        System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
+    // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
         // Drink healing potion
         Item minorHealingPotion = ItemLoader.getItemById(8000); // Minor Healing Potion
         minorHealingPotion.onApply(biggles);
-        System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
+    // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
     }
 
     @Test
@@ -77,28 +77,27 @@ public class TestCreatureAttack {
             darkHound.attack(dummy);
         }
 
-        System.out.println("--- Dark Hound Attack Summary after " + runs + " runs ---");
+    // System.out.println("--- Dark Hound Attack Summary after " + runs + " runs ---");
         for (String name : counts.keySet()) {
             int count = counts.get(name);
             int times = timesPerAttack.getOrDefault(name, 1);
             int totalHits = count * times;
-            System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
-                    + " | TotalHits: " + totalHits + " | PhysTotal: " + physTotals.getOrDefault(name, 0)
-                    + " | MagTotal: " + magTotals.getOrDefault(name, 0));
+            // Ensure computation is used via assertion
+            assert totalHits >= 0;
         }
-        System.out.println("----------------------------------------------");
+    // System.out.println("----------------------------------------------");
 
         // Basic checks (non-fatal): if no attacks were recorded, print a warning but
         // don't fail the test.
         if (counts.size() == 0) {
-            System.out.println("Warning: No attacks recorded for Dark Hound; this run produced no attack events.");
+            // System.out.println("Warning: No attacks recorded for Dark Hound; this run produced no attack events.");
         } else {
             int summedHits = 0;
             for (String name : counts.keySet()) {
                 summedHits += counts.get(name) * timesPerAttack.getOrDefault(name, 1);
             }
             if (summedHits == 0) {
-                System.out.println("Warning: Recorded attacks but total hits summed to 0.");
+                // System.out.println("Warning: Recorded attacks but total hits summed to 0.");
             }
         }
 
@@ -131,7 +130,7 @@ public class TestCreatureAttack {
         // biggles.setStat(Stats.CHARISMA, 100);
         // biggles.setStat(Stats.STRENGTH, 15);
         // biggles.setStat(Stats.DEXTERITY, 20);
-        System.out.println(biggles.toString());
+    // System.out.println(biggles.toString());
 
         // Load training dummy as a target
         com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
@@ -172,17 +171,14 @@ public class TestCreatureAttack {
         }
 
         // Print summary
-        System.out.println("--- Attack Summary after " + runs + " attacks ---");
+    // System.out.println("--- Attack Summary after " + runs + " attacks ---");
         for (String name : counts.keySet()) {
             int count = counts.get(name);
             int times = timesPerAttack.getOrDefault(name, 1);
             int totalHits = count * times;
-            System.out.println("Attack: " + name + " | Count: " + count + " | TimesPerAttack: " + times
-                    + " | TotalHits: " + totalHits + " | PhysType: " + physTypes.getOrDefault(name, "UNKNOWN")
-                    + " | MagType: " + magTypes.getOrDefault(name, "NONE") + " | PhysTotal: "
-                    + physTotals.getOrDefault(name, 0) + " | MagTotal: " + magTotals.getOrDefault(name, 0));
+            assert totalHits >= 0;
         }
-        System.out.println("----------------------------------------------");
+    // System.out.println("----------------------------------------------");
 
         // Basic sanity: At least one attack type should have occurred and total hits
         // consistent
@@ -232,8 +228,8 @@ public class TestCreatureAttack {
         com.bapppis.core.combat.AttackEngine.attackListener = (rpt) -> {
             attackCount.getAndIncrement();
             // Print for debugging
-            System.out.println("Unarmed attack report: " + rpt.attackName + " physAfter=" + rpt.physAfter
-                    + " damageType=" + rpt.damageType);
+        // System.out.println("Unarmed attack report: " + rpt.attackName + " physAfter=" + rpt.physAfter
+        //         + " damageType=" + rpt.damageType);
         };
 
         // Run multiple unarmed attacks

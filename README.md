@@ -365,6 +365,29 @@ To run all tests:
 mvn test
 ```
 
+### Manual / Interactive tests
+
+Some tests are long-running or print interactive/debug output and are intentionally kept out of the default test suite. Those tests live under `src/manual-test/java` and are only compiled/run when you explicitly enable the `manual-tests` Maven profile.
+
+Run the default tests (manual tests excluded):
+
+```powershell
+mvn -DskipTests=false test
+```
+
+Run manual tests as well (activates the `manual-tests` profile which adds `src/manual-test/java` as a test source):
+
+```powershell
+mvn -P manual-tests -DskipTests=false test
+```
+
+Note: The manual tests often print human-readable summaries to the console. They exist to help manual inspection and won't run in CI unless the profile is enabled.
+
+### Enabling debug output in code
+
+Console debug/logging was centralized behind `com.bapppis.core.util.DebugLog`. To enable debug output while developing, open `src/main/java/com/bapppis/core/util/DebugLog.java` and set the `DEBUG` flag to `true` (there's a commented example in the file).
+
+
 ---
 
 ## Contributing

@@ -35,12 +35,18 @@ public class ItemLoader {
                                 itemIdMap.put(id, item);
                             }
                             if (name != null && !name.isEmpty()) {
-                                itemNameMap.put(name.trim().toLowerCase(), item);
+                                String key = name.trim().toLowerCase();
+                                String keyNoSpace = key.replaceAll("\\s+", "");
+                                itemNameMap.put(key, item);
+                                // register space-free variant if unique
+                                if (!itemNameMap.containsKey(keyNoSpace)) {
+                                    itemNameMap.put(keyNoSpace, item);
+                                }
                             }
                         }
                     } catch (Exception e) {
-                        System.out.println("Error loading item from: " + resource.getPath());
-                        e.printStackTrace();
+                        // System.out.println("Error loading item from: " + resource.getPath());
+                        // e.printStackTrace();
                     }
                 }
             }
@@ -53,7 +59,11 @@ public class ItemLoader {
 
     public static Item getItemByName(String name) {
         if (name == null) return null;
-        return itemNameMap.get(name.trim().toLowerCase());
+        String key = name.trim().toLowerCase();
+        Item it = itemNameMap.get(key);
+        if (it != null) return it;
+        String keyNoSpace = key.replaceAll("\\s+", "");
+        return itemNameMap.get(keyNoSpace);
     }
 
     public static List<Item> getAllItems() {

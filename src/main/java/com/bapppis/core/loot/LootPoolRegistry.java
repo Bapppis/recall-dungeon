@@ -20,7 +20,14 @@ public class LootPoolRegistry {
             for (LootPool p : list) {
                 if (p == null) continue;
                 if (p.id != null) poolById.put(p.id, p);
-                if (p.name != null) poolByName.put(p.name.toLowerCase(), p);
+                if (p.name != null) {
+                    String key = p.name.toLowerCase();
+                    String keyNoSpace = key.replaceAll("\\s+", "");
+                    poolByName.put(key, p);
+                    if (!poolByName.containsKey(keyNoSpace)) {
+                        poolByName.put(keyNoSpace, p);
+                    }
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -32,7 +39,13 @@ public class LootPoolRegistry {
     }
 
     public static LootPool getPoolByName(String name) {
-        return name == null ? null : poolByName.get(name.toLowerCase());
+        if (name == null) return null;
+        String key = name.trim().toLowerCase();
+        LootPool p = poolByName.get(key);
+        if (p != null) return p;
+        // Try space-free variant
+        String keyNoSpace = key.replaceAll("\\s+", "");
+        return poolByName.get(keyNoSpace);
     }
 
     public static List<LootPool> getAllPools() {

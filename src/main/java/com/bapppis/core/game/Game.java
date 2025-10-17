@@ -34,7 +34,7 @@ public class Game {
     public void initialize() {
         loadDungeon();
 
-        System.out.println("Game initialized.");
+    // System.out.println("Game initialized.");
         // Start a background loop to consume commands submitted from GUI
         // If a player was pre-selected, ensure they are spawned on the current floor
         if (GameState.getPlayer() != null && GameState.getCurrentFloor() != null) {
@@ -53,7 +53,7 @@ public class Game {
                         Thread.currentThread().interrupt();
                         break;
                     } catch (Exception e) {
-                        System.out.println("[Game] Error executing command: " + e.getMessage());
+                        // System.out.println("[Game] Error executing command: " + e.getMessage());
                     }
                 }
                 running.set(false);
@@ -82,7 +82,7 @@ public class Game {
             String resourceName = "data/floors/floor" + i + "/floor" + i + ".txt";
             try (InputStream is = Game.class.getClassLoader().getResourceAsStream(resourceName)) {
                 if (is == null) {
-                    System.out.println("[Dungeon] Floor resource not found: " + resourceName);
+                    // System.out.println("[Dungeon] Floor resource not found: " + resourceName);
                     continue;
                 }
                 Floor floor = parser.parseStream(is);
@@ -91,7 +91,7 @@ public class Game {
                     GameState.setCurrentFloor(floor); // Start at floor 0
                 }
             } catch (Exception e) {
-                System.out.println("[Dungeon] Failed to load floor " + i + ": " + e.getMessage());
+                // System.out.println("[Dungeon] Failed to load floor " + i + ": " + e.getMessage());
             }
         }
     }
@@ -103,10 +103,10 @@ public class Game {
         if (c instanceof Player) {
             player = (Player) c;
         } else if (c != null) {
-            System.out.println("[Player] Creature id " + id + " is not a Player. Using default player.");
+            // System.out.println("[Player] Creature id " + id + " is not a Player. Using default player.");
             player = GameState.getPlayer();
         } else {
-            System.out.println("[Player] No creature found for id " + id + ". Using default player.");
+            // System.out.println("[Player] No creature found for id " + id + ". Using default player.");
             player = GameState.getPlayer();
         }
         GameState.setPlayer(player);
@@ -114,7 +114,7 @@ public class Game {
 
     public static void selectPlayer(Player player) {
         if (player == null) {
-            System.out.println("[Player] Given player is null. Using default player.");
+            // System.out.println("[Player] Given player is null. Using default player.");
             player = GameState.getPlayer();
         }
         GameState.setPlayer(player);
@@ -124,7 +124,7 @@ public class Game {
     public static void respawnPlayerOnCurrentFloor(boolean printAfter) {
         Floor floor = GameState.getCurrentFloor();
         if (floor == null) {
-            System.out.println("[Player] No floor loaded; cannot spawn.");
+            // System.out.println("[Player] No floor loaded; cannot spawn.");
             return;
         }
         Player player = GameState.getPlayer();
@@ -148,7 +148,7 @@ public class Game {
                 MapPrinter.printWithPlayer(floor, player);
             }
         } else {
-            System.out.println("[Player] No suitable spawn found; player position unset.");
+            // System.out.println("[Player] No suitable spawn found; player position unset.");
         }
     }
 }

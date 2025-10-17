@@ -1,7 +1,5 @@
 package com.bapppis.core.Creature.player;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.AllLoaders;
@@ -21,7 +19,7 @@ public class TestBigglesCreation {
     }
 
     // helpers (not used directly by the test, kept for convenience)
-    private void assertBigglesDefaults(Player biggles) {
+    /* private void assertBigglesDefaults(Player biggles) {
         assertEquals("Biggles The Unlucky", biggles.getName());
         // finalizeAfterLoad applies HP bonuses: baseHp 5 + hpLvlBonus 4 + constitution
         // delta (12 -> +2) => 11
@@ -43,5 +41,5 @@ public class TestBigglesCreation {
         assertEquals(com.bapppis.core.CreatureType.HUMANOID, biggles.getCreatureType());
     assertEquals(6, biggles.getStat(com.bapppis.core.Stats.INTELLIGENCE));
     assertEquals(1, biggles.getStat(com.bapppis.core.Stats.LUCK));
-    }
+    } */
 }

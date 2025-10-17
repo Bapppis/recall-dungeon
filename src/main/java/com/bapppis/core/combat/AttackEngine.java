@@ -93,7 +93,7 @@ public final class AttackEngine {
                 float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
                 if (isTrue) {
                     if (toHit <= effectiveDodge) {
-                        System.out.println("Missed (dodge TRUE): " + attacker.getName() + " -> " + target.getName());
+                        // System.out.println("Missed (dodge TRUE): " + attacker.getName() + " -> " + target.getName());
                         physMissDodge++;
                         continue;
                     }
@@ -102,21 +102,21 @@ public final class AttackEngine {
                     if (toHit <= totalAvoid) {
                         if (effectiveDodge >= effectiveBlock) {
                             if (toHit <= effectiveBlock) {
-                                System.out.println("Missed (block): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (block): " + attacker.getName() + " -> " + target.getName());
                                 physMissBlock++;
                                 continue;
                             } else {
-                                System.out.println("Missed (dodge): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (dodge): " + attacker.getName() + " -> " + target.getName());
                                 physMissDodge++;
                                 continue;
                             }
                         } else {
                             if (toHit <= effectiveDodge) {
-                                System.out.println("Missed (dodge): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (dodge): " + attacker.getName() + " -> " + target.getName());
                                 physMissDodge++;
                                 continue;
                             } else {
-                                System.out.println("Missed (block): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (block): " + attacker.getName() + " -> " + target.getName());
                                 physMissBlock++;
                                 continue;
                             }
@@ -212,22 +212,22 @@ public final class AttackEngine {
                 if (toHit <= totalAvoid) {
                     if (effectiveDodge >= effectiveMagicResist) {
                         if (toHit <= effectiveMagicResist) {
-                            System.out
-                                    .println("Missed (magicResist): " + attacker.getName() + " -> " + target.getName());
+                // System.out
+                //         .println("Missed (magicResist): " + attacker.getName() + " -> " + target.getName());
                             magicMissResist++;
                         } else {
-                            System.out
-                                    .println("Missed (dodge magic): " + attacker.getName() + " -> " + target.getName());
+                // System.out
+                //         .println("Missed (dodge magic): " + attacker.getName() + " -> " + target.getName());
                             magicMissDodge++;
                         }
                     } else {
                         if (toHit <= effectiveDodge) {
-                            System.out
-                                    .println("Missed (dodge magic): " + attacker.getName() + " -> " + target.getName());
+                // System.out
+                //         .println("Missed (dodge magic): " + attacker.getName() + " -> " + target.getName());
                             magicMissDodge++;
                         } else {
-                            System.out
-                                    .println("Missed (magicResist): " + attacker.getName() + " -> " + target.getName());
+                // System.out
+                //         .println("Missed (magicResist): " + attacker.getName() + " -> " + target.getName());
                             magicMissResist++;
                         }
                     }
@@ -295,10 +295,10 @@ public final class AttackEngine {
         }
 
         if (hasPhysical || isTrue) {
-            System.out.println("Attack: " + attack.name + " Physical After: " + physAfter
-                    + (magAfter > 0 ? (", Magic After: " + magAfter) : ""));
+        // System.out.println("Attack: " + attack.name + " Physical After: " + physAfter
+        //         + (magAfter > 0 ? (", Magic After: " + magAfter) : ""));
         } else if (magAfter > 0) {
-            System.out.println("Attack: " + attack.name + " Magic After: " + magAfter);
+            // System.out.println("Attack: " + attack.name + " Magic After: " + magAfter);
         }
     }
 
