@@ -104,6 +104,7 @@ Notes
 - 8002 — Lesser Blue Healing Potion — data/items/consumables/potions/Lesser Blue Healing Potion.json
 - 8003 — Blue Healing Potion — data/items/consumables/potions/Blue Healing Potion.json
 - 8004 — Perfect Healing Potion — data/items/consumables/potions/Perfect Healing Potion.json
+- 8005 — Health Regen 1 Potion — data/items/consumables/potions/Health Regen 1 Potion.json
 
 ### Weapons (9000-9999)
 #### Blunt Weapons (9000-9199)

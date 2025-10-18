@@ -14,8 +14,15 @@ public class Inventory {
     private static final int MAX_PER_TYPE = 5;
 
     public boolean addItem(Item item) {
+        if (item == null) {
+            System.err.println("[Inventory] Tried to add null item!");
+            return false;
+        }
         List<Item> target = getContainer(item);
-        if (target == null || target.size() >= MAX_PER_TYPE) return false;
+        if (target == null || target.size() >= MAX_PER_TYPE) {
+            System.err.println("[Inventory] No container for item type: " + (item != null ? item.getClass().getSimpleName() : "null"));
+            return false;
+        }
         target.add(item);
         sortContainer(target);
         return true;
@@ -36,6 +43,7 @@ public class Inventory {
     public List<Item> getMisc() { return Collections.unmodifiableList(misc); }
 
     private List<Item> getContainer(Item item) {
+        if (item == null) return null;
         if (item.getType() == ItemType.CONSUMABLE) return consumables;
         if (item.getType() == ItemType.MISC) return misc;
         if (item.getSlot() == EquipmentSlot.WEAPON) return weapons;

@@ -19,6 +19,8 @@ import com.bapppis.core.Type;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.EquipmentSlot;
+import com.bapppis.core.item.Weapon;
+import com.bapppis.core.creature.ItemManager;
 
 public abstract class Creature {
     // --- Fields ---
@@ -728,12 +730,10 @@ public abstract class Creature {
         // Prefer weapon attacks (if equipped and weapon defines attacks), otherwise use
         // creature attacks
         Attack chosen = null;
-        Equipment weapon = null;
-        if (this.getEquipped(EquipmentSlot.WEAPON) instanceof Equipment) {
-            weapon = (Equipment) this.getEquipped(EquipmentSlot.WEAPON);
-            // If the weapon is versatile and is currently wielded two-handed (it also
-            // occupies the OFFHAND slot), prefer the versatileAttacks list. Otherwise
-            // fall back to the weapon's regular attacks.
+        Item equipped = this.getEquipped(EquipmentSlot.WEAPON);
+        Weapon weapon = null;
+        if (equipped instanceof Weapon) {
+            weapon = (Weapon) equipped;
             java.util.List<Attack> weaponAttackList = null;
             try {
                 boolean wieldedTwoHanded = (this.getEquipped(EquipmentSlot.OFFHAND) == weapon) || weapon.isTwoHanded();
@@ -742,8 +742,7 @@ public abstract class Creature {
                         weaponAttackList = weapon.getVersatileAttacks();
                     }
                 }
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
 
             if (weaponAttackList == null) {
                 if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
@@ -753,12 +752,14 @@ public abstract class Creature {
 
             if (weaponAttackList != null && !weaponAttackList.isEmpty()) {
                 chosen = AttackUtil.chooseAttackFromList(weaponAttackList);
-                // stat bonus depends on weapon class/finesse
                 int statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
                 com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, chosen, statBonus, target,
                         weapon.getDamageType(), weapon.getMagicElement(), weapon);
                 return;
             }
+        } else if (equipped instanceof Equipment) {
+            Equipment eq = (Equipment) equipped;
+            // fallback: treat as non-weapon equipment, no attacks
         }
 
         // No weapon attacks — use creature's own attacks if present
@@ -855,14 +856,14 @@ public abstract class Creature {
         // Default behavior: treat two-handed items as two-handed; versatile items
         // default to one-handed unless caller explicitly requests two-handed.
         boolean requestTwoHanded = false;
-        if (item instanceof com.bapppis.core.item.Equipment) {
+        if (item instanceof com.bapppis.core.item.Weapon) {
             try {
-                com.bapppis.core.item.Equipment eq = (com.bapppis.core.item.Equipment) item;
-                requestTwoHanded = eq.isTwoHanded();
+                com.bapppis.core.item.Weapon weapon = (com.bapppis.core.item.Weapon) item;
+                requestTwoHanded = weapon.isTwoHanded();
             } catch (Exception ignored) {
             }
         }
-        EquipmentManager.equip(this, item, requestTwoHanded);
+    ItemManager.equip(this, item, requestTwoHanded);
     }
 
     /**
@@ -1032,11 +1033,11 @@ public abstract class Creature {
      * both WEAPON and OFFHAND slots (reusing the existing two-handed logic).
      */
     public void equipItem(Item item, boolean requestTwoHanded) {
-        EquipmentManager.equip(this, item, requestTwoHanded);
+    ItemManager.equip(this, item, requestTwoHanded);
     }
 
     public void unequipItem(EquipmentSlot slot) {
-        EquipmentManager.unequip(this, slot);
+    ItemManager.unequip(this, slot);
     }
 
     public void addProperty(Property property) {

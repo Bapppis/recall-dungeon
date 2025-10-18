@@ -19,13 +19,22 @@ public class CreatureLoader {
     private static final HashMap<Integer, Creature> creatureIdMap = new HashMap<>();
     private static final HashMap<String, Player> playerMap = new HashMap<>();
     private static final HashMap<Integer, Player> playerIdMap = new HashMap<>();
+    private static boolean loaded = false;
 
     public static void loadCreatures() {
-        // Fresh load each time
+        if (loaded) return;
+        forceReload();
+    }
+
+    /**
+     * Force reload of all creatures, even if already loaded. Use in individual tests.
+     */
+    public static void forceReload() {
         creatureMap.clear();
         creatureIdMap.clear();
         playerMap.clear();
         playerIdMap.clear();
+        loaded = false;
 
         // Ensure items are loaded first so starting inventory/equipment ids resolve
         try {
@@ -34,30 +43,30 @@ public class CreatureLoader {
             // ignore if items already loaded or loading fails here
         }
 
-    com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
-        .registerTypeAdapter(com.bapppis.core.Resistances.class,
-            new com.bapppis.core.util.ResistancesDeserializer())
-        .create();
-    try (ScanResult scanResult = new ClassGraph()
-        // Scan production creature data and the test fixture package so unit tests
-        // find JSON under com/... during test execution.
-        .acceptPaths("data/creatures", "com/bapppis/core/Creature")
-        .scan()) {
-            // Keep track of relative resource paths we've processed so we don't load the
-            // same path multiple times when it appears on the classpath (for example
-            // when both a source and compiled copy exist). This prevents duplicate-id
-            // warnings caused by duplicate classpath entries.
-            java.util.Set<String> processedResourcePaths = new java.util.HashSet<>();
-            for (Resource resource : scanResult.getAllResources()) {
-                String relPath = resource.getPath();
-                // Skip duplicates of the same relative path
-                if (processedResourcePaths.contains(relPath))
-                    continue;
-                processedResourcePaths.add(relPath);
-                if (relPath.endsWith(".json")) {
-                    try (Reader reader = new InputStreamReader(resource.open())) {
-                        Creature creature;
-                        // Read the JSON into a JsonObject first so we can strip fields that would
+        com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+            .registerTypeAdapter(com.bapppis.core.Resistances.class,
+                new com.bapppis.core.util.ResistancesDeserializer())
+            .create();
+        try (ScanResult scanResult = new ClassGraph()
+            // Scan production creature data and the test fixture package so unit tests
+            // find JSON under com/... during test execution.
+            .acceptPaths("data/creatures", "com/bapppis/core/Creature")
+            .scan()) {
+                // Keep track of relative resource paths we've processed so we don't load the
+                // same path multiple times when it appears on the classpath (for example
+                // when both a source and compiled copy exist). This prevents duplicate-id
+                // warnings caused by duplicate classpath entries.
+                java.util.Set<String> processedResourcePaths = new java.util.HashSet<>();
+                for (Resource resource : scanResult.getAllResources()) {
+                    String relPath = resource.getPath();
+                    // Skip duplicates of the same relative path
+                    if (processedResourcePaths.contains(relPath))
+                        continue;
+                    processedResourcePaths.add(relPath);
+                    if (relPath.endsWith(".json")) {
+                        try (Reader reader = new InputStreamReader(resource.open())) {
+                            Creature creature;
+                            // Read the JSON into a JsonObject first so we can strip fields that would
                         // conflict with existing types (for example: inventory is an array in
                         // JSON but Creature.inventory is an Inventory object). We'll remove
                         // the 'inventory' and equipment slot fields before letting Gson map
@@ -188,6 +197,7 @@ public class CreatureLoader {
                 }
             }
         }
+        loaded = true;
     }
 
     private static void applyStartingItemsFromJson(String resourcePath, com.google.gson.Gson gson, Creature creature) {
@@ -200,8 +210,21 @@ public class CreatureLoader {
             if (obj.has("inventory") && obj.get("inventory").isJsonArray()) {
                 for (com.google.gson.JsonElement el : obj.getAsJsonArray("inventory")) {
                     try {
-                        int itemId = el.getAsInt();
-                        com.bapppis.core.item.Item template = ItemLoader.getItemById(itemId);
+                        com.bapppis.core.item.Item template = null;
+                        if (el.isJsonPrimitive()) {
+                            if (el.getAsJsonPrimitive().isNumber()) {
+                                int itemId = el.getAsInt();
+                                template = ItemLoader.getItemById(itemId);
+                            } else if (el.getAsJsonPrimitive().isString()) {
+                                String itemNameOrId = el.getAsString();
+                                try {
+                                    int itemId = Integer.parseInt(itemNameOrId);
+                                    template = ItemLoader.getItemById(itemId);
+                                } catch (NumberFormatException nfe) {
+                                    template = ItemLoader.getItemByName(itemNameOrId);
+                                }
+                            }
+                        }
                         if (template != null) {
                             // Deep-copy the template so each creature gets its own instance
                             com.bapppis.core.item.Item copy = gson.fromJson(gson.toJson(template), template.getClass());
@@ -218,8 +241,21 @@ public class CreatureLoader {
             for (String slotName : slots) {
                 if (obj.has(slotName) && obj.get(slotName).isJsonPrimitive()) {
                     try {
-                        int itemId = obj.get(slotName).getAsInt();
-                        com.bapppis.core.item.Item template = ItemLoader.getItemById(itemId);
+                        com.bapppis.core.item.Item template = null;
+                        if (obj.get(slotName).isJsonPrimitive()) {
+                            if (obj.get(slotName).getAsJsonPrimitive().isNumber()) {
+                                int itemId = obj.get(slotName).getAsInt();
+                                template = ItemLoader.getItemById(itemId);
+                            } else if (obj.get(slotName).getAsJsonPrimitive().isString()) {
+                                String itemNameOrId = obj.get(slotName).getAsString();
+                                try {
+                                    int itemId = Integer.parseInt(itemNameOrId);
+                                    template = ItemLoader.getItemById(itemId);
+                                } catch (NumberFormatException nfe) {
+                                    template = ItemLoader.getItemByName(itemNameOrId);
+                                }
+                            }
+                        }
                         if (template != null) {
                             com.bapppis.core.item.Item copy = gson.fromJson(gson.toJson(template), template.getClass());
                             // Add to inventory first (equipItem will remove it from inventory)
@@ -244,7 +280,26 @@ public class CreatureLoader {
             if (obj != null && obj.has("properties")) {
                 List<Integer> ids = new ArrayList<>();
                 for (com.google.gson.JsonElement el : obj.getAsJsonArray("properties")) {
-                    ids.add(el.getAsInt());
+                    try {
+                        if (el.isJsonPrimitive()) {
+                            if (el.getAsJsonPrimitive().isNumber()) {
+                                ids.add(el.getAsInt());
+                            } else if (el.getAsJsonPrimitive().isString()) {
+                                String propNameOrId = el.getAsString();
+                                try {
+                                    int propId = Integer.parseInt(propNameOrId);
+                                    ids.add(propId);
+                                } catch (NumberFormatException nfe) {
+                                    com.bapppis.core.property.Property prop = com.bapppis.core.property.PropertyLoader.getPropertyByName(propNameOrId);
+                                    if (prop != null) {
+                                        ids.add(prop.getId());
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        // ignore invalid property entries
+                    }
                 }
                 return ids;
             }
@@ -346,6 +401,7 @@ public class CreatureLoader {
     }
 
     public static List<Player> getAllPlayers() {
-        return new ArrayList<>(playerMap.values());
+        // Use playerIdMap to avoid duplicates (playerMap has same player under multiple name keys)
+        return new ArrayList<>(playerIdMap.values());
     }
 }

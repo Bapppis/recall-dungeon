@@ -8,7 +8,7 @@ import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
 
-public class ManualPropertyTest {
+public class PropertyManualTest {
 
     @Test
     public void testAddRemoveCowardOnBiggles() {

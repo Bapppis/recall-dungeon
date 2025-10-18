@@ -1,6 +1,8 @@
-package com.bapppis.core.item;
 
-import com.bapppis.core.creature.Creature;
+package com.bapppis.core.item;
+import com.bapppis.core.property.Property;
+import java.util.List;
+
 
 public interface Item {
     String getName();
@@ -9,14 +11,25 @@ public interface Item {
     ItemType getType();
     int getId();
     EquipmentSlot getSlot();
-    boolean isTwoHanded();
-    void setSlot(EquipmentSlot slot);
-    void setTwoHanded(boolean twoHanded);
+        void setSlot(EquipmentSlot slot);
 
-    default void onApply(Creature creature) {
-        // Default: do nothing
+    List<Property> getProperties();
+    void setProperties(List<Property> properties);
+
+    default void onApply(com.bapppis.core.creature.Creature creature) {
+        List<Property> props = getProperties();
+        if (props != null) {
+            for (Property p : props) {
+                if (p != null) creature.addProperty(p);
+            }
+        }
     }
-    default void onRemove(Creature creature) {
-        // Default: do nothing
+    default void onRemove(com.bapppis.core.creature.Creature creature) {
+        List<Property> props = getProperties();
+        if (props != null) {
+            for (Property p : props) {
+                if (p != null) creature.removeProperty(p.getId());
+            }
+        }
     }
 }

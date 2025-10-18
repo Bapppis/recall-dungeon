@@ -25,7 +25,7 @@
   "baseHp": 5,
   "hpLvlBonus": 4,
   "properties": [
-    3000
+    "Darksight"
   ],
   "attacks": [
     {

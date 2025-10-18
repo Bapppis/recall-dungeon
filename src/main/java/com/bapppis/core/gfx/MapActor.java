@@ -35,6 +35,9 @@ public class MapActor extends Actor {
      */
     public MapActor(BitmapFont font, TextureAtlas atlas, java.util.Map<Character, String> charToRegion,
             java.util.Map<Character, TextureRegion> charTextureRegions) {
+        if (font == null) {
+            throw new IllegalArgumentException("MapActor requires a non-null BitmapFont");
+        }
         this.font = font;
         this.lineHeight = font.getLineHeight();
         this.atlas = atlas;
