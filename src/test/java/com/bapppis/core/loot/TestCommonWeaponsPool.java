@@ -28,6 +28,9 @@ public class TestCommonWeaponsPool {
         allowed.add("Parrying Dagger");
         allowed.add("Rusty Iron Sword");
         allowed.add("Old Bow");
+        allowed.add("ParryingDagger"); // ID in loot pool
+        allowed.add("RustyIronSword"); // ID in loot pool
+        allowed.add("OldBow"); // ID in loot pool
 
         // Sample the pool multiple times to catch randomness
         for (int i = 0; i < 200; i++) {

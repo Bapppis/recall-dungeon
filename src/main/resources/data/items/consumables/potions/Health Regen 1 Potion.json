@@ -1,0 +1,13 @@
+{
+  "id": 8005,
+  "name": "Health Regen 1 Potion",
+  "description": "A potion that gives the drinker health regeneration over time.",
+  "rarity": "COMMON",
+  "itemType": "CONSUMABLE",
+  "tooltip": [
+    "Regenerates 2 health per turn."
+  ],
+  "properties": [
+    "HealthRegen1"
+  ]
+}

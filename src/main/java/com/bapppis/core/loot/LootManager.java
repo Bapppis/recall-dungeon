@@ -91,16 +91,65 @@ public class LootManager {
         int count = min + (max > min ? rng.nextInt(max - min + 1) : 0);
 
         if ("item".equalsIgnoreCase(chosen.type)) {
-            String ref = chosen.id != null ? chosen.id : chosen.name;
+            // Try to resolve by id, then by name
+            String ref = null;
+            if (chosen.id != null) {
+                ref = chosen.id;
+                // Try to resolve as int id, fallback to name
+                try {
+                    int itemId = Integer.parseInt(ref);
+                    if (com.bapppis.core.item.ItemLoader.getItemById(itemId) == null && chosen.name != null) {
+                        ref = chosen.name;
+                    }
+                } catch (NumberFormatException nfe) {
+                    // Not an int, try as name
+                    if (com.bapppis.core.item.ItemLoader.getItemByName(ref) == null && chosen.name != null) {
+                        ref = chosen.name;
+                    }
+                }
+            } else if (chosen.name != null) {
+                ref = chosen.name;
+            }
             for (int i=0;i<count;i++) out.add(new Spawn("item", ref));
         } else if ("monster".equalsIgnoreCase(chosen.type)) {
+            // Try to resolve by id, then by name
+            String ref = null;
+            if (chosen.id != null) {
+                ref = chosen.id;
+                try {
+                    int creatureId = Integer.parseInt(ref);
+                    if (com.bapppis.core.creature.CreatureLoader.getCreatureById(creatureId) == null && chosen.name != null) {
+                        ref = chosen.name;
+                    }
+                } catch (NumberFormatException nfe) {
+                    if (com.bapppis.core.creature.CreatureLoader.getCreature(ref) == null && chosen.name != null) {
+                        ref = chosen.name;
+                    }
+                }
+            } else if (chosen.name != null) {
+                ref = chosen.name;
+            }
             int groupMin = chosen.minGroup != null ? chosen.minGroup : 1;
             int groupMax = chosen.maxGroup != null ? chosen.maxGroup : groupMin;
             int group = groupMin + (groupMax > groupMin ? rng.nextInt(groupMax - groupMin + 1) : 0);
-            for (int i=0;i<group;i++) out.add(new Spawn("monster", chosen.id));
+            for (int i=0;i<group;i++) out.add(new Spawn("monster", ref));
         } else if ("pool".equalsIgnoreCase(chosen.type)) {
-            String poolRef = chosen.id != null ? chosen.id : (chosen.name != null ? chosen.name.toLowerCase() : null);
-            if (poolRef != null) out.addAll(samplePool(poolRef));
+            // Try to resolve pool by id, then by name
+            String poolRef = null;
+            if (chosen.id != null) {
+                poolRef = chosen.id;
+                // Check if pool exists with this id
+                if (pools.get(poolRef) == null && chosen.name != null) {
+                    // Try name as fallback
+                    poolRef = chosen.name.toLowerCase();
+                }
+            } else if (chosen.name != null) {
+                poolRef = chosen.name.toLowerCase();
+            }
+            if (poolRef != null) {
+                List<Spawn> poolSpawns = samplePool(poolRef);
+                out.addAll(poolSpawns);
+            }
         }
     }
 

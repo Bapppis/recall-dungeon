@@ -28,17 +28,17 @@
   "baseManaRegen": 0,
   "hpLvlBonus": 8,
   "helmet": null,
-  "armor": 7002,
-  "legwear": 7501,
-  "weapon": 9801,
-  "offhand": 7751,
+  "armor": "BrokenSteelArmor",
+  "legwear": "LeatherLeggings",
+  "weapon": "RustyIronSword",
+  "offhand": "HeaterShield",
   "inventory": [
-    8000,
-    9600,
-    7000
+    "MinorHealingPotion",
+    "OldBow",
+    "ArmorOfWater"
   ],
   "properties": [
-    3667
+    "HumanAdaptability"
   ],
   "attacks": [
     {

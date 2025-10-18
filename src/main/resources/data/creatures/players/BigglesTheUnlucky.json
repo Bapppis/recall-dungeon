@@ -43,18 +43,18 @@
   "baseStaminaRegen": 0,
   "baseManaRegen": 0,
   "hpLvlBonus": 4,
-  "helmet": 7251,
-  "armor": 7003,
+  "helmet": "GreenHood",
+  "armor": "LeatherArmor",
   "legwear": null,
-  "weapon": 9600,
+  "weapon": "OldBow",
   "offhand": null,
   "inventory": [
-    8000,
-    9802
+    "MinorHealingPotion",
+    "ParryingDagger"
   ],
   "properties": [
-    3666,
-    3668
+    "Coward",
+    "Darksight"
   ],
   "attacks": [
     {

@@ -2,7 +2,7 @@ package com.bapppis.core.util;
 
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.Stats;
-import com.bapppis.core.item.Equipment;
+import com.bapppis.core.item.Weapon;
 
 /**
  * Helpers for weapon-related computations.
@@ -14,7 +14,7 @@ public final class WeaponUtil {
      * Determine the stat bonus used by a weapon for physical damage multipliers.
      * Mirrors the logic previously on Creature.determineStatBonusForWeapon.
      */
-    public static int determineWeaponStatBonus(Creature attacker, Equipment weapon) {
+    public static int determineWeaponStatBonus(Creature attacker, Weapon weapon) {
         if (attacker == null || weapon == null) return 0;
         try {
                 if (weapon.getFinesse()) {

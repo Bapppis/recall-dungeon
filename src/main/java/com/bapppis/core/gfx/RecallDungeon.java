@@ -26,6 +26,7 @@ public class RecallDungeon extends ApplicationAdapter {
     private BitmapFont mapFont;
     private Stage stage;
     private com.bapppis.core.gfx.MapActor mapActor;
+    private com.badlogic.gdx.graphics.g2d.TextureAtlas spriteAtlas; // Cached atlas
     // Left-side character info widgets
     private com.kotcrab.vis.ui.widget.VisLabel nameLabel;
     private com.kotcrab.vis.ui.widget.VisLabel hpLabel;
@@ -154,8 +155,8 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Choose a font for the map if available
-        BitmapFont chosen = null;
+        // Choose a font for the map - use default font as fallback
+        BitmapFont chosen = font; // Use the default font as fallback
         try {
             if (Gdx.files.internal("font-small.fnt").exists()) {
                 chosen = new BitmapFont(Gdx.files.internal("font-small.fnt"));
@@ -164,6 +165,7 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         } catch (Exception e) {
             Gdx.app.log("RecallDungeon", "Error loading bitmap font for map", e);
+            // chosen will be the default font
         }
 
         // Minimal, robust mapping: provide sensible defaults so UI compiles and runs
@@ -173,11 +175,16 @@ public class RecallDungeon extends ApplicationAdapter {
         charToRegion.put('^', "stairs_up");
         charToRegion.put('v', "stairs_down");
         charToRegion.put('P', "player_default");
+        charToRegion.put('?', "undiscovered");
 
         java.util.Map<Character, com.badlogic.gdx.graphics.g2d.TextureRegion> charTextureRegions = new java.util.HashMap<>();
-        com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = null; // atlas optional
 
-        mapActor = new com.bapppis.core.gfx.MapActor(chosen, atlas, charToRegion, charTextureRegions);
+        // Load atlas once and cache it (only load on first call)
+        if (spriteAtlas == null) {
+            spriteAtlas = com.bapppis.core.gfx.AtlasBuilder.loadWithFallback();
+        }
+
+        mapActor = new com.bapppis.core.gfx.MapActor(chosen, spriteAtlas, charToRegion, charTextureRegions);
         // Put the actor inside a container table cell and center it. Don't force fill
         // so actor size is used.
         com.badlogic.gdx.scenes.scene2d.ui.Container<com.bapppis.core.gfx.MapActor> container = new com.badlogic.gdx.scenes.scene2d.ui.Container<>(
@@ -783,6 +790,12 @@ public class RecallDungeon extends ApplicationAdapter {
         if (mapFont != null)
             try {
                 mapFont.dispose();
+            } catch (Exception ignored) {
+            }
+        // Dispose cached sprite atlas
+        if (spriteAtlas != null)
+            try {
+                spriteAtlas.dispose();
             } catch (Exception ignored) {
             }
         // dispose atlas or any textures loaded when creating MapActor

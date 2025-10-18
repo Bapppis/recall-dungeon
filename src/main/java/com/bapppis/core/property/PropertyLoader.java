@@ -14,12 +14,25 @@ import com.google.gson.reflect.TypeToken;
 public class PropertyLoader {
     private static final HashMap<Integer, Property> propertyMap = new HashMap<>();
     private static final HashMap<String, Property> propertyNameMap = new HashMap<>();
+    private static boolean loaded = false;
 
     public static void loadProperties() {
-    com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
-        .registerTypeAdapter(com.bapppis.core.Resistances.class,
-            new com.bapppis.core.util.ResistancesDeserializer())
-        .create();
+        if (loaded) return;
+        forceReload();
+    }
+
+    /**
+     * Force reload of all properties, even if already loaded. Use in individual tests.
+     */
+    public static void forceReload() {
+        propertyMap.clear();
+        propertyNameMap.clear();
+        loaded = false;
+
+        com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+            .registerTypeAdapter(com.bapppis.core.Resistances.class,
+                new com.bapppis.core.util.ResistancesDeserializer())
+            .create();
         try (ScanResult scanResult = new ClassGraph()
                 .acceptPaths("data/properties/buff", "data/properties/debuff", "data/properties/trait")
                 .scan()) {
@@ -98,6 +111,7 @@ public class PropertyLoader {
                 }
             }
         }
+        loaded = true;
     }
 
     // Accessors

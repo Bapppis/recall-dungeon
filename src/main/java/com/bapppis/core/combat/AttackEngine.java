@@ -3,7 +3,7 @@ package com.bapppis.core.combat;
 import com.bapppis.core.creature.Attack;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.Resistances;
-import com.bapppis.core.item.Equipment;
+import com.bapppis.core.item.Weapon;
 import com.bapppis.core.util.Dice;
 import com.bapppis.core.util.ResistanceUtil;
 import com.bapppis.core.util.WeaponUtil;
@@ -55,13 +55,13 @@ public final class AttackEngine {
     }
 
     public static void applyAttackToTarget(Creature attacker, Attack attack, int statBonus, Creature target,
-            Resistances physicalType, Resistances magicType, Equipment weapon) {
-        applyAttackToTarget(attacker, attack, statBonus, target, physicalType, magicType, weapon,
-                new DefaultRandomProvider());
+        Resistances physicalType, Resistances magicType, Weapon weapon) {
+    applyAttackToTarget(attacker, attack, statBonus, target, physicalType, magicType, weapon,
+        new DefaultRandomProvider());
     }
 
     public static void applyAttackToTarget(Creature attacker, Attack attack, int statBonus, Creature target,
-            Resistances physicalType, Resistances magicType, Equipment weapon, RandomProvider rng) {
+        Resistances physicalType, Resistances magicType, Weapon weapon, RandomProvider rng) {
         if (attack == null || target == null || attacker == null)
             return;
 

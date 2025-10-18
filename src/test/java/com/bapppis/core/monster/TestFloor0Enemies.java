@@ -28,19 +28,30 @@ public class TestFloor0Enemies {
         for (int i = 0; i < iterations; i++) {
             List<LootManager.Spawn> spawns = manager.samplePool("11000");
             for (LootManager.Spawn s : spawns) {
-                // try to parse numeric id
-                try {
-                    int mid = Integer.parseInt(s.id);
-                    if (mid == 6600)
-                        spearman.incrementAndGet();
-                    else if (mid == 6601)
-                        swordsman.incrementAndGet();
-                    else if (mid == 6400)
-                        goblin.incrementAndGet();
-                    else if (mid == 6000)
-                        hound.incrementAndGet();
-                } catch (Exception ex) {
-                    // ignore non-numeric ids
+                // Check string IDs from monster pool
+                if ("SkeletonSpearman".equals(s.id) || "Skeleton Spearman".equals(s.id)) {
+                    spearman.incrementAndGet();
+                } else if ("SkeletonSwordsman".equals(s.id) || "Skeleton Swordsman".equals(s.id)) {
+                    swordsman.incrementAndGet();
+                } else if ("GoblinBerserker".equals(s.id) || "Goblin Berserker".equals(s.id)) {
+                    goblin.incrementAndGet();
+                } else if ("DarkHound".equals(s.id) || "Dark Hound".equals(s.id)) {
+                    hound.incrementAndGet();
+                } else {
+                    // Try to parse numeric id for backward compatibility
+                    try {
+                        int mid = Integer.parseInt(s.id);
+                        if (mid == 6600)
+                            spearman.incrementAndGet();
+                        else if (mid == 6601)
+                            swordsman.incrementAndGet();
+                        else if (mid == 6400)
+                            goblin.incrementAndGet();
+                        else if (mid == 6000)
+                            hound.incrementAndGet();
+                    } catch (Exception ex) {
+                        // ignore unrecognized ids
+                    }
                 }
             }
         }
