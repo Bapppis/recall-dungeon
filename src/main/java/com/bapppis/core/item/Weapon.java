@@ -6,6 +6,10 @@ import com.bapppis.core.Stats;
 import java.util.List;
 
 public class Weapon extends Equipment {
+    @Override
+    public String toString() {
+        return getName() + " (id=" + getId() + ", class=" + getWeaponClass() + (isTwoHanded() ? ", 2H" : "") + ")";
+    }
     private boolean twoHanded;
     public boolean isTwoHanded() { return twoHanded; }
     public void setTwoHanded(boolean twoHanded) { this.twoHanded = twoHanded; }

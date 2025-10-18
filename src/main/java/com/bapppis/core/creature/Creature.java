@@ -23,6 +23,79 @@ import com.bapppis.core.item.Weapon;
 import com.bapppis.core.creature.ItemManager;
 
 public abstract class Creature {
+    /**
+     * Returns a map of all equipped items by slot.
+     */
+    public java.util.Map<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> getAllEquipped() {
+        return new java.util.EnumMap<>(equipment);
+    }
+
+    /**
+     * Returns a map of equipped armor items (helmet, armor, legwear).
+     */
+    public java.util.Map<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> getEquippedArmors() {
+        java.util.EnumMap<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> armors = new java.util.EnumMap<>(com.bapppis.core.item.EquipmentSlot.class);
+        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
+                com.bapppis.core.item.EquipmentSlot.HELMET,
+                com.bapppis.core.item.EquipmentSlot.ARMOR,
+                com.bapppis.core.item.EquipmentSlot.LEGWEAR }) {
+            com.bapppis.core.item.Item item = getEquipped(slot);
+            if (item != null) armors.put(slot, item);
+        }
+        return armors;
+    }
+
+    /**
+     * Returns a map of equipped weapon/offhand items.
+     */
+    public java.util.Map<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> getEquippedWeapons() {
+        java.util.EnumMap<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> weapons = new java.util.EnumMap<>(com.bapppis.core.item.EquipmentSlot.class);
+        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
+                com.bapppis.core.item.EquipmentSlot.WEAPON,
+                com.bapppis.core.item.EquipmentSlot.OFFHAND }) {
+            com.bapppis.core.item.Item item = getEquipped(slot);
+            if (item != null) weapons.put(slot, item);
+        }
+        return weapons;
+    }
+
+    /**
+     * Prints all equipped items by slot.
+     */
+    public void printEquipped() {
+        System.out.println("Equipped Items:");
+        for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
+            com.bapppis.core.item.Item item = getEquipped(slot);
+            System.out.println("  " + slot + ": " + (item == null ? "Empty" : item.getName()));
+        }
+    }
+
+    /**
+     * Prints equipped armors (helmet, armor, legwear).
+     */
+    public void printEquippedArmors() {
+        System.out.println("Equipped Armors:");
+        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
+                com.bapppis.core.item.EquipmentSlot.HELMET,
+                com.bapppis.core.item.EquipmentSlot.ARMOR,
+                com.bapppis.core.item.EquipmentSlot.LEGWEAR }) {
+            com.bapppis.core.item.Item item = getEquipped(slot);
+            System.out.println("  " + slot + ": " + (item == null ? "Empty" : item.getName()));
+        }
+    }
+
+    /**
+     * Prints equipped weapons (weapon, offhand).
+     */
+    public void printEquippedWeapons() {
+        System.out.println("Equipped Weapons:");
+        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
+                com.bapppis.core.item.EquipmentSlot.WEAPON,
+                com.bapppis.core.item.EquipmentSlot.OFFHAND }) {
+            com.bapppis.core.item.Item item = getEquipped(slot);
+            System.out.println("  " + slot + ": " + (item == null ? "Empty" : item.getName()));
+        }
+    }
     // --- Fields ---
     private int id;
     private String name;
@@ -1013,13 +1086,16 @@ public abstract class Creature {
      */
     public boolean unequipItemByName(String name) {
         if (name == null || name.isBlank()) return false;
-        String t = name.trim();
+        String t = name.replaceAll("\\s+", "").toLowerCase();
         try {
             for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
                 com.bapppis.core.item.Item eq = this.getEquipped(slot);
-                if (eq != null && eq.getName() != null && eq.getName().equalsIgnoreCase(t)) {
-                    this.unequipItem(slot);
-                    return true;
+                if (eq != null && eq.getName() != null) {
+                    String eqName = eq.getName().replaceAll("\\s+", "").toLowerCase();
+                    if (eqName.equals(t)) {
+                        this.unequipItem(slot);
+                        return true;
+                    }
                 }
             }
         } catch (Exception ignored) {}

@@ -15,5 +15,8 @@
     "THIS DOES NOT BELONG TO YOU"
   ],
   "defense": -15,
-  "magicResist": -10
+  "magicResist": -10,
+  "properties": [
+    "NecroticPlague"
+  ]
 }

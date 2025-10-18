@@ -8,8 +8,6 @@ import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
-import com.bapppis.core.property.Property;
-import com.bapppis.core.property.PropertyType;
 
 public class ConsumableManualTest {
 
@@ -46,7 +44,25 @@ public class ConsumableManualTest {
         System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
         biggles.tickProperties();
         System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.unequipItemByName("TestHelmet");
+        // check if helmet is equipped
+        System.out.println("After unequipping helmet:");
+        System.out.println("Biggles Equipped Items: " + biggles.getAllEquipped());
         System.out.println("Biggles Buffs: " + biggles.getBuffs());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
+        biggles.tickProperties();
+        System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
 
     }
 }
