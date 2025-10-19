@@ -26,7 +26,7 @@ public class TestFloor0Enemies {
         AtomicInteger goblin = new AtomicInteger(0);
 
         for (int i = 0; i < iterations; i++) {
-            List<LootManager.Spawn> spawns = manager.samplePool("11000");
+            List<LootManager.Spawn> spawns = manager.samplePool("41000");
             for (LootManager.Spawn s : spawns) {
                 // Check string IDs from monster pool
                 if ("SkeletonSpearman".equals(s.id) || "Skeleton Spearman".equals(s.id)) {
@@ -41,13 +41,13 @@ public class TestFloor0Enemies {
                     // Try to parse numeric id for backward compatibility
                     try {
                         int mid = Integer.parseInt(s.id);
-                        if (mid == 6600)
+                        if (mid == 19000)
                             spearman.incrementAndGet();
-                        else if (mid == 6601)
+                        else if (mid == 19001)
                             swordsman.incrementAndGet();
-                        else if (mid == 6400)
+                        else if (mid == 15000)
                             goblin.incrementAndGet();
-                        else if (mid == 6000)
+                        else if (mid == 7000)
                             hound.incrementAndGet();
                     } catch (Exception ex) {
                         // ignore unrecognized ids

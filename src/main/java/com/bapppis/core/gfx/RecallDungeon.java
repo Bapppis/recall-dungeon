@@ -17,7 +17,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisList;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.AllLoaders;
 
 public class RecallDungeon extends ApplicationAdapter {
@@ -26,8 +26,7 @@ public class RecallDungeon extends ApplicationAdapter {
     private BitmapFont mapFont;
     private Stage stage;
     private com.bapppis.core.gfx.MapActor mapActor;
-    private com.badlogic.gdx.graphics.g2d.TextureAtlas spriteAtlas; // Cached atlas
-    // Left-side character info widgets
+    private com.badlogic.gdx.graphics.g2d.TextureAtlas spriteAtlas;
     private com.kotcrab.vis.ui.widget.VisLabel nameLabel;
     private com.kotcrab.vis.ui.widget.VisLabel hpLabel;
     private com.kotcrab.vis.ui.widget.VisLabel levelLabel;
@@ -41,13 +40,10 @@ public class RecallDungeon extends ApplicationAdapter {
         batch = new SpriteBatch();
         font = new BitmapFont();
         stage = new Stage(new ScreenViewport());
-        // Use VisUI's built-in skin to avoid external skin dependency
         if (!VisUI.isLoaded())
             VisUI.load();
-        // use VisUI runtime skin where needed via VisUI.getSkin()
 
         Gdx.input.setInputProcessor(stage);
-        // Load all assets once at startup so selection UI has data
         try {
             AllLoaders.loadAll();
         } catch (Exception e) {
@@ -67,7 +63,6 @@ public class RecallDungeon extends ApplicationAdapter {
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Show character selection screen
                 showCharacterSelect();
             }
         });
@@ -80,7 +75,7 @@ public class RecallDungeon extends ApplicationAdapter {
                 Gdx.app.exit();
             }
         });
-        table.row().pad(10, 0, 0, 0); // Adds spacing before the next button
+        table.row().pad(10, 0, 0, 0);
         table.add(exitButton).fillX().uniformX();
     }
 
@@ -90,7 +85,6 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Build a list of player names from loaded players
         java.util.List<Player> tmpPlayers = CreatureLoader.getAllPlayers();
         final java.util.List<Player> players = (tmpPlayers == null) ? java.util.Collections.emptyList() : tmpPlayers;
         final String[] names = players.stream().map(p -> p == null ? "<unknown>" : p.getName()).toArray(String[]::new);
@@ -108,31 +102,15 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (idx < 0 || idx >= players.size())
                     return;
                 Player selected = players.get(idx);
-                // Ensure global game state is set immediately so UI reflects selection
                 com.bapppis.core.game.Game.selectPlayer(selected);
                 Gdx.app.log("RecallDungeon",
                         "Selected player index=" + idx + " id=" + selected.getId() + " name=" + selected.getName());
-                // Initialize game and start its internal command loop (non-blocking)
                 Gdx.app.log("RecallDungeon", "Selected player id=" + selected.getId() + " name=" + selected.getName());
                 Game game = new Game(selected);
                 game.initialize();
-                // Store game instance in the stage's userObject so floor view can access it
                 stage.setDebugAll(false);
                 stage.getRoot().setUserObject(game);
                 showFloorView();
-                // Spawn a goblin for quick combat testing (id 6400)
-                /*
-                 * try {
-                 * com.bapppis.core.creature.Creature goblin =
-                 * com.bapppis.core.creature.CreatureLoader
-                 * .getCreatureById(6400);
-                 * if (goblin != null) {
-                 * showCombatView(goblin);
-                 * }
-                 * } catch (Exception e) {
-                 * Gdx.app.error("RecallDungeon", "Error spawning test goblin", e);
-                 * }
-                 */
             }
         });
 
@@ -155,8 +133,7 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Choose a font for the map - use default font as fallback
-        BitmapFont chosen = font; // Use the default font as fallback
+        BitmapFont chosen = font;
         try {
             if (Gdx.files.internal("font-small.fnt").exists()) {
                 chosen = new BitmapFont(Gdx.files.internal("font-small.fnt"));
@@ -165,10 +142,8 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         } catch (Exception e) {
             Gdx.app.log("RecallDungeon", "Error loading bitmap font for map", e);
-            // chosen will be the default font
         }
 
-        // Minimal, robust mapping: provide sensible defaults so UI compiles and runs
         java.util.Map<Character, String> charToRegion = new java.util.HashMap<>();
         charToRegion.put('#', "wall");
         charToRegion.put('.', "floor");
@@ -179,19 +154,15 @@ public class RecallDungeon extends ApplicationAdapter {
 
         java.util.Map<Character, com.badlogic.gdx.graphics.g2d.TextureRegion> charTextureRegions = new java.util.HashMap<>();
 
-        // Load atlas once and cache it (only load on first call)
         if (spriteAtlas == null) {
             spriteAtlas = com.bapppis.core.gfx.AtlasBuilder.loadWithFallback();
         }
 
         mapActor = new com.bapppis.core.gfx.MapActor(chosen, spriteAtlas, charToRegion, charTextureRegions);
-        // Put the actor inside a container table cell and center it. Don't force fill
-        // so actor size is used.
         com.badlogic.gdx.scenes.scene2d.ui.Container<com.bapppis.core.gfx.MapActor> container = new com.badlogic.gdx.scenes.scene2d.ui.Container<>(
                 mapActor);
         container.center();
 
-        // Left sidebar: character info
         com.kotcrab.vis.ui.widget.VisTable left = new com.kotcrab.vis.ui.widget.VisTable(true);
         nameLabel = new com.kotcrab.vis.ui.widget.VisLabel("Name: -");
         hpLabel = new com.kotcrab.vis.ui.widget.VisLabel("HP: -/-");
@@ -202,7 +173,6 @@ public class RecallDungeon extends ApplicationAdapter {
         inventoryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Toggle inventory view
                 showingInventory = !showingInventory;
                 if (showingInventory)
                     showInventory(left);
@@ -216,21 +186,18 @@ public class RecallDungeon extends ApplicationAdapter {
         left.add(levelLabel).left().row();
         left.add(statsLabel).left().padTop(8).row();
         left.add(resistLabel).left().padTop(8).row();
-        left.add().expandY().row(); // spacer
+        left.add().expandY().row();
         left.add(inventoryButton).width(140).padTop(8).row();
 
-        // Make the left sidebar scrollable and add side-by-side with the map container
         com.kotcrab.vis.ui.widget.VisScrollPane leftScroll = new com.kotcrab.vis.ui.widget.VisScrollPane(left);
         leftScroll.setFadeScrollBars(false);
         table.add(leftScroll).width(300).fillY().top().pad(8);
         table.add(container).expand().fill().row();
 
-        // Bottom area: Back button only (commands via keyboard)
         VisTextButton back = new VisTextButton("Back to Menu");
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // remove keyboard listener when leaving
                 Gdx.input.setInputProcessor(stage);
                 showMainMenu();
             }
@@ -238,7 +205,6 @@ public class RecallDungeon extends ApplicationAdapter {
 
         table.row().pad(10, 0, 0, 0);
         table.add(back).colspan(2).fillX().uniformX();
-        // Schedule initial refreshes to ensure UI shows the map after game initializes
         refreshMapDisplay();
         com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
             @Override
@@ -253,7 +219,6 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         }, 0.35f);
 
-        // Add keyboard input handling: map keys to game commands
         final com.badlogic.gdx.InputAdapter keyHandler = new com.badlogic.gdx.InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
@@ -280,10 +245,10 @@ public class RecallDungeon extends ApplicationAdapter {
                         cmd = "move east";
                         break;
                     case com.badlogic.gdx.Input.Keys.COMMA:
-                        cmd = "down"; // go down a floor
+                        cmd = "down";
                         break;
                     case com.badlogic.gdx.Input.Keys.PERIOD:
-                        cmd = "up"; // go up a floor
+                        cmd = "up";
                         break;
                     case com.badlogic.gdx.Input.Keys.L:
                         cmd = "look";
@@ -291,7 +256,6 @@ public class RecallDungeon extends ApplicationAdapter {
                 }
                 if (cmd != null) {
                     g.submitCommand(cmd);
-                    // refresh map display now and shortly after to pick up async changes
                     refreshMapDisplay();
                     com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
                         @Override
@@ -311,7 +275,6 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         };
 
-        // Use an InputMultiplexer so Stage still receives UI events
         com.badlogic.gdx.InputMultiplexer multiplexer = new com.badlogic.gdx.InputMultiplexer();
         multiplexer.addProcessor(stage);
         multiplexer.addProcessor(keyHandler);
@@ -325,7 +288,6 @@ public class RecallDungeon extends ApplicationAdapter {
         stage.act();
         stage.draw();
         batch.begin();
-        // no title text drawn on floor view
         batch.end();
     }
 
@@ -335,7 +297,7 @@ public class RecallDungeon extends ApplicationAdapter {
         mapActor.refresh();
         // Update left sidebar info from current player
         try {
-            com.bapppis.core.creature.player.Player p = com.bapppis.core.game.GameState.getPlayer();
+            com.bapppis.core.creature.Player p = com.bapppis.core.game.GameState.getPlayer();
             if (p != null) {
                 if (nameLabel != null)
                     nameLabel.setText("Name: " + (p.getName() != null ? p.getName() : "-"));
@@ -347,7 +309,7 @@ public class RecallDungeon extends ApplicationAdapter {
                     StringBuilder sb = new StringBuilder();
                     for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
                         if (s == com.bapppis.core.Stats.LUCK)
-                            continue; // skip luck
+                            continue;
                         sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
                     }
                     statsLabel.setText(sb.toString());
@@ -356,7 +318,7 @@ public class RecallDungeon extends ApplicationAdapter {
                     StringBuilder sb = new StringBuilder();
                     for (com.bapppis.core.Resistances r : com.bapppis.core.Resistances.values()) {
                         if (r == com.bapppis.core.Resistances.TRUE)
-                            continue; // hide TRUE
+                            continue;
                         sb.append(r.name()).append(": ").append(p.getResistance(r)).append('%').append('\n');
                     }
                     resistLabel.setText(sb.toString());
@@ -369,10 +331,9 @@ public class RecallDungeon extends ApplicationAdapter {
 
     private void showInventory(com.kotcrab.vis.ui.widget.VisTable left) {
         left.clear();
-        com.bapppis.core.creature.player.Player p = com.bapppis.core.game.GameState.getPlayer();
+        com.bapppis.core.creature.Player p = com.bapppis.core.game.GameState.getPlayer();
         if (p == null)
             return;
-        // Equipped items
         left.add(new com.kotcrab.vis.ui.widget.VisLabel("Equipped:")).left().row();
         for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
             com.bapppis.core.item.Item eq = p.getEquipped(slot);
@@ -391,7 +352,6 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        // For each inventory group, add items with equip buttons
         com.bapppis.core.creature.Inventory inv = p.getInventory();
         java.util.function.BiConsumer<String, java.util.List<com.bapppis.core.item.Item>> addGroup = (label, items) -> {
             if (items == null || items.isEmpty())
@@ -408,7 +368,6 @@ public class RecallDungeon extends ApplicationAdapter {
                         public void clicked(InputEvent event, float x, float y) {
                             try {
                                 item.onApply(p);
-                                // remove consumable from inventory
                                 p.getInventory().removeItem(item);
                                 showInventory(left);
                                 refreshMapDisplay();
@@ -425,7 +384,6 @@ public class RecallDungeon extends ApplicationAdapter {
                             try {
                                 if (item instanceof com.bapppis.core.item.Equipment) {
                                     p.equipItem((com.bapppis.core.item.Equipment) item);
-                                    // refresh inventory view and labels
                                     showInventory(left);
                                     refreshMapDisplay();
                                 }
@@ -458,9 +416,8 @@ public class RecallDungeon extends ApplicationAdapter {
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Left: player info (reuse refreshMapDisplay values)
         com.kotcrab.vis.ui.widget.VisTable left = new com.kotcrab.vis.ui.widget.VisTable(true);
-        com.bapppis.core.creature.player.Player p = com.bapppis.core.game.GameState.getPlayer();
+        com.bapppis.core.creature.Player p = com.bapppis.core.game.GameState.getPlayer();
         nameLabel = new com.kotcrab.vis.ui.widget.VisLabel("Name: -");
         hpLabel = new com.kotcrab.vis.ui.widget.VisLabel("HP: -/-");
         levelLabel = new com.kotcrab.vis.ui.widget.VisLabel("Level: -");
@@ -491,7 +448,6 @@ public class RecallDungeon extends ApplicationAdapter {
         left.add(statsLabel).left().padTop(8).row();
         left.add(resistLabel).left().padTop(8).row();
 
-        // Right: enemy info
         com.kotcrab.vis.ui.widget.VisTable right = new com.kotcrab.vis.ui.widget.VisTable(true);
         com.kotcrab.vis.ui.widget.VisLabel enemyName = new com.kotcrab.vis.ui.widget.VisLabel("Enemy: -");
         com.kotcrab.vis.ui.widget.VisLabel enemyHp = new com.kotcrab.vis.ui.widget.VisLabel("HP: -/-");
@@ -519,21 +475,18 @@ public class RecallDungeon extends ApplicationAdapter {
         right.add(enemyStats).right().padTop(8).row();
         right.add(enemyResists).right().padTop(8).row();
 
-        // Center: combat controls (Attack, Use, Wait, Flee)
         com.kotcrab.vis.ui.widget.VisTable center = new com.kotcrab.vis.ui.widget.VisTable(true);
         com.kotcrab.vis.ui.widget.VisTextButton attackBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Attack");
         com.kotcrab.vis.ui.widget.VisTextButton useBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Use");
         com.kotcrab.vis.ui.widget.VisTextButton waitBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Wait");
         com.kotcrab.vis.ui.widget.VisTextButton fleeBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Flee");
 
-        // combat message shown above controls
         com.kotcrab.vis.ui.widget.VisLabel combatMsg = new com.kotcrab.vis.ui.widget.VisLabel("");
         combatMsg.setWrap(true);
-        // helper to refresh labels after actions
         final Runnable refreshLabels = new Runnable() {
             @Override
             public void run() {
-                com.bapppis.core.creature.player.Player pp = com.bapppis.core.game.GameState.getPlayer();
+                com.bapppis.core.creature.Player pp = com.bapppis.core.game.GameState.getPlayer();
                 if (pp != null) {
                     nameLabel.setText("Name: " + pp.getName());
                     hpLabel.setText("HP: " + pp.getCurrentHp() + "/" + pp.getMaxHp());
@@ -569,16 +522,13 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         };
 
-        // Attack action: player attacks enemy, show damage, pause, then enemy
-        // retaliates
         attackBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 try {
-                    final com.bapppis.core.creature.player.Player pp = com.bapppis.core.game.GameState.getPlayer();
+                    final com.bapppis.core.creature.Player pp = com.bapppis.core.game.GameState.getPlayer();
                     if (pp == null || enemy == null)
                         return;
-                    // disable buttons while sequence runs
                     attackBtn.setDisabled(true);
                     useBtn.setDisabled(true);
                     waitBtn.setDisabled(true);
@@ -595,7 +545,6 @@ public class RecallDungeon extends ApplicationAdapter {
                         dlg.text(enemy.getName() + " defeated!");
                         dlg.button("OK");
                         dlg.show(stage);
-                        // leave controls disabled or re-enable to inspect
                         attackBtn.setDisabled(false);
                         useBtn.setDisabled(false);
                         waitBtn.setDisabled(false);
@@ -603,7 +552,6 @@ public class RecallDungeon extends ApplicationAdapter {
                         return;
                     }
 
-                    // schedule enemy retaliation after a short pause
                     com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
                         @Override
                         public void run() {
@@ -623,7 +571,6 @@ public class RecallDungeon extends ApplicationAdapter {
                             } catch (Exception e) {
                                 Gdx.app.error("RecallDungeon", "Error during enemy retaliation", e);
                             } finally {
-                                // re-enable controls for next action
                                 attackBtn.setDisabled(false);
                                 useBtn.setDisabled(false);
                                 waitBtn.setDisabled(false);
@@ -641,13 +588,11 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        // Wait: skip player's action, show pause then enemy attacks and damage
-        // displayed
         waitBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 try {
-                    final com.bapppis.core.creature.player.Player pp = com.bapppis.core.game.GameState.getPlayer();
+                    final com.bapppis.core.creature.Player pp = com.bapppis.core.game.GameState.getPlayer();
                     if (pp == null || enemy == null)
                         return;
                     attackBtn.setDisabled(true);
@@ -687,7 +632,6 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        // Flee: end combat and return to floor view
         fleeBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -703,11 +647,10 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        // Use: show dialog with consumables to pick
         useBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                com.bapppis.core.creature.player.Player pp = com.bapppis.core.game.GameState.getPlayer();
+                com.bapppis.core.creature.Player pp = com.bapppis.core.game.GameState.getPlayer();
                 if (pp == null)
                     return;
                 java.util.List<com.bapppis.core.item.Item> cons = pp.getInventory().getConsumables();
@@ -730,7 +673,6 @@ public class RecallDungeon extends ApplicationAdapter {
                                 pp.getInventory().removeItem(item);
                                 refreshLabels.run();
                                 dlg.hide();
-                                // enemy gets a free attack after use
                                 if (enemy != null && pp.getCurrentHp() > 0) {
                                     enemy.attack(pp);
                                     refreshLabels.run();
@@ -749,7 +691,6 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        // layout center message and buttons
         center.add(combatMsg).width(300).padBottom(6).row();
         center.add(attackBtn).pad(6).row();
         center.add(useBtn).pad(6).row();
@@ -767,7 +708,6 @@ public class RecallDungeon extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        // Shutdown running Game loop if present
         try {
             Object userObj = stage != null ? stage.getRoot().getUserObject() : null;
             if (userObj instanceof Game) {
@@ -792,13 +732,11 @@ public class RecallDungeon extends ApplicationAdapter {
                 mapFont.dispose();
             } catch (Exception ignored) {
             }
-        // Dispose cached sprite atlas
         if (spriteAtlas != null)
             try {
                 spriteAtlas.dispose();
             } catch (Exception ignored) {
             }
-        // dispose atlas or any textures loaded when creating MapActor
         try {
             if (mapActor != null) {
                 java.lang.reflect.Field fAtlas = com.bapppis.core.gfx.MapActor.class.getDeclaredField("atlas");
@@ -827,7 +765,6 @@ public class RecallDungeon extends ApplicationAdapter {
                 }
             }
         } catch (Exception e) {
-            // ignore - best effort dispose
         }
         if (stage != null)
             try {

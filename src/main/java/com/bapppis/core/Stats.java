@@ -1,8 +1,5 @@
 package com.bapppis.core;
 
-/**
- * Core stat types used across creatures, items and properties.
- */
 public enum Stats {
     STRENGTH,
     DEXTERITY,
@@ -10,5 +7,5 @@ public enum Stats {
     INTELLIGENCE,
     WISDOM,
     CHARISMA,
-    LUCK,
+    LUCK
 }

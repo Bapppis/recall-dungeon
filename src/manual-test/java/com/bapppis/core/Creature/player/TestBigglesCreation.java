@@ -2,8 +2,10 @@ package com.bapppis.core.Creature.player;
 
 import org.junit.jupiter.api.Test;
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.AllLoaders;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.item.Equipment;
+import com.bapppis.core.item.EquipmentUtils;
 import com.bapppis.core.item.ItemLoader;
 
 public class TestBigglesCreation {
@@ -29,7 +31,7 @@ public class TestBigglesCreation {
         biggles.tickProperties();
         System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());
         biggles.unequipItemByName("TestHelmet");
-        System.out.println(biggles.getAllEquipped());
+        System.out.println(EquipmentUtils.getAllEquipped(biggles));
         System.out.println(biggles.getDebuffs());
     }
 }

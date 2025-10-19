@@ -3,7 +3,7 @@ package com.bapppis.core.creature;
 import com.bapppis.core.property.PropertyLoader;
 import com.bapppis.core.property.Property;
 import com.bapppis.core.item.ItemLoader;
-import com.bapppis.core.creature.player.Player;
+
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
@@ -22,12 +22,14 @@ public class CreatureLoader {
     private static boolean loaded = false;
 
     public static void loadCreatures() {
-        if (loaded) return;
+        if (loaded)
+            return;
         forceReload();
     }
 
     /**
-     * Force reload of all creatures, even if already loaded. Use in individual tests.
+     * Force reload of all creatures, even if already loaded. Use in individual
+     * tests.
      */
     public static void forceReload() {
         creatureMap.clear();
@@ -44,29 +46,29 @@ public class CreatureLoader {
         }
 
         com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
-            .registerTypeAdapter(com.bapppis.core.Resistances.class,
-                new com.bapppis.core.util.ResistancesDeserializer())
-            .create();
+                .registerTypeAdapter(com.bapppis.core.Resistances.class,
+                        new com.bapppis.core.util.ResistancesDeserializer())
+                .create();
         try (ScanResult scanResult = new ClassGraph()
-            // Scan production creature data and the test fixture package so unit tests
-            // find JSON under com/... during test execution.
-            .acceptPaths("data/creatures", "com/bapppis/core/Creature")
-            .scan()) {
-                // Keep track of relative resource paths we've processed so we don't load the
-                // same path multiple times when it appears on the classpath (for example
-                // when both a source and compiled copy exist). This prevents duplicate-id
-                // warnings caused by duplicate classpath entries.
-                java.util.Set<String> processedResourcePaths = new java.util.HashSet<>();
-                for (Resource resource : scanResult.getAllResources()) {
-                    String relPath = resource.getPath();
-                    // Skip duplicates of the same relative path
-                    if (processedResourcePaths.contains(relPath))
-                        continue;
-                    processedResourcePaths.add(relPath);
-                    if (relPath.endsWith(".json")) {
-                        try (Reader reader = new InputStreamReader(resource.open())) {
-                            Creature creature;
-                            // Read the JSON into a JsonObject first so we can strip fields that would
+                // Scan production creature data and the test fixture package so unit tests
+                // find JSON under com/... during test execution.
+                .acceptPaths("data/creatures", "com/bapppis/core/Creature")
+                .scan()) {
+            // Keep track of relative resource paths we've processed so we don't load the
+            // same path multiple times when it appears on the classpath (for example
+            // when both a source and compiled copy exist). This prevents duplicate-id
+            // warnings caused by duplicate classpath entries.
+            java.util.Set<String> processedResourcePaths = new java.util.HashSet<>();
+            for (Resource resource : scanResult.getAllResources()) {
+                String relPath = resource.getPath();
+                // Skip duplicates of the same relative path
+                if (processedResourcePaths.contains(relPath))
+                    continue;
+                processedResourcePaths.add(relPath);
+                if (relPath.endsWith(".json")) {
+                    try (Reader reader = new InputStreamReader(resource.open())) {
+                        Creature creature;
+                        // Read the JSON into a JsonObject first so we can strip fields that would
                         // conflict with existing types (for example: inventory is an array in
                         // JSON but Creature.inventory is an Inventory object). We'll remove
                         // the 'inventory' and equipment slot fields before letting Gson map
@@ -84,19 +86,92 @@ public class CreatureLoader {
                         jsonObj.remove("weapon");
                         jsonObj.remove("offhand");
 
-                        // Try to load as Player when path contains players, otherwise Enemy
-                        if (resource.getPath().contains("players")) {
-                            creature = gson.fromJson(jsonObj, Player.class);
+                        // Extract species and creatureType from JSON to determine the correct class
+                        String speciesName = null;
+                        String creatureTypeName = null;
+                        if (jsonObj.has("species") && !jsonObj.get("species").isJsonNull()) {
+                            speciesName = jsonObj.get("species").getAsString();
+                        }
+                        if (jsonObj.has("creatureType") && !jsonObj.get("creatureType").isJsonNull()) {
+                            creatureTypeName = jsonObj.get("creatureType").getAsString();
+                        }
+
+                        // Try to instantiate the specific species class if available
+                        if (speciesName != null && creatureTypeName != null) {
+                            String packageName = "com.bapppis.core.creature.creaturetype."
+                                    + creatureTypeName.toLowerCase();
+                            String className = packageName + "." + speciesName;
+                            try {
+                                Class<?> speciesClass = Class.forName(className);
+
+                                // Create a species template to get constructor-added properties and fields
+                                Creature speciesTemplate = (Creature) speciesClass.getDeclaredConstructor()
+                                        .newInstance();
+
+                                // Create the actual Player/Enemy/NPC instance
+                                if (resource.getPath().contains("players")) {
+                                    creature = new Player();
+                                } else if (resource.getPath().contains("npcs")) {
+                                    creature = new NPC();
+                                } else {
+                                    creature = new Enemy();
+                                }
+
+                                // Load JSON data first
+                                Creature tempCreature;
+                                if (resource.getPath().contains("players")) {
+                                    tempCreature = gson.fromJson(jsonObj, Player.class);
+                                } else if (resource.getPath().contains("npcs")) {
+                                    tempCreature = gson.fromJson(jsonObj, NPC.class);
+                                } else {
+                                    tempCreature = gson.fromJson(jsonObj, Enemy.class);
+                                }
+
+                                // Priority 1 (lowest): Copy JSON fields to creature
+                                copyCreatureFields(tempCreature, creature);
+                                
+                                // Priority 2 (highest): Copy species-specific fields and properties
+                                // This includes size, properties from constructors, etc.
+                                // Uses selective copying to preserve JSON data (id, name, stats)
+                                copySpeciesFields(speciesTemplate, creature);
+                            } catch (ClassNotFoundException e) {
+                                // Species class not found, fall back to base type loading
+                                if (resource.getPath().contains("players")) {
+                                    creature = gson.fromJson(jsonObj, Player.class);
+                                } else if (resource.getPath().contains("npcs")) {
+                                    creature = gson.fromJson(jsonObj, NPC.class);
+                                } else {
+                                    creature = gson.fromJson(jsonObj, Enemy.class);
+                                }
+                            } catch (Exception e) {
+                                // Any other error, fall back to base type loading
+                                if (resource.getPath().contains("players")) {
+                                    creature = gson.fromJson(jsonObj, Player.class);
+                                } else if (resource.getPath().contains("npcs")) {
+                                    creature = gson.fromJson(jsonObj, NPC.class);
+                                } else {
+                                    creature = gson.fromJson(jsonObj, Enemy.class);
+                                }
+                            }
                         } else {
-                            creature = gson.fromJson(jsonObj, Enemy.class);
+                            // No species specified, use base type loading
+                            if (resource.getPath().contains("players")) {
+                                creature = gson.fromJson(jsonObj, Player.class);
+                            } else if (resource.getPath().contains("npcs")) {
+                                creature = gson.fromJson(jsonObj, NPC.class);
+                            } else {
+                                creature = gson.fromJson(jsonObj, Enemy.class);
+                            }
                         }
                         // Load properties by ID array from JSON
                         if (creature != null) {
-                            // Determine creature type based on id ranges when available
+                            // Determine creature type based on id ranges or class type
                             int cidForType = creature.getId();
-                            if (cidForType >= 5000 && cidForType < 6000) {
+                            if (creature instanceof Player || (cidForType >= 5000 && cidForType < 5500)) {
                                 creature.setType(com.bapppis.core.Type.PLAYER);
-                            } else if (cidForType >= 6000 && cidForType < 7000) {
+                            } else if (creature instanceof NPC || (cidForType >= 5500 && cidForType < 6000)) {
+                                creature.setType(com.bapppis.core.Type.NPC);
+                            } else if (creature instanceof Enemy || (cidForType >= 6000 && cidForType < 20000)) {
                                 creature.setType(com.bapppis.core.Type.ENEMY);
                             }
                             // Ensure all stats are set to defaults if missing
@@ -157,7 +232,8 @@ public class CreatureLoader {
                             // Load starting inventory and equipment slots from JSON
                             applyStartingItemsFromJson(resource.getPath(), gson, creature);
 
-                            // Finalize creature fields after load (resets HP, recalculates mana, converts level->XP)
+                            // Finalize creature fields after load (resets HP, recalculates mana, converts
+                            // level->XP)
                             creature.finalizeAfterLoad();
                             creature.recalcDerivedStats();
                             // Index by id (primary) and by name (optional)
@@ -198,6 +274,63 @@ public class CreatureLoader {
             }
         }
         loaded = true;
+    }
+
+    /**
+     * Copy fields from source creature to destination creature using reflection.
+     * This is used when a species-specific class instance needs to be populated
+     * with JSON data. Properties are handled separately to preserve those added
+     * by type/species constructors.
+     */
+    private static void copyCreatureFields(Creature source, Creature dest) {
+        if (source == null || dest == null)
+            return;
+
+        try {
+            // Copy all accessible fields from Creature class
+            java.lang.reflect.Field[] fields = Creature.class.getDeclaredFields();
+            for (java.lang.reflect.Field field : fields) {
+                // Skip static, final, and propertyManager fields
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
+                        java.lang.reflect.Modifier.isFinal(field.getModifiers()) ||
+                        field.getName().equals("propertyManager")) {
+                    continue;
+                }
+
+                field.setAccessible(true);
+                Object value = field.get(source);
+                field.set(dest, value);
+            }
+        } catch (Exception e) {
+            System.err.println("Error copying creature fields: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Copy only species-specific fields (size, properties) from species template to creature.
+     * This preserves JSON data like id, name, stats while applying species defaults.
+     */
+    private static void copySpeciesFields(Creature speciesTemplate, Creature creature) {
+        if (speciesTemplate == null || creature == null)
+            return;
+
+        try {
+            // Copy size (species can override)
+            creature.setSize(speciesTemplate.getSize());
+
+            // Copy properties from species template (traits, buffs, debuffs)
+            for (com.bapppis.core.property.Property prop : speciesTemplate.getTraits().values()) {
+                creature.addProperty(prop);
+            }
+            for (com.bapppis.core.property.Property prop : speciesTemplate.getBuffs().values()) {
+                creature.addProperty(prop);
+            }
+            for (com.bapppis.core.property.Property prop : speciesTemplate.getDebuffs().values()) {
+                creature.addProperty(prop);
+            }
+        } catch (Exception e) {
+            System.err.println("Error copying species fields: " + e.getMessage());
+        }
     }
 
     private static void applyStartingItemsFromJson(String resourcePath, com.google.gson.Gson gson, Creature creature) {
@@ -290,7 +423,8 @@ public class CreatureLoader {
                                     int propId = Integer.parseInt(propNameOrId);
                                     ids.add(propId);
                                 } catch (NumberFormatException nfe) {
-                                    com.bapppis.core.property.Property prop = com.bapppis.core.property.PropertyLoader.getPropertyByName(propNameOrId);
+                                    com.bapppis.core.property.Property prop = com.bapppis.core.property.PropertyLoader
+                                            .getPropertyByName(propNameOrId);
                                     if (prop != null) {
                                         ids.add(prop.getId());
                                     }
@@ -310,16 +444,20 @@ public class CreatureLoader {
     }
 
     public static Creature getCreature(String name) {
-        if (name == null) return null;
+        if (name == null)
+            return null;
         String key = name.trim().toLowerCase();
         Creature c = creatureMap.get(key);
-        if (c != null) return c;
+        if (c != null)
+            return c;
         Creature p = playerMap.get(key);
-        if (p != null) return p;
+        if (p != null)
+            return p;
         // try space-free variant
         String keyNoSpace = key.replaceAll("\\s+", "");
         c = creatureMap.get(keyNoSpace);
-        if (c != null) return c;
+        if (c != null)
+            return c;
         return playerMap.get(keyNoSpace);
     }
 
@@ -335,48 +473,51 @@ public class CreatureLoader {
      * Returns null if no matching template found.
      */
     public static Creature spawnCreatureByName(String name) {
-        if (name == null || name.isBlank()) return null;
+        if (name == null || name.isBlank())
+            return null;
         String t = name.trim();
         try {
             int id = Integer.parseInt(t);
             Creature tmpl = getCreatureById(id);
-            if (tmpl == null) return null;
+            if (tmpl == null)
+                return null;
             // Use a Gson instance that excludes the 'propertyManager' field during
             // serialization to avoid serializing the back-reference to the creature
             // (which causes infinite recursion). The new instance will create its
             // own PropertyManager in the constructor when deserialized.
             com.google.gson.Gson g = new com.google.gson.GsonBuilder()
-                .addSerializationExclusionStrategy(new com.google.gson.ExclusionStrategy() {
-                    @Override
-                    public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
-                        return "propertyManager".equals(f.getName());
-                    }
+                    .addSerializationExclusionStrategy(new com.google.gson.ExclusionStrategy() {
+                        @Override
+                        public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
+                            return "propertyManager".equals(f.getName());
+                        }
 
-                    @Override
-                    public boolean shouldSkipClass(Class<?> clazz) {
-                        return false;
-                    }
-                }).create();
+                        @Override
+                        public boolean shouldSkipClass(Class<?> clazz) {
+                            return false;
+                        }
+                    }).create();
             Creature copy = g.fromJson(g.toJson(tmpl), tmpl.getClass());
             copy.finalizeAfterLoad();
             return copy;
         } catch (NumberFormatException ignored) {
         }
         Creature tmpl = getCreature(name);
-        if (tmpl == null) return null;
+        if (tmpl == null)
+            return null;
         try {
             com.google.gson.Gson g = new com.google.gson.GsonBuilder()
-                .addSerializationExclusionStrategy(new com.google.gson.ExclusionStrategy() {
-                    @Override
-                    public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
-                        return "propertyManager".equals(f.getName());
-                    }
+                    .addSerializationExclusionStrategy(new com.google.gson.ExclusionStrategy() {
+                        @Override
+                        public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
+                            return "propertyManager".equals(f.getName());
+                        }
 
-                    @Override
-                    public boolean shouldSkipClass(Class<?> clazz) {
-                        return false;
-                    }
-                }).create();
+                        @Override
+                        public boolean shouldSkipClass(Class<?> clazz) {
+                            return false;
+                        }
+                    }).create();
             Creature copy = g.fromJson(g.toJson(tmpl), tmpl.getClass());
             copy.finalizeAfterLoad();
             return copy;
@@ -401,7 +542,8 @@ public class CreatureLoader {
     }
 
     public static List<Player> getAllPlayers() {
-        // Use playerIdMap to avoid duplicates (playerMap has same player under multiple name keys)
+        // Use playerIdMap to avoid duplicates (playerMap has same player under multiple
+        // name keys)
         return new ArrayList<>(playerIdMap.values());
     }
 }

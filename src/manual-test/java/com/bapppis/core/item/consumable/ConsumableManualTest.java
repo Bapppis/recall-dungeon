@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
+import com.bapppis.core.item.EquipmentUtils;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
 
@@ -57,7 +58,7 @@ public class ConsumableManualTest {
         biggles.unequipItemByName("TestHelmet");
         // check if helmet is equipped
         System.out.println("After unequipping helmet:");
-        System.out.println("Biggles Equipped Items: " + biggles.getAllEquipped());
+        System.out.println("Biggles Equipped Items: " + EquipmentUtils.getAllEquipped(biggles));
         System.out.println("Biggles Buffs: " + biggles.getBuffs());
         biggles.tickProperties();
         System.out.println("Biggles HP: " + biggles.getCurrentHp() + "/" + biggles.getMaxHp());

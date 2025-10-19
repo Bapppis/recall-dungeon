@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 
 public class ItemTest {
     // Test item functionality here
@@ -16,8 +16,8 @@ public class ItemTest {
         float dodgeBefore = biggles.getDodge();
         float blockBefore = biggles.getBlock();
         float magicResistBefore = biggles.getMagicResist();
-        biggles.addItem(ItemLoader.getItemById(7249)); // Test Armor
-        biggles.addItem(ItemLoader.getItemById(7499)); // Test Helmet
+        biggles.addItem(ItemLoader.getItemById(21999)); // Test Armor
+        biggles.addItem(ItemLoader.getItemById(23999)); // Test Helmet
         biggles.equipItem(biggles.getInventory().getArmors().get(0)); // Equip Test Armor
         biggles.equipItem(biggles.getInventory().getHelmets().get(0)); // Equip Test Helmet
         // System.out.println("Stats after equipping items:");

@@ -1,6 +1,6 @@
 package com.bapppis.core.dungeon;
 
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 
 public class MapPrinter {
     public static void printWithPlayer(Floor floor, Player player) {

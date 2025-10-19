@@ -3,7 +3,6 @@ package com.bapppis.core.dungeon;
 import java.util.HashMap;
 
 public abstract class Floor {
-    // Make a hash map to store the tiles
     private HashMap<Coordinate, Tile> tiles = new HashMap<>();
 
     public void addTile(Coordinate coordinate, Tile tile) {
@@ -17,6 +16,7 @@ public abstract class Floor {
     public HashMap<Coordinate, Tile> getTiles() {
         return tiles;
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -29,16 +29,12 @@ public abstract class Floor {
         }
         return sb.toString();
     }
-    /**
-     * Reveal all tiles within vision range of (px, py), blocked by walls.
-     * Uses Bresenham's line algorithm for line of sight.
-     */
+
     public void revealTilesWithVision(int px, int py, int visionRange) {
         for (int dx = -visionRange; dx <= visionRange; dx++) {
             for (int dy = -visionRange; dy <= visionRange; dy++) {
                 int tx = px + dx;
                 int ty = py + dy;
-                // Use Chebyshev distance (max of dx,dy) to include corners
                 if (Math.max(Math.abs(dx), Math.abs(dy)) > visionRange) continue;
                 Coordinate target = new Coordinate(tx, ty);
                 if (tiles.containsKey(target) && hasLineOfSight(px, py, tx, ty)) {
@@ -48,10 +44,6 @@ public abstract class Floor {
         }
     }
 
-    /**
-     * Returns true if there is line of sight from (x0, y0) to (x1, y1) (no wall blocks).
-     * Uses Bresenham's line algorithm.
-     */
     public boolean hasLineOfSight(int x0, int y0, int x1, int y1) {
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
@@ -61,7 +53,7 @@ public abstract class Floor {
         int cx = x0;
         int cy = y0;
         while (true) {
-            if (!(cx == x0 && cy == y0)) { // skip starting tile
+            if (!(cx == x0 && cy == y0)) {
                 Tile t = tiles.get(new Coordinate(cx, cy));
                 if (t == null) return false;
                 if (t.isWall()) return false;

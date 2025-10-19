@@ -7,9 +7,6 @@ import com.bapppis.core.creature.Attack;
 public final class AttackUtil {
     private AttackUtil() {}
 
-    /**
-     * Choose an Attack from a weighted list. Returns null for null/empty list.
-     */
     public static Attack chooseAttackFromList(List<Attack> list) {
         if (list == null || list.isEmpty()) return null;
         int total = 0;

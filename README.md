@@ -238,10 +238,17 @@ recall-dungeon/
 │   │   │       │   ├── Creature.java
 │   │   │       │   ├── CreatureLoader.java
 │   │   │       │   ├── Enemy.java
+│   │   │       │   ├── NPC.java
 │   │   │       │   ├── Attack.java
 │   │   │       │   ├── EquipmentManager.java
 │   │   │       │   ├── Inventory.java
 │   │   │       │   ├── PropertyManager.java
+│   │   │       │   ├── creaturetype/    # Biological creature types
+│   │   │       │   │   ├── beast/       # Beast species (Dog, etc.)
+│   │   │       │   │   ├── construct/   # Construct species (TrainingDummy, etc.)
+│   │   │       │   │   ├── humanoid/    # Humanoid species (Human, Goblin, etc.)
+│   │   │       │   │   ├── undead/      # Undead species (Skeleton, etc.)
+│   │   │       │   │   └── ...          # Other creature types
 │   │   │       │   └── player/
 │   │   │       │       └── Player.java
 │   │   │       ├── dungeon/         # Dungeon generation and management
@@ -351,8 +358,188 @@ recall-dungeon/
 - **`src/main/java/com/bapppis/core/`** - Core game engine code
 - **`src/main/resources/data/`** - JSON game data (creatures, items, properties, floors)
 - **`src/main/resources/assets/`** - Graphics, sprites, and UI assets
-- **`src/test/java/`** - Automated test suite (45+ tests)
+- **`src/test/java/`** - Automated test suite (47+ tests)
 - **`src/manual-test/java/`** - Manual/interactive tests (opt-in via Maven profile)
+
+---
+
+## Creature System Architecture
+
+The game uses a sophisticated inheritance hierarchy for creatures that combines class-based inheritance with JSON data-driven instantiation.
+
+### Creature Hierarchy
+
+```
+Creature (base class)
+├── CreatureType Classes (e.g., Humanoid, Beast, Undead)
+│   └── Species Classes (e.g., Human, Goblin, Dog, Skeleton)
+│
+└── Instance Classes
+    ├── Player (playable characters)
+    ├── Enemy (hostile creatures)
+    └── NPC (non-player characters)
+```
+
+### How It Works
+
+1. **Base Creature Class** - `Creature.java`
+
+   - Contains all core creature functionality
+   - Stats (STR, DEX, CON, INT, WIS, CHA, LUCK)
+   - Resistances (FIRE, ICE, BLUDGEONING, etc.)
+   - Properties (traits, buffs, debuffs)
+   - Equipment and inventory management
+   - Combat mechanics
+
+2. **CreatureType Classes** - Broad biological categories
+
+   - **Humanoid** - Two-legged, intelligent creatures
+   - **Beast** - Animals and monsters
+   - **Undead** - Reanimated creatures
+   - **Construct** - Artificial beings
+   - **Dragon** - Draconic creatures
+   - **Elemental** - Beings of pure elemental energy
+   - **Plant** - Living vegetation
+
+   Each type can add default properties/modifiers in its constructor.
+
+   **Example:** `Humanoid.java` adds the "Darksight" property to all humanoids.
+
+3. **Species Classes** - Specific creature subtypes
+
+   - Extend their CreatureType class
+   - Add species-specific properties and modifiers
+   - Located in: `com.bapppis.core.creature.creaturetype.<type>.<Species>`
+
+   **Example:** `Human.java` extends `Humanoid` and adds "Human Adaptability" trait.
+
+   ```
+   Humanoid (CreatureType)
+   ├── Human (adds Human Adaptability)
+   ├── Goblin (sets size to SMALL)
+   ├── Orc
+   └── Elf
+   ```
+
+4. **Instance Classes** - Determine role in game
+
+   - **Player** - Controllable characters
+   - **Enemy** - Hostile creatures
+   - **NPC** - Friendly or neutral characters
+
+   These determine game mechanics, not biological traits.
+
+### Loading Process
+
+When a creature is loaded from JSON:
+
+1. **JSON defines the template:**
+
+   ```json
+   {
+     "id": 5001,
+     "name": "Captain Voss",
+     "creatureType": "HUMANOID",
+     "species": "Human",
+     "stats": { "STR": 12, "DEX": 8 },
+     "properties": ["HumanAdaptability"]
+   }
+   ```
+
+2. **CreatureLoader processes it:**
+
+   - Reads `creatureType` and `species` from JSON
+   - Instantiates the species class: `com.bapppis.core.creature.creaturetype.humanoid.Human`
+   - Creates a "template" instance to capture constructor-added properties
+   - Creates the actual Player/Enemy/NPC instance
+   - **Priority 1 (Lowest):** Applies JSON data (id, name, stats, equipment, etc.)
+   - **Priority 2 (Highest):** Copies species-specific data from template (size, properties)
+   - Result: Captain Voss has data from JSON **overridden** by species defaults where applicable
+
+3. **Priority Order (Highest to Lowest):**
+
+   ```
+   1. Species (e.g., Human) - Highest priority
+      ↓ (sets size, adds species-specific properties)
+   2. CreatureType (e.g., Humanoid) - Medium priority
+      ↓ (adds type-specific properties via species inheritance)
+   3. JSON data - Lowest priority
+      ↓ (provides base values: id, name, stats, equipment)
+   4. Instance Class (Player/Enemy/NPC) - Role only
+      (determines game mechanics, not inherited traits)
+   ```
+
+4. **Example: Goblin vs JSON**
+
+   - JSON might specify `"size": "MEDIUM"`
+   - But `Goblin` constructor sets `setSize(Size.SMALL)`
+   - **Result:** Goblin is SMALL (species overrides JSON) ✅
+
+5. **Property Combination:**
+   ```
+   Humanoid constructor → adds "Darksight"
+   Human constructor → adds "Human Adaptability"
+   JSON → adds any additional properties
+   Final creature → has ALL properties combined (additive, not replacement)
+   ```
+
+### Creating New Species
+
+To add a new species (e.g., Elf):
+
+1. **Create the species class:**
+
+   ```java
+   package com.bapppis.core.creature.creaturetype.humanoid;
+
+   public class Elf extends Humanoid {
+       public Elf() {
+           super(); // Inherits Darksight from Humanoid
+           addProperty("ElvenGrace"); // Add species-specific trait
+           // Set any species-specific defaults
+       }
+   }
+   ```
+
+2. **Create creature JSON files:**
+
+   ```json
+   {
+     "id": 6500,
+     "name": "Wood Elf Scout",
+     "creatureType": "HUMANOID",
+     "species": "Elf",
+     "stats": { "DEX": 16, "WIS": 14 }
+   }
+   ```
+
+3. **That's it!** The loader automatically:
+   - Finds the `Elf` class
+   - Applies Humanoid → Elf → JSON properties in order
+   - Creates a fully functional creature
+
+### Benefits of This System
+
+✅ **Code reuse** - Common traits defined once in species constructors
+✅ **Smart priority** - Species can override JSON defaults (e.g., Goblin size always SMALL)
+✅ **Type safety** - Compile-time checking of species classes
+✅ **Easy extension** - Add new species without modifying loader code
+✅ **Clear hierarchy** - Biological traits (species) separate from role (Player/Enemy)
+✅ **Additive properties** - Properties from all sources combine rather than replace
+
+### Example: Captain Voss (Human Player)
+
+```
+Properties on Captain Voss:
+1. Darksight (from Humanoid constructor)
+2. Human Adaptability (from Human constructor)
+3. Any additional traits from JSON
+
+Class hierarchy:
+Creature → Humanoid → Human (template)
+                      ↓
+                    Player (instance)
+```
 
 ---
 
@@ -487,7 +674,6 @@ Console debug/logging is centralized behind `com.bapppis.core.util.DebugLog`. To
 
 ---
 
-
 ## Roadmap
 
 ### Core Gameplay
@@ -545,6 +731,7 @@ This is a personal portfolio project developed solo to demonstrate individual ca
 ### Feedback Welcome!
 
 While I'm not accepting code contributions, I'm always happy to hear:
+
 - Feedback on gameplay or design
 - Ideas or suggestions (I might implement them if they align with my vision!)
 - Questions about the codebase or architecture
@@ -602,11 +789,13 @@ SOFTWARE.
 Project-owned non-code assets are licensed under **[Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)](ASSETS-LICENSE)**.
 
 **TL;DR:** You can share these assets with attribution, but you **cannot**:
+
 - Use them commercially (sell or profit from them)
 - Create derivative works (modifications)
 - Include them in products you sell
 
 **This includes:**
+
 - JSON game data (`src/main/resources/data/`)
 - Original sprites and graphics (some files in `src/main/resources/assets/`)
 - Floor definitions and maps
@@ -617,6 +806,7 @@ Project-owned non-code assets are licensed under **[Creative Commons Attribution
 This repository includes third-party assets with their own licenses:
 
 - **VisUI** (Apache License 2.0) - UI library and skin
+
   - **Commercial use allowed** with proper attribution
   - Include Apache 2.0 license text when distributing
 

@@ -6,11 +6,6 @@ import java.util.Map;
 
 import com.bapppis.core.property.Property;
 
-/**
- * Manages per-creature properties (buffs, debuffs, traits): storage, apply/remove,
- * ticking and formatting helpers. Kept in the same package so it can call
- * package-private Creature helpers when necessary.
- */
 public class PropertyManager {
     private final Creature owner;
     private final HashMap<Integer, Property> buffs = new HashMap<>();
@@ -33,12 +28,10 @@ public class PropertyManager {
         return traits;
     }
 
-    /** Apply a Property instance (creates per-creature copy when available). */
     public void add(Property property) {
         if (property == null) return;
         int id = property.getId();
 
-        // Avoid double-applying same id
         if ((id >= 1000 && id < 2333 && buffs.containsKey(id))
                 || (id >= 2333 && id < 3666 && debuffs.containsKey(id))
                 || (id >= 3666 && id < 5000 && traits.containsKey(id))) {
@@ -68,7 +61,6 @@ public class PropertyManager {
         }
     }
 
-    /** Lookup by id and apply. Returns true if applied. */
     public boolean addById(int id) {
         try {
             Property prop = com.bapppis.core.property.PropertyLoader.getProperty(id);
@@ -81,7 +73,6 @@ public class PropertyManager {
         return false;
     }
 
-    /** Lookup by human name (case-insensitive). Returns true if applied. */
     public boolean addByName(String name) {
         if (name == null || name.isBlank()) return false;
         String t = name.trim();
@@ -103,7 +94,6 @@ public class PropertyManager {
         return false;
     }
 
-    /** Remove property by id and call onRemove. */
     public void remove(int id) {
         Property property = null;
         if (id >= 1000 && id < 2333) {
@@ -121,14 +111,9 @@ public class PropertyManager {
         }
     }
 
-    /**
-     * Remove a currently-applied property by human name (case-insensitive)
-     * or by numeric id string. Returns true if a property was found and removed.
-     */
     public boolean removeByName(String name) {
         if (name == null || name.isBlank()) return false;
         String t = name.trim();
-        // Try numeric id first
         try {
             int id = Integer.parseInt(t);
             if (buffs.containsKey(id) || debuffs.containsKey(id) || traits.containsKey(id)) {
@@ -152,9 +137,7 @@ public class PropertyManager {
         return false;
     }
 
-    /** Tick all properties: onTick then decrement durations and remove expired. */
     public void tick() {
-        // Regen resources first
         try {
             owner.modifyHp(owner.getHpRegen());
             owner.modifyMana(owner.getManaRegen());
@@ -199,7 +182,6 @@ public class PropertyManager {
         }
     }
 
-    /** Pretty-print status effects to stdout (keeps existing behavior). */
     public void printStatusEffects() {
         System.out.println("Buffs:");
         for (Property buff : buffs.values()) System.out.println(" - " + buff);

@@ -22,9 +22,9 @@ public class TestCommonWeaponsPool {
 
         // Allowed refs in Common Weapons pool (from Common Weapons.json)
         Set<String> allowed = new HashSet<>();
-        allowed.add("9802"); // Parrying Dagger
-        allowed.add("9801"); // Rusty Iron Sword
-        allowed.add("9600"); // Old Bow
+        allowed.add("37002"); // Parrying Dagger
+        allowed.add("37001"); // Rusty Iron Sword
+        allowed.add("35000"); // Old Bow
         allowed.add("Parrying Dagger");
         allowed.add("Rusty Iron Sword");
         allowed.add("Old Bow");
@@ -34,7 +34,7 @@ public class TestCommonWeaponsPool {
 
         // Sample the pool multiple times to catch randomness
         for (int i = 0; i < 200; i++) {
-            List<LootManager.Spawn> spawns = manager.samplePool("10000");
+            List<LootManager.Spawn> spawns = manager.samplePool("40000");
             // should not be empty and should only contain allowed references
             assertTrue(spawns.size() >= 1, "Expected at least one spawn");
             for (LootManager.Spawn s : spawns) {

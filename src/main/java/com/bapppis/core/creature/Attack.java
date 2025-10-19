@@ -5,106 +5,82 @@ import com.bapppis.core.util.Dice;
 
 public class Attack {
 
-  public String name;
-  public Integer times;
-  public String physicalDamageDice;
-  public String magicDamageDice;
-  // Optional override for the magic damage resistance type (e.g. DARKNESS, FIRE)
-  public Resistances magicDamageType;
-  public float damageMultiplier;
-  public float magicDamageMultiplier;
-  public Resistances damageType;
-  public Integer weight;
-  // Optional per-attack crit modifier, can be written in JSON as "+5" or "-3" (string)
-  public String critMod;
-  // Optional per-attack accuracy modifiers (integers). These are added to
-  // the attacker's accuracy when resolving to-hit for this attack only.
-  public Integer accuracy;
-  public Integer magicAccuracy;
+    public String name;
+    public Integer times;
+    public String physicalDamageDice;
+    public String magicDamageDice;
+    public Resistances magicDamageType;
+    public float damageMultiplier;
+    public float magicDamageMultiplier;
+    public Resistances damageType;
+    public Integer weight;
+    public String critMod;
+    public Integer accuracy;
+    public Integer magicAccuracy;
 
-  public int getTimes() {
-    return times == null ? 1 : times;
-  }
-
-  public int getWeight() {
-    return weight == null ? 1 : weight;
-  }
-
-  /**
-   * Returns the per-attack crit modifier as an integer. Accepts formats like "+5", "-2", or "3".
-   */
-  public int getCritMod() {
-    if (critMod == null || critMod.isBlank())
-      return 0;
-    String s = critMod.trim();
-    try {
-      return Integer.parseInt(s);
-    } catch (NumberFormatException e) {
-      // Be defensive: strip leading '+' if present then try again
-      if (s.startsWith("+")) {
-        try {
-          return Integer.parseInt(s.substring(1));
-        } catch (NumberFormatException ex) {
-          return 0;
-        }
-      }
-      return 0;
+    public int getTimes() {
+        return times == null ? 1 : times;
     }
-  }
 
-  public int getAccuracy() {
-    return accuracy == null ? 0 : accuracy.intValue();
-  }
+    public int getWeight() {
+        return weight == null ? 1 : weight;
+    }
 
-  public int getMagicAccuracy() {
-    return magicAccuracy == null ? 0 : magicAccuracy.intValue();
-  }
+    public int getCritMod() {
+        if (critMod == null || critMod.isBlank())
+            return 0;
+        String s = critMod.trim();
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            if (s.startsWith("+")) {
+                try {
+                    return Integer.parseInt(s.substring(1));
+                } catch (NumberFormatException ex) {
+                    return 0;
+                }
+            }
+            return 0;
+        }
+    }
 
-  /**
-   * Returns the physical damage type as a `Creature.Resistances` enum using
-   * the tolerant parser in `ResistanceUtil`. Keeps JSON format compatible
-   * (string values) while giving callers a typesafe enum view.
-   */
-  // Keep convenience getters returning the enum directly (null if not set)
-  public Resistances getDamageTypeEnum() {
-    return this.damageType;
-  }
+    public int getAccuracy() {
+        return accuracy == null ? 0 : accuracy.intValue();
+    }
 
-  /**
-   * Returns the magic damage type as a `Creature.Resistances` enum using
-   * the tolerant parser in `ResistanceUtil`.
-   */
-  public Resistances getMagicDamageTypeEnum() {
-    return this.magicDamageType;
-  }
+    public int getMagicAccuracy() {
+        return magicAccuracy == null ? 0 : magicAccuracy.intValue();
+    }
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Attack[");
-    if (name != null) sb.append("name='").append(name).append("', ");
-    sb.append("times=").append(getTimes()).append(", ");
-    if (physicalDamageDice != null && !physicalDamageDice.isBlank()) sb.append("phys='").append(physicalDamageDice).append("', ");
-    if (damageMultiplier != 0) sb.append("physMultiplier=").append(damageMultiplier).append(", ");
-    if (magicDamageDice != null && !magicDamageDice.isBlank()) sb.append("magic='").append(magicDamageDice).append("', ");
-  if (magicDamageType != null) sb.append("magicType=").append(magicDamageType.name()).append(", ");
-    if (magicDamageMultiplier != 0) sb.append("magicStatBonus=").append(magicDamageMultiplier).append(", ");
-  if (damageType != null) sb.append("damageType=").append(damageType.name()).append(", ");
-  if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
-  if (accuracy != null) sb.append("accuracy=").append(accuracy).append(", ");
-  if (magicAccuracy != null) sb.append("magicAccuracy=").append(magicAccuracy).append(", ");
-    sb.append("weight=").append(getWeight());
-    sb.append("]");
-    return sb.toString();
-  }
+    public Resistances getDamageTypeEnum() {
+        return this.damageType;
+    }
 
+    public Resistances getMagicDamageTypeEnum() {
+        return this.magicDamageType;
+    }
 
+      @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Attack[");
+        if (name != null) sb.append("name='").append(name).append("', ");
+        sb.append("times=").append(getTimes()).append(", ");
+        if (physicalDamageDice != null && !physicalDamageDice.isBlank()) sb.append("phys='").append(physicalDamageDice).append("', ");
+        if (damageMultiplier != 0) sb.append("physMultiplier=").append(damageMultiplier).append(", ");
+        if (magicDamageDice != null && !magicDamageDice.isBlank()) sb.append("magic='").append(magicDamageDice).append("', ");
+        if (magicDamageType != null) sb.append("magicType=").append(magicDamageType.name()).append(", ");
+        if (magicDamageMultiplier != 0) sb.append("magicStatBonus=").append(magicDamageMultiplier).append(", ");
+        if (damageType != null) sb.append("damageType=").append(damageType.name()).append(", ");
+        if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
+        if (accuracy != null) sb.append("accuracy=").append(accuracy).append(", ");
+        if (magicAccuracy != null) sb.append("magicAccuracy=").append(magicAccuracy).append(", ");
+        sb.append("weight=").append(getWeight());
+        sb.append("]");
+        return sb.toString();
+    }
 
-  /**
-   * Roll the physical component of this attack, including stat bonus per hit.
-   * statBonus is added per-hit (caller decides meaning: STR/DEX/INT depending on context).
-   */
-  public int rollPhysicalDamage(int statBonus) {
+    public int rollPhysicalDamage(int statBonus) {
     int total = 0;
     for (int i = 0; i < getTimes(); i++) {
       if (physicalDamageDice != null && !physicalDamageDice.isBlank()) {
@@ -118,16 +94,13 @@ public class Attack {
   /**
    * Roll the magic component of this attack.
    */
-  public int rollMagicDamage() {
-    int total = 0;
-    for (int i = 0; i < getTimes(); i++) {
-      if (magicDamageDice != null && !magicDamageDice.isBlank()) {
-        total += Dice.roll(magicDamageDice);
-      }
+    public int rollMagicDamage() {
+        int total = 0;
+        for (int i = 0; i < getTimes(); i++) {
+            if (magicDamageDice != null && !magicDamageDice.isBlank()) {
+                total += Dice.roll(magicDamageDice);
+            }
+        }
+        return total;
     }
-    return total;
-  }
-
-  // Description is now manually authored in JSON and surfaced directly.
-
 }

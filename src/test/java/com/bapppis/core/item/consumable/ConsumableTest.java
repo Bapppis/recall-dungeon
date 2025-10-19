@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.AllLoaders;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.property.Property;
@@ -20,8 +20,8 @@ public class ConsumableTest {
         Player player = new Player();
         player.setName("TestPlayer");
 
-        // Load the Health Regen 1 Potion (id 8005)
-        Item potion = ItemLoader.getItemById(8005);
+        // Load the Health Regen 1 Potion (id 28005)
+        Item potion = ItemLoader.getItemById(28005);
         assertNotNull(potion, "Health Regen 1 Potion should be loaded");
         assertEquals("Health Regen 1 Potion", potion.getName());
 
@@ -47,7 +47,7 @@ public class ConsumableTest {
 
         Player player = new Player();
         player.setName("TestPlayer");
-        Item potion = ItemLoader.getItemById(8005);
+        Item potion = ItemLoader.getItemById(28005);
         assertNotNull(potion);
         potion.onApply(player);
         assertNotNull(player.getBuff(1011));

@@ -20,46 +20,32 @@ public class Property {
     private PropertyType type;
     private String description;
     private Map<Stats, Integer> statModifiers;
-    // Tooltip can be either a String or an array in JSON; preserve raw object and
-    // provide a helper to produce a joined string like Equipment.getTooltip().
     private Object tooltip;
-    // Optional duration (turns). Null => permanent (traits, permanent
-    // buffs/debuffs)
     private Integer duration;
     private Resistances damageType;
     private String damageDice;
-    // Optional regen deltas per turn (can be negative for debuffs)
     private Integer hpRegen;
     private Integer manaRegen;
     private Integer staminaRegen;
-    // Optional derived stat deltas (can be positive or negative)
     private Float crit;
     private Float dodge;
     private Float block;
     private Float magicResist;
-    // Optional accuracy modifiers added to to-hit rolls
     private Integer accuracy;
     private Integer magicAccuracy;
-    // Optional max pools deltas (positive or negative)
     private Integer maxHp;
     private Integer maxStamina;
     private Integer maxMana;
-    // Optional max pools percentage multipliers (e.g. 0.5 reduces to 50%, 1.5
-    // increases by 50%)
     private Float maxHpPercentage;
     private Float maxStaminaPercentage;
     private Float maxManaPercentage;
-    // Transient fields to store computed per-instance deltas when a percentage is
-    // applied
     private transient Integer appliedMaxHpDelta = null;
     private transient Integer appliedMaxStaminaDelta = null;
     private transient Integer appliedMaxManaDelta = null;
 
     protected Property() {
-        // default constructor for Gson
     }
 
-    /** Copy constructor used by subclasses when creating specialized instances. */
     protected Property(Property other) {
         if (other == null)
             return;

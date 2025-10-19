@@ -2,7 +2,7 @@ package com.bapppis;
 
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.game.Combat;
 import com.bapppis.core.game.Game;
 import com.bapppis.core.item.ItemLoader;

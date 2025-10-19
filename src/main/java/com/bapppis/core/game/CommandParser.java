@@ -5,7 +5,7 @@ import com.bapppis.core.dungeon.mapparser.MapParser;
 import com.bapppis.core.creature.player.Player; */
 import java.util.*;
 
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.dungeon.*;
 
 public class CommandParser {

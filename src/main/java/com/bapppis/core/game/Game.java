@@ -7,8 +7,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.bapppis.core.creature.Creature;
-import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.MapPrinter;
@@ -26,7 +26,7 @@ public class Game {
         // no-op default constructor
     }
 
-    public Game(com.bapppis.core.creature.player.Player player) {
+    public Game(com.bapppis.core.creature.Player player) {
         if (player == null) return;
         selectPlayer(player);
     }

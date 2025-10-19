@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import com.bapppis.core.util.AttackUtil;
 import com.bapppis.core.util.WeaponUtil;
-import com.bapppis.core.util.ResistanceUtil;
 import com.bapppis.core.util.LevelUtil;
 import com.bapppis.core.util.StatUtil;
 
@@ -17,92 +16,15 @@ import com.bapppis.core.Size;
 import com.bapppis.core.Stats;
 import com.bapppis.core.Type;
 import com.bapppis.core.item.Item;
-import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.EquipmentSlot;
 import com.bapppis.core.item.Weapon;
-import com.bapppis.core.creature.ItemManager;
 
 public abstract class Creature {
-    /**
-     * Returns a map of all equipped items by slot.
-     */
-    public java.util.Map<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> getAllEquipped() {
-        return new java.util.EnumMap<>(equipment);
-    }
-
-    /**
-     * Returns a map of equipped armor items (helmet, armor, legwear).
-     */
-    public java.util.Map<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> getEquippedArmors() {
-        java.util.EnumMap<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> armors = new java.util.EnumMap<>(com.bapppis.core.item.EquipmentSlot.class);
-        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
-                com.bapppis.core.item.EquipmentSlot.HELMET,
-                com.bapppis.core.item.EquipmentSlot.ARMOR,
-                com.bapppis.core.item.EquipmentSlot.LEGWEAR }) {
-            com.bapppis.core.item.Item item = getEquipped(slot);
-            if (item != null) armors.put(slot, item);
-        }
-        return armors;
-    }
-
-    /**
-     * Returns a map of equipped weapon/offhand items.
-     */
-    public java.util.Map<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> getEquippedWeapons() {
-        java.util.EnumMap<com.bapppis.core.item.EquipmentSlot, com.bapppis.core.item.Item> weapons = new java.util.EnumMap<>(com.bapppis.core.item.EquipmentSlot.class);
-        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
-                com.bapppis.core.item.EquipmentSlot.WEAPON,
-                com.bapppis.core.item.EquipmentSlot.OFFHAND }) {
-            com.bapppis.core.item.Item item = getEquipped(slot);
-            if (item != null) weapons.put(slot, item);
-        }
-        return weapons;
-    }
-
-    /**
-     * Prints all equipped items by slot.
-     */
-    public void printEquipped() {
-        System.out.println("Equipped Items:");
-        for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
-            com.bapppis.core.item.Item item = getEquipped(slot);
-            System.out.println("  " + slot + ": " + (item == null ? "Empty" : item.getName()));
-        }
-    }
-
-    /**
-     * Prints equipped armors (helmet, armor, legwear).
-     */
-    public void printEquippedArmors() {
-        System.out.println("Equipped Armors:");
-        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
-                com.bapppis.core.item.EquipmentSlot.HELMET,
-                com.bapppis.core.item.EquipmentSlot.ARMOR,
-                com.bapppis.core.item.EquipmentSlot.LEGWEAR }) {
-            com.bapppis.core.item.Item item = getEquipped(slot);
-            System.out.println("  " + slot + ": " + (item == null ? "Empty" : item.getName()));
-        }
-    }
-
-    /**
-     * Prints equipped weapons (weapon, offhand).
-     */
-    public void printEquippedWeapons() {
-        System.out.println("Equipped Weapons:");
-        for (com.bapppis.core.item.EquipmentSlot slot : new com.bapppis.core.item.EquipmentSlot[] {
-                com.bapppis.core.item.EquipmentSlot.WEAPON,
-                com.bapppis.core.item.EquipmentSlot.OFFHAND }) {
-            com.bapppis.core.item.Item item = getEquipped(slot);
-            System.out.println("  " + slot + ": " + (item == null ? "Empty" : item.getName()));
-        }
-    }
-    // --- Fields ---
     private int id;
     private String name;
-    private int visionRange = 2; // default vision range
+    private int visionRange = 2;
     private int level;
     private int xp;
-    private Integer enemyXp;
     private int baseHp;
     private int maxHp;
     private int currentHp;
@@ -132,49 +54,37 @@ public abstract class Creature {
     private float dodge;
     private float block;
     private float magicResist;
-    // Base accuracy bonuses (added to to-hit rolls). Renamed from
-    // rollAttack/MagicBonus
     private int accuracy;
     private int magicAccuracy;
-    // Equipment aggregates (sum of all equipped item contributions)
     private final java.util.EnumMap<Stats, Integer> equipmentStats = new java.util.EnumMap<>(Stats.class);
     private final java.util.EnumMap<Resistances, Integer> equipmentResists = new java.util.EnumMap<>(Resistances.class);
-    private int equipmentHpRegen = 0; // Sum of all equipped item HP regen contributions
-    private int equipmentStaminaRegen = 0; // Sum of all equipped item stamina regen contributions
-    private int equipmentManaRegen = 0; // Sum of all equipped item mana regen contributions
+    private int equipmentHpRegen = 0;
+    private int equipmentStaminaRegen = 0;
+    private int equipmentManaRegen = 0;
     private float equipmentCrit = 0f;
     private float equipmentDodge = 0f;
     private float equipmentBlock = 0f;
     private float equipmentMagicResist = 0f;
     private int equipmentAccuracy = 0;
     private int equipmentMagicAccuracy = 0;
-    // Property-derived accumulators (sum of applied property deltas)
     private float propertyCrit = 0f;
     private float propertyDodge = 0f;
     private float propertyBlock = 0f;
     private float propertyMagicResist = 0f;
     private int propertyAccuracy = 0;
     private int propertyMagicAccuracy = 0;
-    private int statPoints = 0;
-    // Cached per-stat bonuses (e.g. STR 14 -> +4). LUCK bonus equals the raw
-    // luck value.
     private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
     private final PropertyManager propertyManager = new PropertyManager(this);
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
     private Inventory inventory = new Inventory();
-    // Attacks defined on creatures (Gson will fill this from JSON)
     private java.util.List<Attack> attacks = new java.util.ArrayList<>();
-    // Optional sprite key loaded from JSON (e.g. "player_biggles",
-    // "monster_goblin")
     private String sprite;
 
     public String getSprite() {
         return sprite;
     }
 
-
-    // --- Constructor ---
     public Creature() {
         stats = new EnumMap<>(Stats.class);
         for (Stats stat : Stats.values()) {
@@ -184,7 +94,6 @@ public abstract class Creature {
                 stats.put(stat, 10); // other stats default to 10
             }
         }
-        // Initialize cached stat bonuses before derived stats that may rely on them
         recalcStatBonuses();
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
@@ -195,7 +104,50 @@ public abstract class Creature {
         recalcDerivedStats();
     }
 
-    // --- Getters and Setters ---
+    public int getSTR() {
+        return getStat(Stats.STRENGTH);
+    }
+
+    public int getDEX() {
+        return getStat(Stats.DEXTERITY);
+    }
+
+    public int getCON() {
+        return getStat(Stats.CONSTITUTION);
+    }
+
+    public int getINT() {
+        return getStat(Stats.INTELLIGENCE);
+    }
+
+    public int getWIS() {
+        return getStat(Stats.WISDOM);
+    }
+
+    public int getCHA() {
+        return getStat(Stats.CHARISMA);
+    }
+
+    public int getLUCK() {
+        return getStat(Stats.LUCK);
+    }
+
+    public void increaseStat(Stats stat) {
+        StatUtil.increaseStat(this, stat, 1);
+    }
+
+    public void increaseStat(Stats stat, int amount) {
+        StatUtil.increaseStat(this, stat, amount);
+    }
+
+    public void decreaseStat(Stats stat) {
+        StatUtil.decreaseStat(this, stat, 1);
+    }
+
+    public void decreaseStat(Stats stat, int amount) {
+        StatUtil.decreaseStat(this, stat, amount);
+    }
+
     public int getId() {
         return id;
     }
@@ -232,40 +184,6 @@ public abstract class Creature {
         this.xp = xp;
     }
 
-    public void addXp(int xp) {
-        int currentXp = this.xp + xp;
-        if (this.level >= LevelUtil.getMaxLevel()) {
-            this.level = LevelUtil.getMaxLevel();
-            this.xp = 0;
-            return;
-        }
-        if (currentXp >= LevelUtil.xpForNextLevel(this.level)) {
-            levelUp(currentXp);
-            return;
-        }
-        this.xp = currentXp;
-    }
-
-    public void levelUp(int xp) {
-        xp -= LevelUtil.xpForNextLevel(this.level);
-        this.level++;
-
-        this.addStatPoint();
-        this.addStatPoint();
-        this.updateMaxHp();
-
-        this.xp = 0;
-        addXp(xp);
-    }
-
-    public Integer getEnemyXp() {
-        return enemyXp;
-    }
-
-    public void setEnemyXp(Integer enemyXp) {
-        this.enemyXp = enemyXp;
-    }
-
     public int getBaseHp() {
         return baseHp;
     }
@@ -280,9 +198,8 @@ public abstract class Creature {
 
     public void setMaxHp(int maxHp) {
         if (maxHp < 1) {
-            maxHp = 1; // Ensure maxHp is at least 1
+            maxHp = 1;
         }
-        // Preserve the currentHp/maxHp ratio, rounding down
         double ratio = this.maxHp > 0 ? (double) currentHp / this.maxHp : 1.0;
         this.maxHp = maxHp;
         this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
@@ -330,9 +247,8 @@ public abstract class Creature {
 
     public void setMaxMana(int maxMana) {
         if (maxMana < 0) {
-            maxMana = 0; // Ensure maxMana is at least 0
+            maxMana = 0;
         }
-        // Preserve the currentMana/maxMana ratio, rounding down
         double ratio = this.maxMana > 0 ? (double) currentMana / this.maxMana : 1.0;
         this.maxMana = maxMana;
         this.currentMana = Math.max(1, (int) (this.maxMana * ratio));
@@ -348,8 +264,6 @@ public abstract class Creature {
     }
 
     public void updateMaxMana() {
-        // Compute the new max mana from a stable base value so repeated calls don't
-        // compound.
         int delta = this.getStatBonus(Stats.INTELLIGENCE);
         double factor = 1.0;
         if (delta < 0) {
@@ -357,32 +271,23 @@ public abstract class Creature {
         } else if (delta > 0) {
             factor = Math.pow(1.1, delta);
         }
-        // Always round down and never go below 25. Use baseMaxMana as the stable
-        // source.
         int newMax = (int) Math.floor(this.getBaseMaxMana() * factor);
         newMax = Math.max(25, newMax);
-        // Use setMaxMana which preserves currentMana/maxMana ratio
         this.setMaxMana(newMax);
     }
 
     public void setMaxStamina(int maxStamina) {
         if (maxStamina < 0) {
-            maxStamina = 0; // Ensure maxStamina is at least 0
+            maxStamina = 0;
         }
-        // Preserve the currentStamina/maxStamina ratio, rounding down
         double ratio = this.maxStamina > 0 ? (double) currentStamina / this.maxStamina : 1.0;
         this.maxStamina = maxStamina;
         this.currentStamina = Math.max(0, (int) (this.maxStamina * ratio));
-        // Recompute baseStaminaRegen from maxStamina so regen follows a percentile of
-        // max
         this.baseStaminaRegen = Math.max(1, Math.floorDiv(this.maxStamina, 5));
-        // Recompute derived stats (including staminaRegen) whenever max stamina changes
         recalcDerivedStats();
     }
 
     public void updateMaxStamina() {
-        // Compute the new max stamina from a stable base value so repeated calls don't
-        // compound.
         int delta = this.getStatBonus(Stats.CONSTITUTION);
         double factor = 1.0;
         if (delta < 0) {
@@ -390,24 +295,18 @@ public abstract class Creature {
         } else if (delta > 0) {
             factor = Math.pow(1.1, delta);
         }
-        // Always round down and never go below 25. Use baseMaxStamina as the stable
-        // source.
         int newMax = (int) Math.floor(this.getBaseMaxStamina() * factor);
         newMax = Math.max(25, newMax);
-        // Use setMaxStamina which preserves currentStamina/maxStamina ratio
         this.setMaxStamina(newMax);
     }
 
     public void setCurrentStamina(int stamina) {
         this.currentStamina = Math.max(0, Math.min(stamina, this.maxStamina));
-        // Recompute derived values when stamina changes
         recalcDerivedStats();
     }
 
-    // Delta-style modifier that clamps into [0, maxStamina]
     public void modifyStamina(int amount) {
         this.currentStamina = Math.max(0, Math.min(this.currentStamina + amount, this.maxStamina));
-        // Recompute derived values when stamina changes
         recalcDerivedStats();
     }
 
@@ -522,34 +421,6 @@ public abstract class Creature {
         return stats.getOrDefault(stat, 0);
     }
 
-    // --- Per-stat convenience getters ---
-    public int getSTR() {
-        return getStat(Stats.STRENGTH);
-    }
-
-    public int getDEX() {
-        return getStat(Stats.DEXTERITY);
-    }
-
-    public int getCON() {
-        return getStat(Stats.CONSTITUTION);
-    }
-
-    public int getINT() {
-        return getStat(Stats.INTELLIGENCE);
-    }
-
-    public int getWIS() {
-        return getStat(Stats.WISDOM);
-    }
-
-    public int getCHA() {
-        return getStat(Stats.CHARISMA);
-    }
-
-    public int getLUCK() {
-        return getStat(Stats.LUCK);
-    }
 
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
@@ -606,21 +477,6 @@ public abstract class Creature {
      * Generic increase/decrease helpers that delegate to modifyStat so all
      * derived values and cached bonuses remain consistent.
      */
-    public void increaseStat(Stats stat) {
-        StatUtil.increaseStat(this, stat, 1);
-    }
-
-    public void increaseStat(Stats stat, int amount) {
-        StatUtil.increaseStat(this, stat, amount);
-    }
-
-    public void decreaseStat(Stats stat) {
-        StatUtil.decreaseStat(this, stat, 1);
-    }
-
-    public void decreaseStat(Stats stat, int amount) {
-        StatUtil.decreaseStat(this, stat, amount);
-    }
 
     public int getResistance(Resistances resistance) {
         return resistances.getOrDefault(resistance, 0);
@@ -654,8 +510,6 @@ public abstract class Creature {
         return this.crit + this.equipmentCrit + this.propertyCrit;
     }
 
-    // Store raw crit value (can be negative or >100). Clamping to 0-100 is done
-    // only when the value is used for probability checks.
     public float setCrit(float crit) {
         this.crit = crit;
         return this.crit;
@@ -673,8 +527,6 @@ public abstract class Creature {
         return this.dodge + this.equipmentDodge + this.propertyDodge;
     }
 
-    // Store raw dodge value (can be negative or >100). When used for to-hit
-    // checks the effective dodge will be clamped to 0-80.
     public float setDodge(float dodge) {
         this.dodge = dodge;
         return this.dodge;
@@ -684,8 +536,6 @@ public abstract class Creature {
         return this.block + this.equipmentBlock + this.propertyBlock;
     }
 
-    // Store raw block value (can be negative or >100). When used for block
-    // checks the effective block will be clamped to 0-80.
     public float setBlock(float block) {
         this.block = block;
         return this.block;
@@ -695,22 +545,14 @@ public abstract class Creature {
         return this.magicResist + this.equipmentMagicResist + this.propertyMagicResist;
     }
 
-    /**
-     * Total accuracy (base + equipment + property) added to physical to-hit rolls.
-     */
     public int getAccuracy() {
         return accuracy + equipmentAccuracy + propertyAccuracy;
     }
 
-    /**
-     * Total magic accuracy (base + equipment + property) added to magic to-hit
-     * rolls.
-     */
     public int getMagicAccuracy() {
         return magicAccuracy + equipmentMagicAccuracy + propertyMagicAccuracy;
     }
 
-    // Methods for properties to modify property-derived accumulators
     public void modifyPropertyCrit(float delta) {
         this.propertyCrit += delta;
     }
@@ -730,29 +572,6 @@ public abstract class Creature {
     public float setMagicResist(float magicResist) {
         this.magicResist = magicResist;
         return this.magicResist;
-    }
-
-    // (removed unused helper getStatPoints)
-
-    public void setStatPoints(int statPoints, int amount) {
-        this.statPoints = statPoints + amount;
-    }
-
-    public void addStatPoint() {
-        this.statPoints += 1;
-    }
-
-    public void removeStatPoint() {
-        if (this.statPoints > 0) {
-            this.statPoints -= 1;
-        }
-    }
-
-    public void spendStatPoint(Stats stat) {
-        if (this.statPoints > 0) {
-            this.statPoints -= 1;
-            increaseStat(stat);
-        }
     }
 
     public void recalcDerivedStats() {
@@ -779,11 +598,6 @@ public abstract class Creature {
         this.magicResist = this.baseMagicResist + magicResistDelta;
     }
 
-    /**
-     * Recompute and cache per-stat bonuses used throughout creature logic.
-     * - For most stats: bonus = stat - 10
-     * - For LUCK: bonus = stat
-     */
     public void recalcStatBonuses() {
         for (Stats s : Stats.values()) {
             int raw = this.getStat(s);
@@ -792,16 +606,11 @@ public abstract class Creature {
         }
     }
 
-    /**
-     * Get the cached stat bonus for a stat. Returns 0 if missing.
-     */
     public int getStatBonus(Stats s) {
         return statBonuses.getOrDefault(s, 0);
     }
 
     public void attack(Creature target) {
-        // Prefer weapon attacks (if equipped and weapon defines attacks), otherwise use
-        // creature attacks
         Attack chosen = null;
         Item equipped = this.getEquipped(EquipmentSlot.WEAPON);
         Weapon weapon = null;
@@ -816,13 +625,11 @@ public abstract class Creature {
                     }
                 }
             } catch (Exception ignored) {}
-
             if (weaponAttackList == null) {
                 if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
                     weaponAttackList = weapon.getAttacks();
                 }
             }
-
             if (weaponAttackList != null && !weaponAttackList.isEmpty()) {
                 chosen = AttackUtil.chooseAttackFromList(weaponAttackList);
                 int statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
@@ -830,27 +637,17 @@ public abstract class Creature {
                         weapon.getDamageType(), weapon.getMagicElement(), weapon);
                 return;
             }
-        } else if (equipped instanceof Equipment) {
-            Equipment eq = (Equipment) equipped;
-            // fallback: treat as non-weapon equipment, no attacks
         }
-
-        // No weapon attacks — use creature's own attacks if present
         if (this.attacks != null && !this.attacks.isEmpty()) {
             chosen = AttackUtil.chooseAttackFromList(this.attacks);
-            // For creature attacks, default to strength for physical damage
             int statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
             Resistances physType = (chosen == null ? null : chosen.getDamageTypeEnum());
             Resistances magType = (chosen == null ? null : chosen.getMagicDamageTypeEnum());
             com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, chosen, statBonus, target, physType,
                     magType, null);
-            return;
         }
     }
 
-    // parseResistance removed; use ResistanceUtil.parse(...) where needed
-
-    // --- Equipment & Inventory ---
     public Inventory getInventory() {
         return inventory;
     }
@@ -859,8 +656,6 @@ public abstract class Creature {
         return equipment.get(slot);
     }
 
-    // Package-private helpers used by EquipmentManager to mutate equipment map
-    // and update equipment-level accumulators without exposing them publicly.
     Item removeEquipped(EquipmentSlot slot) {
         return equipment.remove(slot);
     }
@@ -907,7 +702,6 @@ public abstract class Creature {
         this.equipmentMagicResist += delta;
     }
 
-    /* Equipment accuracy helpers (package-private for EquipmentManager) */
     void adjustEquipmentAccuracy(int delta) {
         this.equipmentAccuracy += delta;
     }
@@ -916,7 +710,6 @@ public abstract class Creature {
         this.equipmentMagicAccuracy += delta;
     }
 
-    /* Property-driven accuracy modifiers (used by Property.onApply/onRemove) */
     public void modifyPropertyAccuracy(int delta) {
         this.propertyAccuracy += delta;
     }
@@ -936,15 +729,12 @@ public abstract class Creature {
             } catch (Exception ignored) {
             }
         }
-    ItemManager.equip(this, item, requestTwoHanded);
+        ItemManager.equip(this, item, requestTwoHanded);
     }
 
-    /**
-     * Convenience: add an item to inventory by human name or numeric id string.
-     * Looks up the template via ItemLoader and deep-copies it before adding.
-     */
     public boolean addItemByName(String name) {
-        if (name == null || name.isBlank()) return false;
+        if (name == null || name.isBlank())
+            return false;
         String t = name.trim();
         com.bapppis.core.item.Item template = null;
         try {
@@ -952,8 +742,10 @@ public abstract class Creature {
             template = com.bapppis.core.item.ItemLoader.getItemById(id);
         } catch (NumberFormatException ignored) {
         }
-        if (template == null) template = com.bapppis.core.item.ItemLoader.getItemByName(name);
-        if (template == null) return false;
+        if (template == null)
+            template = com.bapppis.core.item.ItemLoader.getItemByName(name);
+        if (template == null)
+            return false;
         try {
             Gson g = new Gson();
             com.bapppis.core.item.Item copy = g.fromJson(g.toJson(template), template.getClass());
@@ -963,14 +755,14 @@ public abstract class Creature {
         }
     }
 
-    /**
-     * Convenience: equip an item by name (will add a copy to inventory then equip it).
-     */
     public boolean equipItemByName(String name) {
-        if (name == null || name.isBlank()) return false;
+        if (name == null || name.isBlank())
+            return false;
         boolean added = addItemByName(name);
-        if (!added) return false;
-        // Find the newly added item in inventory (by name, case-insensitive) and equip it
+        if (!added)
+            return false;
+        // Find the newly added item in inventory (by name, case-insensitive) and equip
+        // it
         try {
             for (com.bapppis.core.item.Item it : getInventory().getWeapons()) {
                 if (it.getName() != null && it.getName().equalsIgnoreCase(name.trim())) {
@@ -1002,16 +794,14 @@ public abstract class Creature {
                     return true;
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return false;
     }
 
-    /**
-     * Consume a consumable item from inventory by name or numeric id string.
-     * Returns true if a consumable was found and consumed.
-     */
     public boolean consumeItemByName(String name) {
-        if (name == null || name.isBlank()) return false;
+        if (name == null || name.isBlank())
+            return false;
         String t = name.trim();
         try {
             // try numeric id match first
@@ -1019,73 +809,79 @@ public abstract class Creature {
                 int id = Integer.parseInt(t);
                 for (com.bapppis.core.item.Item it : getInventory().getConsumables()) {
                     if (it.getId() == id) {
-                        try { it.onApply(this); } catch (Exception ignored) {}
+                        try {
+                            it.onApply(this);
+                        } catch (Exception ignored) {
+                        }
                         getInventory().removeItem(it);
                         return true;
                     }
                 }
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
 
             for (com.bapppis.core.item.Item it : getInventory().getConsumables()) {
                 if (it.getName() != null && it.getName().equalsIgnoreCase(t)) {
-                    try { it.onApply(this); } catch (Exception ignored) {}
+                    try {
+                        it.onApply(this);
+                    } catch (Exception ignored) {
+                    }
                     getInventory().removeItem(it);
                     return true;
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return false;
     }
 
-    /**
-     * Drop an item from inventory by name or id. Placeholder: this removes the
-     * item from inventory but does not place it into any world/floor. Returns
-     * true if an item was removed.
-     */
     public boolean dropItemByName(String name) {
-        if (name == null || name.isBlank()) return false;
+        if (name == null || name.isBlank())
+            return false;
         String t = name.trim();
         try {
             try {
                 int id = Integer.parseInt(t);
                 // search all containers
                 java.util.List<java.util.List<com.bapppis.core.item.Item>> containers = java.util.Arrays.asList(
-                    getInventory().getWeapons(), getInventory().getOffhands(), getInventory().getHelmets(),
-                    getInventory().getArmors(), getInventory().getLegwear(), getInventory().getConsumables(),
-                    getInventory().getMisc());
+                        getInventory().getWeapons(), getInventory().getOffhands(), getInventory().getHelmets(),
+                        getInventory().getArmors(), getInventory().getLegwear(), getInventory().getConsumables(),
+                        getInventory().getMisc());
                 for (java.util.List<com.bapppis.core.item.Item> cont : containers) {
                     for (com.bapppis.core.item.Item it : cont) {
                         if (it.getId() == id) {
                             getInventory().removeItem(it);
-                            // System.out.println("Dropped: " + it.getName() + " (placeholder, no world placement)");
+                            // System.out.println("Dropped: " + it.getName() + " (placeholder, no world
+                            // placement)");
                             return true;
                         }
                     }
                 }
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
 
             java.util.List<java.util.List<com.bapppis.core.item.Item>> containers = java.util.Arrays.asList(
-                getInventory().getWeapons(), getInventory().getOffhands(), getInventory().getHelmets(),
-                getInventory().getArmors(), getInventory().getLegwear(), getInventory().getConsumables(),
-                getInventory().getMisc());
+                    getInventory().getWeapons(), getInventory().getOffhands(), getInventory().getHelmets(),
+                    getInventory().getArmors(), getInventory().getLegwear(), getInventory().getConsumables(),
+                    getInventory().getMisc());
             for (java.util.List<com.bapppis.core.item.Item> cont : containers) {
                 for (com.bapppis.core.item.Item it : cont) {
                     if (it.getName() != null && it.getName().equalsIgnoreCase(t)) {
                         getInventory().removeItem(it);
-                        // System.out.println("Dropped: " + it.getName() + " (placeholder, no world placement)");
+                        // System.out.println("Dropped: " + it.getName() + " (placeholder, no world
+                        // placement)");
                         return true;
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return false;
     }
 
-    /**
-     * Unequip an item by its human name if currently equipped.
-     */
     public boolean unequipItemByName(String name) {
-        if (name == null || name.isBlank()) return false;
+        if (name == null || name.isBlank())
+            return false;
         String t = name.replaceAll("\\s+", "").toLowerCase();
         try {
             for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
@@ -1098,42 +894,27 @@ public abstract class Creature {
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return false;
     }
 
-    /**
-     * Equip an item and optionally treat it as two-handed. If the item is
-     * inherently two-handed, it will always be equipped two-handed. If the
-     * item is versatile and requestTwoHanded is true it will be equipped into
-     * both WEAPON and OFFHAND slots (reusing the existing two-handed logic).
-     */
     public void equipItem(Item item, boolean requestTwoHanded) {
-    ItemManager.equip(this, item, requestTwoHanded);
+        ItemManager.equip(this, item, requestTwoHanded);
     }
 
     public void unequipItem(EquipmentSlot slot) {
-    ItemManager.unequip(this, slot);
+        ItemManager.unequip(this, slot);
     }
 
     public void addProperty(Property property) {
         propertyManager.add(property);
     }
 
-    /**
-     * Convenience overload: look up a property by id via PropertyLoader and apply
-     * it.
-     * If the id is unknown this is a no-op.
-     */
     public void addProperty(int id) {
         propertyManager.addById(id);
     }
 
-    /**
-     * Convenience overload: look up a property by its human name (case-insensitive)
-     * and apply it. If the name is numeric this will fall back to id lookup.
-     * Returns true if a property was found and applied, false otherwise.
-     */
     public boolean addProperty(String name) {
         return propertyManager.addByName(name);
     }
@@ -1146,7 +927,6 @@ public abstract class Creature {
         propertyManager.printStatusEffects();
     }
 
-
     public boolean removeProperty(String name) {
         return propertyManager.removeByName(name);
     }
@@ -1156,12 +936,6 @@ public abstract class Creature {
         return propertyManager.printProperties();
     }
 
-    /**
-     * Return a formatted properties dump with the given number of columns per
-     * row. Columns will be aligned by padding the text so the output is easy to
-     * scan in a console. If columns &lt;= 1 the output will fall back to the
-     * single-column `printProperties()` format.
-     */
     public String printProperties(int columns) {
         if (columns <= 1) {
             return printProperties();
@@ -1170,66 +944,6 @@ public abstract class Creature {
         return propertyManager.formatPropertiesInColumns(propertyManager.getBuffs().values(), columns)
                 + propertyManager.formatPropertiesInColumns(propertyManager.getDebuffs().values(), columns)
                 + propertyManager.formatPropertiesInColumns(propertyManager.getTraits().values(), columns);
-    }
-
-    /**
-     * Helper that lays out the provided properties collection into `columns`
-     * aligned columns. Each property uses its `toString()` as the cell content.
-     */
-    private String formatPropertiesInColumns(java.util.Collection<Property> props, int columns) {
-        StringBuilder sb = new StringBuilder();
-        if (props == null || props.isEmpty()) {
-            sb.append("  (none)\n");
-            return sb.toString();
-        }
-
-        java.util.List<String> cells = new java.util.ArrayList<>();
-        int maxCellLen = 0;
-        for (Property p : props) {
-            String s = formatPropertySummary(p);
-            // For multi-column compact output include a one-line tooltip snippet (first
-            // line)
-            try {
-                String tt = p.getTooltip();
-                if (tt != null && !tt.isBlank()) {
-                    String first = tt.split("\\n")[0];
-                    // append a short snippet, truncating if very long
-                    String snippet = first.length() > 40 ? first.substring(0, 37) + "..." : first;
-                    s = s + " - " + snippet;
-                }
-            } catch (Exception ignored) {
-            }
-            cells.add(s);
-            if (s.length() > maxCellLen)
-                maxCellLen = s.length();
-        }
-
-        // Pad each cell to maxCellLen and arrange into rows
-        int idx = 0;
-        for (String cell : cells) {
-            String padded = String.format("  %-" + maxCellLen + "s", cell);
-            sb.append(padded);
-            idx++;
-            if (idx % columns == 0) {
-                sb.append('\n');
-            } else {
-                sb.append("   "); // small gap between columns
-            }
-        }
-        if (idx % columns != 0) {
-            sb.append('\n');
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Build a compact, human-friendly single-line summary for a property.
-     * Format: "Name (id)[: description] [duration=5] [stats=...] [resists=...]"
-     */
-    private String formatPropertySummary(Property p) {
-        // Delegate to PropertyManager formatting helper to keep code centralised.
-        return propertyManager.formatPropertySummary(p);
     }
 
     public void updateMaxHp() {
@@ -1262,16 +976,6 @@ public abstract class Creature {
         this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
     }
 
-    /**
-     * Finalize creature fields after loading from JSON.
-     * - Resets max HP to base, then calls updateMaxHp() (level/CON scaling).
-     * - Recomputes max mana from INT via updateMaxMana() (does not force current
-     * mana to max).
-     * - Sets stamina to max.
-     * - Converts stored levels into XP so addXp() applies level-up bonuses.
-     * Call this once after Gson has populated fields and after properties/items
-     * (starting equipment) have been applied.
-     */
     public void finalizeAfterLoad() {
         int baseHp = this.getBaseHp();
         this.setMaxHp(baseHp); // Reset max HP to base before applying properties
@@ -1298,81 +1002,27 @@ public abstract class Creature {
         this.currentStamina = this.maxStamina;
 
         updateCrit();
-
-        int tempXp = this.getXp() + LevelUtil.totalXpForLevel(this.getLevel());
-        this.setLevel(0);
-        this.setXp(0);
-        this.addXp(tempXp);
     }
 
     @Override
     public String toString() {
+        // Small print: "SMALL Goblin (HUMANOID)" or similar
         StringBuilder sb = new StringBuilder();
-        sb.append("Creature: ").append(name == null ? "<unnamed>" : name).append(" (Id:").append(id).append(")\n");
-        sb.append("Level: ").append(level).append(" (").append("XP: ").append(getXp()).append("/")
-                .append(LevelUtil.xpForNextLevel(level)).append(") ")
-                .append(this.getSize() == null ? "" : this.getSize().name()).append(" ")
-                .append(creatureType == null ? "" : creatureType.name()).append("\n");
-
-        // Health / resources
-        sb.append("HP: ").append(currentHp).append("/").append(maxHp).append("  (HP regen: ").append(getHpRegen())
-                .append("/s)").append("\n");
-        sb.append("Mana: ").append(currentMana).append("/").append(maxMana).append("  (Mana regen: ")
-                .append(getManaRegen()).append("/s)").append("\n");
-        sb.append("Stamina: ").append(currentStamina).append("/").append(maxStamina).append("  (Stamina regen: ")
-                .append(getStaminaRegen()).append("/s)").append("\n");
-
-        // Basic stats on one line for quick scanning
-        sb.append("Stats: ")
-                .append("STR ").append(getSTR()).append("  ")
-                .append("DEX ").append(getDEX()).append("  ")
-                .append("CON ").append(getCON()).append("  ")
-                .append("INT ").append(getINT()).append("  ")
-                .append("WIS ").append(getWIS()).append("  ")
-                .append("CHA ").append(getCHA()).append("  ")
-                .append("LUCK ").append(getLUCK()).append("\n");
-
-        // Resistances (condensed)
-        sb.append("Resists: ");
-        boolean first = true;
-        for (Entry<Resistances, Integer> entry : resistances.entrySet()) {
-            if (!first)
-                sb.append(", ");
-            sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append("%");
-            first = false;
+        if (getSize() != null) {
+            sb.append(getSize().name()).append(" ");
         }
-        sb.append("\n");
-
-        // Combat chances
-        sb.append("Crit: ").append(getCrit()).append("%  ")
-                .append("Dodge: ").append(getDodge()).append("%  ")
-                .append("Block: ").append(getBlock()).append("%  ")
-                .append("MagicResist: ").append(getMagicResist()).append("%\n");
-        sb.append("Accuracy: ").append(getAccuracy()).append("  ")
-                .append("MagicAccuracy: ").append(getMagicAccuracy()).append("\n");
-
-        // Equipped items (one per slot)
-        sb.append("Equipment:\n");
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            Item equipped = equipment.get(slot);
-            sb.append("  ").append(slot.name()).append(": ");
-            sb.append(equipped == null ? "Empty" : equipped.getName()).append("\n");
+        if (getName() != null) {
+            sb.append(getName());
+        } else {
+            sb.append("Creature");
         }
-
-        // Properties summary and inventory counts
-        sb.append("Properties: ")
-                .append("Buffs=").append(propertyManager.getBuffs().size()).append(" ")
-                .append("Debuffs=").append(propertyManager.getDebuffs().size()).append(" ")
-                .append("Traits=").append(propertyManager.getTraits().size()).append("\n");
-
-        sb.append("Inventory counts: ")
-                .append("Weapons=").append(inventory.getWeapons().size()).append(", ")
-                .append("Offhands=").append(inventory.getOffhands().size()).append(", ")
-                .append("Helmets=").append(inventory.getHelmets().size()).append(", ")
-                .append("Armor=").append(inventory.getArmors().size()).append(", ")
-                .append("Consumables=").append(inventory.getConsumables().size()).append(", ")
-                .append("Misc=").append(inventory.getMisc().size()).append("\n");
-
+        // Print species if available (not base types)
+        String species = getClass().getSimpleName();
+        if (!species.equals("Player") && !species.equals("Enemy") && !species.equals("NPC") && !species.equals("CreatureType") && !species.equals("Creature")) {
+            sb.append(" (").append(species.toUpperCase()).append(")");
+        } else if (getCreatureType() != null) {
+            sb.append(" (").append(getCreatureType().name()).append(")");
+        }
         return sb.toString();
     }
 }

@@ -1,8 +1,5 @@
 package com.bapppis.core;
 
-/**
- * Damage and element/mode resistances used across the project.
- */
 public enum Resistances {
     FIRE,
     WATER,
@@ -15,5 +12,5 @@ public enum Resistances {
     BLUDGEONING,
     PIERCING,
     SLASHING,
-    TRUE,
+    TRUE
 }

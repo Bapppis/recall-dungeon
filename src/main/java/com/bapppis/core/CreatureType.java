@@ -1,15 +1,19 @@
 package com.bapppis.core;
 
-/**
- * What  type of creature something is.
- */
 public enum CreatureType {
-        BEAST,
-        CONSTRUCT,
-        DRAGON,
-        ELEMENTAL,
-        HUMANOID,
-        PLANT,
-        UNDEAD,
-        UNKNOWN,
-    }
+    ABERRATION,
+    BEAST,
+    CELESTIAL,
+    CONSTRUCT,
+    DRAGON,
+    ELEMENTAL,
+    FEY,
+    FIEND,
+    GIANT,
+    HUMANOID,
+    MONSTROSITY,
+    OOZE,
+    PLANT,
+    UNDEAD,
+    UNKNOWN
+}

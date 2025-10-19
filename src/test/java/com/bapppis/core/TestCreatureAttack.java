@@ -4,8 +4,8 @@ package com.bapppis.core;
 import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.Stats;
-import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.item.EquipmentSlot;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
@@ -21,13 +21,13 @@ public class TestCreatureAttack {
         assert biggles != null;
         biggles.setStat(Stats.CONSTITUTION, 100);
         // Give Falchion of Doom to Biggles and equip it
-        biggles.addItem(ItemLoader.getItemById(9800)); // Falchion of Doom
+        biggles.addItem(ItemLoader.getItemById(37000)); // Falchion of Doom
         biggles.equipItem(biggles.getInventory().getWeapons().get(1)); // Equip Falchion of Doom
     // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
         biggles.attack(biggles); // Self-attack for testing
     // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
         // Drink healing potion
-        Item minorHealingPotion = ItemLoader.getItemById(8000); // Minor Healing Potion
+        Item minorHealingPotion = ItemLoader.getItemById(28000); // Minor Healing Potion
         minorHealingPotion.onApply(biggles);
     // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
     }
@@ -36,12 +36,12 @@ public class TestCreatureAttack {
     public void testDarkHoundVsTrainingDummyMultipleAttacks() {
         AllLoaders.loadAll();
 
-        // Load Dark Hound (id 6000)
-        com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(6000);
+        // Load Dark Hound (id 7000)
+        com.bapppis.core.creature.Creature darkHound = CreatureLoader.getCreatureById(7000);
         assert darkHound != null;
 
-        // Load training dummy (id 6100)
-        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
+        // Load training dummy (id 9000)
+        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(9000);
         assert dummy != null;
 
         // Ensure dummy is at full health before each attack
@@ -124,7 +124,7 @@ public class TestCreatureAttack {
         biggles.setStat(Stats.CONSTITUTION, 100);
 
         // Testing versatile weapon attacks
-        biggles.addItem(ItemLoader.getItemById(9801)); // Rusty Iron Sword
+        biggles.addItem(ItemLoader.getItemById(37001)); // Rusty Iron Sword
         biggles.equipItem(biggles.getInventory().getWeapons().get(1), true);
         // biggles.setStat(Stats.INTELLIGENCE, 20);
         // biggles.setStat(Stats.CHARISMA, 100);
@@ -133,7 +133,7 @@ public class TestCreatureAttack {
     // System.out.println(biggles.toString());
 
         // Load training dummy as a target
-        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
+        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(9000);
         assert dummy != null;
 
         // Prepare counters
@@ -219,7 +219,7 @@ public class TestCreatureAttack {
         }
 
         // Load training dummy as a target
-        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(6100);
+        com.bapppis.core.creature.Creature dummy = CreatureLoader.getCreatureById(9000);
         assert dummy != null;
 
         java.util.concurrent.atomic.AtomicInteger attackCount = new java.util.concurrent.atomic.AtomicInteger(0);

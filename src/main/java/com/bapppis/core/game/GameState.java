@@ -1,6 +1,6 @@
 package com.bapppis.core.game;
 
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.dungeon.Floor;
 
 public final class GameState {

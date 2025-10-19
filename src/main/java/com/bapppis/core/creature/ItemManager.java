@@ -1,4 +1,3 @@
-
 package com.bapppis.core.creature;
 
 import com.bapppis.core.item.*;
@@ -6,15 +5,8 @@ import java.util.Map;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.Stats;
 
-/**
- * Helper that centralizes item slot management and application/removal of
- * item effects and properties. Kept package-private and lightweight to minimize
- * API
- * surface on Creature.
- */
 class ItemManager {
 
-    /** Equip the item on the creature. Returns true on success. */
     static boolean equip(Creature creature, Item item, boolean requestTwoHanded) {
         if (item == null || creature == null)
             return false;
@@ -36,7 +28,6 @@ class ItemManager {
         }
 
         if (willBeTwoHanded) {
-            // Clear weapon/offhand first
             oldItem = creature.removeEquipped(EquipmentSlot.WEAPON);
             if (oldItem != null) {
                 removeEffects(creature, oldItem);
@@ -55,13 +46,11 @@ class ItemManager {
             creature.putEquipped(slot, item);
         }
 
-        // Remove from inventory if present
         try {
             creature.getInventory().removeItem(item);
         } catch (Exception ignored) {
         }
 
-        // Apply effects and properties
         applyEffects(creature, item);
 
         return true;
@@ -71,7 +60,6 @@ class ItemManager {
         return equip(creature, item, false);
     }
 
-    /** Unequip a slot and try to return the item to inventory. */
     static void unequip(Creature creature, EquipmentSlot slot) {
         if (creature == null || slot == null)
             return;
@@ -80,8 +68,6 @@ class ItemManager {
         if (item == null)
             return;
 
-        // If the item is two-handed, remove the other slot referencing the same
-        // instance.
         try {
             if (item instanceof Weapon && ((Weapon) item).isTwoHanded()) {
                 EquipmentSlot other = (slot == EquipmentSlot.WEAPON) ? EquipmentSlot.OFFHAND
@@ -94,11 +80,8 @@ class ItemManager {
         } catch (Exception ignored) {
         }
 
-        // Remove effects once
         removeEffects(creature, item);
 
-        // Try to add back to inventory, but only if there's not already an item with
-        // the same id
         boolean alreadyInInventory = false;
         try {
             int id = item.getId();
@@ -155,9 +138,7 @@ class ItemManager {
         }
     }
 
-    // privately so `Creature` can delegate when needed.
     static void applyEffects(Creature creature, Item item) {
-        // Apply stats/resistances for Equipment and Weapon
         if (item instanceof Equipment) {
             Equipment eq = (Equipment) item;
             if (eq.getStats() != null) {
@@ -189,13 +170,10 @@ class ItemManager {
                         creature.adjustEquipmentResist(res, entry.getValue());
                         creature.modifyResistance(res, entry.getValue());
                     } catch (IllegalArgumentException e) {
-                        // ignore
                     }
                 }
             }
 
-            // Apply equipment stat fields (crit, dodge, block, magicResist, accuracy,
-            // magicAccuracy)
             if (eq.getCrit() != null && eq.getCrit() != 0f) {
                 creature.adjustEquipmentCrit(eq.getCrit());
             }
@@ -215,13 +193,11 @@ class ItemManager {
                 creature.adjustEquipmentMagicAccuracy(eq.getMagicAccuracy());
             }
         }
-        // Apply item properties using unified Item interface logic
         item.onApply(creature);
         creature.recalcDerivedStats();
     }
 
     static void removeEffects(Creature creature, Item item) {
-        // Remove stats/resistances for Equipment and Weapon
         if (item instanceof Equipment) {
             Equipment eq = (Equipment) item;
             if (eq.getStats() != null) {
@@ -253,13 +229,10 @@ class ItemManager {
                         creature.adjustEquipmentResist(res, -entry.getValue());
                         creature.modifyResistance(res, -entry.getValue());
                     } catch (IllegalArgumentException e) {
-                        // ignore
                     }
                 }
             }
 
-            // Remove equipment stat fields (crit, dodge, block, magicResist, accuracy,
-            // magicAccuracy)
             if (eq.getCrit() != null && eq.getCrit() != 0f) {
                 creature.adjustEquipmentCrit(-eq.getCrit());
             }
@@ -279,7 +252,6 @@ class ItemManager {
                 creature.adjustEquipmentMagicAccuracy(-eq.getMagicAccuracy());
             }
         }
-        // Remove item properties using unified Item interface logic
         item.onRemove(creature);
         creature.recalcDerivedStats();
     }

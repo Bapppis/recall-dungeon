@@ -16,7 +16,7 @@ public class Coordinate {
     public int getY() {
         return y;
     }
-    // Override equals and hashCode for usage in a hash map
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -29,6 +29,7 @@ public class Coordinate {
     public int hashCode() {
         return 31 * x + y;
     }
+
     @Override
     public String toString() {
         return "(" + x + ", " + y + ")";

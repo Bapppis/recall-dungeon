@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
-import com.bapppis.core.creature.player.Player;
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.Player;
 
 public class NameConvenienceTest {
 
@@ -34,8 +34,8 @@ public class NameConvenienceTest {
         boolean dropped = p.dropItemByName("Rusty Iron Sword");
         assertTrue(dropped, "Should drop Rusty Iron Sword by name (placeholder)");
 
-        // Spawn a creature by id string (common goblin id is 6400 in data)
-        com.bapppis.core.creature.Creature copy = CreatureLoader.spawnCreatureByName("6400");
-        assertNotNull(copy, "Should be able to spawn creature by id string '6400'");
+        // Spawn a creature by id string (common goblin id is 15000 in data)
+        com.bapppis.core.creature.Creature copy = CreatureLoader.spawnCreatureByName("15000");
+        assertNotNull(copy, "Should be able to spawn creature by id string '15000'");
     }
 }

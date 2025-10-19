@@ -11,11 +11,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Gson deserializer for a map of Resistances -> Integer used in property JSON.
- * This implementation tolerates unknown or misspelled keys by using
- * ResistanceUtil.parse(...) and skipping entries that don't map to an enum.
- */
 public class ResistanceMapDeserializer implements JsonDeserializer<Map<Resistances, Integer>> {
     @Override
     public Map<Resistances, Integer> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -26,14 +21,12 @@ public class ResistanceMapDeserializer implements JsonDeserializer<Map<Resistanc
             String key = entry.getKey();
             Resistances res = ResistanceUtil.parse(key);
             if (res == null) {
-                // tolerate unknown keys by skipping rather than throwing
                 continue;
             }
             try {
                 int value = entry.getValue().getAsInt();
                 map.put(res, value);
             } catch (Exception e) {
-                // malformed value; skip
                 continue;
             }
         }

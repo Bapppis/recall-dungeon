@@ -8,16 +8,11 @@ import com.bapppis.core.util.Dice;
 import com.bapppis.core.util.ResistanceUtil;
 import com.bapppis.core.util.WeaponUtil;
 
-/**
- * Centralized attack resolution engine.
- */
 public final class AttackEngine {
 
-    // Optional listener for tests and tooling
     public static java.util.function.Consumer<AttackReport> attackListener = null;
 
     private AttackEngine() {
-        // static utility
     }
 
     public static class AttackReport {
@@ -55,13 +50,13 @@ public final class AttackEngine {
     }
 
     public static void applyAttackToTarget(Creature attacker, Attack attack, int statBonus, Creature target,
-        Resistances physicalType, Resistances magicType, Weapon weapon) {
-    applyAttackToTarget(attacker, attack, statBonus, target, physicalType, magicType, weapon,
-        new DefaultRandomProvider());
+            Resistances physicalType, Resistances magicType, Weapon weapon) {
+        applyAttackToTarget(attacker, attack, statBonus, target, physicalType, magicType, weapon,
+                new DefaultRandomProvider());
     }
 
     public static void applyAttackToTarget(Creature attacker, Attack attack, int statBonus, Creature target,
-        Resistances physicalType, Resistances magicType, Weapon weapon, RandomProvider rng) {
+            Resistances physicalType, Resistances magicType, Weapon weapon, RandomProvider rng) {
         if (attack == null || target == null || attacker == null)
             return;
 
@@ -81,8 +76,8 @@ public final class AttackEngine {
         }
         float critChance = Math.max(0f, Math.min(100f, baseCrit + critMod));
 
-    boolean hasPhysical = physicalType != null
-        && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
+        boolean hasPhysical = physicalType != null
+                && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
         boolean isTrue = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.TRUE;
         if (hasPhysical || isTrue) {
             for (int i = 0; i < times; i++) {
@@ -93,7 +88,6 @@ public final class AttackEngine {
                 float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
                 if (isTrue) {
                     if (toHit <= effectiveDodge) {
-                        // System.out.println("Missed (dodge TRUE): " + attacker.getName() + " -> " + target.getName());
                         physMissDodge++;
                         continue;
                     }

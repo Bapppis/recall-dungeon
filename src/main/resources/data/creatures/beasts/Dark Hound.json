@@ -1,8 +1,9 @@
 {
-  "id": 6000,
+  "id": 7000,
   "name": "Dark Hound",
   "description": "An enormous fierce hound corrupted by darkness by dark beings and used as loyal pets and protectors. It's claws spread corrupting darkness into whatever they touch.",
   "creatureType": "BEAST",
+  "species": "Dog",
   "size": "MEDIUM",
   "level": 1,
   "enemyXp": 5,

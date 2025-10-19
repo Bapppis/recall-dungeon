@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.player.Player;
+import com.bapppis.core.creature.Player;
 
 public class ItemEquipEdgeCasesTest {
 

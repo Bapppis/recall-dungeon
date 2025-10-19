@@ -3,11 +3,6 @@ package com.bapppis.core.util;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.Stats;
 
-/**
- * Small helper utilities for manipulating creature stats from external call sites
- * (tests, consoles, dev tools). Methods ensure stats never drop below zero and
- * delegate to Creature's existing APIs so derived fields remain consistent.
- */
 public final class StatUtil {
     private StatUtil() {}
 
@@ -46,7 +41,6 @@ public final class StatUtil {
     public static void decreaseLUCK(Creature c) { decreaseLUCK(c, 1); }
     public static void decreaseLUCK(Creature c, int amt) { decreaseStat(c, Stats.LUCK, amt); }
 
-    // Generic helpers
     public static void increaseStat(Creature c, Stats stat, int amount) {
         if (c == null || amount <= 0) return;
         c.modifyStat(stat, Math.max(0, amount));
@@ -54,10 +48,9 @@ public final class StatUtil {
 
     public static void decreaseStat(Creature c, Stats stat, int amount) {
         if (c == null || amount <= 0) return;
-        // Ensure stat doesn't drop below 1: compute current and clamp
         int current = c.getStat(stat);
         int minAllowed = 1;
-        int maxSub = Math.max(0, current - minAllowed); // most we can subtract
+        int maxSub = Math.max(0, current - minAllowed);
         int toSubtract = Math.min(Math.max(0, amount), maxSub);
         if (toSubtract == 0) return;
         c.modifyStat(stat, -toSubtract);

@@ -17,29 +17,26 @@ public class PropertyLoader {
     private static boolean loaded = false;
 
     public static void loadProperties() {
-        if (loaded) return;
+        if (loaded)
+            return;
         forceReload();
     }
 
-    /**
-     * Force reload of all properties, even if already loaded. Use in individual tests.
-     */
     public static void forceReload() {
         propertyMap.clear();
         propertyNameMap.clear();
         loaded = false;
 
         com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
-            .registerTypeAdapter(com.bapppis.core.Resistances.class,
-                new com.bapppis.core.util.ResistancesDeserializer())
-            .create();
+                .registerTypeAdapter(com.bapppis.core.Resistances.class,
+                        new com.bapppis.core.util.ResistancesDeserializer())
+                .create();
         try (ScanResult scanResult = new ClassGraph()
                 .acceptPaths("data/properties/buff", "data/properties/debuff", "data/properties/trait")
                 .scan()) {
             for (Resource resource : scanResult.getAllResources()) {
                 if (resource.getPath().endsWith(".json")) {
                     try {
-                        // Read the resource fully into a String so we can parse it
                         String json;
                         try (java.io.InputStream is = resource.open();
                                 java.util.Scanner s = new java.util.Scanner(is,
@@ -48,8 +45,6 @@ public class PropertyLoader {
                             json = s.hasNext() ? s.next() : "";
                         }
 
-                        // Read JSON into a generic map first to inspect the `type` field without
-                        // binding
                         java.util.Map<String, Object> temp = gson.fromJson(json,
                                 new TypeToken<java.util.Map<String, Object>>() {
                                 }.getType());
@@ -64,7 +59,6 @@ public class PropertyLoader {
                             }
 
                             if (t == null) {
-                                // Fallback: infer from the resource path (folder names)
                                 String path = resource.getPath();
                                 if (path.contains("/buff/") || path.contains("\\buff\\")) {
                                     t = PropertyType.BUFF;
@@ -75,7 +69,6 @@ public class PropertyLoader {
                                 }
                             }
 
-                            // Deserialize into unified Property class
                             Property propInstance = gson.fromJson(json, Property.class);
                             if (propInstance == null) {
                                 propInstance = new Property();
@@ -102,11 +95,7 @@ public class PropertyLoader {
                             } catch (Exception ignored) {
                             }
                         }
-                        // System.out.println("Loaded property: " + property.getId() + " from " +
-                        // resource.getPath());
                     } catch (Exception e) {
-                        // System.out.println("Error loading property from: " + resource.getPath());
-                        // e.printStackTrace();
                     }
                 }
             }
@@ -125,7 +114,8 @@ public class PropertyLoader {
             return null;
         String key = name.trim().toLowerCase();
         Property p = propertyNameMap.get(key);
-        if (p != null) return p;
+        if (p != null)
+            return p;
         String keyNoSpace = key.replaceAll("\\s+", "");
         return propertyNameMap.get(keyNoSpace);
     }

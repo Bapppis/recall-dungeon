@@ -7,11 +7,6 @@ import java.util.regex.Pattern;
 public final class Dice {
     private Dice() {}
 
-    /**
-     * Rolls dice in NdM format, optionally with a modifier like +K or -K.
-     * Examples: "2d6", "3d4+2", "1d8-1".
-     * Returns 0 if input is invalid or null.
-     */
     public static int roll(String dice) {
         if (dice == null) return 0;
         Pattern p = Pattern.compile("^(\\d+)d(\\d+)([+-]\\d+)?$");
@@ -21,7 +16,6 @@ public final class Dice {
         int sides = Integer.parseInt(m.group(2));
         int modifier = 0;
         if (m.group(3) != null) modifier = Integer.parseInt(m.group(3));
-        // Guard against invalid values like 0 dice or 0 sides (e.g., "0d6", "1d0")
         if (num <= 0 || sides <= 0) return 0;
         int total = 0;
         for (int i = 0; i < num; i++) {
