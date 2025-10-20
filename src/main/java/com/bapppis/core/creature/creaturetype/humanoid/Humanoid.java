@@ -5,6 +5,6 @@ import com.bapppis.core.creature.Creature;
 public class Humanoid extends Creature {
     public Humanoid() {
         super();
-        setSize(com.bapppis.core.Size.MEDIUM);
+        setSize(com.bapppis.core.creature.creatureEnums.Size.MEDIUM);
     }
 }

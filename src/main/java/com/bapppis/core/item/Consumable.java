@@ -1,5 +1,8 @@
 package com.bapppis.core.item;
 
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+import com.bapppis.core.item.itemEnums.ItemType;
+
 public class Consumable extends Equipment {
     // healingDice is optional: present for healing potions, absent for property-based consumables
     private String healingDice;

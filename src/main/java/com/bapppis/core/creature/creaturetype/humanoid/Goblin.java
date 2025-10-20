@@ -9,6 +9,6 @@ public class Goblin extends Humanoid {
         // modifyStat(Stats.STRENGTH, -5);
         // Example: add a property by name
         // addProperty("Nimble");
-        setSize(com.bapppis.core.Size.SMALL);
+        setSize(com.bapppis.core.creature.creatureEnums.Size.SMALL);
     }
 }

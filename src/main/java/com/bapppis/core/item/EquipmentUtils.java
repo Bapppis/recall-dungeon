@@ -1,6 +1,8 @@
 package com.bapppis.core.item;
 
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+
 import java.util.EnumMap;
 import java.util.Map;
 

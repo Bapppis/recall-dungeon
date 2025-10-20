@@ -1,5 +1,8 @@
 
 package com.bapppis.core.item;
+
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+import com.bapppis.core.item.itemEnums.ItemType;
 import com.bapppis.core.property.Property;
 import java.util.List;
 
@@ -11,7 +14,7 @@ public interface Item {
     ItemType getType();
     int getId();
     EquipmentSlot getSlot();
-        void setSlot(EquipmentSlot slot);
+    void setSlot(EquipmentSlot slot);
 
     List<Property> getProperties();
     void setProperties(List<Property> properties);

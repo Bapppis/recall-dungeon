@@ -1,7 +1,7 @@
 package com.bapppis.core.util;
 
 import com.bapppis.core.creature.Creature;
-import com.bapppis.core.Stats;
+import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.item.Weapon;
 
 public final class WeaponUtil {

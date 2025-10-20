@@ -166,10 +166,10 @@ public final class AttackEngine {
         if (hasMagicComponent && magicType != null) {
             try {
                 if (weapon != null) {
-                    com.bapppis.core.Stats chosen = null;
+                    com.bapppis.core.creature.creatureEnums.Stats chosen = null;
                     int best = Integer.MIN_VALUE;
                     if (weapon.getMagicStatBonuses() != null && !weapon.getMagicStatBonuses().isEmpty()) {
-                        for (com.bapppis.core.Stats s : weapon.getMagicStatBonuses()) {
+                        for (com.bapppis.core.creature.creatureEnums.Stats s : weapon.getMagicStatBonuses()) {
                             int b = attacker.getStatBonus(s);
                             if (b > best) {
                                 best = b;

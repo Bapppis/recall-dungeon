@@ -216,31 +216,45 @@ Armor items are organized by slot with generous ID ranges:
 
 ### Weapons (29000-39999)
 
-Weapons are organized by damage type with large ID ranges:
+Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 
-#### Blunt Weapons (29000-30999)
+#### Melee Weapons (29000-33999)
+
+##### Slash Weapons (29000-30332)
+
+- 29000 — Falchion of Doom — data/items/weapons/melee weapons/slash weapons/Falchion of Doom.json
+- 29001 — Rusty Iron Sword — data/items/weapons/melee weapons/slash weapons/Rusty Iron Sword.json
+- 29002 — Parrying Dagger — data/items/weapons/melee weapons/slash weapons/Parrying Dagger.json
+
+##### Piercing Weapons (30333-31665)
+
+- 30333 — Rusty Iron Spear — data/items/weapons/melee weapons/piercing weapons/Rusty Iron Spear.json
+
+##### Blunt Weapons (31666-32999)
 
 - [none indexed yet]
 
-#### Magic Weapons (31000-32999)
+#### Ranged Weapons (34000-36999)
+
+##### Bows (34000-35499)
+
+- 34000 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
+
+##### Crossbows (35500-36999)
 
 - [none indexed yet]
 
-#### Piercing Weapons (33000-34999)
+#### Magic Weapons (37000-39999)
 
-- 33000 — Rusty Iron Spear — data/items/weapons/melee weapons/piercing weapons/Rusty Iron Spear.json
+##### Staffs (37000-37999)
 
-#### Ranged Weapons (35000-36999)
+- [none indexed yet]
 
-- 35000 — Old Bow — data/items/weapons/ranged weapons/Old Bow.json
+##### Arcane Weapons (38000-38999)
 
-#### Slash Weapons (37000-38999)
+- [none indexed yet]
 
-- 37000 — Falchion of Doom — data/items/weapons/melee weapons/slash weapons/Falchion of Doom.json
-- 37001 — Rusty Iron Sword — data/items/weapons/melee weapons/slash weapons/Rusty Iron Sword.json
-- 37002 — Parrying Dagger — data/items/weapons/melee weapons/slash weapons/Parrying Dagger.json
-
-#### Versatile/Special Weapons (39000-39999)
+##### Magic Physical Weapons (39000-39999)
 
 - [none indexed yet]
 
@@ -327,12 +341,17 @@ This section describes the ID allocation system for all game assets in Recall Du
 │ │  └─ Shields        (26000-27999) - 2000 IDs             │
 │ ├─ Consumables (28000-28999) - 1000 IDs                    │
 │ └─ Weapons     (29000-39999) - 11000 IDs                   │
-│    ├─ Blunt          (29000-30999) - 2000 IDs             │
-│    ├─ Magic          (31000-32999) - 2000 IDs             │
-│    ├─ Piercing       (33000-34999) - 2000 IDs             │
-│    ├─ Ranged         (35000-36999) - 2000 IDs             │
-│    ├─ Slash          (37000-38999) - 2000 IDs             │
-│    └─ Versatile      (39000-39999) - 1000 IDs             │
+│    ├─ Melee Weapons  (29000-33999) - 5000 IDs             │
+│    │  ├─ Slash       (29000-30332) - 1333 IDs             │
+│    │  ├─ Piercing    (30333-31665) - 1333 IDs             │
+│    │  └─ Blunt       (31666-32999) - 1334 IDs             │
+│    ├─ Ranged Weapons (34000-36999) - 3000 IDs             │
+│    │  ├─ Bows        (34000-35499) - 1500 IDs             │
+│    │  └─ Crossbows   (35500-36999) - 1500 IDs             │
+│    └─ Magic Weapons  (37000-39999) - 3000 IDs             │
+│       ├─ Staffs      (37000-37999) - 1000 IDs             │
+│       ├─ Arcane      (38000-38999) - 1000 IDs             │
+│       └─ Magic Physical (39000-39999) - 1000 IDs          │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐

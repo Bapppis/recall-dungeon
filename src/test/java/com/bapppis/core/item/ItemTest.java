@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.Player;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
 
 public class ItemTest {
     // Test item functionality here

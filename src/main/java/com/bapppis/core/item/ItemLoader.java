@@ -3,10 +3,15 @@ package com.bapppis.core.item;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
+
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
+
+import com.bapppis.core.item.itemEnums.ItemType;
+import com.bapppis.core.item.itemEnums.WeaponType;
+
 import java.util.ArrayList;
 
 public class ItemLoader {

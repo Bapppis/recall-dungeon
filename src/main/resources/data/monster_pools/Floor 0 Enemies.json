@@ -3,32 +3,32 @@
   "name": "Floor 0 Enemies",
   "entries": [
     {
-  "id": "SkeletonSpearman",
-  "name": "Skeleton Spearman",
+      "id": "SkeletonSpearman",
+      "name": "Skeleton Spearman",
       "maxGroup": 1,
       "minGroup": 1,
       "type": "monster",
       "weight": 10
     },
     {
-  "id": "SkeletonSwordsman",
-  "name": "Skeleton Swordsman",
+      "id": "SkeletonSwordsman",
+      "name": "Skeleton Swordsman",
       "maxGroup": 1,
       "minGroup": 1,
       "type": "monster",
       "weight": 10
     },
     {
-  "id": "GoblinBerserker",
-  "name": "Goblin Berserker",
+      "id": "GoblinBerserker",
+      "name": "Goblin Berserker",
       "maxGroup": 1,
       "minGroup": 1,
       "type": "monster",
       "weight": 5
     },
     {
-  "id": "DarkHound",
-  "name": "Dark Hound",
+      "id": "DarkHound",
+      "name": "Dark Hound",
       "maxGroup": 1,
       "minGroup": 1,
       "type": "monster",

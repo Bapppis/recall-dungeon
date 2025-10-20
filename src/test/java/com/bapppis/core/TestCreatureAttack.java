@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.Player;
-import com.bapppis.core.Stats;
-import com.bapppis.core.item.EquipmentSlot;
+import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
-import com.bapppis.core.AllLoaders;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
 
 public class TestCreatureAttack {
     @Test
@@ -21,7 +20,7 @@ public class TestCreatureAttack {
         assert biggles != null;
         biggles.setStat(Stats.CONSTITUTION, 100);
         // Give Falchion of Doom to Biggles and equip it
-        biggles.addItem(ItemLoader.getItemById(37000)); // Falchion of Doom
+    biggles.addItem(ItemLoader.getItemById(29000)); // Falchion of Doom
         biggles.equipItem(biggles.getInventory().getWeapons().get(1)); // Equip Falchion of Doom
     // System.out.println(biggles.getCurrentHp() + " / " + biggles.getMaxHp());
         biggles.attack(biggles); // Self-attack for testing
@@ -124,7 +123,7 @@ public class TestCreatureAttack {
         biggles.setStat(Stats.CONSTITUTION, 100);
 
         // Testing versatile weapon attacks
-        biggles.addItem(ItemLoader.getItemById(37001)); // Rusty Iron Sword
+    biggles.addItem(ItemLoader.getItemById(29001)); // Rusty Iron Sword
         biggles.equipItem(biggles.getInventory().getWeapons().get(1), true);
         // biggles.setStat(Stats.INTELLIGENCE, 20);
         // biggles.setStat(Stats.CHARISMA, 100);

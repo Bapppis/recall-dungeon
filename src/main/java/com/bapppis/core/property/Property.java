@@ -1,8 +1,8 @@
 package com.bapppis.core.property;
 
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Stats;
 import com.bapppis.core.creature.Creature;
+import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.util.Dice;
 import com.bapppis.core.util.ResistanceUtil;
 import com.google.gson.annotations.SerializedName;

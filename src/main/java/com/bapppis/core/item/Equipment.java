@@ -1,12 +1,22 @@
 package com.bapppis.core.item;
 
+
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+import com.bapppis.core.item.itemEnums.ItemType;
+import com.bapppis.core.item.itemEnums.Rarity;
 import com.bapppis.core.property.Property;
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 import java.util.Map;
 
 public class Equipment implements Item {
+    public void setEquipmentSlot(EquipmentSlot slot) {
+        this.equipmentSlot = slot;
+    }
+
+    public EquipmentSlot getEquipmentSlot() {
+        return this.equipmentSlot;
+    }
     @Override
     public String toString() {
         return getName() + " (id=" + getId() + ")";

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
-import com.bapppis.core.Stats;
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.item.ItemLoader;
 

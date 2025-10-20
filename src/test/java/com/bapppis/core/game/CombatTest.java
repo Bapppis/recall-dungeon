@@ -16,7 +16,7 @@ public class CombatTest {
 
     Player biggles = CreatureLoader.getPlayerById(5000);
         // Give Falchion of Doom to Biggles and equip it
-        biggles.addItem(ItemLoader.getItemById(37000)); // Falchion of Doom
+    biggles.addItem(ItemLoader.getItemById(29000)); // Falchion of Doom
         biggles.equipItem(biggles.getInventory().getWeapons().get(0)); // Equip Falchion of Doom
 
     Creature goblin = CreatureLoader.getCreatureById(15000); // Goblin

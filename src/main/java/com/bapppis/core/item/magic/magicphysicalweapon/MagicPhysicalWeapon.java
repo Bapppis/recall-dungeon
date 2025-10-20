@@ -1,9 +1,9 @@
 package com.bapppis.core.item.magic.magicphysicalweapon;
 
+import com.bapppis.core.item.itemEnums.WeaponType;
 import com.bapppis.core.item.magic.MagicWeapon;
-import com.bapppis.core.item.WeaponType;
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Stats;
+import com.bapppis.core.creature.creatureEnums.Stats;
 
 public class MagicPhysicalWeapon extends MagicWeapon {
     public MagicPhysicalWeapon() {

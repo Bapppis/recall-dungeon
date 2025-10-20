@@ -1,6 +1,10 @@
 package com.bapppis.core.creature;
 
 import com.bapppis.core.item.*;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+import com.bapppis.core.item.itemEnums.ItemType;
+import com.bapppis.core.item.itemEnums.Rarity;
+
 import java.util.*;
 
 public class Inventory {

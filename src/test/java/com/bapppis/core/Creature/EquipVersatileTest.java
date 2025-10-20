@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.item.Equipment;
 import com.bapppis.core.item.Weapon;
-import com.bapppis.core.item.EquipmentSlot;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
 
 /**
  * Tests for equipping versatile weapons one- and two-handed.
@@ -24,7 +24,7 @@ public class EquipVersatileTest {
     // Helper to build a simple versatile Weapon instance without needing JSON
     private Weapon makeVersatileWeapon(String name) {
     Weapon w = new com.bapppis.core.item.melee.slashweapon.SlashWeapon();
-    w.setSlot(EquipmentSlot.WEAPON);
+    w.setSlot(com.bapppis.core.item.itemEnums.EquipmentSlot.WEAPON);
     w.setTwoHanded(false);
     w.setVersatile(true);
     return w;

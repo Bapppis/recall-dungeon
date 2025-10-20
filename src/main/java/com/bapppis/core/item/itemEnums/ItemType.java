@@ -1,4 +1,4 @@
-package com.bapppis.core.item;
+package com.bapppis.core.item.itemEnums;
 
 public enum ItemType {
     WEAPON,

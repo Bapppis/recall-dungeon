@@ -48,7 +48,12 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ### Creature System
 
-- Multiple creature types (players, enemies, beasts, undead, etc.)
+- **Creature type hierarchy**: Specialized creature classes for different entity types
+  - **Player**: Player character with extended functionality
+  - **Enemy**: Hostile creatures with AI behavior
+  - **NPC**: Non-hostile characters for dialogue and quests
+- **Creature variants**: Multiple creature types organized by family
+  - Beast, Construct, Humanoid, Undead, etc.
 - Creatures have stats (Strength, Dexterity, Constitution, etc.) and resistances (Fire, Ice, Bludgeoning, etc.)
 - Level and XP system with customizable XP progression
 - Runtime utilities: `com.bapppis.core.util` contains helper classes used by gameplay and tests. Notable ones:
@@ -60,7 +65,12 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 - Comprehensive inventory system for items, weapons, armor, and consumables
 - Equipment slots: weapon, offhand, armor, helmet, legwear
-- Support for two-handed and versatile weapons
+- **Weapon hierarchy**: Specialized weapon classes for different combat styles
+  - **Melee Weapons**: Slash (swords, axes), Piercing (daggers, spears), Blunt (maces, hammers)
+  - **Ranged Weapons**: Bows and Crossbows with ammunition support
+  - **Magic Weapons**: Staffs, Arcane weapons, and Magic-Physical hybrid weapons
+  - Support for two-handed and versatile weapons
+- **Equipment hierarchy**: Specialized equipment classes (Armor, Helmet, Legwear, Offhand)
 - Weapons have physical and optional magical damage types (with dice notation, e.g., 2d6)
 - Weapons have multiple attacks decided semi-randomly via weighted randomness
 - Items and equipment can modify stats, resistances, and traits
@@ -239,18 +249,33 @@ recall-dungeon/
 │   │   │       │   ├── CreatureLoader.java
 │   │   │       │   ├── Enemy.java
 │   │   │       │   ├── NPC.java
+│   │   │       │   ├── Player.java
 │   │   │       │   ├── Attack.java
-│   │   │       │   ├── EquipmentManager.java
+│   │   │       │   ├── ItemManager.java
 │   │   │       │   ├── Inventory.java
 │   │   │       │   ├── PropertyManager.java
-│   │   │       │   ├── creaturetype/    # Biological creature types
-│   │   │       │   │   ├── beast/       # Beast species (Dog, etc.)
-│   │   │       │   │   ├── construct/   # Construct species (TrainingDummy, etc.)
-│   │   │       │   │   ├── humanoid/    # Humanoid species (Human, Goblin, etc.)
-│   │   │       │   │   ├── undead/      # Undead species (Skeleton, etc.)
-│   │   │       │   │   └── ...          # Other creature types
-│   │   │       │   └── player/
-│   │   │       │       └── Player.java
+│   │   │       │   ├── creatureEnums/   # Creature-related enums
+│   │   │       │   │   ├── CreatureType.java
+│   │   │       │   │   ├── Size.java
+│   │   │       │   │   ├── Stats.java
+│   │   │       │   │   └── Type.java
+│   │   │       │   └── creaturetype/    # Biological creature type implementations
+│   │   │       │       ├── aberration/
+│   │   │       │       ├── beast/       # Beast species (Dog, etc.)
+│   │   │       │       ├── celestial/
+│   │   │       │       ├── construct/   # Construct species (TrainingDummy, etc.)
+│   │   │       │       ├── dragon/
+│   │   │       │       ├── elemental/
+│   │   │       │       ├── fey/
+│   │   │       │       ├── fiend/
+│   │   │       │       ├── giant/
+│   │   │       │       ├── humanoid/    # Humanoid species (Human, Goblin, etc.)
+│   │   │       │       ├── monstrosity/
+│   │   │       │       ├── ooze/
+│   │   │       │       ├── plant/
+│   │   │       │       ├── playertype/
+│   │   │       │       ├── undead/      # Undead species (Skeleton, Zombie, etc.)
+│   │   │       │       └── unknown/
 │   │   │       ├── dungeon/         # Dungeon generation and management
 │   │   │       │   ├── Dungeon.java
 │   │   │       │   ├── Floor.java
@@ -266,18 +291,44 @@ recall-dungeon/
 │   │   │       ├── item/            # Item system
 │   │   │       │   ├── Item.java
 │   │   │       │   ├── ItemLoader.java
-│   │   │       │   ├── ItemType.java
 │   │   │       │   ├── Equipment.java
-│   │   │       │   ├── EquipmentSlot.java
-│   │   │       │   ├── Rarity.java
-│   │   │       │   ├── WeaponClass.java
-│   │   │       │   ├── consumable/
-│   │   │       │   │   ├── Consumable.java
-│   │   │       │   │   └── HealingPotion.java
-│   │   │       │   ├── misc/
-│   │   │       │   │   └── Misc.java
-│   │   │       │   └── weapon/
-│   │   │       │       └── Weapon.java
+│   │   │       │   ├── EquipmentUtils.java
+│   │   │       │   ├── Consumable.java
+│   │   │       │   ├── Misc.java
+│   │   │       │   ├── Weapon.java
+│   │   │       │   ├── equipment/   # Equipment subclasses
+│   │   │       │   │   ├── Armor.java
+│   │   │       │   │   ├── Helmet.java
+│   │   │       │   │   ├── Legwear.java
+│   │   │       │   │   └── Offhand.java
+│   │   │       │   ├── enums/       # Item-related enums
+│   │   │       │   │   ├── EquipmentSlot.java
+│   │   │       │   │   ├── ItemType.java
+│   │   │       │   │   ├── Rarity.java
+│   │   │       │   │   ├── WeaponClass.java
+│   │   │       │   │   └── WeaponType.java
+│   │   │       │   ├── melee/       # Melee weapon subclasses
+│   │   │       │   │   ├── MeleeWeapon.java
+│   │   │       │   │   ├── bluntweapon/
+│   │   │       │   │   │   └── BluntWeapon.java
+│   │   │       │   │   ├── piercingweapon/
+│   │   │       │   │   │   └── PiercingWeapon.java
+│   │   │       │   │   └── slashweapon/
+│   │   │       │   │       └── SlashWeapon.java
+│   │   │       │   ├── ranged/      # Ranged weapon subclasses
+│   │   │       │   │   ├── RangedWeapon.java
+│   │   │       │   │   ├── bow/
+│   │   │       │   │   │   └── Bow.java
+│   │   │       │   │   └── crossbow/
+│   │   │       │   │       └── Crossbow.java
+│   │   │       │   └── magic/       # Magic weapon subclasses
+│   │   │       │       ├── MagicWeapon.java
+│   │   │       │       ├── arcaneweapon/
+│   │   │       │       │   └── ArcaneWeapon.java
+│   │   │       │       ├── magicphysicalweapon/
+│   │   │       │       │   └── MagicPhysicalWeapon.java
+│   │   │       │       └── staff/
+│   │   │       │           └── Staff.java
 │   │   │       ├── loot/            # Loot and treasure system
 │   │   │       │   ├── LootManager.java
 │   │   │       │   ├── LootPool.java
@@ -320,9 +371,19 @@ recall-dungeon/
 │   │           │   └── floor(50x50).txt
 │   │           ├── items/           # Item definitions
 │   │           │   ├── armor/
+│   │           │   │   ├── armor/   # Body armor
+│   │           │   │   ├── helmets/
+│   │           │   │   ├── legwear/
+│   │           │   │   └── shields/
 │   │           │   ├── consumables/
 │   │           │   │   └── potions/
 │   │           │   └── weapons/
+│   │           │       ├── melee weapons/
+│   │           │       │   ├── blunt weapons/
+│   │           │       │   ├── piercing weapons/
+│   │           │       │   └── slash weapons/
+│   │           │       ├── ranged weapons/
+│   │           │       └── magic weapons/
 │   │           ├── properties/      # Property definitions
 │   │           │   ├── buff/
 │   │           │   ├── debuff/
@@ -333,13 +394,37 @@ recall-dungeon/
 │   ├── test/
 │   │   ├── java/com/bapppis/core/  # Unit and integration tests
 │   │   │   ├── Creature/
+│   │   │   │   ├── EquipVersatileTest.java
+│   │   │   │   ├── beast/
+│   │   │   │   ├── construct/
+│   │   │   │   ├── dragon/
+│   │   │   │   ├── elemental/
+│   │   │   │   ├── humanoid/
+│   │   │   │   ├── plant/
+│   │   │   │   ├── player/
+│   │   │   │   ├── undead/
+│   │   │   │   └── unknown/
+│   │   │   ├── TestCreatureAttack.java
 │   │   │   ├── dungeon/
+│   │   │   │   └── mapparser/
 │   │   │   ├── game/
+│   │   │   │   ├── CombatTest.java
+│   │   │   │   ├── GameTest.java
+│   │   │   │   └── ...
 │   │   │   ├── integration/
 │   │   │   ├── item/
+│   │   │   │   ├── ItemTest.java
+│   │   │   │   ├── ItemEquipEdgeCasesTest.java
+│   │   │   │   ├── armor/
+│   │   │   │   │   └── ArmorTest.java
 │   │   │   │   ├── consumable/
 │   │   │   │   │   └── ConsumableTest.java
+│   │   │   │   ├── equipment/
+│   │   │   │   ├── melee/
+│   │   │   │   ├── ranged/
+│   │   │   │   ├── magic/
 │   │   │   │   └── weapon/
+│   │   │   │       └── weaponTest.java
 │   │   │   ├── loaders/
 │   │   │   ├── loot/
 │   │   │   ├── monster/

@@ -3,7 +3,6 @@
   "name": "Goblin Berserker",
   "description": "A small goblin wielding two axes, it is thirsting for blood.",
   "creatureType": "HUMANOID",
-  "species": "Goblin",
   "size": "SMALL",
   "level": 0,
   "enemyXp": 4,
@@ -41,5 +40,6 @@
       "weight": 2
     }
   ],
-  "sprite": "monster_goblin"
+  "sprite": "monster_goblin",
+  "species": "Goblin"
 }

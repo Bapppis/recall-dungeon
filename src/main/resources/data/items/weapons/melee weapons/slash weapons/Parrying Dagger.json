@@ -1,12 +1,12 @@
 {
-  "id": 37002,
+  "id": 29002,
   "name": "Parrying Dagger",
   "description": "Not really meant for attacking, you are not even sure how you got it.",
   "rarity": "COMMON",
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
-  "weaponType": "SLASH",
+  "finesse": true,
   "damageType": "SLASHING",
   "stats": {
     "DEXTERITY": 1
@@ -40,5 +40,5 @@
       "weight": 3
     }
   ],
-  "finesse": true
+  "weaponType": "SLASH"
 }

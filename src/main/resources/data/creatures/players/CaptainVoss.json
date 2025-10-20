@@ -3,7 +3,6 @@
   "name": "Captain Aldric Voss",
   "description": "Captain Voss, a seasoned warrior. Determined to find home and protect his homeland.",
   "creatureType": "HUMANOID",
-  "species": "Human",
   "level": 0,
   "xp": 0,
   "visionRange": 2,
@@ -48,5 +47,6 @@
       "times": 1
     }
   ],
-  "sprite": "player_voss"
+  "sprite": "player_voss",
+  "species": "Human"
 }

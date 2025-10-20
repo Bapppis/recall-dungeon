@@ -1,8 +1,12 @@
 package com.bapppis.core.item;
 
+
 import com.bapppis.core.creature.Attack;
+import com.bapppis.core.creature.creatureEnums.Stats;
+import com.bapppis.core.item.itemEnums.WeaponClass;
+import com.bapppis.core.item.itemEnums.WeaponType;
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Stats;
+
 import java.util.List;
 
 public abstract class Weapon extends Equipment {

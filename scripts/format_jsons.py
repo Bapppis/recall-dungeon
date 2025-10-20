@@ -13,8 +13,56 @@ import json
 from pathlib import Path
 from typing import Dict, Any, List
 
-root = Path(__file__).resolve().parents[1]
-data_dir = root / 'src' / 'main' / 'resources' / 'data'
+try:
+    # Use resolve() to get absolute path to project root
+    root = Path(__file__).resolve().parent.parent
+    data_dir = root / 'src' / 'main' / 'resources' / 'data'
+    print(f"Resolved data_dir: {data_dir}")
+    if not data_dir.exists():
+        raise FileNotFoundError(f"Data directory not found: {data_dir}")
+except Exception as e:
+    print(f"Error determining data directory: {e}")
+    exit(1)
+
+# ID RANGES (from IDS.md)
+ID_RANGES = {
+    "spells": (0, 999),
+    "properties_buff": (1000, 2332),
+    "properties_debuff": (2333, 3665),
+    "properties_trait": (3666, 4999),
+    "creatures_players": (5000, 5499),
+    "creatures_neutrals": (5500, 5999),
+    "creatures_enemies_aberrations": (6000, 6999),
+    "creatures_enemies_beasts": (7000, 7999),
+    "creatures_enemies_celestials": (8000, 8999),
+    "creatures_enemies_constructs": (9000, 9999),
+    "creatures_enemies_dragons": (10000, 10999),
+    "creatures_enemies_elementals": (11000, 11999),
+    "creatures_enemies_fey": (12000, 12999),
+    "creatures_enemies_fiends": (13000, 13999),
+    "creatures_enemies_giants": (14000, 14999),
+    "creatures_enemies_humanoids": (15000, 15999),
+    "creatures_enemies_monstrosities": (16000, 16999),
+    "creatures_enemies_oozes": (17000, 17999),
+    "creatures_enemies_plants": (18000, 18999),
+    "creatures_enemies_undead": (19000, 19999),
+    "items_armor_chest": (20000, 21999),
+    "items_armor_helmets": (22000, 23999),
+    "items_armor_legwear": (24000, 25999),
+    "items_armor_shields": (26000, 27999),
+    "items_consumables": (28000, 28999),
+    "items_weapons_melee_slash": (29000, 30332),
+    "items_weapons_melee_piercing": (30333, 31665),
+    "items_weapons_melee_blunt": (31666, 32999),
+    "items_weapons_ranged_bows": (34000, 35499),
+    "items_weapons_ranged_crossbows": (35500, 36999),
+    "items_weapons_magic_staffs": (37000, 37999),
+    "items_weapons_magic_arcane": (38000, 38999),
+    "items_weapons_magic_physical": (39000, 39999),
+    "loot_pools": (40000, 40999),
+    "monster_pools": (41000, 41999),
+    "reserved": (42000, 49999)
+}
 
 # Canonical top-level ordering derived from Falchion of Doom.json.
 CANON_TOP_ORDER: List[str] = [
@@ -26,6 +74,8 @@ CANON_TOP_ORDER: List[str] = [
     "equipmentSlot",
     "weaponClass",
     "twoHanded",
+    "finesse",
+    "versatile",
     "damageType",
     "magicElement",
     "magicStatBonuses",  # multi-stat support (array)
@@ -227,8 +277,12 @@ def transform(obj: Any, kind: str = None) -> Any:
 
 
 changed: List[str] = []
-for p in data_dir.rglob('*.json'):
+json_files = list(data_dir.rglob('*.json'))
+if not json_files:
+    print(f"Warning: No JSON files found in {data_dir}")
+for p in json_files:
     try:
+        print(f"Processing: {p}")
         text = p.read_text(encoding='utf-8')
         obj = json.loads(text)
         # Determine file kind by path segments (items vs creatures)
@@ -242,14 +296,18 @@ for p in data_dir.rglob('*.json'):
             kind = 'property'
         else:
             kind = None
+        print(f"  Detected kind: {kind}")
 
         transformed = transform(obj, kind)
         new_text = json.dumps(transformed, ensure_ascii=False, indent=2) + "\n"
         if new_text != text:
             p.write_text(new_text, encoding='utf-8')
             changed.append(str(p.relative_to(root)))
+            print(f"  File formatted and updated.")
+        else:
+            print(f"  No changes needed.")
     except Exception as e:
-        print(f"Skipping {p}: {e}")
+        print(f"Skipping {p}: {p}\n  Error: {e}")
 
 if changed:
     print('Reformatted & re-ordered files:')

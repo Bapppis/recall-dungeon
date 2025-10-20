@@ -1,12 +1,11 @@
 {
-  "id": 35000,
+  "id": 34000,
   "name": "Old Bow",
   "description": "The bow is past its prime, hopefully it won't break just yet.",
   "rarity": "COMMON",
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "RANGED",
-  "weaponType": "PIERCE",
   "twoHanded": true,
   "damageType": "PIERCING",
   "crit": 10,
@@ -45,5 +44,6 @@
       "times": 1,
       "weight": 5
     }
-  ]
+  ],
+  "weaponType": "PIERCE"
 }

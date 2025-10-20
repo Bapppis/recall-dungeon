@@ -168,27 +168,27 @@ public class CreatureLoader {
                             // Determine creature type based on id ranges or class type
                             int cidForType = creature.getId();
                             if (creature instanceof Player || (cidForType >= 5000 && cidForType < 5500)) {
-                                creature.setType(com.bapppis.core.Type.PLAYER);
+                                creature.setType(com.bapppis.core.creature.creatureEnums.Type.PLAYER);
                             } else if (creature instanceof NPC || (cidForType >= 5500 && cidForType < 6000)) {
-                                creature.setType(com.bapppis.core.Type.NPC);
+                                creature.setType(com.bapppis.core.creature.creatureEnums.Type.NPC);
                             } else if (creature instanceof Enemy || (cidForType >= 6000 && cidForType < 20000)) {
-                                creature.setType(com.bapppis.core.Type.ENEMY);
+                                creature.setType(com.bapppis.core.creature.creatureEnums.Type.ENEMY);
                             }
                             // Ensure all stats are set to defaults if missing
                             // Only set default if stat key is missing from the map
                             @SuppressWarnings("unchecked")
-                            EnumMap<com.bapppis.core.Stats, Integer> statMap = null;
+                            EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer> statMap = null;
                             try {
                                 java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
                                 statsField.setAccessible(true);
-                                statMap = (EnumMap<com.bapppis.core.Stats, Integer>) statsField.get(creature);
+                                statMap = (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField.get(creature);
                             } catch (Exception e) {
                                 // Should not happen
                             }
                             if (statMap != null) {
-                                for (com.bapppis.core.Stats stat : com.bapppis.core.Stats.values()) {
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats.values()) {
                                     if (!statMap.containsKey(stat)) {
-                                        if (stat == com.bapppis.core.Stats.LUCK) {
+                                        if (stat == com.bapppis.core.creature.creatureEnums.Stats.LUCK) {
                                             creature.setStat(stat, 1);
                                         } else {
                                             creature.setStat(stat, 10);

@@ -37,11 +37,11 @@ public class TestCommonTreasureChest {
                     resolved = com.bapppis.core.item.ItemLoader.getItemByName(s.id);
                 }
                 if (resolved != null) {
-                    if (resolved.getType() == com.bapppis.core.item.ItemType.CONSUMABLE) {
+                    if ("CONSUMABLE".equalsIgnoreCase(String.valueOf(resolved.getType()))) {
                         seenPotion = true;
                         potionCount++;
                     }
-                    if (resolved.getType() == com.bapppis.core.item.ItemType.WEAPON) {
+                    if ("WEAPON".equalsIgnoreCase(String.valueOf(resolved.getType()))) {
                         seenWeapon = true;
                     }
                 }

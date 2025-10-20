@@ -3,7 +3,6 @@
   "name": "Training Dummy",
   "description": "A training dummy used for practice, you sense malice from it",
   "creatureType": "CONSTRUCT",
-  "species": "TrainingDummy",
   "size": "MEDIUM",
   "level": 0,
   "enemyXp": 10,
@@ -15,5 +14,6 @@
   "hpLvlBonus": 4,
   "weapon": null,
   "properties": null,
-  "sprite": null
+  "sprite": null,
+  "species": "TrainingDummy"
 }

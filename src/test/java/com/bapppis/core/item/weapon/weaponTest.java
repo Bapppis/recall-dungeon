@@ -15,7 +15,7 @@ public class weaponTest {
     @Test
     public void testMeleeWeaponInstantiation() {
         AllLoaders.loadAll();
-        Item swordItem = ItemLoader.getItemById(37001); // Rusty Iron Sword (SLASH)
+    Item swordItem = ItemLoader.getItemById(29001); // Rusty Iron Sword (SLASH)
         assertEquals("Rusty Iron Sword", swordItem.getName());
         assertTrue(swordItem instanceof com.bapppis.core.item.Weapon);
         com.bapppis.core.item.Weapon sword = (com.bapppis.core.item.Weapon) swordItem;
@@ -26,7 +26,7 @@ public class weaponTest {
     @Test
     public void testRangedWeaponInstantiation() {
         AllLoaders.loadAll();
-        Item bowItem = ItemLoader.getItemById(35000); // Old Bow (PIERCE)
+    Item bowItem = ItemLoader.getItemById(34000); // Old Bow (PIERCE)
         assertEquals("Old Bow", bowItem.getName());
         assertTrue(bowItem instanceof com.bapppis.core.item.Weapon);
         com.bapppis.core.item.Weapon bow = (com.bapppis.core.item.Weapon) bowItem;
@@ -60,7 +60,7 @@ public class weaponTest {
     @Test
     public void testWeaponVersatileFinesseFlags() {
         AllLoaders.loadAll();
-        Item swordItem = ItemLoader.getItemById(37001); // Rusty Iron Sword
+    Item swordItem = ItemLoader.getItemById(29001); // Rusty Iron Sword
         assertTrue(swordItem instanceof com.bapppis.core.item.Weapon);
         com.bapppis.core.item.Weapon sword = (com.bapppis.core.item.Weapon) swordItem;
         assertEquals(true, sword.getVersatile());

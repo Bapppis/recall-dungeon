@@ -1,12 +1,13 @@
 {
-  "id": 37001,
+  "id": 29001,
   "name": "Rusty Iron Sword",
   "description": "A rusty iron sword, worn and weathered from years of neglect. The rust could poison someone.",
   "rarity": "COMMON",
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
-  "weaponType": "SLASH",
+  "finesse": true,
+  "versatile": true,
   "damageType": "SLASHING",
   "magicElement": "NATURE",
   "magicStatBonuses": [
@@ -40,8 +41,6 @@
       "weight": 3
     }
   ],
-  "finesse": true,
-  "versatile": true,
   "versatileAttacks": [
     {
       "name": "Two-handed Slashes",
@@ -64,5 +63,6 @@
       "times": 1,
       "weight": 3
     }
-  ]
+  ],
+  "weaponType": "SLASH"
 }

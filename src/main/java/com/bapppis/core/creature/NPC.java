@@ -1,8 +1,7 @@
 package com.bapppis.core.creature;
 
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Type;
-import com.bapppis.core.util.LevelUtil;
+import com.bapppis.core.creature.creatureEnums.Type;
 
 public class NPC extends Creature {
     public NPC() {

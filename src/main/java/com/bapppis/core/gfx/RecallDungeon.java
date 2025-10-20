@@ -307,8 +307,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     levelLabel.setText("Level: " + p.getLevel());
                 if (statsLabel != null) {
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
-                        if (s == com.bapppis.core.Stats.LUCK)
+                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                        if (s == com.bapppis.core.creature.creatureEnums.Stats.LUCK)
                             continue;
                         sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
                     }
@@ -335,7 +335,7 @@ public class RecallDungeon extends ApplicationAdapter {
         if (p == null)
             return;
         left.add(new com.kotcrab.vis.ui.widget.VisLabel("Equipped:")).left().row();
-        for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
+    for (com.bapppis.core.item.itemEnums.EquipmentSlot slot : com.bapppis.core.item.itemEnums.EquipmentSlot.values()) {
             com.bapppis.core.item.Item eq = p.getEquipped(slot);
             String text = slot.name() + ": " + (eq != null ? eq.getName() : "Empty");
             left.add(new com.kotcrab.vis.ui.widget.VisLabel(text)).left().row();
@@ -361,7 +361,7 @@ public class RecallDungeon extends ApplicationAdapter {
                 com.kotcrab.vis.ui.widget.VisTable row = new com.kotcrab.vis.ui.widget.VisTable(true);
                 row.add(new com.kotcrab.vis.ui.widget.VisLabel(item.getName())).left();
                 com.kotcrab.vis.ui.widget.VisTextButton actionBtn;
-                if (item.getType() == com.bapppis.core.item.ItemType.CONSUMABLE) {
+                if (item.getType() == com.bapppis.core.item.itemEnums.ItemType.CONSUMABLE) {
                     actionBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Use");
                     actionBtn.addListener(new ClickListener() {
                         @Override
@@ -428,8 +428,8 @@ public class RecallDungeon extends ApplicationAdapter {
             hpLabel.setText("HP: " + p.getCurrentHp() + "/" + p.getMaxHp());
             levelLabel.setText("Level: " + p.getLevel());
             StringBuilder sb = new StringBuilder();
-            for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
-                if (s == com.bapppis.core.Stats.LUCK)
+            for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                if (s == com.bapppis.core.creature.creatureEnums.Stats.LUCK)
                     continue;
                 sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
             }
@@ -459,7 +459,7 @@ public class RecallDungeon extends ApplicationAdapter {
             enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
             enemyLevel.setText("Level: " + enemy.getLevel());
             StringBuilder sb = new StringBuilder();
-            for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
+            for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
                 sb.append(s.name()).append(": ").append(enemy.getStat(s)).append('\n');
             }
             enemyStats.setText(sb.toString());
@@ -492,8 +492,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     hpLabel.setText("HP: " + pp.getCurrentHp() + "/" + pp.getMaxHp());
                     levelLabel.setText("Level: " + pp.getLevel());
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
-                        if (s == com.bapppis.core.Stats.LUCK)
+                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                        if (s == com.bapppis.core.creature.creatureEnums.Stats.LUCK)
                             continue;
                         sb.append(s.name()).append(": ").append(pp.getStat(s)).append('\n');
                     }
@@ -509,7 +509,7 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (enemy != null) {
                     enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.Stats s : com.bapppis.core.Stats.values()) {
+                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
                         sb.append(s.name()).append(": ").append(enemy.getStat(s)).append('\n');
                     }
                     enemyStats.setText(sb.toString());

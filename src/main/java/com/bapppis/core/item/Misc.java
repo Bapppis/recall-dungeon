@@ -1,7 +1,7 @@
 package com.bapppis.core.item;
 
-
-
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+import com.bapppis.core.item.itemEnums.ItemType;
 
 public class Misc extends Equipment {
 

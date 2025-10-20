@@ -1,9 +1,9 @@
 package com.bapppis.core.creature;
 
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Type;
-import com.bapppis.core.item.EquipmentSlot;
+import com.bapppis.core.creature.creatureEnums.Type;
 import com.bapppis.core.item.Item;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
 import com.bapppis.core.util.LevelUtil;
 
 public class Enemy extends Creature {
@@ -68,7 +68,7 @@ public class Enemy extends Creature {
         sb.append("Accuracy: ").append(getAccuracy()).append("  ")
                 .append("MagicAccuracy: ").append(getMagicAccuracy()).append("\n");
         sb.append("Equipment:\n");
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
+    for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = getEquipped(slot);
             sb.append("  ").append(slot.name()).append(": ");
             sb.append(equipped == null ? "Empty" : equipped.getName()).append("\n");

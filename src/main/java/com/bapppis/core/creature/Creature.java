@@ -1,5 +1,5 @@
-package com.bapppis.core.creature;
 
+package com.bapppis.core.creature;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -10,14 +10,14 @@ import com.bapppis.core.util.StatUtil;
 
 import com.bapppis.core.property.Property;
 import com.google.gson.Gson;
-import com.bapppis.core.CreatureType;
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Size;
-import com.bapppis.core.Stats;
-import com.bapppis.core.Type;
+import com.bapppis.core.creature.creatureEnums.CreatureType;
+import com.bapppis.core.creature.creatureEnums.Size;
+import com.bapppis.core.creature.creatureEnums.Stats;
+import com.bapppis.core.creature.creatureEnums.Type;
 import com.bapppis.core.item.Item;
-import com.bapppis.core.item.EquipmentSlot;
 import com.bapppis.core.item.Weapon;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
 
 public abstract class Creature {
     private int id;
@@ -884,8 +884,8 @@ public abstract class Creature {
             return false;
         String t = name.replaceAll("\\s+", "").toLowerCase();
         try {
-            for (com.bapppis.core.item.EquipmentSlot slot : com.bapppis.core.item.EquipmentSlot.values()) {
-                com.bapppis.core.item.Item eq = this.getEquipped(slot);
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                Item eq = this.getEquipped(slot);
                 if (eq != null && eq.getName() != null) {
                     String eqName = eq.getName().replaceAll("\\s+", "").toLowerCase();
                     if (eqName.equals(t)) {

@@ -2,7 +2,7 @@
 package com.bapppis.core.item.magic.arcaneweapon;
 
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Stats;
+import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.item.magic.MagicWeapon;
 
 public class ArcaneWeapon extends MagicWeapon {

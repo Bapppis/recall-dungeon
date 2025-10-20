@@ -3,7 +3,7 @@
   "name": "Common Potions",
   "entries": [
     {
-  "id": "MinorHealingPotion",
+      "id": "MinorHealingPotion",
       "countMax": 1,
       "countMin": 1,
       "type": "item"

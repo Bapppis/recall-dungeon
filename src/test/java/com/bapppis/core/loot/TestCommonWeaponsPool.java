@@ -22,9 +22,9 @@ public class TestCommonWeaponsPool {
 
         // Allowed refs in Common Weapons pool (from Common Weapons.json)
         Set<String> allowed = new HashSet<>();
-        allowed.add("37002"); // Parrying Dagger
-        allowed.add("37001"); // Rusty Iron Sword
-        allowed.add("35000"); // Old Bow
+    allowed.add("29002"); // Parrying Dagger
+    allowed.add("29001"); // Rusty Iron Sword
+    allowed.add("34000"); // Old Bow
         allowed.add("Parrying Dagger");
         allowed.add("Rusty Iron Sword");
         allowed.add("Old Bow");

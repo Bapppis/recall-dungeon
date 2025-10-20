@@ -1,9 +1,11 @@
 package com.bapppis.core.creature;
 
 import com.bapppis.core.item.*;
+import com.bapppis.core.item.itemEnums.EquipmentSlot;
+
 import java.util.Map;
 import com.bapppis.core.Resistances;
-import com.bapppis.core.Stats;
+import com.bapppis.core.creature.creatureEnums.Stats;
 
 class ItemManager {
 
@@ -11,7 +13,7 @@ class ItemManager {
         if (item == null || creature == null)
             return false;
 
-        EquipmentSlot slot = item.getSlot();
+    EquipmentSlot slot = item.getSlot();
         Item oldItem = null;
         boolean willBeTwoHanded = false;
 

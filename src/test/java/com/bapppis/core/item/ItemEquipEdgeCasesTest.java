@@ -47,7 +47,7 @@ public class ItemEquipEdgeCasesTest {
     @Test
     public void testWeaponFlagsVersatileFinesse() {
         com.bapppis.core.AllLoaders.loadAll();
-        com.bapppis.core.item.Item swordItem = com.bapppis.core.item.ItemLoader.getItemById(37001); // Rusty Iron Sword
+    com.bapppis.core.item.Item swordItem = com.bapppis.core.item.ItemLoader.getItemById(29001); // Rusty Iron Sword
         assertTrue(swordItem instanceof com.bapppis.core.item.Weapon);
         com.bapppis.core.item.Weapon sword = (com.bapppis.core.item.Weapon) swordItem;
         // Should be true for Rusty Iron Sword
@@ -63,7 +63,7 @@ public class ItemEquipEdgeCasesTest {
         assertNotNull(p);
 
         // Unequip when nothing equipped should not throw
-        assertDoesNotThrow(() -> p.unequipItem(EquipmentSlot.HELMET));
+    assertDoesNotThrow(() -> p.unequipItem(com.bapppis.core.item.itemEnums.EquipmentSlot.HELMET));
 
         // Equip using out-of-range inventory index should not throw
         assertDoesNotThrow(() -> {

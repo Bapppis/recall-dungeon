@@ -3,7 +3,6 @@
   "name": "Biggles The Unlucky",
   "description": "Biggles The Unlucky, a small and unfortunate creature.",
   "creatureType": "HUMANOID",
-  "species": "Goblin",
   "level": 0,
   "xp": 0,
   "visionRange": 2,
@@ -64,5 +63,6 @@
       "times": 1
     }
   ],
-  "sprite": "player_biggles"
+  "sprite": "player_biggles",
+  "species": "Goblin"
 }

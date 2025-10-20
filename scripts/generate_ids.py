@@ -44,11 +44,32 @@ for p in sorted(DATA_DIR.rglob('*.json')):
 # Define expected numeric ranges for specific folder prefixes. Each key is a tuple
 # of path segments (relative to data/) and the rule matches when a file's path
 # begins with that tuple. Values are (min_inclusive, max_inclusive, description).
-# Add more rules here as needed.
+# Updated to match IDS.md
 RANGE_RULES = [
-    (("items", "armor", "armor"), (7000, 7249, "Armor (7000-7249)")),
-    # Example broader rule (kept for reference):
-    # (("items", "armor"), (7000, 7999, "Armor (7000-7999)")),
+    (("items", "armor", "armor"), (20000, 21999, "Chest Armor (20000-21999)")),
+    (("items", "armor", "helmets"), (22000, 23999, "Helmets (22000-23999)")),
+    (("items", "armor", "legwear"), (24000, 25999, "Legwear (24000-25999)")),
+    (("items", "armor", "shields"), (26000, 27999, "Shields (26000-27999)")),
+    (("items", "consumables"), (28000, 28999, "Consumables (28000-28999)")),
+    (("items", "weapons", "melee weapons", "slash weapons"), (29000, 30332, "Melee Slash Weapons (29000-30332)")),
+    (("items", "weapons", "melee weapons", "piercing weapons"), (30333, 31665, "Melee Piercing Weapons (30333-31665)")),
+    (("items", "weapons", "melee weapons", "blunt weapons"), (31666, 32999, "Melee Blunt Weapons (31666-32999)")),
+    (("items", "weapons", "ranged weapons", "bows"), (34000, 35499, "Ranged Bows (34000-35499)")),
+    (("items", "weapons", "ranged weapons", "crossbows"), (35500, 36999, "Ranged Crossbows (35500-36999)")),
+    (("items", "weapons", "magic weapons", "staffs"), (37000, 37999, "Magic Staffs (37000-37999)")),
+    (("items", "weapons", "magic weapons", "arcane"), (38000, 38999, "Magic Arcane (38000-38999)")),
+    (("items", "weapons", "magic weapons", "magic physical"), (39000, 39999, "Magic Physical (39000-39999)")),
+    (("properties", "buff"), (1000, 2332, "Buffs (1000-2332)")),
+    (("properties", "debuff"), (2333, 3665, "Debuffs (2333-3665)")),
+    (("properties", "trait"), (3666, 4999, "Traits (3666-4999)")),
+    (("creatures", "players"), (5000, 5499, "Players (5000-5499)")),
+    (("creatures", "neutrals"), (5500, 5999, "Neutrals (5500-5999)")),
+    (("creatures", "beasts"), (7000, 7999, "Beasts (7000-7999)")),
+    (("creatures", "constructs"), (9000, 9999, "Constructs (9000-9999)")),
+    (("creatures", "undead"), (19000, 19999, "Undead (19000-19999)")),
+    (("loot_pools",), (40000, 40999, "Loot Pools (40000-40999)")),
+    (("monster_pools",), (41000, 41999, "Monster Pools (41000-41999)")),
+    (("reserved",), (42000, 49999, "Reserved (42000-49999)")),
 ]
 
 # Sort by id
