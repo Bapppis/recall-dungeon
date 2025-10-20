@@ -6,6 +6,7 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
+  "weaponType": "PIERCE",
   "damageType": "PIERCING",
   "magicElement": "NATURE",
   "tooltip": [
@@ -16,7 +17,7 @@
   "attacks": [
     {
       "name": "Jabs",
-      "damageType": "PIERCING",
+    "weaponType": "PIERCE",
       "damageMultiplier": 0.5,
       "magicDamageDice": "1d1",
       "magicDamageMultiplier": 0,

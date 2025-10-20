@@ -6,12 +6,11 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
+  "weaponType": "SLASH",
   "twoHanded": true,
   "damageType": "SLASHING",
   "magicElement": "DARKNESS",
-  "magicStatBonuses": [
-    "CHARISMA"
-  ],
+  "magicStatBonuses": ["CHARISMA"],
   "stats": {
     "STRENGTH": 2
   },
@@ -28,7 +27,7 @@
     "You gain 10% block chance while wielding this weapon.",
     "",
     "You gain +2 STR while wielding this weapon.",
-    "",
+
     "You take 15% less darkness damage while wielding this weapon.",
     "",
     "Double Slash (40%): Deals 2-12 + 5 * STR bonus slashing damage and 2-8 + 5 * CHA/INT bonus darkness damage.",

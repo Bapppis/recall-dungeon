@@ -58,7 +58,38 @@ public class ItemLoader {
                         Item item = null;
                         switch (type) {
                             case WEAPON:
-                                item = gson.fromJson(jsonObj, Weapon.class);
+                                // Use weaponType to select subclass
+                                String weaponTypeStr = jsonObj.has("weaponType") ? jsonObj.get("weaponType").getAsString().toUpperCase() : "";
+                                WeaponType weaponType = null;
+                                try {
+                                    weaponType = WeaponType.valueOf(weaponTypeStr);
+                                } catch (Exception ignored) {}
+                                if (weaponType != null) {
+                                    switch (weaponType) {
+                                        case SLASH:
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.melee.slashweapon.SlashWeapon.class);
+                                            break;
+                                        case PIERCE:
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.melee.piercingweapon.PiercingWeapon.class);
+                                            break;
+                                        case BLUNT:
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.melee.bluntweapon.BluntWeapon.class);
+                                            break;
+                                        case STAFF:
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.magic.staff.Staff.class);
+                                            break;
+                                        case ARCANE:
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.magic.arcaneweapon.ArcaneWeapon.class);
+                                            break;
+                                        case MAGIC_PHYSICAL:
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.magic.magicphysicalweapon.MagicPhysicalWeapon.class);
+                                            break;
+                                        default:
+                                            // fallback to Weapon if unknown
+                                            item = null;
+                                            break;
+                                    }
+                                }
                                 break;
                             case CONSUMABLE:
                                 item = gson.fromJson(jsonObj, Consumable.class);

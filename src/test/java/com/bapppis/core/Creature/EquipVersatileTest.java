@@ -23,11 +23,11 @@ public class EquipVersatileTest {
 
     // Helper to build a simple versatile Weapon instance without needing JSON
     private Weapon makeVersatileWeapon(String name) {
-        Weapon w = new Weapon();
-        w.setSlot(EquipmentSlot.WEAPON);
-        w.setTwoHanded(false);
-        w.setVersatile(true);
-        return w;
+    Weapon w = new com.bapppis.core.item.melee.slashweapon.SlashWeapon();
+    w.setSlot(EquipmentSlot.WEAPON);
+    w.setTwoHanded(false);
+    w.setVersatile(true);
+    return w;
     }
 
     @Test

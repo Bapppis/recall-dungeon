@@ -6,6 +6,7 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "RANGED",
+  "weaponType": "PIERCE",
   "twoHanded": true,
   "damageType": "PIERCING",
   "crit": 10,
