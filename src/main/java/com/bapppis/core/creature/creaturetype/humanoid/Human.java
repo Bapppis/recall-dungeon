@@ -1,6 +1,10 @@
 package com.bapppis.core.creature.creaturetype.humanoid;
 
 public class Human extends Humanoid {
+    @Override
+    protected void applySpeciesModifications() {
+        super.applySpeciesModifications();
+    }
     public Human() {
         super();
         // Example: add 2 to all stats

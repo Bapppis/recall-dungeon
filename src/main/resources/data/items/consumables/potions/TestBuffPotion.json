@@ -1,0 +1,13 @@
+{
+  "id": 28998,
+  "name": "Test Buff Potion",
+  "description": "A test potion that applies a buff property",
+  "rarity": "UNCOMMON",
+  "itemType": "CONSUMABLE",
+  "tooltip": [
+    "Grants TestBuff for 10 turns when consumed"
+  ],
+  "properties": [
+    "TestBuff"
+  ]
+}

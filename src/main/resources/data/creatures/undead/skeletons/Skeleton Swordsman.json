@@ -2,11 +2,11 @@
   "id": 19001,
   "name": "Skeleton Swordsman",
   "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty sword.",
+  "species": "Skeleton",
   "creatureType": "UNDEAD",
   "size": "MEDIUM",
   "level": 0,
   "enemyXp": 3,
-  "visionRange": 1,
   "stats": {
     "STRENGTH": 11,
     "DEXTERITY": 12,
@@ -45,6 +45,5 @@
     }
   ],
   "sprite": null,
-  "defaultDamageType": "BLUDGEONING",
-  "species": "Skeleton"
+  "defaultDamageType": "BLUDGEONING"
 }

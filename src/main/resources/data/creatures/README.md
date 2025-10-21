@@ -28,11 +28,32 @@ This folder contains all creature definitions (players, enemies, NPCs, etc.). Th
 
 ## Creature id conventions
 Use ids to group types; names are for display only.
-- 5000–5999: Players
-- 6000–6999: Enemies / NPCs
-- You can reserve sub‑ranges per species/faction if helpful (e.g., 6100–6149 goblins), but keep the top‑level range intact.
+- **5000–5499**: Players
+- **5500–5999**: Neutrals/NPCs
+- **6000–19999**: Enemies (organized by creature type)
+  - 6000–6999: Aberrations
+  - 7000–7999: Beasts
+  - 8000–8999: Celestials
+  - 9000–9999: Constructs
+  - 10000–10999: Dragons
+  - 11000–11999: Elementals
+  - 12000–12999: Fey
+  - 13000–13999: Fiends
+  - 14000–14999: Giants
+  - 15000–15999: Humanoids
+  - 16000–16999: Monstrosities
+  - 17000–17999: Oozes
+  - 18000–18999: Plants
+  - 19000–19999: Undead
 
-Note: This is a convention for consistency; it is not currently enforced in code.
+Each creature type has 1000 IDs divided into space for up to 10 species (100 IDs per species).
+For example, within Humanoids (15000–15999):
+- Goblins: 15000–15099
+- Humans: 15100–15199
+- Orcs: 15200–15299
+- etc.
+
+Note: This convention is enforced by the ID validation script (`scripts/generate_ids.py`).
 
 ## Minimal JSON structure
 Required/commonly used fields (keep names exactly):

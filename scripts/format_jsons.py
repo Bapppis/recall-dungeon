@@ -111,6 +111,7 @@ CANON_CREATURE_ORDER: List[str] = [
     "id",
     "name",
     "description",
+    "species",
     "creatureType",
     "size",
     "level",
@@ -138,6 +139,7 @@ CANON_CREATURE_ORDER: List[str] = [
     "weapon",
     "offhand",
     "inventory",
+    "removeProperties",
     "properties",
     "attacks",
     "sprite"

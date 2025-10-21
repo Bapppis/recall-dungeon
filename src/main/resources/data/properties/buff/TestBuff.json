@@ -1,8 +1,8 @@
 {
   "id": 2332,
-  "name": "Test Buff",
+  "name": "TestBuff",
   "description": "A buff used for testing purposes.",
-  "duration": 5,
+  "duration": 10,
   "maxHpPercentage": 1.5,
   "maxStaminaPercentage": 1.5,
   "maxManaPercentage": 1.5,
@@ -16,7 +16,7 @@
   "dodge": 5,
   "block": 5,
   "magicResist": 5,
-  "stats": {
+  "statModifiers": {
     "STRENGTH": 1,
     "DEXTERITY": 1,
     "CONSTITUTION": 1,

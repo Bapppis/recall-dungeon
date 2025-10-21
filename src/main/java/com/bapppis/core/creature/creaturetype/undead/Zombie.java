@@ -1,6 +1,10 @@
 package com.bapppis.core.creature.creaturetype.undead;
 
 public class Zombie extends Undead {
+    @Override
+    protected void applySpeciesModifications() {
+        super.applySpeciesModifications();
+    }
     public Zombie() {
         super();
         // Example: add 8 to CONSTITUTION

@@ -1,6 +1,10 @@
 package com.bapppis.core.creature.creaturetype.construct;
 
 public class TrainingDummy extends Construct {
+    @Override
+    protected void applySpeciesModifications() {
+        super.applySpeciesModifications();
+    }
     public TrainingDummy() {
         super();
         // Example: add 10 to ARMOR

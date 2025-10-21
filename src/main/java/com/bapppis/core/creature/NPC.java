@@ -27,6 +27,7 @@ public class NPC extends Creature {
         }
         sb.append("\n");
 
+        sb.append("Vision Range: ").append(getVisionRange()).append("\n");
         sb.append("HP: ").append(getCurrentHp()).append("/").append(getMaxHp()).append("\n");
         sb.append("Stats: ")
                 .append("STR ").append(getSTR()).append("  ")

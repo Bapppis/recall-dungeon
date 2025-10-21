@@ -1,13 +1,13 @@
 package com.bapppis.core.creature.creaturetype.undead;
 
+import com.bapppis.core.Resistances;
+
 public class Skeleton extends Undead {
+    @Override
+    protected void applySpeciesModifications() {
+        super.applySpeciesModifications();
+    }
     public Skeleton() {
         super();
-        // Example: negate 10 from SLASHING resistance
-        // modifyResistance(Resistances.SLASHING, -10);
-        // Example: add 20 to PIERCING resistance
-        // modifyResistance(Resistances.PIERCING, 20);
-        // Example: add a property by name
-        // addProperty("BoneArmor");
     }
 }

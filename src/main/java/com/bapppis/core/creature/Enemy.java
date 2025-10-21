@@ -41,6 +41,7 @@ public class Enemy extends Creature {
         sb.append("\n");
 
         sb.append("XP Reward: ").append(enemyXp != null ? enemyXp : "N/A").append("\n");
+        sb.append("Vision Range: ").append(getVisionRange()).append("\n");
         sb.append("HP: ").append(getCurrentHp()).append("/").append(getMaxHp()).append("\n");
         sb.append("Mana: ").append(getCurrentMana()).append("/").append(getMaxMana()).append("\n");
         sb.append("Stamina: ").append(getCurrentStamina()).append("/").append(getMaxStamina()).append("\n");

@@ -52,6 +52,11 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 - 3666 — Coward — data/properties/trait/Coward.json
 - 3667 — Human Adaptability — data/properties/trait/HumanAdaptability.json
 - 3668 — Darksight — data/properties/trait/Darksight.json
+- 4001 — TestTrait1 — data/properties/trait/TestTrait1.json
+- 4002 — TestTrait2 — data/properties/trait/TestTrait2.json
+- 4003 — TestTrait3 — data/properties/trait/TestTrait3.json
+- 4004 — TestTrait4 — data/properties/trait/TestTrait4.json
+- 4005 — TestTrait5 — data/properties/trait/TestTrait5.json
 
 
 ## Creatures (5000-19999)
@@ -60,6 +65,7 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 
 - 5000 — Biggles The Unlucky — data/creatures/players/BigglesTheUnlucky.json
 - 5001 — Captain Aldric Voss — data/creatures/players/CaptainVoss.json
+- 5002 — Biggles The Test — data/creatures/players/BigglesTheTest.json
 
 ### Neutrals (5500-5999)
 
@@ -81,7 +87,7 @@ Each species gets 100 IDs. Examples: Dog (7000-7099), feline (7100-7199), avian 
 
 ##### Dog (7000-7099)
 
-- 7000 — Dark Hound — data/creatures/beasts/Dark Hound.json
+- 7000 — Dark Hound — data/creatures/beasts/dogs/Dark Hound.json
 
 #### Celestials (8000-8999)
 
@@ -95,7 +101,7 @@ Each species gets 100 IDs. Examples: TrainingDummy (9000-9099), golem (9100-9199
 
 ##### TrainingDummy (9000-9099)
 
-- 9000 — Training Dummy — data/creatures/constructs/Training Dummy.json
+- 9000 — Training Dummy — data/creatures/constructs/training-dummies/Training Dummy.json
 
 #### Dragons (10000-10999)
 
@@ -163,8 +169,8 @@ Each species gets 100 IDs. Examples: Skeleton (19000-19099), Zombie (19100-19199
 
 ##### Skeleton (19000-19099)
 
-- 19000 — Skeleton Spearman — data/creatures/undead/Skeleton Spearman.json
-- 19001 — Skeleton Swordsman — data/creatures/undead/Skeleton Swordsman.json
+- 19000 — Skeleton Spearman — data/creatures/undead/skeletons/Skeleton Spearman.json
+- 19001 — Skeleton Swordsman — data/creatures/undead/skeletons/Skeleton Swordsman.json
 
 ##### Zombie (19100-19199)
 
@@ -193,17 +199,19 @@ Armor items are organized by slot with generous ID ranges:
 
 - 22000 — Crusader Helmet — data/items/armor/helmets/Crusader Helmet.json
 - 22001 — Green Hood — data/items/armor/helmets/Green Hood.json
-- 23999 — Test Helmet — data/items/armor/helmets/Green Hood.json
+- 23999 — Test Helmet — data/items/armor/helmets/Test Helmet.json
 
 #### Legwear (24000-25999)
 
 - 24000 — Legs of Speed — data/items/armor/legwear/Legs of Speed.json
 - 24001 — Leather Leggings — data/items/armor/legwear/Leather Leggings.json
+- 24999 — Test Boots — data/items/armor/legwear/TestBoots.json
 
 #### Shields (26000-27999)
 
 - 26000 — Tower Shield — data/items/armor/shields/Tower Shield.json
 - 26001 — Heater Shield — data/items/armor/shields/Heater Shield.json
+- 26999 — Test Shield — data/items/armor/shields/TestShield.json
 
 ### Consumables (28000-28999)
 
@@ -213,6 +221,8 @@ Armor items are organized by slot with generous ID ranges:
 - 28003 — Blue Healing Potion — data/items/consumables/potions/Blue Healing Potion.json
 - 28004 — Perfect Healing Potion — data/items/consumables/potions/Perfect Healing Potion.json
 - 28005 — Health Regen 1 Potion — data/items/consumables/potions/Health Regen 1 Potion.json
+- 28998 — Test Buff Potion — data/items/consumables/potions/TestBuffPotion.json
+- 28999 — Test Healing Potion — data/items/consumables/potions/TestHealingPotion.json
 
 ### Weapons (29000-39999)
 
@@ -225,6 +235,7 @@ Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 - 29000 — Falchion of Doom — data/items/weapons/melee weapons/slash weapons/Falchion of Doom.json
 - 29001 — Rusty Iron Sword — data/items/weapons/melee weapons/slash weapons/Rusty Iron Sword.json
 - 29002 — Parrying Dagger — data/items/weapons/melee weapons/slash weapons/Parrying Dagger.json
+- 29999 — Test Sword — data/items/weapons/melee weapons/slash weapons/TestSword.json
 
 ##### Piercing Weapons (30333-31665)
 

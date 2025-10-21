@@ -15,5 +15,6 @@ public enum CreatureType {
     OOZE,
     PLANT,
     UNDEAD,
-    UNKNOWN
+    UNKNOWN,
+    TESTHUMANOID  // Test creature type for validation
 }

@@ -713,6 +713,12 @@ mvn exec:java -Dexec.mainClass="com.bapppis.core.gfx.DesktopLauncher"
 
 ## Running Tests
 
+The project includes comprehensive test coverage for core systems including:
+- **Creature system**: Species modifications, stat calculations, XP progression
+- **Item system**: Equipment, consumables, property application, stat modifiers
+- **Combat system**: Attack resolution, damage calculation, status effects
+- **Loot system**: Treasure generation, pool distributions
+
 ### Run all tests
 
 ```sh
@@ -723,6 +729,7 @@ mvn test
 
 ```sh
 mvn -Dtest=ConsumableTest test
+mvn -Dtest=ItemEquipmentTest test
 ```
 
 ### Run specific test method

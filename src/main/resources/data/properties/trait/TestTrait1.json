@@ -1,0 +1,10 @@
+{
+  "id": 4001,
+  "name": "TestTrait1",
+  "description": "Test trait 1: +1 CON, -1 INT",
+  "type": "TRAIT",
+  "statModifiers": {
+    "CONSTITUTION": 1,
+    "INTELLIGENCE": -1
+  }
+}

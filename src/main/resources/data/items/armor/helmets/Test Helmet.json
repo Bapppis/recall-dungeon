@@ -1,22 +1,32 @@
 {
   "id": 23999,
   "name": "Test Helmet",
-  "description": "This is not a part of our world.",
-  "rarity": "LEGENDARY",
+  "description": "Comprehensive test helmet with wisdom bonus",
+  "rarity": "RARE",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
   "stats": {
-    "DEXTERITY": -1
+    "CHARISMA": -1,
+    "INTELLIGENCE": 2,
+    "WISDOM": 3
   },
-  "dodge": 0,
-  "crit": 5,
-  "block": 0,
+  "resistances": {
+    "DARKNESS": -5,
+    "LIGHT": 10
+  },
+  "dodge": 0.0,
+  "crit": 5.0,
+  "block": 0.0,
+  "accuracy": 0,
+  "magicAccuracy": 2,
   "tooltip": [
-    "THIS DOES NOT BELONG TO YOU"
+    "Test helmet with WIS+3, INT+2, CHA-1",
+    "Provides +3 defense, 5% crit, 15% magic resist, +2 magic accuracy",
+    "Resistances: LIGHT+10%, DARKNESS-5%"
   ],
-  "defense": -15,
-  "magicResist": -10,
+  "defense": 3,
+  "magicResist": 15.0,
   "properties": [
-    "NecroticPlague"
+    "TestTrait5"
   ]
 }

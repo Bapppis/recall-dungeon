@@ -1,0 +1,45 @@
+{
+  "id": 29999,
+  "name": "Test Sword",
+  "description": "A comprehensive test sword with various stat modifiers",
+  "rarity": "RARE",
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
+  "weaponClass": "MELEE",
+  "twoHanded": false,
+  "damageType": "SLASHING",
+  "stats": {
+    "CONSTITUTION": -1,
+    "DEXTERITY": 2,
+    "STRENGTH": 3
+  },
+  "resistances": {
+    "FIRE": 5,
+    "SLASHING": 10
+  },
+  "dodge": 5.0,
+  "crit": 10.0,
+  "block": 0.0,
+  "accuracy": 1,
+  "magicAccuracy": 0,
+  "tooltip": [
+    "A test sword with STR+3, DEX+2, CON-1",
+    "Provides 10% crit, 5% dodge, +2 defense, +1 accuracy",
+    "Resistances: SLASHING+10%, FIRE+5%"
+  ],
+  "attacks": [
+    {
+      "name": "Slash",
+      "damageType": "SLASHING",
+      "accuracy": null,
+      "magicAccuracy": null,
+      "damageMultiplier": 1.0,
+      "physicalDamageDice": "1d8",
+      "times": 1,
+      "weight": 10
+    }
+  ],
+  "defense": 2,
+  "magicResist": 0.0,
+  "weaponType": "SLASH"
+}

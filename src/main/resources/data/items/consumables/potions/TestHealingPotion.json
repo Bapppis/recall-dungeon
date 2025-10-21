@@ -1,0 +1,11 @@
+{
+  "id": 28999,
+  "name": "Test Healing Potion",
+  "description": "A test healing potion",
+  "rarity": "COMMON",
+  "itemType": "CONSUMABLE",
+  "tooltip": [
+    "Heals 3d6+5 HP when used."
+  ],
+  "healingDice": "3d6+5"
+}

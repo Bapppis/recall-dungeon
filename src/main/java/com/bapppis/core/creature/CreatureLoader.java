@@ -102,38 +102,171 @@ public class CreatureLoader {
                                     + creatureTypeName.toLowerCase();
                             String className = packageName + "." + speciesName;
                             try {
+                                // Check if species class exists
                                 Class<?> speciesClass = Class.forName(className);
 
-                                // Create a species template to get constructor-added properties and fields
-                                Creature speciesTemplate = (Creature) speciesClass.getDeclaredConstructor()
+                                // Create TWO templates: one before species mods, one after
+                                Creature beforeTemplate = (Creature) speciesClass.getDeclaredConstructor()
                                         .newInstance();
 
-                                // Create the actual Player/Enemy/NPC instance
-                                if (resource.getPath().contains("players")) {
-                                    creature = new Player();
-                                } else if (resource.getPath().contains("npcs")) {
-                                    creature = new NPC();
-                                } else {
-                                    creature = new Enemy();
+                                // Capture initial state (all stats = 10 except LUCK = 1, size = MEDIUM)
+                                java.util.Map<com.bapppis.core.creature.creatureEnums.Stats, Integer> statsBefore = new java.util.EnumMap<>(
+                                        com.bapppis.core.creature.creatureEnums.Stats.class);
+                                java.util.Map<com.bapppis.core.Resistances, Integer> resistBefore = new java.util.EnumMap<>(
+                                        com.bapppis.core.Resistances.class);
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                        .values()) {
+                                    statsBefore.put(stat, beforeTemplate.getStat(stat));
+                                }
+                                for (com.bapppis.core.Resistances res : com.bapppis.core.Resistances.values()) {
+                                    resistBefore.put(res, beforeTemplate.getResistance(res));
+                                }
+                                com.bapppis.core.creature.creatureEnums.Size sizeBefore = beforeTemplate.getSize();
+
+                                // Apply species modifications
+                                beforeTemplate.applySpeciesModifications();
+
+                                // Calculate pure stat deltas (INCLUDES property effects, which we'll subtract
+                                // later)
+                                java.util.Map<com.bapppis.core.creature.creatureEnums.Stats, Integer> statsAfter = new java.util.EnumMap<>(
+                                        com.bapppis.core.creature.creatureEnums.Stats.class);
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                        .values()) {
+                                    statsAfter.put(stat, beforeTemplate.getStat(stat));
                                 }
 
-                                // Load JSON data first
-                                Creature tempCreature;
-                                if (resource.getPath().contains("players")) {
-                                    tempCreature = gson.fromJson(jsonObj, Player.class);
-                                } else if (resource.getPath().contains("npcs")) {
-                                    tempCreature = gson.fromJson(jsonObj, NPC.class);
-                                } else {
-                                    tempCreature = gson.fromJson(jsonObj, Enemy.class);
+                                // Calculate property stat modifier totals to subtract out
+                                java.util.Map<com.bapppis.core.creature.creatureEnums.Stats, Integer> propertyEffects = new java.util.EnumMap<>(
+                                        com.bapppis.core.creature.creatureEnums.Stats.class);
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                        .values()) {
+                                    propertyEffects.put(stat, 0);
                                 }
 
-                                // Priority 1 (lowest): Copy JSON fields to creature
-                                copyCreatureFields(tempCreature, creature);
-                                
-                                // Priority 2 (highest): Copy species-specific fields and properties
-                                // This includes size, properties from constructors, etc.
-                                // Uses selective copying to preserve JSON data (id, name, stats)
-                                copySpeciesFields(speciesTemplate, creature);
+                                try {
+                                    java.lang.reflect.Field pmField = Creature.class
+                                            .getDeclaredField("propertyManager");
+                                    pmField.setAccessible(true);
+                                    PropertyManager templatePM = (PropertyManager) pmField.get(beforeTemplate);
+
+                                    // Sum up stat modifiers from all properties
+                                    for (Property prop : templatePM.getBuffs().values()) {
+                                        if (prop.getStatModifiers() != null) {
+                                            for (java.util.Map.Entry<com.bapppis.core.creature.creatureEnums.Stats, Integer> entry : prop
+                                                    .getStatModifiers().entrySet()) {
+                                                propertyEffects.put(entry.getKey(),
+                                                        propertyEffects.get(entry.getKey()) + entry.getValue());
+                                            }
+                                        }
+                                    }
+                                    for (Property prop : templatePM.getDebuffs().values()) {
+                                        if (prop.getStatModifiers() != null) {
+                                            for (java.util.Map.Entry<com.bapppis.core.creature.creatureEnums.Stats, Integer> entry : prop
+                                                    .getStatModifiers().entrySet()) {
+                                                propertyEffects.put(entry.getKey(),
+                                                        propertyEffects.get(entry.getKey()) + entry.getValue());
+                                            }
+                                        }
+                                    }
+                                    for (Property prop : templatePM.getTraits().values()) {
+                                        if (prop.getStatModifiers() != null) {
+                                            for (java.util.Map.Entry<com.bapppis.core.creature.creatureEnums.Stats, Integer> entry : prop
+                                                    .getStatModifiers().entrySet()) {
+                                                propertyEffects.put(entry.getKey(),
+                                                        propertyEffects.get(entry.getKey()) + entry.getValue());
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // If we can't read properties, leave propertyEffects as zeros
+                                }
+
+                                // Calculate PURE stat deltas (species modifications only, excluding property
+                                // effects)
+                                java.util.Map<com.bapppis.core.creature.creatureEnums.Stats, Integer> pureStatDeltas = new java.util.EnumMap<>(
+                                        com.bapppis.core.creature.creatureEnums.Stats.class);
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                        .values()) {
+                                    int totalDelta = statsAfter.get(stat) - statsBefore.get(stat);
+                                    int propEffect = propertyEffects.get(stat);
+                                    pureStatDeltas.put(stat, totalDelta - propEffect);
+                                }
+
+                                // Load JSON as base type (Player/Enemy/NPC) to preserve type safety
+                                if (resource.getPath().contains("players")) {
+                                    creature = gson.fromJson(jsonObj, Player.class);
+                                } else if (resource.getPath().contains("npcs")) {
+                                    creature = gson.fromJson(jsonObj, NPC.class);
+                                } else {
+                                    creature = gson.fromJson(jsonObj, Enemy.class);
+                                }
+
+                                // IMPORTANT: Fill in missing stats with defaults BEFORE applying species modifications
+                                // This ensures getStat() returns correct defaults (10 or 1 for LUCK) not 0
+                                try {
+                                    java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
+                                    statsField.setAccessible(true);
+                                    @SuppressWarnings("unchecked")
+                                    EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer> statMap = 
+                                            (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField.get(creature);
+                                    
+                                    for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                                        if (!statMap.containsKey(stat)) {
+                                            if (stat == com.bapppis.core.creature.creatureEnums.Stats.LUCK) {
+                                                statMap.put(stat, 1);
+                                            } else {
+                                                statMap.put(stat, 10);
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // Should not happen
+                                }
+
+                                // Apply PURE stat deltas (species modifications without property effects)
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                        .values()) {
+                                    int delta = pureStatDeltas.get(stat);
+                                    if (delta != 0) {
+                                        creature.modifyStat(stat, delta);
+                                    }
+                                }
+
+                                // Copy resistance modifications
+                                for (com.bapppis.core.Resistances res : com.bapppis.core.Resistances.values()) {
+                                    int templateValue = beforeTemplate.getResistance(res);
+                                    int beforeValue = resistBefore.get(res);
+                                    int delta = templateValue - beforeValue;
+                                    if (delta != 0) {
+                                        creature.modifyResistance(res, delta);
+                                    }
+                                }
+
+                                // Copy size if changed
+                                if (beforeTemplate.getSize() != sizeBefore) {
+                                    creature.setSize(beforeTemplate.getSize());
+                                }
+
+                                // Copy properties from species template (these will apply their own stat
+                                // modifiers)
+                                try {
+                                    java.lang.reflect.Field pmField = Creature.class
+                                            .getDeclaredField("propertyManager");
+                                    pmField.setAccessible(true);
+                                    PropertyManager templatePM = (PropertyManager) pmField.get(beforeTemplate);
+
+                                    for (Property prop : templatePM.getBuffs().values()) {
+                                        creature.addProperty(prop);
+                                    }
+                                    for (Property prop : templatePM.getDebuffs().values()) {
+                                        creature.addProperty(prop);
+                                    }
+                                    for (Property prop : templatePM.getTraits().values()) {
+                                        creature.addProperty(prop);
+                                    }
+                                } catch (Exception e) {
+                                    // ignore if property copy fails
+                                }
                             } catch (ClassNotFoundException e) {
                                 // Species class not found, fall back to base type loading
                                 if (resource.getPath().contains("players")) {
@@ -181,12 +314,14 @@ public class CreatureLoader {
                             try {
                                 java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
                                 statsField.setAccessible(true);
-                                statMap = (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField.get(creature);
+                                statMap = (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField
+                                        .get(creature);
                             } catch (Exception e) {
                                 // Should not happen
                             }
                             if (statMap != null) {
-                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                                for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                        .values()) {
                                     if (!statMap.containsKey(stat)) {
                                         if (stat == com.bapppis.core.creature.creatureEnums.Stats.LUCK) {
                                             creature.setStat(stat, 1);
@@ -226,6 +361,18 @@ public class CreatureLoader {
                                     Property prop = PropertyLoader.getProperty(pid);
                                     if (prop != null) {
                                         creature.addProperty(prop);
+                                    }
+                                }
+                            }
+
+                            // Remove properties requested in JSON (these remove properties
+                            // that may have been added by creature type or species)
+                            List<Integer> removeIds = getRemovePropertyIdsFromJson(resource.getPath(), gson);
+                            if (removeIds != null) {
+                                for (Integer rid : removeIds) {
+                                    try {
+                                        creature.removeProperty(rid);
+                                    } catch (Exception ignored) {
                                     }
                                 }
                             }
@@ -296,40 +443,19 @@ public class CreatureLoader {
                         field.getName().equals("propertyManager")) {
                     continue;
                 }
-
                 field.setAccessible(true);
                 Object value = field.get(source);
+                // Special handling for 'size': only copy if not null and not default (MEDIUM)
+                if (field.getName().equals("size")) {
+                    if (value != null && !value.toString().equals("MEDIUM")) {
+                        field.set(dest, value);
+                    }
+                    continue;
+                }
                 field.set(dest, value);
             }
         } catch (Exception e) {
             System.err.println("Error copying creature fields: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Copy only species-specific fields (size, properties) from species template to creature.
-     * This preserves JSON data like id, name, stats while applying species defaults.
-     */
-    private static void copySpeciesFields(Creature speciesTemplate, Creature creature) {
-        if (speciesTemplate == null || creature == null)
-            return;
-
-        try {
-            // Copy size (species can override)
-            creature.setSize(speciesTemplate.getSize());
-
-            // Copy properties from species template (traits, buffs, debuffs)
-            for (com.bapppis.core.property.Property prop : speciesTemplate.getTraits().values()) {
-                creature.addProperty(prop);
-            }
-            for (com.bapppis.core.property.Property prop : speciesTemplate.getBuffs().values()) {
-                creature.addProperty(prop);
-            }
-            for (com.bapppis.core.property.Property prop : speciesTemplate.getDebuffs().values()) {
-                creature.addProperty(prop);
-            }
-        } catch (Exception e) {
-            System.err.println("Error copying species fields: " + e.getMessage());
         }
     }
 
@@ -433,6 +559,44 @@ public class CreatureLoader {
                         }
                     } catch (Exception e) {
                         // ignore invalid property entries
+                    }
+                }
+                return ids;
+            }
+        } catch (Exception e) {
+            // Ignore, fallback to none
+        }
+        return null;
+    }
+
+    // Helper to extract property IDs to remove from JSON ("removeProperties")
+    private static List<Integer> getRemovePropertyIdsFromJson(String resourcePath, com.google.gson.Gson gson) {
+        try (Reader reader = new InputStreamReader(
+                CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
+            com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);
+            if (obj != null && obj.has("removeProperties")) {
+                List<Integer> ids = new ArrayList<>();
+                for (com.google.gson.JsonElement el : obj.getAsJsonArray("removeProperties")) {
+                    try {
+                        if (el.isJsonPrimitive()) {
+                            if (el.getAsJsonPrimitive().isNumber()) {
+                                ids.add(el.getAsInt());
+                            } else if (el.getAsJsonPrimitive().isString()) {
+                                String propNameOrId = el.getAsString();
+                                try {
+                                    int propId = Integer.parseInt(propNameOrId);
+                                    ids.add(propId);
+                                } catch (NumberFormatException nfe) {
+                                    com.bapppis.core.property.Property prop = com.bapppis.core.property.PropertyLoader
+                                            .getPropertyByName(propNameOrId);
+                                    if (prop != null) {
+                                        ids.add(prop.getId());
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        // ignore invalid entries
                     }
                 }
                 return ids;

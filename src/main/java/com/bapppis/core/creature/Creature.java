@@ -1,11 +1,10 @@
 
 package com.bapppis.core.creature;
+
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import com.bapppis.core.util.AttackUtil;
 import com.bapppis.core.util.WeaponUtil;
-import com.bapppis.core.util.LevelUtil;
 import com.bapppis.core.util.StatUtil;
 
 import com.bapppis.core.property.Property;
@@ -101,6 +100,8 @@ public abstract class Creature {
         }
         size = Size.MEDIUM; // default size
         type = Type.ENEMY; // default type
+        level = 0; // default level
+        xp = 0; // default xp
         recalcDerivedStats();
     }
 
@@ -421,7 +422,6 @@ public abstract class Creature {
         return stats.getOrDefault(stat, 0);
     }
 
-
     public void setStat(Stats stat, int value) {
         stats.put(stat, value);
         // Keep cached bonuses in sync whenever a stat changes
@@ -445,6 +445,9 @@ public abstract class Creature {
             // Recompute crit when luck changes
             recalcDerivedStats();
         }
+        // Ensure all derived stats are consistent after any stat change
+        // (covers STR/DEX/CHA which may affect derived values indirectly)
+        recalcDerivedStats();
     }
 
     public void modifyStat(Stats stat, int amount) {
@@ -470,6 +473,9 @@ public abstract class Creature {
             // Recompute crit when luck changes
             recalcDerivedStats();
         }
+        // Ensure all derived stats are consistent after any stat change
+        // (covers STR/DEX/CHA which may affect derived values indirectly)
+        recalcDerivedStats();
     }
 
     // --- Stat helper convenience methods ---
@@ -487,7 +493,16 @@ public abstract class Creature {
     }
 
     public void modifyResistance(Resistances resistance, int amount) {
-        resistances.put(resistance, getResistance(resistance) + amount);
+        // Adds the amount to the current resistance value, defaulting to 100 if unset
+        int base = resistances.containsKey(resistance) ? resistances.get(resistance) : 100;
+        resistances.put(resistance, base + amount);
+    }
+
+    /**
+     * Sets the resistance to an absolute value, ignoring previous value.
+     */
+    public void setResistanceAbsolute(Resistances resistance, int value) {
+        resistances.put(resistance, value);
     }
 
     public float getBaseCrit() {
@@ -624,7 +639,8 @@ public abstract class Creature {
                         weaponAttackList = weapon.getVersatileAttacks();
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             if (weaponAttackList == null) {
                 if (weapon.getAttacks() != null && !weapon.getAttacks().isEmpty()) {
                     weaponAttackList = weapon.getAttacks();
@@ -749,6 +765,20 @@ public abstract class Creature {
         try {
             Gson g = new Gson();
             com.bapppis.core.item.Item copy = g.fromJson(g.toJson(template), template.getClass());
+            
+            // Copy transient properties field manually since GSON won't copy it
+            if (template instanceof com.bapppis.core.item.Equipment && copy instanceof com.bapppis.core.item.Equipment) {
+                com.bapppis.core.item.Equipment templateEq = (com.bapppis.core.item.Equipment) template;
+                com.bapppis.core.item.Equipment copyEq = (com.bapppis.core.item.Equipment) copy;
+                if (templateEq.getProperties() != null) {
+                    copyEq.setProperties(templateEq.getProperties());
+                }
+            }
+            // Copy transient properties field for consumables too
+            if (template.getProperties() != null) {
+                copy.setProperties(template.getProperties());
+            }
+            
             return this.getInventory().addItem(copy);
         } catch (Exception e) {
             return false;
@@ -976,6 +1006,16 @@ public abstract class Creature {
         this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
     }
 
+    /**
+     * Hook method called after JSON data is loaded but before finalization.
+     * Override in species/type subclasses to apply modifications that should
+     * take priority over JSON values (e.g., resistance/stat adjustments).
+     * Default implementation does nothing.
+     */
+    protected void applySpeciesModifications() {
+        // Default: no modifications
+    }
+
     public void finalizeAfterLoad() {
         int baseHp = this.getBaseHp();
         this.setMaxHp(baseHp); // Reset max HP to base before applying properties
@@ -1018,7 +1058,8 @@ public abstract class Creature {
         }
         // Print species if available (not base types)
         String species = getClass().getSimpleName();
-        if (!species.equals("Player") && !species.equals("Enemy") && !species.equals("NPC") && !species.equals("CreatureType") && !species.equals("Creature")) {
+        if (!species.equals("Player") && !species.equals("Enemy") && !species.equals("NPC")
+                && !species.equals("CreatureType") && !species.equals("Creature")) {
             sb.append(" (").append(species.toUpperCase()).append(")");
         } else if (getCreatureType() != null) {
             sb.append(" (").append(getCreatureType().name()).append(")");

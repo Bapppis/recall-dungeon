@@ -1,0 +1,11 @@
+{
+  "id": 4002,
+  "name": "TestTrait2",
+  "description": "Test trait 2: +2 STR, +1 WIS, dodge+5%",
+  "dodge": 5.0,
+  "type": "TRAIT",
+  "statModifiers": {
+    "STRENGTH": 2,
+    "WISDOM": 1
+  }
+}

@@ -2,11 +2,11 @@
   "id": 19000,
   "name": "Skeleton Spearman",
   "description": "Rarely dangerous alone but in packs they can overwhelm even the strongest adventurers. It is wielding a rusty spear and a shield.",
+  "species": "Skeleton",
   "creatureType": "UNDEAD",
   "size": "MEDIUM",
   "level": 0,
   "enemyXp": 3,
-  "visionRange": 1,
   "stats": {
     "STRENGTH": 6,
     "LUCK": 0
@@ -44,6 +44,5 @@
     }
   ],
   "sprite": null,
-  "defaultDamageType": "BLUDGEONING",
-  "species": "Skeleton"
+  "defaultDamageType": "BLUDGEONING"
 }

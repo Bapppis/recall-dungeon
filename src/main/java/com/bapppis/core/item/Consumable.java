@@ -16,19 +16,25 @@ public class Consumable extends Equipment {
     @Override public void setSlot(EquipmentSlot slot) { }
 
     /**
-     * Override onApply to prevent the duration-nulling behavior from Equipment.
+     * Override onApply to handle both healing and property application.
      * Consumables should preserve the property's original duration.
-     * This reimplements Item's default behavior without Equipment's modifications.
      */
     @Override
     public void onApply(com.bapppis.core.creature.Creature creature) {
-        // Use Item's default implementation logic without Equipment's duration modification
+        // Handle healing if healingDice is present
+        if (healingDice != null && !healingDice.isBlank()) {
+            int healAmount = com.bapppis.core.util.Dice.roll(healingDice);
+            int newHp = Math.min(creature.getCurrentHp() + healAmount, creature.getMaxHp());
+            creature.setCurrentHp(newHp);
+        }
+        
+        // Handle properties
         java.util.List<com.bapppis.core.property.Property> props = getProperties();
         if (props != null) {
             for (com.bapppis.core.property.Property p : props) {
                 if (p != null) {
                     // Add property with its original duration (don't modify)
-                    creature.addProperty(p);
+                    creature.addProperty(p.copy());
                 }
             }
         }

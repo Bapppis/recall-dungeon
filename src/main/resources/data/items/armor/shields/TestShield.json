@@ -1,0 +1,32 @@
+{
+  "id": 26999,
+  "name": "Test Shield",
+  "description": "A comprehensive test shield with blocking bonuses",
+  "rarity": "UNCOMMON",
+  "itemType": "EQUIPMENT",
+  "equipmentSlot": "OFFHAND",
+  "stats": {
+    "CONSTITUTION": 2,
+    "DEXTERITY": -1,
+    "WISDOM": 1
+  },
+  "resistances": {
+    "BLUDGEONING": 15,
+    "PIERCING": 10
+  },
+  "dodge": -5.0,
+  "crit": 0.0,
+  "block": 20.0,
+  "accuracy": 0,
+  "magicAccuracy": 0,
+  "tooltip": [
+    "A test shield with CON+2, WIS+1, DEX-1",
+    "Provides 20% block, -5% dodge, 5% magic resist, +5 defense",
+    "Resistances: BLUDGEONING+15%, PIERCING+10%"
+  ],
+  "defense": 5,
+  "magicResist": 5.0,
+  "properties": [
+    "TestTrait4"
+  ]
+}

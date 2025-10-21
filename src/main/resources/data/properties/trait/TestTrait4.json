@@ -1,0 +1,10 @@
+{
+  "id": 4004,
+  "name": "TestTrait4",
+  "description": "Test trait 4: +1 DEX, blocking +5%",
+  "block": 5.0,
+  "type": "TRAIT",
+  "statModifiers": {
+    "DEXTERITY": 1
+  }
+}

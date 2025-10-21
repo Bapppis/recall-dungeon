@@ -1,0 +1,10 @@
+{
+  "id": 4005,
+  "name": "TestTrait5",
+  "description": "Test trait 5: +2 CON, crit +3%",
+  "crit": 3.0,
+  "type": "TRAIT",
+  "statModifiers": {
+    "CONSTITUTION": 2
+  }
+}

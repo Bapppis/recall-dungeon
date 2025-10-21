@@ -21,9 +21,9 @@ public class Player extends Creature {
 
     public static Player fromJson(String json) {
         Gson gson = new GsonBuilder()
-            .registerTypeAdapter(com.bapppis.core.Resistances.class,
-                new com.bapppis.core.util.ResistancesDeserializer())
-            .create();
+                .registerTypeAdapter(com.bapppis.core.Resistances.class,
+                        new com.bapppis.core.util.ResistancesDeserializer())
+                .create();
         return gson.fromJson(json, Player.class);
     }
 
@@ -120,35 +120,40 @@ public class Player extends Creature {
     public String toString() {
         // Detailed player printout
         StringBuilder sb = new StringBuilder();
-        sb.append("Player: ").append(getName() == null ? "<unnamed>" : getName()).append(" (Id:").append(getId()).append(")\n");
+        sb.append("Player: ").append(getName() == null ? "<unnamed>" : getName()).append(" (Id:").append(getId())
+                .append(")\n");
         sb.append("Level: ").append(getLevel()).append(" (").append("XP: ").append(getXp()).append("/")
-            .append(LevelUtil.xpForNextLevel(getLevel())).append(") ")
-            .append(getSize() == null ? "" : getSize().name()).append(" ");
-        
+                .append(LevelUtil.xpForNextLevel(getLevel())).append(") ")
+                .append(getSize() == null ? "" : getSize().name()).append(" ");
+
         // Print species if available (not base types)
         String species = getClass().getSimpleName();
-        if (!species.equals("Player") && !species.equals("Enemy") && !species.equals("NPC") && !species.equals("CreatureType") && !species.equals("Creature")) {
+        if (!species.equals("Player") && !species.equals("Enemy") && !species.equals("NPC")
+                && !species.equals("CreatureType") && !species.equals("Creature")) {
             sb.append(species.toUpperCase());
         } else if (getCreatureType() != null) {
             sb.append(getCreatureType().name());
         }
         sb.append("\n");
-        
+
         sb.append("Stat Points: ").append(statPoints).append("\n");
-        sb.append("HP: ").append(getCurrentHp()).append("/").append(getMaxHp()).append("  (HP regen: ").append(getHpRegen())
-            .append("/s)").append("\n");
+        sb.append("Vision Range: ").append(getVisionRange()).append("\n");
+        sb.append("HP: ").append(getCurrentHp()).append("/").append(getMaxHp()).append("  (HP regen: ")
+                .append(getHpRegen())
+                .append("/s)").append("\n");
         sb.append("Mana: ").append(getCurrentMana()).append("/").append(getMaxMana()).append("  (Mana regen: ")
-            .append(getManaRegen()).append("/s)").append("\n");
-        sb.append("Stamina: ").append(getCurrentStamina()).append("/").append(getMaxStamina()).append("  (Stamina regen: ")
-            .append(getStaminaRegen()).append("/s)").append("\n");
+                .append(getManaRegen()).append("/s)").append("\n");
+        sb.append("Stamina: ").append(getCurrentStamina()).append("/").append(getMaxStamina())
+                .append("  (Stamina regen: ")
+                .append(getStaminaRegen()).append("/s)").append("\n");
         sb.append("Stats: ")
-            .append("STR ").append(getSTR()).append("  ")
-            .append("DEX ").append(getDEX()).append("  ")
-            .append("CON ").append(getCON()).append("  ")
-            .append("INT ").append(getINT()).append("  ")
-            .append("WIS ").append(getWIS()).append("  ")
-            .append("CHA ").append(getCHA()).append("  ")
-            .append("LUCK ").append(getLUCK()).append("\n");
+                .append("STR ").append(getSTR()).append("  ")
+                .append("DEX ").append(getDEX()).append("  ")
+                .append("CON ").append(getCON()).append("  ")
+                .append("INT ").append(getINT()).append("  ")
+                .append("WIS ").append(getWIS()).append("  ")
+                .append("CHA ").append(getCHA()).append("  ")
+                .append("LUCK ").append(getLUCK()).append("\n");
         sb.append("Resists: ");
         boolean first = true;
         for (Resistances res : Resistances.values()) {
@@ -159,28 +164,28 @@ public class Player extends Creature {
         }
         sb.append("\n");
         sb.append("Crit: ").append(getCrit()).append("%  ")
-            .append("Dodge: ").append(getDodge()).append("%  ")
-            .append("Block: ").append(getBlock()).append("%  ")
-            .append("MagicResist: ").append(getMagicResist()).append("%\n");
+                .append("Dodge: ").append(getDodge()).append("%  ")
+                .append("Block: ").append(getBlock()).append("%  ")
+                .append("MagicResist: ").append(getMagicResist()).append("%\n");
         sb.append("Accuracy: ").append(getAccuracy()).append("  ")
-            .append("MagicAccuracy: ").append(getMagicAccuracy()).append("\n");
+                .append("MagicAccuracy: ").append(getMagicAccuracy()).append("\n");
         sb.append("Equipment:\n");
-    for (EquipmentSlot slot : EquipmentSlot.values()) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
             Item equipped = getEquipped(slot);
             sb.append("  ").append(slot.name()).append(": ");
             sb.append(equipped == null ? "Empty" : equipped.getName()).append("\n");
         }
         sb.append("Properties: ")
-            .append("Buffs=").append(getBuffs().size()).append(" ")
-            .append("Debuffs=").append(getDebuffs().size()).append(" ")
-            .append("Traits=").append(getTraits().size()).append("\n");
+                .append("Buffs=").append(getBuffs().size()).append(" ")
+                .append("Debuffs=").append(getDebuffs().size()).append(" ")
+                .append("Traits=").append(getTraits().size()).append("\n");
         sb.append("Inventory counts: ")
-            .append("Weapons=").append(getInventory().getWeapons().size()).append(", ")
-            .append("Offhands=").append(getInventory().getOffhands().size()).append(", ")
-            .append("Helmets=").append(getInventory().getHelmets().size()).append(", ")
-            .append("Armor=").append(getInventory().getArmors().size()).append(", ")
-            .append("Consumables=").append(getInventory().getConsumables().size()).append(", ")
-            .append("Misc=").append(getInventory().getMisc().size()).append("\n");
+                .append("Weapons=").append(getInventory().getWeapons().size()).append(", ")
+                .append("Offhands=").append(getInventory().getOffhands().size()).append(", ")
+                .append("Helmets=").append(getInventory().getHelmets().size()).append(", ")
+                .append("Armor=").append(getInventory().getArmors().size()).append(", ")
+                .append("Consumables=").append(getInventory().getConsumables().size()).append(", ")
+                .append("Misc=").append(getInventory().getMisc().size()).append("\n");
         return sb.toString();
     }
 }
