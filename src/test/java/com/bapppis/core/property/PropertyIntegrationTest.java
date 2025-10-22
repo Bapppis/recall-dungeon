@@ -46,8 +46,8 @@ public class PropertyIntegrationTest {
         biggles.addProperty(coward);
     // System.out.println("After adding Coward:\n" + biggles);
 
-        // Coward JSON decreases STR by 2 and increases DEX by 2
-        assertEquals(baseSTR - 2, biggles.getSTR(), "STR should be decreased by 2 after Coward applied");
+        // Coward JSON decreases STR by 1 and increases DEX by 2
+        assertEquals(baseSTR - 1, biggles.getSTR(), "STR should be decreased by 1 after Coward applied");
         assertEquals(baseDEX + 2, biggles.getDEX(), "DEX should be increased by 2 after Coward applied");
 
         // Remove Coward and assert stats revert

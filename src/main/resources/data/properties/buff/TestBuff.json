@@ -16,15 +16,6 @@
   "dodge": 5,
   "block": 5,
   "magicResist": 5,
-  "statModifiers": {
-    "STRENGTH": 1,
-    "DEXTERITY": 1,
-    "CONSTITUTION": 1,
-    "INTELLIGENCE": 1,
-    "WISDOM": 1,
-    "CHARISMA": 1,
-    "LUCK": 1
-  },
   "resistances": {
     "FIRE": -5,
     "WATER": -5,
@@ -42,5 +33,14 @@
   "tooltip": [
     "Touched by the gods."
   ],
-  "type": "BUFF"
+  "type": "BUFF",
+  "statModifiers": {
+    "STRENGTH": 1,
+    "DEXTERITY": 1,
+    "CONSTITUTION": 1,
+    "INTELLIGENCE": 1,
+    "WISDOM": 1,
+    "CHARISMA": 1,
+    "LUCK": 1
+  }
 }

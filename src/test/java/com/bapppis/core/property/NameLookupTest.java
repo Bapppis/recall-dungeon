@@ -43,6 +43,7 @@ public class NameLookupTest {
     // Record base STR/DEX
     int baseStr = biggles.getStat(Stats.STRENGTH);
     int baseDex = biggles.getStat(Stats.DEXTERITY);
+    int baseWis = biggles.getStat(Stats.WISDOM);
 
     // Add property by name (string) using the new convenience method
     boolean added = biggles.addProperty("Coward");
@@ -51,8 +52,10 @@ public class NameLookupTest {
     // After applying Coward, STR should be decreased (Coward JSON reduces STR by 2)
     int newStr = biggles.getStat(Stats.STRENGTH);
     int newDex = biggles.getStat(Stats.DEXTERITY);
-    assertEquals(baseStr - 2, newStr, "STR should be reduced by Coward property");
+    int newWis = biggles.getStat(Stats.WISDOM);
+    assertEquals(baseStr - 1, newStr, "STR should be reduced by Coward property");
     assertEquals(baseDex + 2, newDex, "DEX should be increased by Coward property");
+    assertEquals(baseWis + 1, newWis, "WIS should be increased by Coward property");
 
     // Clean up: remove by id and verify stats restored
     biggles.removeProperty(coward.getId());

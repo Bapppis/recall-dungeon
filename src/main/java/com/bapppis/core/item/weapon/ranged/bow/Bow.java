@@ -1,6 +1,6 @@
-package com.bapppis.core.item.ranged.bow;
+package com.bapppis.core.item.weapon.ranged.bow;
 
-import com.bapppis.core.item.ranged.RangedWeapon;
+import com.bapppis.core.item.weapon.ranged.RangedWeapon;
 
 public class Bow extends RangedWeapon {
     public Bow() {

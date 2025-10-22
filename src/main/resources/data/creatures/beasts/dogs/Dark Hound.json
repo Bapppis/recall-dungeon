@@ -23,8 +23,8 @@
   "baseCrit": 5,
   "baseDodge": 5,
   "baseMagicResist": 0,
-  "baseHp": 12,
-  "hpLvlBonus": 4,
+  "baseHp": 30,
+  "hpDice": 20,
   "properties": [
     "Darksight"
   ],

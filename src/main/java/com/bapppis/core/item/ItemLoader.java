@@ -72,22 +72,22 @@ public class ItemLoader {
                                 if (weaponType != null) {
                                     switch (weaponType) {
                                         case SLASH:
-                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.melee.slashweapon.SlashWeapon.class);
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.weapon.melee.slashweapon.SlashWeapon.class);
                                             break;
                                         case PIERCE:
-                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.melee.piercingweapon.PiercingWeapon.class);
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.weapon.melee.piercingweapon.PiercingWeapon.class);
                                             break;
                                         case BLUNT:
-                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.melee.bluntweapon.BluntWeapon.class);
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.weapon.melee.bluntweapon.BluntWeapon.class);
                                             break;
                                         case STAFF:
-                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.magic.staff.Staff.class);
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.weapon.magic.staff.Staff.class);
                                             break;
                                         case ARCANE:
-                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.magic.arcaneweapon.ArcaneWeapon.class);
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.weapon.magic.arcaneweapon.ArcaneWeapon.class);
                                             break;
                                         case MAGIC_PHYSICAL:
-                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.magic.magicphysicalweapon.MagicPhysicalWeapon.class);
+                                            item = gson.fromJson(jsonObj, com.bapppis.core.item.weapon.magic.magicphysicalweapon.MagicPhysicalWeapon.class);
                                             break;
                                         default:
                                             // fallback to Weapon if unknown

@@ -1,4 +1,4 @@
-package com.bapppis.core.item.ranged;
+package com.bapppis.core.item.weapon.ranged;
 
 import com.bapppis.core.Resistances;
 import com.bapppis.core.creature.creatureEnums.Stats;

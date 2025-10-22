@@ -11,7 +11,7 @@
     "STRENGTH": 10,
     "DEXTERITY": 10,
     "CONSTITUTION": 10,
-    "INTELLIGENCE": 7,
+    "INTELLIGENCE": 8,
     "WISDOM": 10,
     "CHARISMA": 10,
     "LUCK": 1
@@ -36,13 +36,13 @@
   "baseMagicResist": 5,
   "accuracy": null,
   "magicAccuracy": null,
-  "baseHp": 5,
+  "baseHp": 25,
+  "hpDice": 20,
   "baseMaxMana": 80,
   "baseMaxStamina": 100,
   "baseHpRegen": 0,
   "baseStaminaRegen": 0,
   "baseManaRegen": 0,
-  "hpLvlBonus": 4,
   "helmet": "GreenHood",
   "armor": "LeatherArmor",
   "legwear": null,
@@ -52,10 +52,7 @@
     "MinorHealingPotion",
     "ParryingDagger"
   ],
-  "properties": [
-    "Coward",
-    "Darksight"
-  ],
+  "properties": null,
   "attacks": [
     {
       "name": "Scratch",

@@ -13,6 +13,54 @@ public final class ResistanceUtil {
 
     private ResistanceUtil() {
     }
+        // --- Helper methods for modifying resistances ---
+        public static void modifyFireResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.FIRE, amount);
+        }
+
+        public static void modifyWaterResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.WATER, amount);
+        }
+
+        public static void modifyWindResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.WIND, amount);
+        }
+
+        public static void modifyIceResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.ICE, amount);
+        }
+
+        public static void modifyNatureResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.NATURE, amount);
+        }
+
+        public static void modifyLightningResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.LIGHTNING, amount);
+        }
+
+        public static void modifyLightResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.LIGHT, amount);
+        }
+
+        public static void modifyDarknessResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.DARKNESS, amount);
+        }
+
+        public static void modifyBludgeoningResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.BLUDGEONING, amount);
+        }
+
+        public static void modifyPiercingResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.PIERCING, amount);
+        }
+
+        public static void modifySlashingResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.SLASHING, amount);
+        }
+
+        public static void modifyTrueResistance(Creature c, int amount) {
+            if (c != null) c.modifyResistance(Resistances.TRUE, amount);
+        }
 
     public static Kind classify(Resistances r) {
         if (r == null)

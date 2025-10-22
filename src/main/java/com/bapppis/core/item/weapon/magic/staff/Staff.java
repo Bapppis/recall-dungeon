@@ -1,8 +1,8 @@
-package com.bapppis.core.item.magic.staff;
+package com.bapppis.core.item.weapon.magic.staff;
 
 import com.bapppis.core.Resistances;
 import com.bapppis.core.creature.creatureEnums.Stats;
-import com.bapppis.core.item.magic.MagicWeapon;
+import com.bapppis.core.item.weapon.magic.MagicWeapon;
 
 public class Staff extends MagicWeapon {
     private Stats primaryStat;

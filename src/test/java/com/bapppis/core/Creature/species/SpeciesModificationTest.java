@@ -152,8 +152,8 @@ public class SpeciesModificationTest {
         // maxHp = floor(10 * 1.1) = 11
         int expectedBaseHp = 10;
         int conBonus = expectedCONBonus;
-        // MaxHP formula: baseHp + ((level + 1) * (hpLvlBonus + conBonus))
-        int expectedMaxHp = expectedBaseHp + ((biggles.getLevel() + 1) * (biggles.getHpLvlBonus() + conBonus));
+        // MaxHP formula: baseHp + ((level + 1) * (hpDice + conBonus))
+        int expectedMaxHp = expectedBaseHp + ((biggles.getLevel() + 1) * (biggles.getHpDice() + conBonus));
         // 10 + ((0 + 1) * (5 + 1)) = 10 + 6 = 16
         assertEquals(expectedMaxHp, biggles.getMaxHp(), "MaxHP calculation failed");
 

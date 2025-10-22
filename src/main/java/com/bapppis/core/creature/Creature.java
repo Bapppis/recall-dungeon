@@ -27,7 +27,7 @@ public abstract class Creature {
     private int baseHp;
     private int maxHp;
     private int currentHp;
-    private int hpLvlBonus;
+    private int hpDice;
     private int currentMana;
     private int currentStamina;
     private int maxMana = 100;
@@ -80,8 +80,69 @@ public abstract class Creature {
     private java.util.List<Attack> attacks = new java.util.ArrayList<>();
     private String sprite;
 
+        // --- Base stat modifier helpers ---
+        public void modifyBaseCrit(float delta) {
+            this.baseCrit += delta;
+            updateCrit();
+        }
+
+        public void modifyBaseDodge(float delta) {
+            this.baseDodge += delta;
+            recalcDerivedStats();
+        }
+
+        public void modifyBaseBlock(float delta) {
+            this.baseBlock += delta;
+            recalcDerivedStats();
+        }
+
+        public void modifyBaseMagicResist(float delta) {
+            this.baseMagicResist += delta;
+            recalcDerivedStats();
+        }
+
+        public void modifyBaseAccuracy(int delta) {
+            this.accuracy += delta;
+        }
+
+        public void modifyBaseMagicAccuracy(int delta) {
+            this.magicAccuracy += delta;
+        }
+
     public String getSprite() {
         return sprite;
+    }
+
+    // --- Additional base field modifiers ---
+    public void modifyBaseHp(int delta) {
+        this.baseHp += delta;
+        recalcMaxHp();
+    }
+
+    public void modifyBaseMaxMana(int delta) {
+        this.baseMaxMana += delta;
+        updateMaxMana();
+    }
+
+    public void modifyBaseMaxStamina(int delta) {
+        this.baseMaxStamina += delta;
+        updateMaxStamina();
+    }
+
+    public void modifyBaseHpRegen(int delta) {
+        this.baseHpRegen += delta;
+        // hpRegen uses equipment and property additions; keep base in sync
+        this.hpRegen = Math.max(0, this.baseHpRegen);
+    }
+
+    public void modifyBaseStaminaRegen(int delta) {
+        this.baseStaminaRegen += delta;
+        this.staminaRegen = Math.max(0, this.baseStaminaRegen);
+    }
+
+    public void modifyBaseManaRegen(int delta) {
+        this.baseManaRegen += delta;
+        this.manaRegen = Math.max(0, this.baseManaRegen);
     }
 
     public Creature() {
@@ -214,12 +275,12 @@ public abstract class Creature {
         this.currentHp = Math.max(0, hp);
     }
 
-    public int getHpLvlBonus() {
-        return hpLvlBonus;
+    public int getHpDice() {
+        return hpDice;
     }
 
-    public void setHpLvlBonus(int hpLvlBonus) {
-        this.hpLvlBonus = hpLvlBonus;
+    public void setHpDice(int hpDice) {
+        this.hpDice = hpDice;
     }
 
     public int getCurrentMana() {
@@ -765,9 +826,10 @@ public abstract class Creature {
         try {
             Gson g = new Gson();
             com.bapppis.core.item.Item copy = g.fromJson(g.toJson(template), template.getClass());
-            
+
             // Copy transient properties field manually since GSON won't copy it
-            if (template instanceof com.bapppis.core.item.Equipment && copy instanceof com.bapppis.core.item.Equipment) {
+            if (template instanceof com.bapppis.core.item.Equipment
+                    && copy instanceof com.bapppis.core.item.Equipment) {
                 com.bapppis.core.item.Equipment templateEq = (com.bapppis.core.item.Equipment) template;
                 com.bapppis.core.item.Equipment copyEq = (com.bapppis.core.item.Equipment) copy;
                 if (templateEq.getProperties() != null) {
@@ -778,7 +840,7 @@ public abstract class Creature {
             if (template.getProperties() != null) {
                 copy.setProperties(template.getProperties());
             }
-            
+
             return this.getInventory().addItem(copy);
         } catch (Exception e) {
             return false;
@@ -977,10 +1039,10 @@ public abstract class Creature {
     }
 
     public void updateMaxHp() {
-        int delta = this.getStatBonus(Stats.CONSTITUTION);
-        int bonusHp = this.hpLvlBonus + delta;
+        int conBonus = this.getStatBonus(Stats.CONSTITUTION);
+        int bonusHp = (this.level + 1) * (this.hpDice + conBonus);
         bonusHp = Math.max(1, bonusHp);
-        this.setMaxHp(this.maxHp + bonusHp);
+        this.setMaxHp(this.baseHp + bonusHp);
         this.modifyHp(bonusHp);
     }
 
@@ -1001,7 +1063,7 @@ public abstract class Creature {
         // Preserve currentHp/maxHp ratio when maxHp changes
         double ratio = this.maxHp > 0 ? (double) currentHp / this.maxHp : 1.0;
         int conBonus = this.getStatBonus(Stats.CONSTITUTION);
-        int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpLvlBonus + conBonus));
+        int newMaxHp = this.baseHp + ((this.level + 1) * (this.hpDice + conBonus));
         this.maxHp = Math.max(1, newMaxHp);
         this.currentHp = Math.max(1, (int) (this.maxHp * ratio));
     }
@@ -1037,11 +1099,42 @@ public abstract class Creature {
         }
 
         updateMaxMana();
-
         this.currentMana = this.maxMana;
         this.currentStamina = this.maxStamina;
 
         updateCrit();
+    }
+
+    public void printAllFields() {
+        System.out.println("Creature: " + getName() + " (Id:" + getId() + ")");
+        System.out.println("Class: " + getClass().getSimpleName());
+        System.out.println("Level: " + getLevel());
+        System.out.println("Type: " + getType());
+        System.out.println("CreatureType: " + getCreatureType());
+        System.out.println("Size: " + getSize());
+        System.out.println("XP: " + getXp());
+        System.out.println("VisionRange: " + getVisionRange());
+        System.out.println("HP: " + getCurrentHp() + "/" + getMaxHp() + " (Base: " + getBaseHp() + " + Dice: "
+                + getHpDice() + " + ConBonus: " + (getStatBonus(Stats.CONSTITUTION)) + " * (Level+1))");
+        System.out.println("Mana: " + getCurrentMana() + "/" + getMaxMana() + " (Base: " + getBaseMaxMana() + ")");
+        System.out.println(
+                "Stamina: " + getCurrentStamina() + "/" + getMaxStamina() + " (Base: " + getBaseMaxStamina() + ")");
+        System.out.println("Stats: " + stats);
+        System.out.println("Resistances: " + resistances);
+        System.out.println("Crit: " + crit);
+        System.out.println("Dodge: " + dodge);
+        System.out.println("Block: " + block);
+        System.out.println("MagicResist: " + magicResist);
+        System.out.println("Accuracy: " + accuracy + " MagicAccuracy: " + magicAccuracy);
+        System.out.println("Equipment: " + equipment);
+        System.out.println("Inventory: " + inventory);
+        System.out.println("Properties: Buffs=" + getBuffs().size() + " Debuffs=" + getDebuffs().size() + " Traits="
+                + getTraits().size());
+        System.out.println("PropertyManager: " + propertyManager);
+        System.out.println("Description: " + getDescription());
+        System.out.println("Sprite: " + getSprite());
+        System.out.println("Attacks: " + attacks);
+        // Add more fields if needed for deeper inspection
     }
 
     @Override

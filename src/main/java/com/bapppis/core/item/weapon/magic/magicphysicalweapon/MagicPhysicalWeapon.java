@@ -1,7 +1,7 @@
-package com.bapppis.core.item.magic.magicphysicalweapon;
+package com.bapppis.core.item.weapon.magic.magicphysicalweapon;
 
 import com.bapppis.core.item.itemEnums.WeaponType;
-import com.bapppis.core.item.magic.MagicWeapon;
+import com.bapppis.core.item.weapon.magic.MagicWeapon;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.creature.creatureEnums.Stats;
 

@@ -1,4 +1,4 @@
-package com.bapppis.core.item.magic;
+package com.bapppis.core.item.weapon.magic;
 
 import com.bapppis.core.Resistances;
 import com.bapppis.core.creature.creatureEnums.Stats;

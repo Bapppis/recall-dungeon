@@ -12,7 +12,7 @@
   "baseCrit": 5,
   "baseDodge": 30,
   "baseHp": 999,
-  "hpLvlBonus": 4,
+  "hpDice": 4,
   "weapon": null,
   "properties": null,
   "sprite": null

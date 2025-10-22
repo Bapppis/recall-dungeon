@@ -89,6 +89,8 @@ public class CreatureLoader {
                         // Extract species and creatureType from JSON to determine the correct class
                         String speciesName = null;
                         String creatureTypeName = null;
+                        // Remember if JSON explicitly provided a size — JSON should override species/type
+                        boolean jsonProvidedSize = jsonObj.has("size") && !jsonObj.get("size").isJsonNull();
                         if (jsonObj.has("species") && !jsonObj.get("species").isJsonNull()) {
                             speciesName = jsonObj.get("species").getAsString();
                         }
@@ -122,6 +124,33 @@ public class CreatureLoader {
                                     resistBefore.put(res, beforeTemplate.getResistance(res));
                                 }
                                 com.bapppis.core.creature.creatureEnums.Size sizeBefore = beforeTemplate.getSize();
+
+                                // Capture base field values before species modifications so we can compute
+                                // deltas (for baseCrit, baseDodge, baseBlock, baseMagicResist, accuracy,
+                                // magicAccuracy, hpDice) and apply them to the JSON-loaded creature later.
+                                java.util.Map<String, Double> baseFieldsBefore = new java.util.HashMap<>();
+                                try {
+                                    String[] baseNames = new String[] { "baseCrit", "baseDodge", "baseBlock",
+                                            "baseMagicResist", "accuracy", "magicAccuracy", "hpDice",
+                                            "baseHp", "baseMaxMana", "baseMaxStamina", "baseHpRegen",
+                                            "baseStaminaRegen", "baseManaRegen" };
+                                    for (String fname : baseNames) {
+                                        try {
+                                            java.lang.reflect.Field f = Creature.class.getDeclaredField(fname);
+                                            f.setAccessible(true);
+                                            Object v = f.get(beforeTemplate);
+                                            if (v instanceof Number) {
+                                                baseFieldsBefore.put(fname, ((Number) v).doubleValue());
+                                            } else {
+                                                baseFieldsBefore.put(fname, 0.0);
+                                            }
+                                        } catch (NoSuchFieldException nsf) {
+                                            // ignore missing fields
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // ignore reflection failures
+                                }
 
                                 // Apply species modifications
                                 beforeTemplate.applySpeciesModifications();
@@ -192,6 +221,35 @@ public class CreatureLoader {
                                     pureStatDeltas.put(stat, totalDelta - propEffect);
                                 }
 
+                                // Compute base-field deltas after species modifications
+                                java.util.Map<String, Double> baseFieldDeltas = new java.util.HashMap<>();
+                                try {
+                                    String[] baseNames = new String[] { "baseCrit", "baseDodge", "baseBlock",
+                                            "baseMagicResist", "accuracy", "magicAccuracy", "hpDice",
+                                            "baseHp", "baseMaxMana", "baseMaxStamina", "baseHpRegen",
+                                            "baseStaminaRegen", "baseManaRegen" };
+                                    for (String fname : baseNames) {
+                                        try {
+                                            java.lang.reflect.Field f = Creature.class.getDeclaredField(fname);
+                                            f.setAccessible(true);
+                                            Object afterVal = f.get(beforeTemplate); // beforeTemplate now contains
+                                                                                     // post-mod
+                                            double after = (afterVal instanceof Number)
+                                                    ? ((Number) afterVal).doubleValue()
+                                                    : 0.0;
+                                            double before = baseFieldsBefore.getOrDefault(fname, 0.0);
+                                            double delta = after - before;
+                                            if (Math.abs(delta) > 0.0001) {
+                                                baseFieldDeltas.put(fname, delta);
+                                            }
+                                        } catch (NoSuchFieldException nsf) {
+                                            // ignore
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // ignore reflection failures
+                                }
+
                                 // Load JSON as base type (Player/Enemy/NPC) to preserve type safety
                                 if (resource.getPath().contains("players")) {
                                     creature = gson.fromJson(jsonObj, Player.class);
@@ -201,16 +259,18 @@ public class CreatureLoader {
                                     creature = gson.fromJson(jsonObj, Enemy.class);
                                 }
 
-                                // IMPORTANT: Fill in missing stats with defaults BEFORE applying species modifications
+                                // IMPORTANT: Fill in missing stats with defaults BEFORE applying species
+                                // modifications
                                 // This ensures getStat() returns correct defaults (10 or 1 for LUCK) not 0
                                 try {
                                     java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
                                     statsField.setAccessible(true);
                                     @SuppressWarnings("unchecked")
-                                    EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer> statMap = 
-                                            (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField.get(creature);
-                                    
-                                    for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                                    EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer> statMap = (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField
+                                            .get(creature);
+
+                                    for (com.bapppis.core.creature.creatureEnums.Stats stat : com.bapppis.core.creature.creatureEnums.Stats
+                                            .values()) {
                                         if (!statMap.containsKey(stat)) {
                                             if (stat == com.bapppis.core.creature.creatureEnums.Stats.LUCK) {
                                                 statMap.put(stat, 1);
@@ -242,8 +302,69 @@ public class CreatureLoader {
                                     }
                                 }
 
-                                // Copy size if changed
-                                if (beforeTemplate.getSize() != sizeBefore) {
+                                // Apply base-field deltas (if any) to the loaded creature so species can
+                                // override
+                                // base values (mirrors how stat/resistance deltas are applied)
+                                // Apply deltas for base fields to the loaded creature
+                                if (baseFieldDeltas.containsKey("baseCrit")) {
+                                    creature.modifyBaseCrit(baseFieldDeltas.get("baseCrit").floatValue());
+                                }
+                                if (baseFieldDeltas.containsKey("baseDodge")) {
+                                    creature.modifyBaseDodge(baseFieldDeltas.get("baseDodge").floatValue());
+                                }
+                                if (baseFieldDeltas.containsKey("baseBlock")) {
+                                    creature.modifyBaseBlock(baseFieldDeltas.get("baseBlock").floatValue());
+                                }
+                                if (baseFieldDeltas.containsKey("baseMagicResist")) {
+                                    creature.modifyBaseMagicResist(baseFieldDeltas.get("baseMagicResist").floatValue());
+                                }
+                                if (baseFieldDeltas.containsKey("accuracy")) {
+                                    creature.modifyBaseAccuracy(baseFieldDeltas.get("accuracy").intValue());
+                                }
+                                if (baseFieldDeltas.containsKey("magicAccuracy")) {
+                                    creature.modifyBaseMagicAccuracy(baseFieldDeltas.get("magicAccuracy").intValue());
+                                }
+                                if (baseFieldDeltas.containsKey("hpDice")) {
+                                    int deltaHp = (int) Math.round(baseFieldDeltas.get("hpDice"));
+                                    if (deltaHp != 0) {
+                                        creature.setHpDice(creature.getHpDice() + deltaHp);
+                                    }
+                                }
+                                if (baseFieldDeltas.containsKey("baseHp")) {
+                                    int delta = (int) Math.round(baseFieldDeltas.get("baseHp"));
+                                    if (delta != 0) {
+                                        creature.modifyBaseHp(delta);
+                                    }
+                                }
+                                if (baseFieldDeltas.containsKey("baseMaxMana")) {
+                                    int delta = (int) Math.round(baseFieldDeltas.get("baseMaxMana"));
+                                    if (delta != 0)
+                                        creature.modifyBaseMaxMana(delta);
+                                }
+                                if (baseFieldDeltas.containsKey("baseMaxStamina")) {
+                                    int delta = (int) Math.round(baseFieldDeltas.get("baseMaxStamina"));
+                                    if (delta != 0)
+                                        creature.modifyBaseMaxStamina(delta);
+                                }
+                                if (baseFieldDeltas.containsKey("baseHpRegen")) {
+                                    int delta = (int) Math.round(baseFieldDeltas.get("baseHpRegen"));
+                                    if (delta != 0)
+                                        creature.modifyBaseHpRegen(delta);
+                                }
+                                if (baseFieldDeltas.containsKey("baseStaminaRegen")) {
+                                    int delta = (int) Math.round(baseFieldDeltas.get("baseStaminaRegen"));
+                                    if (delta != 0)
+                                        creature.modifyBaseStaminaRegen(delta);
+                                }
+                                if (baseFieldDeltas.containsKey("baseManaRegen")) {
+                                    int delta = (int) Math.round(baseFieldDeltas.get("baseManaRegen"));
+                                    if (delta != 0)
+                                        creature.modifyBaseManaRegen(delta);
+                                }
+
+                                // Copy size if changed — but only if JSON did NOT explicitly provide a size.
+                                // JSON is intended to override species/type when present.
+                                if (!jsonProvidedSize && beforeTemplate.getSize() != sizeBefore) {
                                     creature.setSize(beforeTemplate.getSize());
                                 }
 
@@ -309,13 +430,16 @@ public class CreatureLoader {
                             }
                             // Ensure all stats are set to defaults if missing
                             // Only set default if stat key is missing from the map
-                            @SuppressWarnings("unchecked")
                             EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer> statMap = null;
                             try {
                                 java.lang.reflect.Field statsField = Creature.class.getDeclaredField("stats");
                                 statsField.setAccessible(true);
-                                statMap = (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statsField
-                                        .get(creature);
+                                Object statObj = statsField.get(creature);
+                                if (statObj instanceof EnumMap) {
+                                    @SuppressWarnings("unchecked")
+                                    EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer> tmp = (EnumMap<com.bapppis.core.creature.creatureEnums.Stats, Integer>) statObj;
+                                    statMap = tmp;
+                                }
                             } catch (Exception e) {
                                 // Should not happen
                             }
@@ -332,12 +456,16 @@ public class CreatureLoader {
                                 }
                             }
                             // Ensure all resistances are set to 100 unless provided
-                            @SuppressWarnings("unchecked")
                             EnumMap<com.bapppis.core.Resistances, Integer> resistMap = null;
                             try {
                                 java.lang.reflect.Field resistField = Creature.class.getDeclaredField("resistances");
                                 resistField.setAccessible(true);
-                                resistMap = (EnumMap<com.bapppis.core.Resistances, Integer>) resistField.get(creature);
+                                Object resistObj = resistField.get(creature);
+                                if (resistObj instanceof EnumMap) {
+                                    @SuppressWarnings("unchecked")
+                                    EnumMap<com.bapppis.core.Resistances, Integer> tmp = (EnumMap<com.bapppis.core.Resistances, Integer>) resistObj;
+                                    resistMap = tmp;
+                                }
                             } catch (Exception e) {
                                 // Should not happen
                             }
@@ -348,8 +476,8 @@ public class CreatureLoader {
                                     }
                                 }
                             }
-                            if (creature.getHpLvlBonus() == 0) {
-                                creature.setHpLvlBonus(6);
+                            if (creature.getHpDice() == 0) {
+                                creature.setHpDice(6);
                             }
                             if (creature.getVisionRange() == 0) {
                                 creature.setVisionRange(1);
@@ -423,41 +551,7 @@ public class CreatureLoader {
         loaded = true;
     }
 
-    /**
-     * Copy fields from source creature to destination creature using reflection.
-     * This is used when a species-specific class instance needs to be populated
-     * with JSON data. Properties are handled separately to preserve those added
-     * by type/species constructors.
-     */
-    private static void copyCreatureFields(Creature source, Creature dest) {
-        if (source == null || dest == null)
-            return;
-
-        try {
-            // Copy all accessible fields from Creature class
-            java.lang.reflect.Field[] fields = Creature.class.getDeclaredFields();
-            for (java.lang.reflect.Field field : fields) {
-                // Skip static, final, and propertyManager fields
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-                        java.lang.reflect.Modifier.isFinal(field.getModifiers()) ||
-                        field.getName().equals("propertyManager")) {
-                    continue;
-                }
-                field.setAccessible(true);
-                Object value = field.get(source);
-                // Special handling for 'size': only copy if not null and not default (MEDIUM)
-                if (field.getName().equals("size")) {
-                    if (value != null && !value.toString().equals("MEDIUM")) {
-                        field.set(dest, value);
-                    }
-                    continue;
-                }
-                field.set(dest, value);
-            }
-        } catch (Exception e) {
-            System.err.println("Error copying creature fields: " + e.getMessage());
-        }
-    }
+    // copyCreatureFields removed: unused helper
 
     private static void applyStartingItemsFromJson(String resourcePath, com.google.gson.Gson gson, Creature creature) {
         try (Reader reader = new InputStreamReader(

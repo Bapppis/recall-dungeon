@@ -1,7 +1,7 @@
-package com.bapppis.core.item.melee.slashweapon;
+package com.bapppis.core.item.weapon.melee.slashweapon;
 
 import com.bapppis.core.Resistances;
-import com.bapppis.core.item.melee.MeleeWeapon;
+import com.bapppis.core.item.weapon.melee.MeleeWeapon;
 
 public class SlashWeapon extends MeleeWeapon {
     public SlashWeapon() {

@@ -1,6 +1,6 @@
-package com.bapppis.core.item.ranged.crossbow;
+package com.bapppis.core.item.weapon.ranged.crossbow;
 
-import com.bapppis.core.item.ranged.RangedWeapon;
+import com.bapppis.core.item.weapon.ranged.RangedWeapon;
 
 public class Crossbow extends RangedWeapon {
     public Crossbow() {

@@ -1,7 +1,7 @@
-package com.bapppis.core.item.melee.bluntweapon;
+package com.bapppis.core.item.weapon.melee.bluntweapon;
 
 import com.bapppis.core.Resistances;
-import com.bapppis.core.item.melee.MeleeWeapon;
+import com.bapppis.core.item.weapon.melee.MeleeWeapon;
 
 public class BluntWeapon extends MeleeWeapon {
     public BluntWeapon() {

@@ -1,4 +1,4 @@
-package com.bapppis.core.item.melee;
+package com.bapppis.core.item.weapon.melee;
 
 import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.item.Weapon;

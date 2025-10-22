@@ -7,9 +7,8 @@ public class Humanoid extends Creature {
     @Override
     protected void applySpeciesModifications() {
         super.applySpeciesModifications();
-        setSize(com.bapppis.core.creature.creatureEnums.Size.LARGE);
+        setSize(com.bapppis.core.creature.creatureEnums.Size.MEDIUM);
 
-        addProperty("Coward");
     }
 
     public Humanoid() {
