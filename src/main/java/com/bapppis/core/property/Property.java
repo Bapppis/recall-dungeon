@@ -1,6 +1,7 @@
 package com.bapppis.core.property;
 
 import com.bapppis.core.Resistances;
+import com.bapppis.core.ResBuildUp;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.util.Dice;
@@ -42,6 +43,9 @@ public class Property {
     private transient Integer appliedMaxHpDelta = null;
     private transient Integer appliedMaxStaminaDelta = null;
     private transient Integer appliedMaxManaDelta = null;
+    private transient java.util.EnumMap<ResBuildUp, Integer> appliedResBuildUpPrev = null;
+    @SerializedName("resBuildUp")
+    private Map<ResBuildUp, Integer> resBuildUpModifiers;
 
     protected Property() {
     }
@@ -57,6 +61,7 @@ public class Property {
         this.damageDice = other.damageDice;
         this.statModifiers = other.statModifiers;
         this.resistanceModifiers = other.resistanceModifiers;
+    this.resBuildUpModifiers = other.resBuildUpModifiers;
         this.visionRange = other.visionRange;
         this.tooltip = other.tooltip;
         this.duration = other.duration;
@@ -281,6 +286,8 @@ public class Property {
         return resistanceModifiers;
     }
 
+    public Map<ResBuildUp, Integer> getResBuildUpModifiers() { return resBuildUpModifiers; }
+
     public Integer getVisionRangeModifier() {
         return visionRange;
     }
@@ -383,6 +390,22 @@ public class Property {
                 this.appliedMaxManaDelta = 0;
             }
         }
+        // Apply ResBuildUp modifiers (absolute or delta). If value == -1 => immunity.
+        if (resBuildUpModifiers != null && !resBuildUpModifiers.isEmpty()) {
+            if (this.appliedResBuildUpPrev == null) this.appliedResBuildUpPrev = new java.util.EnumMap<>(ResBuildUp.class);
+            for (Map.Entry<ResBuildUp, Integer> e : resBuildUpModifiers.entrySet()) {
+                ResBuildUp key = e.getKey();
+                Integer val = e.getValue();
+                if (val == null) continue;
+                if (val == -1) {
+                    // save previous absolute and set immunity
+                    this.appliedResBuildUpPrev.put(key, creature.getResBuildUp(key));
+                    creature.setResBuildUpAbsolute(key, -1);
+                } else {
+                    creature.modifyResBuildUp(key, val);
+                }
+            }
+        }
     }
 
     /**
@@ -456,6 +479,22 @@ public class Property {
         if (this.appliedMaxManaDelta != null) {
             creature.setMaxMana(creature.getMaxMana() - this.appliedMaxManaDelta);
             this.appliedMaxManaDelta = null;
+        }
+        // Revert any ResBuildUp changes applied by this property.
+        if (resBuildUpModifiers != null && !resBuildUpModifiers.isEmpty()) {
+            for (Map.Entry<ResBuildUp, Integer> e : resBuildUpModifiers.entrySet()) {
+                ResBuildUp key = e.getKey();
+                Integer val = e.getValue();
+                if (val == null) continue;
+                if (val == -1) {
+                    int prev = 0;
+                    if (this.appliedResBuildUpPrev != null && this.appliedResBuildUpPrev.containsKey(key)) prev = this.appliedResBuildUpPrev.get(key);
+                    creature.setResBuildUpAbsolute(key, prev);
+                } else {
+                    creature.modifyResBuildUp(key, -val);
+                }
+            }
+            this.appliedResBuildUpPrev = null;
         }
     }
 

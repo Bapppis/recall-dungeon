@@ -476,6 +476,23 @@ public class CreatureLoader {
                                     }
                                 }
                             }
+                            // Ensure all ResBuildUp entries exist and default to 0 unless provided
+                            try {
+                                java.lang.reflect.Field rbuField = Creature.class.getDeclaredField("resBuildUp");
+                                rbuField.setAccessible(true);
+                                Object rbuObj = rbuField.get(creature);
+                                if (rbuObj instanceof java.util.EnumMap) {
+                                    @SuppressWarnings("unchecked")
+                                    java.util.EnumMap<com.bapppis.core.ResBuildUp, Integer> rbuMap = (java.util.EnumMap<com.bapppis.core.ResBuildUp, Integer>) rbuObj;
+                                    for (com.bapppis.core.ResBuildUp rb : com.bapppis.core.ResBuildUp.values()) {
+                                        if (!rbuMap.containsKey(rb)) {
+                                            rbuMap.put(rb, 0);
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                // ignore if reflection fails; creature will have defaults set in constructor
+                            }
                             if (creature.getHpDice() == 0) {
                                 creature.setHpDice(6);
                             }

@@ -6,10 +6,12 @@ import java.util.HashMap;
 import com.bapppis.core.util.AttackUtil;
 import com.bapppis.core.util.WeaponUtil;
 import com.bapppis.core.util.StatUtil;
+import com.bapppis.core.util.ResistanceUtil;
 
 import com.bapppis.core.property.Property;
 import com.google.gson.Gson;
 import com.bapppis.core.Resistances;
+import com.bapppis.core.ResBuildUp;
 import com.bapppis.core.creature.creatureEnums.CreatureType;
 import com.bapppis.core.creature.creatureEnums.Size;
 import com.bapppis.core.creature.creatureEnums.Stats;
@@ -42,6 +44,7 @@ public abstract class Creature {
     private CreatureType creatureType;
     private EnumMap<Stats, Integer> stats;
     private EnumMap<Resistances, Integer> resistances;
+    private java.util.EnumMap<ResBuildUp, Integer> resBuildUp;
     private float baseCrit;
     private float baseDodge;
     private float baseBlock;
@@ -158,6 +161,11 @@ public abstract class Creature {
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
             resistances.put(res, 100); // default resistance 100%
+        }
+        // Initialize ResBuildUp values to 0 for every enum entry
+        resBuildUp = new java.util.EnumMap<>(ResBuildUp.class);
+        for (ResBuildUp rb : ResBuildUp.values()) {
+            resBuildUp.put(rb, 0);
         }
         size = Size.MEDIUM; // default size
         type = Type.ENEMY; // default type
@@ -557,6 +565,40 @@ public abstract class Creature {
         // Adds the amount to the current resistance value, defaulting to 100 if unset
         int base = resistances.containsKey(resistance) ? resistances.get(resistance) : 100;
         resistances.put(resistance, base + amount);
+    }
+
+    // --- ResBuildUp helpers ---
+    public int getResBuildUp(ResBuildUp key) {
+        return resBuildUp.getOrDefault(key, 0);
+    }
+
+    /**
+     * Set an absolute value for the buildup. Allowed: 0..100 or -1 for immunity.
+     */
+    public void setResBuildUpAbsolute(ResBuildUp key, int value) {
+        if (value == -1) {
+            resBuildUp.put(key, -1);
+            return;
+        }
+        int v = Math.max(0, Math.min(100, value));
+        resBuildUp.put(key, v);
+    }
+
+    /**
+     * Modify buildup by delta. If current value is -1 (immune) no change will occur.
+     * Result is clamped to 0..100.
+     */
+    public void modifyResBuildUp(ResBuildUp key, int delta) {
+        int cur = resBuildUp.getOrDefault(key, 0);
+        if (cur == -1)
+            return; // immune, cannot be changed while immune
+        int next = cur + delta;
+        next = Math.max(0, Math.min(100, next));
+        resBuildUp.put(key, next);
+    }
+
+    public boolean isResBuildUpImmune(ResBuildUp key) {
+        return resBuildUp.getOrDefault(key, 0) == -1;
     }
 
     /**
@@ -1057,6 +1099,8 @@ public abstract class Creature {
 
     public void tickProperties() {
         propertyManager.tick();
+        // Decay build-ups via centralized util so behavior is consistent and testable
+        ResistanceUtil.decayResBuildUps(this);
     }
 
     public void recalcMaxHp() {

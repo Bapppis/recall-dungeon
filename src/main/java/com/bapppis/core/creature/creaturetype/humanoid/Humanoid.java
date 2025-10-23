@@ -8,6 +8,7 @@ public class Humanoid extends Creature {
     protected void applySpeciesModifications() {
         super.applySpeciesModifications();
         setSize(com.bapppis.core.creature.creatureEnums.Size.MEDIUM);
+        addProperty("BleedImmunity");
 
     }
 

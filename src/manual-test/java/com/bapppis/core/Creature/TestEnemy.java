@@ -7,6 +7,7 @@ import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Creature;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.item.ItemLoader;
+import com.bapppis.core.util.ResistanceUtil;
 
 public class TestEnemy {
     @BeforeEach
@@ -20,6 +21,10 @@ public class TestEnemy {
     @Test
     public void testGoblinCreation() {
         Creature goblin = CreatureLoader.getCreature("GoblinBerserker");
+        ResistanceUtil.modifyFireBuildUp(goblin, 50);
+        ResistanceUtil.modifyWaterBuildUp(goblin, -50);
+        ResistanceUtil.modifySlashingBuildUp(goblin, 50);
+        ResistanceUtil.printResBuildUps(goblin);
         //System.out.println(goblin);
         //goblin.printAllFields();
     }

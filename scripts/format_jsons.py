@@ -196,6 +196,7 @@ CANON_PROPERTY_ORDER: List[str] = [
     "magicAccuracy",
     "stats",
     "resistances",
+    "resBuildUp",
     "tooltip",
     "type",
 ]

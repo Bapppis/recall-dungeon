@@ -2,5 +2,11 @@
   "id": 1001,
   "name": "Bleed Immunity",
   "description": "Immunity to the bleed condition.",
+  "resBuildUp": {
+    "SLASHING": -1
+  },
+  "tooltip": [
+    "Immune to Bleed condition."
+  ],
   "type": "BUFF"
 }
