@@ -5,15 +5,15 @@
   "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "LEGWEAR",
-  "stats": {
-    "DEXTERITY": 1
-  },
-  "resistances": {},
   "dodge": 10.0,
   "crit": 0.0,
   "block": 0.0,
   "accuracy": 0,
   "magicAccuracy": 0,
+  "stats": {
+    "DEXTERITY": 1
+  },
+  "resistances": {},
   "tooltip": [
     "Test boots with DEX+1 and 10% dodge bonus"
   ],

@@ -1,11 +1,11 @@
 {
   "id": 2334,
+  "type": "DEBUFF",
   "name": "Bleed 1",
   "description": "Lose health over time.",
   "duration": 5,
   "hpRegen": -2,
   "tooltip": [
     "You lose 2 HP every turn."
-  ],
-  "type": "DEBUFF"
+  ]
 }

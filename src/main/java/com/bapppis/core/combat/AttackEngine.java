@@ -130,6 +130,12 @@ public final class AttackEngine {
                     hit *= 2;
                 }
                 totalPhysBeforeResist += hit;
+                // For every successful physical hit, add build-up to the target using the
+                // attack's damageType and the physical build-up modifier.
+                try {
+                    ResistanceUtil.addBuildUp(target, attack.getDamageTypeEnum(), attack.getPhysBuildUpMod());
+                } catch (Exception ignored) {
+                }
             }
             int physStatBase = 0;
             int physStatExtra = 0;
@@ -240,6 +246,19 @@ public final class AttackEngine {
                     hit *= 2;
                 }
                 magicBeforeResist += hit;
+                // For every successful magic hit, add build-up to the target. Prefer the
+                // weapon's magic element when available; otherwise fall back to the
+                // attack's magic damage type. Use the attack's magic build-up modifier.
+                try {
+                    com.bapppis.core.Resistances buildRes = null;
+                    if (weapon != null && weapon.getMagicElement() != null) {
+                        buildRes = weapon.getMagicElement();
+                    } else {
+                        buildRes = attack.getMagicDamageTypeEnum();
+                    }
+                    ResistanceUtil.addBuildUp(target, buildRes, attack.getMagicBuildUpMod());
+                } catch (Exception ignored) {
+                }
             }
 
             // Use ResistanceUtil for magic damage as well. This keeps logic centralized.

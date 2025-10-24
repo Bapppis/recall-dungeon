@@ -73,22 +73,23 @@ CANON_TOP_ORDER: List[str] = [
     "itemType",
     "equipmentSlot",
     "weaponClass",
-    "twoHanded",
-    "finesse",
-    "versatile",
+    "weaponType",
     "damageType",
     "magicElement",
     "magicStatBonuses",  # multi-stat support (array)
     "magicStatBonus",
-    "stats",
-    "resistances",
+    "twoHanded",
+    "finesse",
+    "versatile",
     "dodge",
     "crit",
     "block",
     "accuracy",
     "magicAccuracy",
-    "tooltip",
+    "stats",
+    "resistances",
     "attacks",
+    "tooltip",
 ]
 
 # Canonical ordering for attack objects (fields optional; absent ones skipped).
@@ -97,11 +98,13 @@ CANON_ATTACK_ORDER: List[str] = [
     "times",
     "accuracy",
     "magicAccuracy",
+    "critMod",
+    "PhysBuildUpMod",
+    "MagicBuildUpMod",
     "physicalDamageDice",
     "magicDamageDice",
     "damageMultiplier",
     "magicDamageMultiplier",
-    "critMod",
     "weight",
     "damageType",
 ]
@@ -118,8 +121,6 @@ CANON_CREATURE_ORDER: List[str] = [
     "xp",
     "enemyXp",
     "visionRange",
-    "stats",
-    "resistances",
     "baseBlock",
     "baseCrit",
     "baseDodge",
@@ -133,6 +134,8 @@ CANON_CREATURE_ORDER: List[str] = [
     "baseHpRegen",
     "baseStaminaRegen",
     "baseManaRegen",
+    "stats",
+    "resistances",
     "helmet",
     "armor",
     "legwear",
@@ -174,6 +177,7 @@ CANON_CREATURE_RESISTS: List[str] = [
 # Canonical top-level ordering for properties (derived from TestDebuff.json)
 CANON_PROPERTY_ORDER: List[str] = [
     "id",
+    "type",
     "name",
     "description",
     "duration",
@@ -198,7 +202,6 @@ CANON_PROPERTY_ORDER: List[str] = [
     "resistances",
     "resBuildUp",
     "tooltip",
-    "type",
 ]
 
 
@@ -236,7 +239,8 @@ def transform(obj: Any, kind: str = None) -> Any:
 
         # Recurse into values
         for k, v in list(obj.items()):
-            if k == "attacks" and isinstance(v, list):
+            # Apply canonical ordering to both 'attacks' and 'versatileAttacks' arrays
+            if k in ("attacks", "versatileAttacks") and isinstance(v, list):
                 new_attacks = []
                 for attack in v:
                     if isinstance(attack, dict):

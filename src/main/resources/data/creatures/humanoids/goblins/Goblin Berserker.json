@@ -7,6 +7,12 @@
   "level": 0,
   "enemyXp": 4,
   "visionRange": 1,
+  "baseBlock": 5,
+  "baseCrit": 5,
+  "baseDodge": 5,
+  "baseMagicResist": 0,
+  "baseHp": 25,
+  "hpDice": 20,
   "stats": {
     "STRENGTH": 11,
     "DEXTERITY": 11,
@@ -30,12 +36,6 @@
     "SLASHING": 90,
     "TRUE": 100
   },
-  "baseBlock": 5,
-  "baseCrit": 5,
-  "baseDodge": 5,
-  "baseMagicResist": 0,
-  "baseHp": 25,
-  "hpDice": 20,
   "removeProperties": [
     "Coward"
   ],

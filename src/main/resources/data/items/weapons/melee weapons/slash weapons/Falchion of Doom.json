@@ -6,42 +6,31 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
-  "twoHanded": true,
+  "weaponType": "SLASH",
   "damageType": "SLASHING",
   "magicElement": "DARKNESS",
   "magicStatBonuses": [
     "CHARISMA"
   ],
+  "twoHanded": true,
+  "crit": 15,
+  "block": 10,
+  "accuracy": 1,
+  "magicAccuracy": 1,
   "stats": {
     "STRENGTH": 2
   },
   "resistances": {
     "DARKNESS": -15
   },
-  "crit": 15,
-  "block": 10,
-  "accuracy": 1,
-  "magicAccuracy": 1,
-  "tooltip": [
-    "You gain 15% critical chance while wielding this weapon.",
-    "",
-    "You gain 10% block chance while wielding this weapon.",
-    "",
-    "You gain +2 STR while wielding this weapon.",
-    "You take 15% less darkness damage while wielding this weapon.",
-    "",
-    "Double Slash (40%): Deals 2-12 + 5 * STR bonus slashing damage and 2-8 + 5 * CHA/INT bonus darkness damage.",
-    "",
-    "Big Slash (40%): Deals 2-12 + 5 * STR bonus slashing damage and 1-8 + 5 * CHA/INT bonus darkness damage. This attack has a +10% critical chance.",
-    "",
-    "Shadow Slashes (20%): Deals 9-20 + 5 * STR bonus slashing damage and 12-16 + 5 * CHA/INT bonus darkness damage. This attack has a +5% critical chance."
-  ],
   "attacks": [
     {
       "name": "Double Slash",
       "damageType": "SLASHING",
       "accuracy": null,
       "magicAccuracy": null,
+      "MagicBuildUpMod": 0.5,
+      "PhysBuildUpMod": 0.5,
       "damageMultiplier": 0.5,
       "magicDamageDice": "1d4",
       "magicDamageMultiplier": 0.5,
@@ -54,6 +43,8 @@
       "damageType": "SLASHING",
       "accuracy": null,
       "magicAccuracy": null,
+      "MagicBuildUpMod": 1.0,
+      "PhysBuildUpMod": 1.0,
       "critMod": "+10",
       "damageMultiplier": 1.0,
       "magicDamageDice": "1d8",
@@ -67,6 +58,8 @@
       "damageType": "SLASHING",
       "accuracy": null,
       "magicAccuracy": null,
+      "MagicBuildUpMod": 0.25,
+      "PhysBuildUpMod": 0.25,
       "critMod": "+5",
       "damageMultiplier": 0.25,
       "magicDamageDice": "1d2+2",
@@ -76,5 +69,18 @@
       "weight": 2
     }
   ],
-  "weaponType": "SLASH"
+  "tooltip": [
+    "You gain 15% critical chance while wielding this weapon.",
+    "",
+    "You gain 10% block chance while wielding this weapon.",
+    "",
+    "You gain +2 STR while wielding this weapon.",
+    "You take 15% less darkness damage while wielding this weapon.",
+    "",
+    "Double Slash (40%): Deals 2-12 + 5 * STR bonus slashing damage and 2-8 + 5 * CHA/INT bonus darkness damage.",
+    "",
+    "Big Slash (40%): Deals 2-12 + 5 * STR bonus slashing damage and 1-8 + 5 * CHA/INT bonus darkness damage. This attack has a +10% critical chance.",
+    "",
+    "Shadow Slashes (20%): Deals 9-20 + 5 * STR bonus slashing damage and 12-16 + 5 * CHA/INT bonus darkness damage. This attack has a +5% critical chance."
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "id": 1009,
+  "type": "BUFF",
   "name": "Jolt Immunity",
-  "description": "Immunity to the jolt condition.",
-  "type": "BUFF"
+  "description": "Immunity to the jolt condition."
 }

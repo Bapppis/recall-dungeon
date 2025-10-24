@@ -1,7 +1,7 @@
 {
   "id": 4003,
+  "type": "TRAIT",
   "name": "TestTrait3",
   "description": "Test trait 3: vision+1, no stat modifiers",
-  "type": "TRAIT",
   "visionRange": 1
 }

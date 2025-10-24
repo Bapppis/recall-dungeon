@@ -472,7 +472,11 @@ public class CreatureLoader {
                             if (resistMap != null) {
                                 for (com.bapppis.core.Resistances res : com.bapppis.core.Resistances.values()) {
                                     if (!resistMap.containsKey(res)) {
-                                        creature.setResistance(res, 100);
+                                        if (res == com.bapppis.core.Resistances.TRUE) {
+                                            creature.setResistance(res, 50);
+                                        } else {
+                                            creature.setResistance(res, 100);
+                                        }
                                     }
                                 }
                             }

@@ -1,6 +1,6 @@
 {
   "id": 1008,
+  "type": "BUFF",
   "name": "InstaKill Immunity",
-  "description": "Immunity to the insta-kill condition.",
-  "type": "BUFF"
+  "description": "Immunity to the insta-kill condition."
 }

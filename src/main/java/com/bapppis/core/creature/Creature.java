@@ -45,6 +45,7 @@ public abstract class Creature {
     private EnumMap<Stats, Integer> stats;
     private EnumMap<Resistances, Integer> resistances;
     private java.util.EnumMap<ResBuildUp, Integer> resBuildUp;
+    private java.util.EnumSet<ResBuildUp> freshResBuildUps = java.util.EnumSet.noneOf(ResBuildUp.class);
     private float baseCrit;
     private float baseDodge;
     private float baseBlock;
@@ -83,34 +84,34 @@ public abstract class Creature {
     private java.util.List<Attack> attacks = new java.util.ArrayList<>();
     private String sprite;
 
-        // --- Base stat modifier helpers ---
-        public void modifyBaseCrit(float delta) {
-            this.baseCrit += delta;
-            updateCrit();
-        }
+    // --- Base stat modifier helpers ---
+    public void modifyBaseCrit(float delta) {
+        this.baseCrit += delta;
+        updateCrit();
+    }
 
-        public void modifyBaseDodge(float delta) {
-            this.baseDodge += delta;
-            recalcDerivedStats();
-        }
+    public void modifyBaseDodge(float delta) {
+        this.baseDodge += delta;
+        recalcDerivedStats();
+    }
 
-        public void modifyBaseBlock(float delta) {
-            this.baseBlock += delta;
-            recalcDerivedStats();
-        }
+    public void modifyBaseBlock(float delta) {
+        this.baseBlock += delta;
+        recalcDerivedStats();
+    }
 
-        public void modifyBaseMagicResist(float delta) {
-            this.baseMagicResist += delta;
-            recalcDerivedStats();
-        }
+    public void modifyBaseMagicResist(float delta) {
+        this.baseMagicResist += delta;
+        recalcDerivedStats();
+    }
 
-        public void modifyBaseAccuracy(int delta) {
-            this.accuracy += delta;
-        }
+    public void modifyBaseAccuracy(int delta) {
+        this.accuracy += delta;
+    }
 
-        public void modifyBaseMagicAccuracy(int delta) {
-            this.magicAccuracy += delta;
-        }
+    public void modifyBaseMagicAccuracy(int delta) {
+        this.magicAccuracy += delta;
+    }
 
     public String getSprite() {
         return sprite;
@@ -160,7 +161,12 @@ public abstract class Creature {
         recalcStatBonuses();
         resistances = new EnumMap<>(Resistances.class);
         for (Resistances res : Resistances.values()) {
-            resistances.put(res, 100); // default resistance 100%
+            // TRUE damage defaults to 50% resistance, other types default to 100%
+            if (res == Resistances.TRUE) {
+                resistances.put(res, 50);
+            } else {
+                resistances.put(res, 100); // default resistance 100%
+            }
         }
         // Initialize ResBuildUp values to 0 for every enum entry
         resBuildUp = new java.util.EnumMap<>(ResBuildUp.class);
@@ -573,6 +579,28 @@ public abstract class Creature {
     }
 
     /**
+     * Mark a ResBuildUp as freshly increased so it will be skipped by the next
+     * decay pass. Safe to call even if the EnumSet is uninitialized.
+     */
+    public void markResBuildUpFresh(ResBuildUp key) {
+        if (key == null)
+            return;
+        if (freshResBuildUps == null)
+            freshResBuildUps = java.util.EnumSet.noneOf(ResBuildUp.class);
+        freshResBuildUps.add(key);
+    }
+
+    /**
+     * Test whether a ResBuildUp was marked fresh; if so, clear the flag and
+     * return true. Used by the decay routine to skip one tick of decay.
+     */
+    public boolean testAndClearResBuildUpFresh(ResBuildUp key) {
+        if (key == null || freshResBuildUps == null)
+            return false;
+        return freshResBuildUps.remove(key);
+    }
+
+    /**
      * Set an absolute value for the buildup. Allowed: 0..100 or -1 for immunity.
      */
     public void setResBuildUpAbsolute(ResBuildUp key, int value) {
@@ -585,8 +613,11 @@ public abstract class Creature {
     }
 
     /**
-     * Modify buildup by delta. If current value is -1 (immune) no change will occur.
+     * Modify buildup by delta. If current value is -1 (immune) no change will
+     * occur.
      * Result is clamped to 0..100.
+     * After modification, checks for overload (buildup >= 100%) and triggers
+     * debuff if applicable.
      */
     public void modifyResBuildUp(ResBuildUp key, int delta) {
         int cur = resBuildUp.getOrDefault(key, 0);
@@ -595,6 +626,8 @@ public abstract class Creature {
         int next = cur + delta;
         next = Math.max(0, Math.min(100, next));
         resBuildUp.put(key, next);
+        // Check for overload after every modification
+        com.bapppis.core.util.ResistanceUtil.checkResOverload(this);
     }
 
     public boolean isResBuildUpImmune(ResBuildUp key) {

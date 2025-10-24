@@ -5,6 +5,8 @@
   "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
+  "dodge": 5,
+  "block": 5,
   "stats": {
     "DEXTERITY": 1
   },
@@ -12,8 +14,6 @@
     "BLUDGEONING": -5,
     "SLASHING": -5
   },
-  "dodge": 5,
-  "block": 5,
   "tooltip": [
     "Your dodge chance is increased by 5% while wearing this armor.",
     "",

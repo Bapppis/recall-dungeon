@@ -1,5 +1,6 @@
 {
   "id": 2332,
+  "type": "BUFF",
   "name": "TestBuff",
   "description": "A buff used for testing purposes.",
   "duration": 10,
@@ -33,7 +34,6 @@
   "tooltip": [
     "Touched by the gods."
   ],
-  "type": "BUFF",
   "statModifiers": {
     "STRENGTH": 1,
     "DEXTERITY": 1,

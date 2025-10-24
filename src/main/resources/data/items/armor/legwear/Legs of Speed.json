@@ -5,6 +5,7 @@
   "rarity": "RARE",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "LEGWEAR",
+  "dodge": 15,
   "stats": {
     "DEXTERITY": 4
   },
@@ -12,7 +13,6 @@
     "BLUDGEONING": -10,
     "SLASHING": -10
   },
-  "dodge": 15,
   "tooltip": [
     "Your dodge chance is increased by 15% while wearing this armor.",
     "",

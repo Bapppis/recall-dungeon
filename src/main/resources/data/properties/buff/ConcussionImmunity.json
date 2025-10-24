@@ -1,6 +1,6 @@
 {
   "id": 1004,
+  "type": "BUFF",
   "name": "Concussion Immunity",
-  "description": "Immunity to the concussion condition.",
-  "type": "BUFF"
+  "description": "Immunity to the concussion condition."
 }

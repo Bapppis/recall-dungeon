@@ -5,6 +5,7 @@
   "rarity": "RARE",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
+  "block": 20,
   "stats": {
     "CONSTITUTION": 2,
     "INTELLIGENCE": 2
@@ -12,7 +13,6 @@
   "resistances": {
     "WATER": -50
   },
-  "block": 20,
   "tooltip": [
     "Your gain 20% block chance while wearing this armor.",
     "",

@@ -12,7 +12,27 @@ import java.util.List;
 public abstract class Weapon extends Equipment {
     @Override
     public String toString() {
-        return getName() + " (id=" + getId() + ", class=" + getWeaponClass() + (isTwoHanded() ? ", 2H" : "") + ")";
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName()).append(" (id=").append(getId()).append(", class=").append(getWeaponClass());
+        if (isTwoHanded()) sb.append(", 2H");
+        sb.append(")");
+        if (getDamageType() != null) {
+            sb.append(" damage=").append(getDamageType().name());
+        }
+        if (getMagicElement() != null) {
+            sb.append(" magic=").append(getMagicElement().name());
+        }
+        if (getAttacks() != null && !getAttacks().isEmpty()) {
+            sb.append(" attacks=[");
+            boolean first = true;
+            for (com.bapppis.core.creature.Attack a : getAttacks()) {
+                if (!first) sb.append(", ");
+                sb.append(a == null ? "null" : a.toString());
+                first = false;
+            }
+            sb.append("]");
+        }
+        return sb.toString();
     }
     private boolean twoHanded;
     public boolean isTwoHanded() { return twoHanded; }

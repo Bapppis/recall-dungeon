@@ -1,5 +1,6 @@
 {
   "id": 1001,
+  "type": "BUFF",
   "name": "Bleed Immunity",
   "description": "Immunity to the bleed condition.",
   "resBuildUp": {
@@ -7,6 +8,5 @@
   },
   "tooltip": [
     "Immune to Bleed condition."
-  ],
-  "type": "BUFF"
+  ]
 }

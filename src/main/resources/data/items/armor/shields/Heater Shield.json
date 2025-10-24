@@ -5,12 +5,12 @@
   "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "OFFHAND",
+  "block": 15,
   "resistances": {
     "BLUDGEONING": -10,
     "PIERCING": -5,
     "SLASHING": -15
   },
-  "block": 15,
   "tooltip": [
     "Your gain 15% block chance while wearing this armor.",
     "",

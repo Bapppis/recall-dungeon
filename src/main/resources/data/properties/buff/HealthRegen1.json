@@ -1,11 +1,11 @@
 {
   "id": 1011,
+  "type": "BUFF",
   "name": "Health Regen 1",
   "description": "Restores health over time.",
   "duration": 5,
   "hpRegen": 2,
   "tooltip": [
     "You regenerate 2 HP every turn."
-  ],
-  "type": "BUFF"
+  ]
 }

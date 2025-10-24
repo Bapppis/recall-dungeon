@@ -5,13 +5,13 @@
   "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
+  "dodge": 5,
   "stats": {
     "DEXTERITY": 1
   },
   "resistances": {
     "NATURE": -10
   },
-  "dodge": 5,
   "tooltip": [
     "Your dodge chance is increased by 5% while wearing this armor.",
     "",

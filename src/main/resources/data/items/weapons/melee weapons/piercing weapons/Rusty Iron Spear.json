@@ -6,28 +6,28 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
-  "versatile": true,
+  "weaponType": "PIERCE",
   "damageType": "PIERCING",
   "magicElement": "NATURE",
-  "tooltip": [
-    "Slash (70%): Deals 1-6 + 5 * STR bonus (1-8 + 5 * 1.25 STR bonus) slashing damage and 1 (1-2) nature damage.",
-    "",
-    "Thrust (30%): Deals 2-6 + 5 * STR bonus (2-8 + 5 * 1.25 STR bonus) piercing damage and 1-2 (1-4) nature damage. This attack has a +5% (10%) critical chance."
-  ],
+  "versatile": true,
   "attacks": [
     {
       "name": "Jabs",
+      "weaponType": "PIERCE",
+      "MagicBuildUpMod": 0.5,
+      "PhysBuildUpMod": 0.5,
       "damageMultiplier": 0.5,
       "magicDamageDice": "1d1",
       "magicDamageMultiplier": 0,
       "physicalDamageDice": "1d6",
       "times": 2,
-      "weaponType": "PIERCE",
       "weight": 7
     },
     {
       "name": "Thrust",
       "damageType": "PIERCING",
+      "MagicBuildUpMod": 1.0,
+      "PhysBuildUpMod": 1.0,
       "critMod": "+5",
       "damageMultiplier": 1.0,
       "magicDamageDice": "1d2",
@@ -37,10 +37,17 @@
       "weight": 3
     }
   ],
+  "tooltip": [
+    "Slash (70%): Deals 1-6 + 5 * STR bonus (1-8 + 5 * 1.25 STR bonus) slashing damage and 1 (1-2) nature damage.",
+    "",
+    "Thrust (30%): Deals 2-6 + 5 * STR bonus (2-8 + 5 * 1.25 STR bonus) piercing damage and 1-2 (1-4) nature damage. This attack has a +5% (10%) critical chance."
+  ],
   "versatileAttacks": [
     {
       "name": "Two-handed Jabs",
       "damageType": "PIERCING",
+      "MagicBuildUpMod": 0.75,
+      "PhysBuildUpMod": 0.75,
       "damageMultiplier": 0.75,
       "magicDamageDice": "1d2",
       "magicDamageMultiplier": 0,
@@ -52,6 +59,8 @@
       "name": "Two-handed Thrust",
       "damageType": "PIERCING",
       "critMod": "+10",
+      "MagicBuildUpMod": 1.25,
+      "PhysBuildUpMod": 1.25,
       "damageMultiplier": 1.25,
       "magicDamageDice": "1d4",
       "magicDamageMultiplier": 0,
@@ -59,6 +68,5 @@
       "times": 1,
       "weight": 3
     }
-  ],
-  "weaponType": "PIERCE"
+  ]
 }

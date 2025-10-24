@@ -24,9 +24,10 @@ public class BuildUpTest {
         // numeric modifications and clamping
         p.modifyResBuildUp(ResBuildUp.FIRE, 50);
         assertEquals(50, p.getResBuildUp(ResBuildUp.FIRE));
-        p.modifyResBuildUp(ResBuildUp.FIRE, 60); // would go to 110 -> clamp 100
-        assertEquals(100, p.getResBuildUp(ResBuildUp.FIRE));
-        p.modifyResBuildUp(ResBuildUp.FIRE, -30);
+        // After reaching 100, overload triggers and resets to 0 (new behavior)
+        p.modifyResBuildUp(ResBuildUp.FIRE, 60); // would go to 110 -> clamp 100, then overload resets to 0
+        assertEquals(0, p.getResBuildUp(ResBuildUp.FIRE), "After overload at 100%, buildup resets to 0");
+        p.modifyResBuildUp(ResBuildUp.FIRE, 70);
         assertEquals(70, p.getResBuildUp(ResBuildUp.FIRE));
 
         // absolute set and immunity
@@ -83,5 +84,22 @@ public class BuildUpTest {
         prop.onRemove(p);
         assertEquals(0, p.getResBuildUp(ResBuildUp.FIRE), "Removing property should revert numeric delta");
         assertEquals(0, p.getResBuildUp(ResBuildUp.SLASHING), "Removing property should restore previous value (0)");
+    }
+
+    @Test
+    public void addBuildUpAndFreshSkipDecay() {
+        Player p = new Player();
+        // Set resistance to 100% so amount = floor(20 * 1.0 * 1.0) = 20
+        p.setResistance(Resistances.FIRE, 100);
+        ResistanceUtil.addBuildUp(p, Resistances.FIRE, 1.0f);
+        assertEquals(20, p.getResBuildUp(ResBuildUp.FIRE), "addBuildUp should apply BASE_BUILD_UP * mult * resistanceFactor");
+
+        // First decay should skip because the buildup was just added
+        ResistanceUtil.decayResBuildUps(p);
+        assertEquals(20, p.getResBuildUp(ResBuildUp.FIRE), "fresh buildup should skip decay once");
+
+        // Second decay should apply: decay for resistance 100 is (200-100)/10 = 10
+        ResistanceUtil.decayResBuildUps(p);
+        assertEquals(10, p.getResBuildUp(ResBuildUp.FIRE), "after skip, next decay should reduce by expected amount");
     }
 }

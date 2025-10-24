@@ -1,5 +1,6 @@
 {
   "id": 3665,
+  "type": "DEBUFF",
   "name": "Test Debuff",
   "description": "A debuff used for testing purposes.",
   "duration": 5,
@@ -41,6 +42,5 @@
   },
   "tooltip": [
     "Cursed by the gods."
-  ],
-  "type": "DEBUFF"
+  ]
 }

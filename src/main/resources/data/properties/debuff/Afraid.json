@@ -1,10 +1,10 @@
 {
   "id": 2333,
+  "type": "DEBUFF",
   "name": "Afraid",
   "description": "Unable to act properly and weaker to darkness",
   "duration": 3,
   "resistances": {
     "DARKNESS": 50
-  },
-  "type": "DEBUFF"
+  }
 }

@@ -1,7 +1,7 @@
 {
   "id": 3668,
+  "type": "TRAIT",
   "name": "Darksight",
   "description": "Your vision range is now increased by one tile in darkness",
-  "type": "TRAIT",
   "visionRange": 1
 }

@@ -5,6 +5,11 @@
   "rarity": "LEGENDARY",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "ARMOR",
+  "dodge": -10.0,
+  "crit": 0.0,
+  "block": 5.0,
+  "accuracy": 0,
+  "magicAccuracy": 0,
   "stats": {
     "CONSTITUTION": 4,
     "DEXTERITY": -2,
@@ -15,11 +20,6 @@
     "FIRE": -10,
     "SLASHING": 15
   },
-  "dodge": -10.0,
-  "crit": 0.0,
-  "block": 5.0,
-  "accuracy": 0,
-  "magicAccuracy": 0,
   "tooltip": [
     "Heavy test armor with CON+4, STR+2, DEX-2",
     "Provides +10 defense, 5% block, -10% dodge, 10% magic resist",

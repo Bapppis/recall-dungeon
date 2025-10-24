@@ -5,11 +5,11 @@
   "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "LEGWEAR",
+  "dodge": 5,
+  "block": 5,
   "resistances": {
     "SLASHING": -5
   },
-  "dodge": 5,
-  "block": 5,
   "tooltip": [
     "Your dodge chance is increased by 5% while wearing this armor.",
     "",

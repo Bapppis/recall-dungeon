@@ -8,6 +8,12 @@
   "level": 1,
   "enemyXp": 5,
   "visionRange": 3,
+  "baseBlock": 0,
+  "baseCrit": 5,
+  "baseDodge": 5,
+  "baseMagicResist": 0,
+  "baseHp": 30,
+  "hpDice": 20,
   "stats": {
     "STRENGTH": 11,
     "CONSTITUTION": 12,
@@ -19,12 +25,6 @@
     "DARKNESS": 80,
     "SLASHING": 90
   },
-  "baseBlock": 0,
-  "baseCrit": 5,
-  "baseDodge": 5,
-  "baseMagicResist": 0,
-  "baseHp": 30,
-  "hpDice": 20,
   "properties": [
     "Darksight"
   ],

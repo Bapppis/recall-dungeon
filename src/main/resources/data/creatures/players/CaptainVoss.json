@@ -7,15 +7,6 @@
   "level": 0,
   "xp": 0,
   "visionRange": 2,
-  "stats": {
-    "STRENGTH": 13,
-    "DEXTERITY": 10,
-    "CONSTITUTION": 12,
-    "INTELLIGENCE": 10,
-    "WISDOM": 10,
-    "CHARISMA": 10,
-    "LUCK": 1
-  },
   "baseBlock": 15,
   "baseCrit": 0,
   "baseDodge": 5,
@@ -27,6 +18,15 @@
   "baseHpRegen": 0,
   "baseStaminaRegen": 0,
   "baseManaRegen": 0,
+  "stats": {
+    "STRENGTH": 13,
+    "DEXTERITY": 10,
+    "CONSTITUTION": 12,
+    "INTELLIGENCE": 10,
+    "WISDOM": 10,
+    "CHARISMA": 10,
+    "LUCK": 1
+  },
   "helmet": null,
   "armor": "BrokenSteelArmor",
   "legwear": "LeatherLeggings",

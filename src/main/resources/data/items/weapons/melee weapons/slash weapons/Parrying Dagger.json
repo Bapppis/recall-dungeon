@@ -6,25 +6,20 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "MELEE",
-  "finesse": true,
+  "weaponType": "SLASH",
   "damageType": "SLASHING",
+  "finesse": true,
   "stats": {
     "DEXTERITY": 1
   },
   "resistances": {
     "SLASHING": -10
   },
-  "tooltip": [
-    "You take 10% less slashing damage while wielding this weapon.",
-    "",
-    "Slashes (70%): Deals 2-6 + 5 * DEX bonus slashing damage.",
-    "",
-    "Stab (30%): Deals 1-6 + 5 * DEX bonus piercing damage. This attack has a +5% critical chance."
-  ],
   "attacks": [
     {
       "name": "Slashes",
       "damageType": "SLASHING",
+      "PhysBuildUpMod": 0.5,
       "damageMultiplier": 0.5,
       "physicalDamageDice": "1d3",
       "times": 2,
@@ -33,6 +28,7 @@
     {
       "name": "Stab",
       "damageType": "PIERCING",
+      "PhysBuildUpMod": 1.0,
       "critMod": "+5",
       "damageMultiplier": 1.0,
       "physicalDamageDice": "1d6",
@@ -40,5 +36,11 @@
       "weight": 3
     }
   ],
-  "weaponType": "SLASH"
+  "tooltip": [
+    "You take 10% less slashing damage while wielding this weapon.",
+    "",
+    "Slashes (70%): Deals 2-6 + 5 * DEX bonus slashing damage.",
+    "",
+    "Stab (30%): Deals 1-6 + 5 * DEX bonus piercing damage. This attack has a +5% critical chance."
+  ]
 }

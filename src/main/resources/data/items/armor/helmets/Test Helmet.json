@@ -5,6 +5,11 @@
   "rarity": "RARE",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
+  "dodge": 0.0,
+  "crit": 5.0,
+  "block": 0.0,
+  "accuracy": 0,
+  "magicAccuracy": 2,
   "stats": {
     "CHARISMA": -1,
     "INTELLIGENCE": 2,
@@ -14,11 +19,6 @@
     "DARKNESS": -5,
     "LIGHT": 10
   },
-  "dodge": 0.0,
-  "crit": 5.0,
-  "block": 0.0,
-  "accuracy": 0,
-  "magicAccuracy": 2,
   "tooltip": [
     "Test helmet with WIS+3, INT+2, CHA-1",
     "Provides +3 defense, 5% crit, 15% magic resist, +2 magic accuracy",

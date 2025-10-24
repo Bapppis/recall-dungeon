@@ -5,13 +5,13 @@
   "rarity": "COMMON",
   "itemType": "EQUIPMENT",
   "equipmentSlot": "HELMET",
+  "block": 2.5,
   "resistances": {
     "BLUDGEONING": -5,
     "DARKNESS": 5,
     "LIGHT": -20,
     "SLASHING": -25
   },
-  "block": 2.5,
   "tooltip": [
     "Your gain 2.5% block chance while wearing this armor.",
     "",

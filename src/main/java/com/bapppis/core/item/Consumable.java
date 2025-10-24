@@ -8,6 +8,11 @@ public class Consumable extends Equipment {
     private String healingDice;
     // properties field is inherited from Equipment, no need to redeclare
 
+    @Override
+    public String toString() {
+        return getName() + " (id=" + getId() + ", type=" + getType() + ")";
+    }
+
     public String getHealingDice() { return healingDice; }
     public void setHealingDice(String healingDice) { this.healingDice = healingDice; }
 

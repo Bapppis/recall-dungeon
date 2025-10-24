@@ -17,6 +17,8 @@ public class Attack {
     public String critMod;
     public Integer accuracy;
     public Integer magicAccuracy;
+    public float PhysBuildUpMod = 1.0f;
+    public float MagicBuildUpMod = 1.0f;
 
     public int getTimes() {
         return times == null ? 1 : times;
@@ -52,6 +54,14 @@ public class Attack {
         return magicAccuracy == null ? 0 : magicAccuracy.intValue();
     }
 
+    public float getPhysBuildUpMod() {
+        return PhysBuildUpMod;
+    }
+
+    public float getMagicBuildUpMod() {
+        return MagicBuildUpMod;
+    }
+
     public Resistances getDamageTypeEnum() {
         return this.damageType;
     }
@@ -75,6 +85,8 @@ public class Attack {
         if (critMod != null && !critMod.isBlank()) sb.append("critMod=").append(critMod).append(", ");
         if (accuracy != null) sb.append("accuracy=").append(accuracy).append(", ");
         if (magicAccuracy != null) sb.append("magicAccuracy=").append(magicAccuracy).append(", ");
+        sb.append("PhysBuildUpMod=").append(PhysBuildUpMod).append(", ");
+        sb.append("MagicBuildUpMod=").append(MagicBuildUpMod).append(", ");
         sb.append("weight=").append(getWeight());
         sb.append("]");
         return sb.toString();

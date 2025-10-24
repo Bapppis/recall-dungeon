@@ -6,6 +6,12 @@
   "creatureType": "UNDEAD",
   "level": 0,
   "enemyXp": 3,
+  "baseBlock": 10,
+  "baseCrit": 10,
+  "baseDodge": 5,
+  "baseMagicResist": 5,
+  "baseHp": 20,
+  "hpDice": 15,
   "stats": {
     "STRENGTH": 11,
     "DEXTERITY": 11,
@@ -29,12 +35,6 @@
     "SLASHING": 100,
     "TRUE": 100
   },
-  "baseBlock": 10,
-  "baseCrit": 10,
-  "baseDodge": 5,
-  "baseMagicResist": 5,
-  "baseHp": 20,
-  "hpDice": 15,
   "properties": [
     "Darksight"
   ],

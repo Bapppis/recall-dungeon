@@ -84,15 +84,21 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ### Combat System
 
-- Turn-based combat loop between player and enemies. The combat resolution was refactored to separate physical and magical components and to make testing deterministic.
-- Player chooses actions (attack, flee, etc.) each turn (the game also exposes a non-interactive mode for automated tests).
-- Dice-based damage calculation (e.g., 2d6 for physical, 1d8 for magic).
-- Attack resolution (current model):
-  - Each attempted hit rolls a single to-hit value (0–100) and compares it to the target's avoidance window.
-  - Physical hits use a dodge+block partition (block prevents damage like armor); TRUE-type physical damage ignores block and only checks dodge.
-  - Magical hits use dodge + magic resist as the avoidance window (no block).
-  - Weapons with a magic element can trigger a dual-resolution attack: physical and magical parts are resolved independently and reported separately.
-  - Crits are rolled per successful hit and are included in detailed `AttackEngine.AttackReport` objects emitted via `AttackEngine.attackListener` (useful for tests).
+- **Turn-based combat** between player and enemies with sophisticated hit/miss/crit mechanics
+- **Per-hit resolution**: Each attack can have multiple hits (`attack.times`), each resolved independently
+- **Dice-based damage**: Physical and magical damage use dice notation (e.g., `2d6`, `1d8+5`)
+- **Resistance buildup system**: Successful hits add buildup (0-100%) to resistance types
+  - When buildup reaches 100%, triggers **Resistance Overload** (applies debuff, resets to 0)
+  - Buildup decays over time based on target's resistance values
+  - Fresh-flag system prevents immediate decay after new buildup
+- **Attack resolution**:
+  - Physical: Roll to-hit vs. dodge+block partition (TRUE damage ignores block)
+  - Magical: Roll to-hit vs. dodge+magicResist partition
+  - Dual-element weapons resolve physical and magical independently
+- **Critical hits**: Rolled per successful hit, doubles damage for that hit
+- **Damage bonuses**: Stat bonuses (STR/DEX for physical, INT/WIS/CHA for magic) and multipliers
+- **Detailed reporting**: `AttackEngine.AttackReport` tracks all combat metrics for testing and logging
+- **See [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md) for complete combat mechanics documentation**
 
 ### Properties & Traits
 
@@ -135,49 +141,47 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ## Combat and Stats
 
-### Attack Resolution
+> **📖 For comprehensive combat system documentation, see [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md)**
+>
+> The SYSTEM_REFERENCE provides detailed explanations of:
+> - Complete attack resolution flow (to-hit, damage, crits, buildup)
+> - Resistance buildup and overload system
+> - Multi-hit mechanics and damage calculation
+> - Stat formulas and derived values
+> - All combat-related enums and constants
 
-- **Single to-hit roll per attack** (0–100) compared against target's avoidance window
-- **Physical attacks:**
-  - Use dodge + block as avoidance window (partitioned to avoid overlap)
-  - Block prevents damage entirely (like armor deflection)
-  - TRUE-type physical damage ignores block, only checks dodge
-- **Magical attacks:**
-  - Use dodge + magic resist as avoidance window (no block)
-  - Magic resist reduces magical damage
-- **Dual-element weapons:**
-  - Physical and magical components resolved independently
-  - Separate damage calculations and reports for each type
-- **Critical hits:**
-  - Rolled per successful hit
-  - Crit chance clamped to 0–100 at check time
-  - Detailed crit information in `AttackEngine.AttackReport`
+### Quick Reference
 
-### Stat Mechanics
+**Attack Resolution:**
+- To-hit roll (0-100) vs. avoidance window (dodge + block/magicResist)
+- Physical attacks use dodge+block partition; TRUE damage ignores block
+- Magical attacks use dodge+magicResist partition
+- Each hit in multi-hit attacks resolves independently
 
-- **Dexterity → Dodge:**
-  - Formula: `Dodge = baseDodge + 2.5 × (DEX − 10)`
-  - Negative DEX reduces dodge; positive DEX increases it
-- **Intelligence → Max Mana:**
-  - Max mana scales ±10% per INT point relative to 10
-  - Result floored with minimum of 25
-  - Current mana preserves fraction when max changes
-- **Wisdom → Stamina Regeneration:**
-  - Base regen: `floor(maxStamina / 5)`
-  - Bonus: `floor(2.5 × (WIS - 10))` with minimum of 1
-  - Equipment provides additional regen
+**Critical Hits:**
+- Base formula: `crit = baseCrit + 5 × (LUCK - 1) + equipment + properties`
+- Rolled per successful hit, doubles that hit's damage
+- Clamped to [0, 100] when checked
 
-### Raw vs Effective Values
+**Resistance Buildup:**
+- Base: 20 per hit × attack modifier × (target resistance / 100)
+- Range: 0-100% (or -1 for immunity)
+- **Overload at 100%**: applies debuff, resets to 0
+- Decays over time: `(200 - resistance) / 10` per tick
 
-- Raw crit/dodge/block values stored unclamped (include equipment modifiers)
-- Values clamped only when used for probability checks (0–100)
-- Partitioning logic ensures deterministic outcomes
+**Stat Mechanics:**
+- **Dodge**: `baseDodge + 2.5 × (DEX - 10)` — clamped [0, 80]
+- **Crit**: `baseCrit + 5 × (LUCK - 1)` — clamped [0, 100]
+- **Magic Resist**: `baseMagicResist + 5 × (WIS - 10) + 2.5 × (CON - 10)`
+- **Max Mana**: Scales ±10% per INT point from 10 (min 25)
+- **Stamina Regen**: `baseRegen + max(1, floor(2.5 × WIS))`
 
-### Data-Driven Combat
-
-- **No implicit default attacks** - creatures must define all attacks in JSON
-- Unarmed attacks require explicit JSON entries
-- Attack weights determine selection probability
+**Damage Calculation:**
+1. Roll damage dice per hit
+2. Add stat bonuses
+3. Check for crit (×2 if successful)
+4. Sum all successful hits
+5. Apply resistance: `damage × (targetResist / 100)`
 
 ---
 
@@ -229,21 +233,34 @@ recall-dungeon/
 ├── ATTRIBUTION.md                   # Third-party asset attributions
 ├── pom.xml                          # Maven build configuration
 ├── README.md                        # This file
+├── SPRITE_ATLAS_SYSTEM.md           # Sprite atlas system documentation
+├── libgdx-maven-dependencies.txt    # LibGDX dependency reference
+├── docs/                            # Documentation
+├── scripts/                         # Python utility scripts
+│   ├── format_jsons.py              # JSON formatter with canonical field ordering
+│   ├── generate_ids.py              # ID generation utilities
+│   └── generate_property_dedupe.py  # Property deduplication tool
+├── assets/                          # Game assets (sprites, fonts, UI)
+│   ├── art-src/                     # Source art files
+│   ├── Deep Dive Game Studio/       # Third-party asset packs
+│   ├── RGS_Dev/                     # RGS tileset pack
+│   ├── default.fnt                  # Default font
+│   ├── font-small.fnt               # Small font
+│   ├── uiskin.atlas                 # UI texture atlas
+│   └── uiskin.json                  # UI skin configuration
+├── third-party-licenses/            # Third-party software licenses
 ├── src/
 │   ├── main/
 │   │   ├── java/com/bapppis/
 │   │   │   ├── Main.java            # Entry point (legacy console mode)
 │   │   │   └── core/
 │   │   │       ├── AllLoaders.java  # Centralized loader initialization
-│   │   │       ├── CreatureType.java
-│   │   │       ├── Resistances.java
-│   │   │       ├── Size.java
-│   │   │       ├── Stats.java
-│   │   │       ├── Type.java        # Damage types (FIRE, ICE, PHYSICAL, etc.)
+│   │   │       ├── Resistances.java # Damage type and resistance enums
+│   │   │       ├── ResBuildUp.java  # Buildup status enum
 │   │   │       ├── combat/          # Combat engine and mechanics
-│   │   │       │   ├── AttackEngine.java
-│   │   │       │   ├── RandomProvider.java
-│   │   │       │   └── DefaultRandomProvider.java
+│   │   │       │   ├── AttackEngine.java          # Core combat resolution
+│   │   │       │   ├── RandomProvider.java        # RNG interface
+│   │   │       │   └── DefaultRandomProvider.java # Default RNG impl
 │   │   │       ├── creature/        # Creature system
 │   │   │       │   ├── Creature.java
 │   │   │       │   ├── CreatureLoader.java
@@ -393,6 +410,10 @@ recall-dungeon/
 │   │           └── monster_pools/   # Monster pool definitions
 │   ├── test/
 │   │   ├── java/com/bapppis/core/  # Unit and integration tests
+│   │   │   ├── BuildUpTest.java             # Buildup mechanics tests
+│   │   │   ├── ResOverloadTest.java         # Resistance overload system tests
+│   │   │   ├── TestCreatureAttack.java      # Attack system tests
+│   │   │   ├── TestIDSPaths.java            # ID validation tests
 │   │   │   ├── Creature/
 │   │   │   │   ├── EquipVersatileTest.java
 │   │   │   │   ├── beast/
@@ -404,9 +425,9 @@ recall-dungeon/
 │   │   │   │   ├── player/
 │   │   │   │   ├── undead/
 │   │   │   │   └── unknown/
-│   │   │   ├── TestCreatureAttack.java
 │   │   │   ├── dungeon/
 │   │   │   │   └── mapparser/
+│   │   │   ├── event/
 │   │   │   ├── game/
 │   │   │   │   ├── CombatTest.java
 │   │   │   │   ├── GameTest.java

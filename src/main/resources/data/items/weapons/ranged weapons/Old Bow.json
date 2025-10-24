@@ -6,22 +6,15 @@
   "itemType": "WEAPON",
   "equipmentSlot": "WEAPON",
   "weaponClass": "RANGED",
-  "twoHanded": true,
+  "weaponType": "PIERCE",
   "damageType": "PIERCING",
+  "twoHanded": true,
   "crit": 10,
-  "tooltip": [
-    "You gain 10% critical chance while wielding this weapon.",
-    "",
-    "Shoot (70%): Deals 2-8 + 5 * DEX bonus piercing damage.",
-    "",
-    "Barrage (25%): Deals 3-9 + 5 * DEX bonus piercing damage.",
-    "",
-    "Perfect Shot (5%): Deals 1-6 + 5 * DEX bonus true damage. This attack has a +30% critical chance and pierces through anything."
-  ],
   "attacks": [
     {
       "name": "Shoot",
       "damageType": "PIERCING",
+      "PhysBuildUpMod": 1.0,
       "damageMultiplier": 1.0,
       "physicalDamageDice": "2d4",
       "times": 1,
@@ -30,6 +23,7 @@
     {
       "name": "Barrage",
       "damageType": "PIERCING",
+      "PhysBuildUpMod": 0.33,
       "damageMultiplier": 0.33,
       "physicalDamageDice": "1d3",
       "times": 3,
@@ -38,6 +32,7 @@
     {
       "name": "Perfect Shot",
       "damageType": "TRUE",
+      "PhysBuildUpMod": 1.0,
       "critMod": "+30",
       "damageMultiplier": 1.0,
       "physicalDamageDice": "1d6",
@@ -45,5 +40,13 @@
       "weight": 5
     }
   ],
-  "weaponType": "PIERCE"
+  "tooltip": [
+    "You gain 10% critical chance while wielding this weapon.",
+    "",
+    "Shoot (70%): Deals 2-8 + 5 * DEX bonus piercing damage.",
+    "",
+    "Barrage (25%): Deals 3-9 + 5 * DEX bonus piercing damage.",
+    "",
+    "Perfect Shot (5%): Deals 1-6 + 5 * DEX bonus true damage. This attack has a +30% critical chance and pierces through anything."
+  ]
 }
