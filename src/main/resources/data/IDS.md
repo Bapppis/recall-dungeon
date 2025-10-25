@@ -243,7 +243,7 @@ Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 
 ##### Blunt Weapons (31666-32999)
 
-- [none indexed yet]
+- 31666 — Steel Flanged Mace — data/items/weapons/melee weapons/blunt weapons/Steel Flanged Mace.json
 
 #### Ranged Weapons (34000-36999)
 
@@ -257,9 +257,9 @@ Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 
 #### Magic Weapons (37000-39999)
 
-##### Staffs (37000-37999)
+##### Staves (37000-37999)
 
-- [none indexed yet]
+- 37000 — Staff Of Flames — data/items/weapons/magic weapons/staves/Staff of Flames.json
 
 ##### Arcane Weapons (38000-38999)
 

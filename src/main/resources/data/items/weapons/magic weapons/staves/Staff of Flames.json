@@ -1,0 +1,54 @@
+{
+  "id": 37000,
+  "name": "Staff Of Flames",
+  "description": "A staff imbued with the essence of fire, capable of unleashing devastating flames upon its foes.",
+  "rarity": "UNCOMMON",
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
+  "weaponClass": "MAGIC",
+  "weaponType": "STAFF",
+  "damageType": "FIRE",
+  "magicStatBonuses": [
+    "INTELLIGENCE"
+  ],
+  "attacks": [
+    {
+      "name": "Firebolts",
+      "damageType": "FIRE",
+      "MagicBuildUpMod": 0.75,
+      "damageMultiplier": 0.5,
+      "physicalDamageDice": "1d4",
+      "times": 2,
+      "weight": 60
+    },
+    {
+      "name": "Flamethrower",
+      "damageType": "FIRE",
+      "accuracy": 5,
+      "PhysBuildUpMod": 0.4,
+      "critMod": "+10",
+      "damageMultiplier": 0.4,
+      "physicalDamageDice": "1d4",
+      "times": 4,
+      "weight": 30
+    },
+    {
+      "name": "Fireball",
+      "damageType": "FIRE",
+      "accuracy": 5,
+      "MagicBuildUpMod": 1.25,
+      "critMod": "+15",
+      "damageMultiplier": 1.25,
+      "physicalDamageDice": "3d5",
+      "times": 1,
+      "weight": 10
+    }
+  ],
+  "tooltip": [
+    "Firebolts (60%): Deals 2-8 + 5 * INT bonus fire damage. This attack builds up FIRE 1.5x",
+    "",
+    "Flamethrower (30%): Deals 4-16 + 5 * INT bonus * 1.6x fire damage. This attack has a +10% critical chance, 5% increased accuracy and builds up FIRE 1.6x",
+    "",
+    "Fireball (10%): Deals 3-15 + 5 * INT bonus * 1.25x fire damage. This attack has a +15% critical chance, 5% increased accuracy and builds up FIRE 1.25x."
+  ]
+}

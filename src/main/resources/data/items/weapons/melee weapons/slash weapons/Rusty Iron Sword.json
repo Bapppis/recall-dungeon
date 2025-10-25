@@ -30,8 +30,8 @@
     {
       "name": "Stab",
       "damageType": "PIERCING",
-      "MagicBuildUpMod": 0.5,
-      "PhysBuildUpMod": 0.5,
+      "MagicBuildUpMod": 1.0,
+      "PhysBuildUpMod": 1.0,
       "critMod": "+5",
       "damageMultiplier": 1.0,
       "magicDamageDice": "1d2",

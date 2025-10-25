@@ -58,9 +58,9 @@
     {
       "name": "Two-handed Thrust",
       "damageType": "PIERCING",
-      "critMod": "+10",
       "MagicBuildUpMod": 1.25,
       "PhysBuildUpMod": 1.25,
+      "critMod": "+10",
       "damageMultiplier": 1.25,
       "magicDamageDice": "1d4",
       "magicDamageMultiplier": 0,
