@@ -263,7 +263,7 @@ Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 
 ##### Arcane Weapons (38000-38999)
 
-- [none indexed yet]
+- 38000 — Sword of Windfury — data/items/weapons/magic weapons/arcane weapons/Sword of Windfury.json
 
 ##### Magic Physical Weapons (39000-39999)
 

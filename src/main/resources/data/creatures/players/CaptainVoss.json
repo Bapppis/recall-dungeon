@@ -44,8 +44,8 @@
     {
       "name": "Punch",
       "damageType": "BLUDGEONING",
-      "physicalDamageDice": "1d3",
-      "times": 1
+      "times": 1,
+      "physicalDamageDice": "1d3"
     }
   ],
   "sprite": "player_voss"

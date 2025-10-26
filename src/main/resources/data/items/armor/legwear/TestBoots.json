@@ -8,6 +8,7 @@
   "dodge": 10.0,
   "crit": 0.0,
   "block": 0.0,
+  "magicResist": 0.0,
   "accuracy": 0,
   "magicAccuracy": 0,
   "stats": {
@@ -17,6 +18,5 @@
   "tooltip": [
     "Test boots with DEX+1 and 10% dodge bonus"
   ],
-  "defense": 1,
-  "magicResist": 0.0
+  "defense": 1
 }

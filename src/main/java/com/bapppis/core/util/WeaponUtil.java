@@ -19,6 +19,12 @@ public final class WeaponUtil {
                 case RANGED:
                     return Math.max(0, attacker.getStatBonus(Stats.DEXTERITY));
                 case MAGIC:
+                    // If weapon is arcane magic, use the higher of CHARISMA or INTELLIGENCE
+                    try {
+                        if (weapon.getWeaponType() != null && weapon.getWeaponType().name().equals("ARCANE")) {
+                            return Math.max(0, Math.max(attacker.getStatBonus(Stats.CHARISMA), attacker.getStatBonus(Stats.INTELLIGENCE)));
+                        }
+                    } catch (Exception ignored) {}
                     return Math.max(0, attacker.getStatBonus(Stats.INTELLIGENCE));
                 default:
                     return 0;

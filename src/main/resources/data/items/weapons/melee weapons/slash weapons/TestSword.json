@@ -12,6 +12,7 @@
   "dodge": 5.0,
   "crit": 10.0,
   "block": 0.0,
+  "magicResist": 0.0,
   "accuracy": 1,
   "magicAccuracy": 0,
   "stats": {
@@ -27,21 +28,30 @@
     {
       "name": "Slash",
       "damageType": "SLASHING",
+      "times": 1,
+      "physicalDamageDice": "1d8",
       "accuracy": null,
       "magicAccuracy": null,
-      "MagicBuildUpMod": null,
-      "PhysBuildUpMod": null,
+      "physBuildUpMod": null,
+      "magicBuildUpMod": null,
       "damageMultiplier": 1.0,
-      "physicalDamageDice": "1d8",
-      "times": 1,
       "weight": 10
     }
   ],
   "tooltip": [
-    "A test sword with STR+3, DEX+2, CON-1",
-    "Provides 10% crit, 5% dodge, +2 defense, +1 accuracy",
-    "Resistances: SLASHING+10%, FIRE+5%"
+    "You gain 10% critical chance while wielding this weapon.",
+    "",
+    "You gain 5% dodge chance while wielding this weapon.",
+    "",
+    "You gain -1 CON, +2 DEX, +3 STR while wielding this weapon.",
+    "",
+    "You take 5% more fire damage while wielding this weapon.",
+    "",
+    "You take 10% more slashing damage while wielding this weapon.",
+    "",
+    "You gain +1 accuracy while wielding this weapon.",
+    "",
+    "Slash (100%): Deals 1-8 + 5 * STR bonus slashing damage."
   ],
-  "defense": 2,
-  "magicResist": 0.0
+  "defense": 2
 }

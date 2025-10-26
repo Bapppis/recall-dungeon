@@ -32,26 +32,26 @@
     {
       "name": "Bite",
       "damageType": "PIERCING",
-      "physicalDamageDice": "1d6+1",
       "times": 1,
+      "physicalDamageDice": "1d6+1",
       "weight": 38
     },
     {
       "name": "Claw Frenzy",
       "damageType": "SLASHING",
-      "physicalDamageDice": "1d4",
       "times": 2,
+      "physicalDamageDice": "1d4",
       "weight": 37
     },
     {
       "name": "Shadow Bite",
-      "critMod": "+10",
       "damageType": "PIERCING",
-      "magicDamageDice": "2d3",
-      "magicDamageType": "SHADOW",
-      "physicalDamageDice": "1d6+1",
       "times": 1,
-      "weight": 15
+      "physicalDamageDice": "1d6+1",
+      "magicDamageDice": "2d3",
+      "critMod": "+10",
+      "weight": 15,
+      "magicDamageType": "SHADOW"
     }
   ],
   "sprite": null,

@@ -1,0 +1,79 @@
+{
+  "id": 38000,
+  "name": "Sword of Windfury",
+  "description": "A sword imbued with the essence of wind, the enchanter made a pact with the elements of the air itself. It floats beside you, ready to strike.",
+  "rarity": "RARE",
+  "itemType": "WEAPON",
+  "equipmentSlot": "WEAPON",
+  "weaponClass": "MAGIC",
+  "weaponType": "ARCANE",
+  "damageType": "SLASHING",
+  "magicElement": "WIND",
+  "magicStatBonuses": [
+    "CHARISMA"
+  ],
+  "crit": 10,
+  "magicResist": 10,
+  "accuracy": 5,
+  "magicAccuracy": 10,
+  "resistances": {
+    "WIND": -15
+  },
+  "attacks": [
+    {
+      "name": "Gale Force",
+      "damageType": "SLASHING",
+      "times": 2,
+      "physicalDamageDice": "1d4",
+      "magicDamageDice": "1d6",
+      "physBuildUpMod": 0.5,
+      "magicBuildUpMod": 0.75,
+      "damageMultiplier": 0.5,
+      "magicDamageMultiplier": 0.75,
+      "weight": 60
+    },
+    {
+      "name": "Wind Shear",
+      "damageType": "SLASHING",
+      "times": 1,
+      "physicalDamageDice": "2d4",
+      "magicDamageDice": "2d6",
+      "physBuildUpMod": 1.0,
+      "magicBuildUpMod": 1.25,
+      "damageMultiplier": 1.0,
+      "magicDamageMultiplier": 1.25,
+      "weight": 30
+    },
+    {
+      "name": "The Name of the Wind",
+      "damageType": "SLASHING",
+      "times": 1,
+      "physicalDamageDice": "2d6",
+      "magicDamageDice": "3d8",
+      "accuracy": 5,
+      "magicAccuracy": 10,
+      "physBuildUpMod": 1.25,
+      "magicBuildUpMod": 2.0,
+      "damageMultiplier": 1.25,
+      "magicDamageMultiplier": 1.25,
+      "weight": 10
+    }
+  ],
+  "tooltip": [
+    "You gain 10% critical chance while wielding this weapon.",
+    "",
+    "You gain 10% magic resistance while wielding this weapon.",
+    "",
+    "You take 15% less wind damage while wielding this weapon.",
+    "",
+    "You gain +5 accuracy while wielding this weapon.",
+    "",
+    "You gain +10 magic accuracy while wielding this weapon.",
+    "",
+    "Gale Force (60%): Deals 2-8 + 5 * CHA or INT bonus slashing damage and 2-12 + 5 * CHA bonus wind damage.",
+    "",
+    "Wind Shear (30%): Deals 2-8 + 5 * CHA or INT bonus slashing damage and 2-12 + 5 * CHA bonus wind damage.",
+    "",
+    "The Name of the Wind (10%): Deals 2-12 + 5 * CHA or INT bonus slashing damage and 3-24 + 5 * CHA bonus wind damage. This attack has +5 accuracy and +10 magic accuracy."
+  ]
+}

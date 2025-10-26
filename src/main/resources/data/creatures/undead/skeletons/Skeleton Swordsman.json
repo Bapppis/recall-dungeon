@@ -42,16 +42,16 @@
     {
       "name": "Slash",
       "damageType": "SLASHING",
-      "physicalDamageDice": "1d6+1",
       "times": 1,
+      "physicalDamageDice": "1d6+1",
       "weight": 7
     },
     {
       "name": "Stab",
-      "critMod": "+10",
       "damageType": "PIERCING",
-      "physicalDamageDice": "1d6",
       "times": 1,
+      "physicalDamageDice": "1d6",
+      "critMod": "+10",
       "weight": 3
     }
   ],

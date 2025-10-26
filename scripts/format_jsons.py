@@ -1,3 +1,5 @@
+# python .\scripts\format_jsons.py --regenerate-tooltips
+# python .\scripts\generate_tooltips.py --apply
 # python scripts/format_jsons.py
 #!/usr/bin/env python3
 """Format all JSON files under src/main/resources/data with 2-space indent.
@@ -8,10 +10,25 @@ alphabetical order after the known sequence. For attack objects inside an
 "attacks" array a specialized ordering is applied.
 
 This keeps diffs stable and makes visual comparison easier.
+
+Optional: Use --regenerate-tooltips to automatically generate weapon tooltips.
 """
 import json
+import re
+import sys
 from pathlib import Path
 from typing import Dict, Any, List
+
+# Stat abbreviations for tooltip display
+STAT_ABBREV = {
+    "STRENGTH": "STR",
+    "DEXTERITY": "DEX",
+    "CONSTITUTION": "CON",
+    "INTELLIGENCE": "INT",
+    "WISDOM": "WIS",
+    "CHARISMA": "CHA",
+    "LUCK": "LUCK",
+}
 
 try:
     # Use resolve() to get absolute path to project root
@@ -84,6 +101,7 @@ CANON_TOP_ORDER: List[str] = [
     "dodge",
     "crit",
     "block",
+    "magicResist",
     "accuracy",
     "magicAccuracy",
     "stats",
@@ -95,18 +113,18 @@ CANON_TOP_ORDER: List[str] = [
 # Canonical ordering for attack objects (fields optional; absent ones skipped).
 CANON_ATTACK_ORDER: List[str] = [
     "name",
+    "damageType",
     "times",
-    "accuracy",
-    "magicAccuracy",
-    "critMod",
-    "PhysBuildUpMod",
-    "MagicBuildUpMod",
     "physicalDamageDice",
     "magicDamageDice",
+    "accuracy",
+    "magicAccuracy",
+    "physBuildUpMod",
+    "magicBuildUpMod",
     "damageMultiplier",
     "magicDamageMultiplier",
+    "critMod",
     "weight",
-    "damageType",
 ]
 
 # Canonical ordering for creature objects (derived from BigglesTheUnlucky.json)
@@ -244,8 +262,24 @@ def transform(obj: Any, kind: str = None) -> Any:
                 new_attacks = []
                 for attack in v:
                     if isinstance(attack, dict):
+                        # Normalize a few legacy key names to the canonical camelCase keys
+                        # so we can rename fields like PhysBuildUpMod -> physBuildUpMod
+                        rename_map = {
+                            'PhysBuildUpMod': 'physBuildUpMod',
+                            'MagicBuildUpMod': 'magicBuildUpMod'
+                        }
+                        for old_k, new_k in rename_map.items():
+                            if old_k in attack and new_k not in attack:
+                                attack[new_k] = attack.pop(old_k)
+
+                        # Apply canonical ordering before transforming, then transform,
+                        # and re-apply ordering to ensure nested transforms don't change key order.
                         attack = order_keys(attack, CANON_ATTACK_ORDER)
-                    new_attacks.append(transform(attack, kind))
+                        attack = transform(attack, kind)
+                        attack = order_keys(attack, CANON_ATTACK_ORDER)
+                    else:
+                        attack = transform(attack, kind)
+                    new_attacks.append(attack)
                 obj[k] = new_attacks
             else:
                 obj[k] = transform(v, kind)
@@ -283,13 +317,202 @@ def transform(obj: Any, kind: str = None) -> Any:
         return obj
 
 
+def parse_dice(dice_str: str):
+    """Parse dice notation and return (min_damage, max_damage)."""
+    if not dice_str or dice_str.strip() == "":
+        return (0, 0)
+    
+    dice_str = dice_str.strip()
+    match = re.match(r'(\d+)d(\d+)([+-]\d+)?', dice_str)
+    if not match:
+        return (0, 0)
+    
+    num_dice = int(match.group(1))
+    die_size = int(match.group(2))
+    modifier = int(match.group(3)) if match.group(3) else 0
+    
+    min_dmg = num_dice * 1 + modifier
+    max_dmg = num_dice * die_size + modifier
+    
+    return (min_dmg, max_dmg)
+
+
+def get_damage_type_display(damage_type: str) -> str:
+    """Convert damage type enum to display name."""
+    type_map = {
+        "SLASHING": "slashing", "PIERCING": "piercing", "BLUDGEONING": "bludgeoning",
+        "FIRE": "fire", "WATER": "water", "WIND": "wind", "ICE": "ice",
+        "NATURE": "nature", "LIGHTNING": "lightning", "LIGHT": "light",
+        "DARKNESS": "darkness", "TRUE": "true",
+    }
+    return type_map.get(damage_type, damage_type.lower())
+
+
+def get_primary_stat(weapon: Dict[str, Any]) -> str:
+    """Determine the primary physical damage stat for this weapon."""
+    weapon_class = weapon.get("weaponClass", "MELEE")
+    finesse = weapon.get("finesse", False)
+    
+    if finesse:
+        return "STR or DEX"
+    if weapon_class == "RANGED":
+        return "DEX"
+    return "STR"
+
+
+def get_magic_stat(weapon: Dict[str, Any]) -> str:
+    """Get the magic stat bonus(es) for this weapon."""
+    magic_stat_bonuses = weapon.get("magicStatBonuses", [])
+    
+    if magic_stat_bonuses:
+        if len(magic_stat_bonuses) == 1:
+            return STAT_ABBREV.get(magic_stat_bonuses[0], magic_stat_bonuses[0])
+        else:
+            return " or ".join(STAT_ABBREV.get(s, s) for s in magic_stat_bonuses)
+    
+    weapon_class = weapon.get("weaponClass", "MELEE")
+    if weapon_class == "MAGIC":
+        weapon_type = weapon.get("weaponType", "")
+        if weapon_type == "ARCANE":
+            return "CHA or INT"
+        return "INT"
+    
+    return "INT"
+
+
+def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
+    """Generate tooltip lines for a weapon based on its stats and attacks."""
+    lines = []
+    
+    # Equipment bonuses
+    if weapon.get("crit"):
+        lines.append(f"You gain {int(weapon['crit'])}% critical chance while wielding this weapon.")
+        lines.append("")
+    
+    if weapon.get("block"):
+        lines.append(f"You gain {int(weapon['block'])}% block chance while wielding this weapon.")
+        lines.append("")
+    
+    if weapon.get("dodge"):
+        lines.append(f"You gain {int(weapon['dodge'])}% dodge chance while wielding this weapon.")
+        lines.append("")
+    
+    if weapon.get("magicResist"):
+        lines.append(f"You gain {int(weapon['magicResist'])}% magic resistance while wielding this weapon.")
+        lines.append("")
+    
+    stats = weapon.get("stats", {})
+    if stats:
+        stat_parts = []
+        for stat, value in stats.items():
+            stat_abbrev = STAT_ABBREV.get(stat, stat)
+            if value > 0:
+                stat_parts.append(f"+{value} {stat_abbrev}")
+            elif value < 0:
+                stat_parts.append(f"{value} {stat_abbrev}")
+        
+        if stat_parts:
+            lines.append(f"You gain {', '.join(stat_parts)} while wielding this weapon.")
+            lines.append("")
+    
+    resistances = weapon.get("resistances", {})
+    if resistances:
+        for res, value in resistances.items():
+            if value != 0:
+                res_display = get_damage_type_display(res)
+                if value > 0:
+                    lines.append(f"You take {value}% more {res_display} damage while wielding this weapon.")
+                else:
+                    lines.append(f"You take {abs(value)}% less {res_display} damage while wielding this weapon.")
+                lines.append("")
+    
+    acc = weapon.get("accuracy")
+    mag_acc = weapon.get("magicAccuracy")
+    
+    if acc and mag_acc and acc == mag_acc:
+        lines.append(f"You gain +{acc} accuracy and magic accuracy while wielding this weapon.")
+        lines.append("")
+    else:
+        if acc:
+            lines.append(f"You gain +{acc} accuracy while wielding this weapon.")
+            lines.append("")
+        if mag_acc:
+            lines.append(f"You gain +{mag_acc} magic accuracy while wielding this weapon.")
+            lines.append("")
+    
+    # Attacks
+    attacks = weapon.get("attacks", [])
+    if not attacks:
+        if lines and lines[-1] == "":
+            lines.pop()
+        return lines
+    
+    total_weight = sum(atk.get("weight", 1) for atk in attacks)
+    
+    for attack in attacks:
+        attack_name = attack.get("name", "Unknown Attack")
+        weight = attack.get("weight", 1)
+        percentage = int(round(100 * weight / total_weight))
+        
+        times = attack.get("times", 1)
+        phys_dice = attack.get("physicalDamageDice")
+        magic_dice = attack.get("magicDamageDice")
+        
+        damage_parts = []
+        
+        if phys_dice:
+            phys_min, phys_max = parse_dice(phys_dice)
+            phys_stat = get_primary_stat(weapon)
+            phys_damage_type = get_damage_type_display(attack.get("damageType", weapon.get("damageType", "")))
+            damage_parts.append(
+                f"{phys_min * times}-{phys_max * times} + 5 * {phys_stat} bonus {phys_damage_type} damage"
+            )
+        
+        if magic_dice:
+            magic_min, magic_max = parse_dice(magic_dice)
+            magic_stat = get_magic_stat(weapon)
+            magic_element = weapon.get("magicElement", attack.get("magicDamageType", ""))
+            magic_damage_type = get_damage_type_display(magic_element) if magic_element else "magic"
+            damage_parts.append(
+                f"{magic_min * times}-{magic_max * times} + 5 * {magic_stat} bonus {magic_damage_type} damage"
+            )
+        
+        attack_line = f"{attack_name} ({percentage}%): Deals " + " and ".join(damage_parts) + "."
+        
+        modifiers = []
+        crit_mod = attack.get("critMod")
+        if crit_mod:
+            crit_val = crit_mod.strip().lstrip("+")
+            if crit_val:
+                modifiers.append(f"a +{crit_val}% critical chance")
+        
+        attack_acc = attack.get("accuracy")
+        if attack_acc:
+            modifiers.append(f"+{attack_acc} accuracy")
+        
+        attack_mag_acc = attack.get("magicAccuracy")
+        if attack_mag_acc:
+            modifiers.append(f"+{attack_mag_acc} magic accuracy")
+        
+        if modifiers:
+            attack_line += " This attack has " + " and ".join(modifiers) + "."
+        
+        lines.append(attack_line)
+        lines.append("")
+    
+    if lines and lines[-1] == "":
+        lines.pop()
+    
+    return lines
+
+
 changed: List[str] = []
+regenerate_tooltips = '--regenerate-tooltips' in sys.argv
 json_files = list(data_dir.rglob('*.json'))
 if not json_files:
     print(f"Warning: No JSON files found in {data_dir}")
 for p in json_files:
     try:
-        print(f"Processing: {p}")
         text = p.read_text(encoding='utf-8')
         obj = json.loads(text)
         # Determine file kind by path segments (items vs creatures)
@@ -303,16 +526,22 @@ for p in json_files:
             kind = 'property'
         else:
             kind = None
-        print(f"  Detected kind: {kind}")
+
+        # Regenerate tooltips for weapons if requested
+        if regenerate_tooltips and kind == 'item' and obj.get('itemType') == 'WEAPON':
+            generated_tooltip = generate_weapon_tooltip(obj)
+            if generated_tooltip:
+                obj['tooltip'] = generated_tooltip
 
         transformed = transform(obj, kind)
         new_text = json.dumps(transformed, ensure_ascii=False, indent=2) + "\n"
         if new_text != text:
+            # Only print when a file actually changed
+            print(f"Processing: {p}")
+            print(f"  Detected kind: {kind}")
             p.write_text(new_text, encoding='utf-8')
             changed.append(str(p.relative_to(root)))
             print(f"  File formatted and updated.")
-        else:
-            print(f"  No changes needed.")
     except Exception as e:
         print(f"Skipping {p}: {p}\n  Error: {e}")
 

@@ -15,40 +15,40 @@
     {
       "name": "Firebolts",
       "damageType": "FIRE",
-      "MagicBuildUpMod": 0.75,
-      "damageMultiplier": 0.5,
-      "physicalDamageDice": "1d4",
       "times": 2,
+      "physicalDamageDice": "1d4",
+      "magicBuildUpMod": 0.75,
+      "damageMultiplier": 0.5,
       "weight": 60
     },
     {
       "name": "Flamethrower",
       "damageType": "FIRE",
-      "accuracy": 5,
-      "PhysBuildUpMod": 0.4,
-      "critMod": "+10",
-      "damageMultiplier": 0.4,
-      "physicalDamageDice": "1d4",
       "times": 4,
+      "physicalDamageDice": "1d4",
+      "accuracy": 5,
+      "physBuildUpMod": 0.4,
+      "damageMultiplier": 0.4,
+      "critMod": "+10",
       "weight": 30
     },
     {
       "name": "Fireball",
       "damageType": "FIRE",
-      "accuracy": 5,
-      "MagicBuildUpMod": 1.25,
-      "critMod": "+15",
-      "damageMultiplier": 1.25,
-      "physicalDamageDice": "3d5",
       "times": 1,
+      "physicalDamageDice": "3d5",
+      "accuracy": 5,
+      "magicBuildUpMod": 1.25,
+      "damageMultiplier": 1.25,
+      "critMod": "+15",
       "weight": 10
     }
   ],
   "tooltip": [
-    "Firebolts (60%): Deals 2-8 + 5 * INT bonus fire damage. This attack builds up FIRE 1.5x",
+    "Firebolts (60%): Deals 2-8 + 5 * INT bonus fire damage.",
     "",
-    "Flamethrower (30%): Deals 4-16 + 5 * INT bonus * 1.6x fire damage. This attack has a +10% critical chance, 5% increased accuracy and builds up FIRE 1.6x",
+    "Flamethrower (30%): Deals 4-16 + 5 * INT bonus fire damage. This attack has a +10% critical chance and +5 accuracy.",
     "",
-    "Fireball (10%): Deals 3-15 + 5 * INT bonus * 1.25x fire damage. This attack has a +15% critical chance, 5% increased accuracy and builds up FIRE 1.25x."
+    "Fireball (10%): Deals 3-15 + 5 * INT bonus fire damage. This attack has a +15% critical chance and +5 accuracy."
   ]
 }

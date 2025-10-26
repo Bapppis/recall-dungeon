@@ -8,6 +8,7 @@
   "dodge": -5.0,
   "crit": 0.0,
   "block": 20.0,
+  "magicResist": 5.0,
   "accuracy": 0,
   "magicAccuracy": 0,
   "stats": {
@@ -25,7 +26,6 @@
     "Resistances: BLUDGEONING+15%, PIERCING+10%"
   ],
   "defense": 5,
-  "magicResist": 5.0,
   "properties": [
     "TestTrait4"
   ]

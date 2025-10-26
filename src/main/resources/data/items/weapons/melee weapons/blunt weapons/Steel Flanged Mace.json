@@ -12,31 +12,31 @@
     {
       "name": "Bludgeon",
       "damageType": "BLUDGEONING",
-      "PhysBuildUpMod": 0.5,
-      "damageMultiplier": 0.5,
-      "physicalDamageDice": "1d4",
       "times": 2,
+      "physicalDamageDice": "1d4",
+      "physBuildUpMod": 0.5,
+      "damageMultiplier": 0.5,
       "weight": 60
     },
     {
       "name": "Crush",
       "damageType": "BLUDGEONING",
-      "PhysBuildUpMod": 1.0,
-      "critMod": "+5",
-      "damageMultiplier": 1.0,
-      "physicalDamageDice": "2d4",
       "times": 1,
+      "physicalDamageDice": "2d4",
+      "physBuildUpMod": 1.0,
+      "damageMultiplier": 1.0,
+      "critMod": "+5",
       "weight": 25
     },
     {
       "name": "Skull Crush",
       "damageType": "BLUDGEONING",
-      "accuracy": 5,
-      "PhysBuildUpMod": 1.25,
-      "critMod": "+10",
-      "damageMultiplier": 1.25,
-      "physicalDamageDice": "2d5",
       "times": 1,
+      "physicalDamageDice": "2d5",
+      "accuracy": 5,
+      "physBuildUpMod": 1.25,
+      "damageMultiplier": 1.25,
+      "critMod": "+10",
       "weight": 15
     }
   ],
@@ -45,6 +45,6 @@
     "",
     "Crush (25%): Deals 2-8 + 5 * STR bonus bludgeoning damage. This attack has a +5% critical chance.",
     "",
-    "Skull Crush (15%): Deals 2-10 + 5 * STR bonus bludgeoning damage. This attack has a +10% critical chance and 5% increased accuracy."
+    "Skull Crush (15%): Deals 2-10 + 5 * STR bonus bludgeoning damage. This attack has a +10% critical chance and +5 accuracy."
   ]
 }

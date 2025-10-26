@@ -8,6 +8,7 @@
   "dodge": 0.0,
   "crit": 5.0,
   "block": 0.0,
+  "magicResist": 15.0,
   "accuracy": 0,
   "magicAccuracy": 2,
   "stats": {
@@ -25,7 +26,6 @@
     "Resistances: LIGHT+10%, DARKNESS-5%"
   ],
   "defense": 3,
-  "magicResist": 15.0,
   "properties": [
     "TestTrait5"
   ]

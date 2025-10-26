@@ -8,6 +8,7 @@
   "dodge": -10.0,
   "crit": 0.0,
   "block": 5.0,
+  "magicResist": 10.0,
   "accuracy": 0,
   "magicAccuracy": 0,
   "stats": {
@@ -25,6 +26,5 @@
     "Provides +10 defense, 5% block, -10% dodge, 10% magic resist",
     "Resistances: BLUDGEONING+20%, SLASHING+15%, FIRE-10%"
   ],
-  "defense": 10,
-  "magicResist": 10.0
+  "defense": 10
 }

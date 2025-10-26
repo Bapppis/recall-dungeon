@@ -54,8 +54,8 @@
     {
       "name": "Test Punch",
       "damageType": "BLUDGEONING",
-      "physicalDamageDice": "1d4",
-      "times": 1
+      "times": 1,
+      "physicalDamageDice": "1d4"
     }
   ],
   "sprite": "player_test"

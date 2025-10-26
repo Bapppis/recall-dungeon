@@ -44,16 +44,16 @@
     {
       "name": "Axe Chops",
       "damageType": "SLASHING",
-      "physicalDamageDice": "2d3",
       "times": 2,
+      "physicalDamageDice": "2d3",
       "weight": 8
     },
     {
       "name": "Rampage",
-      "critMod": "+10",
       "damageType": "SLASHING",
-      "physicalDamageDice": "4d2",
       "times": 4,
+      "physicalDamageDice": "4d2",
+      "critMod": "+10",
       "weight": 2
     }
   ],

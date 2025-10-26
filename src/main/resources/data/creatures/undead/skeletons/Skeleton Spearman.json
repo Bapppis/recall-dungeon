@@ -42,16 +42,16 @@
     {
       "name": "Jab",
       "damageType": "PIERCING",
-      "physicalDamageDice": "1d6+1",
       "times": 1,
+      "physicalDamageDice": "1d6+1",
       "weight": 6
     },
     {
       "name": "Swipe",
-      "critMod": "+5",
       "damageType": "SLASHING",
-      "physicalDamageDice": "1d6",
       "times": 1,
+      "physicalDamageDice": "1d6",
+      "critMod": "+5",
       "weight": 4
     }
   ],
