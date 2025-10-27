@@ -10,6 +10,8 @@ public class Undead extends Creature {
         setSize(com.bapppis.core.creature.creatureEnums.Size.MEDIUM);
         ResistanceUtil.modifyDarknessResistance(this, -20);
         ResistanceUtil.modifyLightResistance(this, 20);
+
+        addProperty("Darksight");
     }
 
     public Undead() {

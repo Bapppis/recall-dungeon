@@ -45,6 +45,7 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 - 2333 — Afraid — data/properties/debuff/Afraid.json
 - 2334 — Bleed — data/properties/debuff/Bleed1.json
 - 2335 — Necrotic Plague — data/properties/debuff/NecroticPlague.json
+- 2336 — Burning 1 — data/properties/debuff/Burning1.json
 - 3665 — Test Debuff — data/properties/debuff/TestDebuff.json
 
 ### Traits (3666-4999)
@@ -107,7 +108,11 @@ Each species gets 100 IDs. Examples: TrainingDummy (9000-9099), golem (9100-9199
 
 Each species gets 100 IDs. Examples: chromatic (10000-10099), metallic (10100-10199), gem (10200-10299), etc.
 
-- [none indexed yet]
+##### Kobold (10000-10099)
+
+- 10000 — Kobold Warrior — data/creatures/dragons/kobolds/Kobold Warrior.json
+
+- [other dragon species examples: chromatic (10000-10099), metallic (10100-10199), gem (10200-10299)]
 
 #### Elementals (11000-11999)
 

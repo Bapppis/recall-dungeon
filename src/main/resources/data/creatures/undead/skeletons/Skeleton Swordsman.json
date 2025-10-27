@@ -33,17 +33,16 @@
     "BLUDGEONING": 100,
     "PIERCING": 100,
     "SLASHING": 100,
-    "TRUE": 100
+    "TRUE": 50
   },
-  "properties": [
-    "Darksight"
-  ],
+  "properties": null,
   "attacks": [
     {
       "name": "Slash",
       "damageType": "SLASHING",
       "times": 1,
       "physicalDamageDice": "1d6+1",
+      "physBuildUpMod": 1.0,
       "weight": 7
     },
     {
@@ -51,6 +50,7 @@
       "damageType": "PIERCING",
       "times": 1,
       "physicalDamageDice": "1d6",
+      "physBuildUpMod": 1.25,
       "critMod": "+10",
       "weight": 3
     }

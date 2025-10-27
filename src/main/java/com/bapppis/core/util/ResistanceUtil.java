@@ -268,7 +268,7 @@ public final class ResistanceUtil {
     private static int getOverloadPropertyId(com.bapppis.core.ResBuildUp rb) {
         switch (rb) {
             case FIRE:
-                return -1; // TODO: Create "Burning" property
+                return 2336;
             case WATER:
                 return -1; // TODO: Create "Drenched" or similar property
             case WIND:
@@ -282,13 +282,13 @@ public final class ResistanceUtil {
             case LIGHT:
                 return -1; // TODO: Create "Blinded" property
             case DARKNESS:
-                return -1; // TODO: Create "Cursed" or similar property
+                return 2335;
             case BLUDGEONING:
                 return -1; // TODO: Create "Concussed" property
             case PIERCING:
                 return -1; // TODO: Create "Punctured" or similar property
             case SLASHING:
-                return 2334; // Bleed 1 (example)
+                return 2334;
             case TRUE:
                 return -1; // TODO: Create "True Damage Overload" property (if applicable)
             default:

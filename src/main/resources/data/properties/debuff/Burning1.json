@@ -1,0 +1,15 @@
+{
+  "id": 2336,
+  "type": "DEBUFF",
+  "name": "Burning 1",
+  "description": "You are engulfed in flames!",
+  "duration": 3,
+  "damageType": "FIRE",
+  "damageDice": "1d3+2",
+  "resistances": {
+    "WATER": -50
+  },
+  "tooltip": [
+    "You take 1-5 fire damage at the start of your turn but also gain 50% resistance to water. Wet condition will extinguish the flames."
+  ]
+}

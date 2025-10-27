@@ -105,7 +105,8 @@ public class SpeciesModificationTest {
         assertEquals(100, biggles.getResistance(Resistances.BLUDGEONING), "BLUDGEONING resistance should remain 100");
         assertEquals(110, biggles.getResistance(Resistances.PIERCING), "PIERCING resistance calculation failed");
         assertEquals(100, biggles.getResistance(Resistances.SLASHING), "SLASHING resistance should remain 100");
-        assertEquals(100, biggles.getResistance(Resistances.TRUE), "TRUE resistance should remain 100");
+    // Note: default TRUE resistance changed to 50 by recent design updates
+    assertEquals(50, biggles.getResistance(Resistances.TRUE), "TRUE resistance should remain 50");
 
         // ===== VERIFY DERIVED STATS =====
         // Base values from JSON: baseCrit=0, baseDodge=0, baseBlock=0,

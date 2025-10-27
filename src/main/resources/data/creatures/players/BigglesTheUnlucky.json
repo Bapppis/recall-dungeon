@@ -41,7 +41,7 @@
     "BLUDGEONING": 100,
     "PIERCING": 100,
     "SLASHING": 120,
-    "TRUE": 100
+    "TRUE": 50
   },
   "helmet": "GreenHood",
   "armor": "LeatherArmor",
@@ -58,7 +58,8 @@
       "name": "Scratch",
       "damageType": "SLASHING",
       "times": 1,
-      "physicalDamageDice": "1d2"
+      "physicalDamageDice": "1d2",
+      "physBuildUpMod": 1.0
     }
   ],
   "sprite": "player_biggles"

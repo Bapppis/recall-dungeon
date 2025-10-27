@@ -105,12 +105,43 @@ public class ResOverloadTest {
     void testPlaceholderResistancesDoNotCrash() {
         // Test that resistances without a configured property ID don't crash
         // (they return -1 from getOverloadPropertyId and are skipped)
-        testCreature.modifyResBuildUp(ResBuildUp.FIRE, 100);
-        assertEquals(0, testCreature.getResBuildUp(ResBuildUp.FIRE),
-                "Fire buildup should reset to 0 even without a configured property");
+    // Fire currently maps to a property (2336) — ensure it applies and resets
+    testCreature.modifyResBuildUp(ResBuildUp.FIRE, 100);
+    assertEquals(0, testCreature.getResBuildUp(ResBuildUp.FIRE),
+        "Fire buildup should reset to 0 after overload");
+    assertNotNull(testCreature.getDebuff(2336), "Fire overload should apply property ID 2336");
 
-        testCreature.modifyResBuildUp(ResBuildUp.NATURE, 100);
-        assertEquals(0, testCreature.getResBuildUp(ResBuildUp.NATURE),
-                "Nature buildup should reset to 0 even without a configured property");
+    // Nature currently has no configured overload property; it should reset but not apply a debuff
+    testCreature.modifyResBuildUp(ResBuildUp.NATURE, 100);
+    assertEquals(0, testCreature.getResBuildUp(ResBuildUp.NATURE),
+        "Nature buildup should reset to 0 even without a configured property");
+    }
+
+    @Test
+    void testAllResBuildUpOverloadMappings() {
+        // Exhaustively test each ResBuildUp value: buildup reaches 100 -> resets to 0.
+        // For known mappings, ensure the correct property is applied; otherwise no debuff.
+        for (ResBuildUp rb : ResBuildUp.values()) {
+            // Clear any previous debuffs for this id range by creating a fresh player
+            Player c = new Player();
+            // Apply 100 buildup
+            c.modifyResBuildUp(rb, 100);
+            assertEquals(0, c.getResBuildUp(rb), "Buildup for " + rb.name() + " should reset to 0 after overload");
+
+            // Known overload mappings (kept in sync with ResistanceUtil.getOverloadPropertyId)
+            if (rb == ResBuildUp.SLASHING) {
+                assertNotNull(c.getDebuff(2334), "Slashing overload should apply Bleed1 (2334)");
+            } else if (rb == ResBuildUp.FIRE) {
+                assertNotNull(c.getDebuff(2336), "Fire overload should apply property 2336");
+            } else if (rb == ResBuildUp.DARKNESS) {
+                assertNotNull(c.getDebuff(2335), "Darkness overload should apply property 2335");
+            } else {
+                // Other types currently have no configured overload property — ensure nothing applied
+                // We don't know exact IDs for future mappings, so assert that none of the two known IDs
+                // were applied for these types.
+                assertNull(c.getDebuff(2334), "No slashing debuff should be applied for " + rb.name());
+                assertNull(c.getDebuff(2336), "No fire debuff should be applied for " + rb.name());
+            }
+        }
     }
 }

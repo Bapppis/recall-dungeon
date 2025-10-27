@@ -41,7 +41,7 @@
     "BLUDGEONING": 100,
     "PIERCING": 100,
     "SLASHING": 100,
-    "TRUE": 100
+    "TRUE": 50
   },
   "helmet": null,
   "armor": null,
@@ -55,7 +55,8 @@
       "name": "Test Punch",
       "damageType": "BLUDGEONING",
       "times": 1,
-      "physicalDamageDice": "1d4"
+      "physicalDamageDice": "1d4",
+      "physBuildUpMod": 1.0
     }
   ],
   "sprite": "player_test"

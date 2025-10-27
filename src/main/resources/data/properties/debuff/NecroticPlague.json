@@ -7,6 +7,6 @@
   "damageType": "DARKNESS",
   "damageDice": "1d5",
   "tooltip": [
-    "You take 1-5 damage at the start of your turn."
+    "You take 1-5 darkness damage at the start of your turn."
   ]
 }

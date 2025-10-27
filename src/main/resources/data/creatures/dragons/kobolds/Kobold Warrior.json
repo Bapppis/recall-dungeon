@@ -1,21 +1,21 @@
 {
-  "id": 15000,
-  "name": "Goblin Berserker",
-  "description": "A small goblin wielding two axes, it is thirsting for blood.",
-  "species": "Goblin",
-  "creatureType": "HUMANOID",
+  "id": 10000,
+  "name": "Kobold Warrior",
+  "description": "A brave kobold warrior, skilled in combat. He is wielding a sword and a shield.",
+  "species": "Kobold",
+  "creatureType": "DRAGON",
   "level": 0,
   "enemyXp": 4,
   "visionRange": 1,
-  "baseBlock": 5,
+  "baseBlock": 15,
   "baseCrit": 5,
   "baseDodge": 5,
   "baseMagicResist": 0,
-  "baseHp": 25,
+  "baseHp": 20,
   "hpDice": 20,
   "stats": {
-    "STRENGTH": 11,
-    "DEXTERITY": 11,
+    "STRENGTH": 12,
+    "DEXTERITY": 10,
     "CONSTITUTION": 12,
     "INTELLIGENCE": 8,
     "WISDOM": 10,
@@ -42,7 +42,7 @@
   "properties": null,
   "attacks": [
     {
-      "name": "Axe Chops",
+      "name": "Quick Slashes",
       "damageType": "SLASHING",
       "times": 2,
       "physicalDamageDice": "2d4",
@@ -50,11 +50,12 @@
       "weight": 8
     },
     {
-      "name": "Rampage",
-      "damageType": "SLASHING",
-      "times": 4,
-      "physicalDamageDice": "1d4",
-      "physBuildUpMod": 0.3,
+      "name": "Stab",
+      "damageType": "PIERCING",
+      "times": 1,
+      "physicalDamageDice": "4d4",
+      "accuracy": 5,
+      "physBuildUpMod": 1.25,
       "critMod": "+10",
       "weight": 2
     }
