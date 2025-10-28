@@ -245,6 +245,7 @@ Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 ##### Piercing Weapons (30333-31665)
 
 - 30333 — Rusty Iron Spear — data/items/weapons/melee weapons/piercing weapons/Rusty Iron Spear.json
+- 30334 — Morningstar — data/items/weapons/melee weapons/piercing weapons/Morningstar.json
 
 ##### Blunt Weapons (31666-32999)
 
