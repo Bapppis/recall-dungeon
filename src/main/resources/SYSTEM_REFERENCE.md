@@ -168,6 +168,42 @@ Buildup represents the accumulation of elemental or physical stress on a creatur
 - **Independent Resolution**: Both components roll separately with their own to-hit, damage, crit, and buildup
 - **Magic Element Priority**: For magic buildup, prefers `weapon.magicElement` over `attack.magicDamageType`
 
+### Secondary Damage System
+Weapons can have secondary damage types that apply automatically when primary hits land:
+
+#### Secondary Physical Damage
+- **Fields**: `weapon.damageType2` + `attack.physicalDamageDice2`
+- **Trigger**: Applies for each successful primary physical hit
+- **To-Hit**: Uses primary hit success (no separate roll)
+- **Damage**: Rolls `physicalDamageDice2` only (NO stat bonus added)
+- **Crit**: Crits when the corresponding primary hit crits
+- **Buildup**: Does NOT apply buildup
+- **Resistance**: Reduced by target's `damageType2` resistance
+
+#### Secondary Magic Damage
+- **Fields**: `weapon.magicElement2` + `attack.magicDamageDice2`
+- **Trigger**: Applies for each successful primary magic hit
+- **To-Hit**: Uses primary magic hit success (no separate roll)
+- **Damage**: Rolls `magicDamageDice2` only (NO stat bonus added)
+- **Crit**: Crits when the corresponding primary magic hit crits
+- **Buildup**: Does NOT apply buildup
+- **Resistance**: Reduced by target's `magicElement2` resistance
+
+#### Example: Morningstar
+```json
+{
+  "damageType": "PIERCING",
+  "damageType2": "BLUDGEONING",
+  "attacks": [{
+    "physicalDamageDice": "1d6",
+    "physicalDamageDice2": "1d6"
+  }]
+}
+```
+- Primary hit: 1d6 PIERCING + STR bonus + buildup
+- Secondary hit: 1d6 BLUDGEONING (no bonus, no buildup)
+- Both use same crit result
+
 ### Attack Reports
 - **AttackEngine.attackListener**: Optional consumer that receives detailed `AttackReport` objects
 - **Report Contents**:

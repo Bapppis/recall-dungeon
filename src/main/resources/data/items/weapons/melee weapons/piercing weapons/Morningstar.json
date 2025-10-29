@@ -8,13 +8,15 @@
   "weaponClass": "MELEE",
   "weaponType": "PIERCE",
   "damageType": "PIERCING",
+  "damageType2": "BLUDGEONING",
   "crit": 10,
   "attacks": [
     {
       "name": "Double Smash",
       "damageType": "PIERCING",
       "times": 2,
-      "physicalDamageDice": "1d6",
+      "physicalDamageDice": "1d3",
+      "physicalDamageDice2": "1d3",
       "accuracy": null,
       "physBuildUpMod": 0.5,
       "damageMultiplier": 0.5,
@@ -24,7 +26,8 @@
       "name": "Crushing Blow",
       "damageType": "PIERCING",
       "times": 1,
-      "physicalDamageDice": "2d6",
+      "physicalDamageDice": "1d6",
+      "physicalDamageDice2": "1d6",
       "accuracy": null,
       "physBuildUpMod": 1.0,
       "damageMultiplier": 1.0,
@@ -34,7 +37,8 @@
       "name": "Critical Blow",
       "damageType": "PIERCING",
       "times": 1,
-      "physicalDamageDice": "2d6+2",
+      "physicalDamageDice": "1d6+1",
+      "physicalDamageDice2": "1d6+1",
       "accuracy": null,
       "physBuildUpMod": 1.25,
       "damageMultiplier": 1.25,
@@ -45,10 +49,10 @@
   "tooltip": [
     "You gain 10% critical chance while wielding this weapon.",
     "",
-    "Double Smash (40%): Deals 2-12 + 5 * STR bonus piercing damage.",
+    "Double Smash (40%): Deals 1-6 + 5 * STR bonus piercing damage and 1-6 bludgeoning damage.",
     "",
-    "Crushing Blow (40%): Deals 2-12 + 5 * STR bonus piercing damage.",
+    "Crushing Blow (40%): Deals 1-6 + 5 * STR bonus piercing damage and 1-6 bludgeoning damage.",
     "",
-    "Critical Blow (20%): Deals 4-14 + 5 * STR bonus piercing damage. This attack has a +10% critical chance."
+    "Critical Blow (20%): Deals 2-7 + 5 * STR bonus piercing damage and 2-7 bludgeoning damage. This attack has a +10% critical chance."
   ]
 }

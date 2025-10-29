@@ -8,7 +8,9 @@ public class Attack {
     public String name;
     public Integer times;
     public String physicalDamageDice;
+    public String physicalDamageDice2;
     public String magicDamageDice;
+    public String magicDamageDice2;
     public Resistances magicDamageType;
     public float damageMultiplier;
     public float magicDamageMultiplier;

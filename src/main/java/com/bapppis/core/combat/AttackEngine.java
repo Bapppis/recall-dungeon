@@ -22,6 +22,8 @@ public final class AttackEngine {
         public int physAfterCritBeforeResist;
         public int physAfter;
         public int magAfter;
+        public int phys2After; // Secondary physical damage
+        public int mag2After; // Secondary magic damage
         public int times;
         public String damageType;
         public String magicType;
@@ -67,6 +69,8 @@ public final class AttackEngine {
         int physAttempts = 0;
         int physMissDodge = 0;
         int physMissBlock = 0;
+        int phys2After = 0; // Secondary physical damage
+        boolean[] physHitCrits = new boolean[100]; // Track which hits crit (max 100 hits per attack)
         int times = attack.getTimes();
         float baseCrit = attacker.getCrit();
         int critMod = 0;
@@ -80,6 +84,7 @@ public final class AttackEngine {
                 && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.PHYSICAL;
         boolean isTrue = physicalType != null && ResistanceUtil.classify(physicalType) == ResistanceUtil.Kind.TRUE;
         if (hasPhysical || isTrue) {
+            int successfulHitIndex = 0;
             for (int i = 0; i < times; i++) {
                 physAttempts++;
                 float rawRoll = rng.nextFloat() * 100f;
@@ -129,6 +134,8 @@ public final class AttackEngine {
                     physCritCount++;
                     hit *= 2;
                 }
+                physHitCrits[successfulHitIndex] = crit;
+                successfulHitIndex++;
                 totalPhysBeforeResist += hit;
                 // For every successful physical hit, add build-up to the target using the
                 // attack's damageType and the physical build-up modifier.
@@ -154,6 +161,27 @@ public final class AttackEngine {
             if (physAfter > 0) {
                 target.modifyHp(-physAfter);
             }
+
+            // Apply secondary physical damage if present (weapon.damageType2 and attack.physicalDamageDice2)
+            // Secondary damage: no stat bonus, no buildup, applies only when primary hits
+            // Secondary damage crits when the corresponding primary hit crit
+            if (weapon != null && weapon.getDamageType2() != null 
+                    && attack.physicalDamageDice2 != null && !attack.physicalDamageDice2.isBlank()) {
+                int totalPhys2BeforeResist = 0;
+                int successfulPrimaryHits = physAttempts - physMissDodge - physMissBlock;
+                for (int i = 0; i < successfulPrimaryHits; i++) {
+                    int hit2 = Dice.roll(attack.physicalDamageDice2);
+                    // Apply crit if the corresponding primary hit crit
+                    if (physHitCrits[i]) {
+                        hit2 *= 2;
+                    }
+                    totalPhys2BeforeResist += hit2;
+                }
+                phys2After = ResistanceUtil.getDamageAfterResistance(target, totalPhys2BeforeResist, weapon.getDamageType2());
+                if (phys2After > 0) {
+                    target.modifyHp(-phys2After);
+                }
+            }
         }
 
         int magRaw = 0;
@@ -162,6 +190,8 @@ public final class AttackEngine {
         int magicBeforeResist = 0;
         int magicStatBonus = 0;
         int magicStatExtra = 0;
+        int mag2After = 0; // Secondary magic damage
+        boolean[] magicHitCrits = new boolean[100]; // Track which magic hits crit (max 100 hits per attack)
         float magicMult = attack.magicDamageMultiplier;
         String magicStatChosenName = null;
         int magicAttempts = 0;
@@ -201,6 +231,7 @@ public final class AttackEngine {
             int magicToHitBonus = Math.max(0, magicStatBonus) * 5;
 
             int magicTimes = attack.getTimes();
+            int successfulMagicHitIndex = 0;
             for (int i = 0; i < magicTimes; i++) {
                 magicAttempts++;
                 float rawRoll = rng.nextFloat() * 100f;
@@ -245,6 +276,8 @@ public final class AttackEngine {
                     magicCritCount++;
                     hit *= 2;
                 }
+                magicHitCrits[successfulMagicHitIndex] = crit;
+                successfulMagicHitIndex++;
                 magicBeforeResist += hit;
                 // For every successful magic hit, add build-up to the target. Prefer the
                 // weapon's magic element when available; otherwise fall back to the
@@ -266,6 +299,27 @@ public final class AttackEngine {
             if (magAfter > 0) {
                 target.modifyHp(-magAfter);
             }
+
+            // Apply secondary magic damage if present (weapon.magicElement2 and attack.magicDamageDice2)
+            // Secondary magic damage: no stat bonus, no buildup, applies only when primary magic hits
+            // Secondary magic damage crits when the corresponding primary magic hit crit
+            if (weapon != null && weapon.getMagicElement2() != null 
+                    && attack.magicDamageDice2 != null && !attack.magicDamageDice2.isBlank()) {
+                int totalMag2BeforeResist = 0;
+                int successfulMagicHits = magicAttempts - magicMissDodge - magicMissResist;
+                for (int i = 0; i < successfulMagicHits; i++) {
+                    int hit2 = Dice.roll(attack.magicDamageDice2);
+                    // Apply crit if the corresponding primary magic hit crit
+                    if (magicHitCrits[i]) {
+                        hit2 *= 2;
+                    }
+                    totalMag2BeforeResist += hit2;
+                }
+                mag2After = ResistanceUtil.getDamageAfterResistance(target, totalMag2BeforeResist, weapon.getMagicElement2());
+                if (mag2After > 0) {
+                    target.modifyHp(-mag2After);
+                }
+            }
         }
 
         try {
@@ -277,6 +331,8 @@ public final class AttackEngine {
                 rpt.physAfterCritBeforeResist = totalPhysBeforeResist;
                 rpt.physAfter = physAfter;
                 rpt.magAfter = magAfter;
+                rpt.phys2After = phys2After; // Include secondary physical damage
+                rpt.mag2After = mag2After; // Include secondary magic damage
                 rpt.times = attack.getTimes();
                 rpt.damageType = (physicalType == null ? null : physicalType.name());
                 rpt.magicType = (magicType == null ? null : magicType.name());

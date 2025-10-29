@@ -46,7 +46,9 @@ public abstract class Weapon extends Equipment {
     private WeaponClass weaponClass = WeaponClass.MELEE; // MELEE, RANGED, MAGIC
     private WeaponType weaponType; // SLASH, PIERCE, BLUNT, BOW, CROSSBOW, STAFF, ARCANE, MAGIC_PHYSICAL
     private Resistances damageType;
+    private Resistances damageType2;
     private Resistances magicElement;
+    private Resistances magicElement2;
     private Stats magicStatBonus;
     private List<Stats> magicStatBonuses;
 
@@ -67,8 +69,12 @@ public abstract class Weapon extends Equipment {
     public void setWeaponType(WeaponType weaponType) { this.weaponType = weaponType; }
     public Resistances getDamageType() { return damageType; }
     public void setDamageType(Resistances damageType) { this.damageType = damageType; }
+    public Resistances getDamageType2() { return damageType2; }
+    public void setDamageType2(Resistances damageType2) { this.damageType2 = damageType2; }
     public Resistances getMagicElement() { return magicElement; }
     public void setMagicElement(Resistances magicElement) { this.magicElement = magicElement; }
+    public Resistances getMagicElement2() { return magicElement2; }
+    public void setMagicElement2(Resistances magicElement2) { this.magicElement2 = magicElement2; }
     public Stats getMagicStatBonus() { return magicStatBonus; }
     public void setMagicStatBonus(Stats magicStatBonus) { this.magicStatBonus = magicStatBonus; }
     public List<Stats> getMagicStatBonuses() { return magicStatBonuses; }

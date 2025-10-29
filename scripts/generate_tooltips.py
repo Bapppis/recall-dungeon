@@ -230,7 +230,9 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
         
         times = attack.get("times", 1)
         phys_dice = attack.get("physicalDamageDice")
+        phys_dice2 = attack.get("physicalDamageDice2")
         magic_dice = attack.get("magicDamageDice")
+        magic_dice2 = attack.get("magicDamageDice2")
         phys_mult = attack.get("damageMultiplier", 1.0)
         magic_mult = attack.get("magicDamageMultiplier", 1.0)
         
@@ -241,7 +243,7 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
         
         damage_parts = []
         
-        # Physical damage
+        # Primary physical damage
         if phys_dice:
             phys_min, phys_max = parse_dice(phys_dice)
             phys_min_total = phys_min * times
@@ -261,11 +263,32 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
             phys_stat = get_primary_stat(weapon)
             phys_damage_type = get_damage_type_display(attack.get("damageType", weapon.get("damageType", "")))
             
-            damage_parts.append(
-                f"{phys_min_total}-{phys_max_total}{vers_suffix} + 5 * {phys_stat} bonus {phys_damage_type} damage"
-            )
+            # Build primary physical damage string
+            phys_dmg_str = f"{phys_min_total}-{phys_max_total}{vers_suffix} + 5 * {phys_stat} bonus {phys_damage_type} damage"
+            
+            # Add secondary physical damage if present
+            if phys_dice2 and weapon.get("damageType2"):
+                phys2_min, phys2_max = parse_dice(phys_dice2)
+                phys2_min_total = phys2_min * times
+                phys2_max_total = phys2_max * times
+                
+                # Check versatile variant for secondary
+                vers_phys2_dice = versatile_attack.get("physicalDamageDice2") if versatile_attack else None
+                vers2_suffix = ""
+                if vers_phys2_dice and vers_phys2_dice != phys_dice2:
+                    vers2_times = versatile_attack.get("times", 1)
+                    vers2_min, vers2_max = parse_dice(vers_phys2_dice)
+                    vers2_min_total = vers2_min * vers2_times
+                    vers2_max_total = vers2_max * vers2_times
+                    if vers2_min_total != phys2_min_total or vers2_max_total != phys2_max_total:
+                        vers2_suffix = f" ({vers2_min_total}-{vers2_max_total})"
+                
+                phys2_damage_type = get_damage_type_display(weapon.get("damageType2", ""))
+                phys_dmg_str += f" and {phys2_min_total}-{phys2_max_total}{vers2_suffix} {phys2_damage_type} damage"
+            
+            damage_parts.append(phys_dmg_str)
         
-        # Magic damage
+        # Primary magic damage
         if magic_dice:
             magic_min, magic_max = parse_dice(magic_dice)
             magic_min_total = magic_min * times
@@ -286,9 +309,30 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
             magic_element = weapon.get("magicElement", attack.get("magicDamageType", ""))
             magic_damage_type = get_damage_type_display(magic_element) if magic_element else "magic"
             
-            damage_parts.append(
-                f"{magic_min_total}-{magic_max_total}{vers_suffix} + 5 * {magic_stat} bonus {magic_damage_type} damage"
-            )
+            # Build primary magic damage string
+            magic_dmg_str = f"{magic_min_total}-{magic_max_total}{vers_suffix} + 5 * {magic_stat} bonus {magic_damage_type} damage"
+            
+            # Add secondary magic damage if present
+            if magic_dice2 and weapon.get("magicElement2"):
+                magic2_min, magic2_max = parse_dice(magic_dice2)
+                magic2_min_total = magic2_min * times
+                magic2_max_total = magic2_max * times
+                
+                # Check versatile variant for secondary magic
+                vers_magic2_dice = versatile_attack.get("magicDamageDice2") if versatile_attack else None
+                vers2_suffix = ""
+                if vers_magic2_dice and vers_magic2_dice != magic_dice2:
+                    vers2_times = versatile_attack.get("times", 1)
+                    vers2_min, vers2_max = parse_dice(vers_magic2_dice)
+                    vers2_min_total = vers2_min * vers2_times
+                    vers2_max_total = vers2_max * vers2_times
+                    if vers2_min_total != magic2_min_total or vers2_max_total != magic2_max_total:
+                        vers2_suffix = f" ({vers2_min_total}-{vers2_max_total})"
+                
+                magic2_damage_type = get_damage_type_display(weapon.get("magicElement2", ""))
+                magic_dmg_str += f" and {magic2_min_total}-{magic2_max_total}{vers2_suffix} {magic2_damage_type} damage"
+            
+            damage_parts.append(magic_dmg_str)
         
         # Build attack line
         attack_line = f"{attack_name} ({percentage}%): Deals " + " and ".join(damage_parts) + "."
