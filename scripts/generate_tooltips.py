@@ -120,6 +120,24 @@ def get_magic_stat(weapon: Dict[str, Any]) -> str:
     return "INT"
 
 
+def load_property_by_name(property_name: str) -> Dict[str, Any]:
+    """Load a property JSON by name from the properties folder."""
+    project_root = Path(__file__).resolve().parent.parent
+    properties_dir = project_root / "src" / "main" / "resources" / "data" / "properties"
+    
+    # Search all subdirectories for property files
+    for prop_file in properties_dir.rglob("*.json"):
+        try:
+            with open(prop_file, "r", encoding="utf-8") as f:
+                prop = json.load(f)
+                if prop.get("name") == property_name:
+                    return prop
+        except Exception:
+            continue
+    
+    return None
+
+
 def calculate_attack_damage_range(attack: Dict[str, Any], times: int, multiplier: float) -> Tuple[int, int]:
     """Calculate total damage range for an attack considering times and multiplier."""
     dice = attack.get("physicalDamageDice") or attack.get("magicDamageDice", "")
@@ -340,6 +358,14 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
         # Add modifiers
         modifiers = []
         
+        # Check for property-on-hit
+        phys_property = attack.get("physicalOnHitProperty")
+        magic_property = attack.get("magicOnHitProperty")
+        
+        if phys_property or magic_property:
+            property_name = phys_property or magic_property
+            modifiers.append(f"a chance to inflict the {property_name} condition")
+        
         crit_mod = attack.get("critMod")
         vers_crit_mod = versatile_attack.get("critMod") if versatile_attack else None
         
@@ -376,6 +402,37 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
         
         lines.append(attack_line)
         lines.append("")
+    
+    # Collect all unique properties mentioned in attacks
+    property_names = set()
+    for attack in attacks:
+        phys_prop = attack.get("physicalOnHitProperty")
+        magic_prop = attack.get("magicOnHitProperty")
+        if phys_prop:
+            property_names.add(phys_prop)
+        if magic_prop:
+            property_names.add(magic_prop)
+    
+    # Add property tooltips at the end
+    for prop_name in sorted(property_names):
+        prop_data = load_property_by_name(prop_name)
+        if prop_data:
+            # Use tooltip if available, otherwise fall back to description
+            prop_tooltip = prop_data.get("tooltip")
+            if prop_tooltip:
+                # If tooltip is a list, join with space; if string, use as-is
+                if isinstance(prop_tooltip, list):
+                    tooltip_text = " ".join(prop_tooltip)
+                else:
+                    tooltip_text = prop_tooltip
+                lines.append(f"{prop_name}: {tooltip_text}")
+                lines.append("")
+            else:
+                # Fallback to description if no tooltip
+                desc = prop_data.get("description", "")
+                if desc:
+                    lines.append(f"{prop_name}: {desc}")
+                    lines.append("")
     
     # Remove trailing blank line
     if lines and lines[-1] == "":

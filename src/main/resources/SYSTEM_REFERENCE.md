@@ -204,6 +204,44 @@ Weapons can have secondary damage types that apply automatically when primary hi
 - Secondary hit: 1d6 BLUDGEONING (no bonus, no buildup)
 - Both use same crit result
 
+### Property-on-Hit System
+Attacks can apply properties (buffs/debuffs) conditionally when they hit:
+
+#### Physical Property-on-Hit
+- **Field**: `attack.physicalOnHitProperty` (property name as string)
+- **Trigger**: Single attempt per attack when at least one primary physical hit succeeds
+- **To-Hit Roll**: `roll(0-100) + weaponStatBonus` (does NOT include accuracy or attack accuracy)
+- **Avoidance**: Same dodge/block calculation as primary physical hits
+- **Success**: Calls `target.addProperty(propertyName)` if to-hit succeeds
+- **Tracking**: `AttackReport.physPropertyAttempted`, `AttackReport.physPropertyApplied`
+
+#### Magical Property-on-Hit
+- **Field**: `attack.magicOnHitProperty` (property name as string)
+- **Trigger**: Single attempt per attack when at least one primary magic hit succeeds
+- **To-Hit Roll**: `roll(0-100) + (magicStatBonus × 5)` (does NOT include magic accuracy or attack magic accuracy)
+- **Avoidance**: Same dodge/magicResist calculation as primary magic hits
+- **Success**: Calls `target.addProperty(propertyName)` if to-hit succeeds
+- **Tracking**: `AttackReport.magPropertyAttempted`, `AttackReport.magPropertyApplied`
+
+#### Important Notes
+- Property application happens **once per attack**, not per hit (even for multi-hit attacks)
+- Property to-hit uses **stat bonus only** (no accuracy bonuses)
+- Property attempt only occurs if **at least one primary hit succeeded**
+- Property can fail to apply even if primary hits landed (separate to-hit check)
+- Properties referenced by name are loaded via `PropertyLoader` at runtime
+
+#### Example: Morningstar with Dizzy
+```json
+{
+  "name": "Critical Blow",
+  "physicalDamageDice": "1d6+1",
+  "physicalOnHitProperty": "Dizzy"
+}
+```
+- Primary hit: 1d6+1 PIERCING + STR bonus + buildup
+- If primary hit succeeds: attempt to apply "Dizzy" with one extra to-hit roll
+- Dizzy property: -10% block, -4 DEX for 2 turns
+
 ### Attack Reports
 - **AttackEngine.attackListener**: Optional consumer that receives detailed `AttackReport` objects
 - **Report Contents**:

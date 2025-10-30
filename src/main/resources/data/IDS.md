@@ -46,6 +46,7 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 - 2334 — Bleed — data/properties/debuff/Bleed1.json
 - 2335 — Necrotic Plague — data/properties/debuff/NecroticPlague.json
 - 2336 — Burning 1 — data/properties/debuff/Burning1.json
+- 2337 — Dizzy — data/properties/debuff/Dizzy.json
 - 3665 — Test Debuff — data/properties/debuff/TestDebuff.json
 
 ### Traits (3666-4999)

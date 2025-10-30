@@ -1,0 +1,14 @@
+{
+  "id": 2337,
+  "type": "DEBUFF",
+  "name": "Dizzy",
+  "description": "You feel lightheaded and unsteady.",
+  "duration": 2,
+  "block": -10,
+  "stats": {
+    "DEXTERITY": -4
+  },
+  "tooltip": [
+    "You have -10% block and -4 Dexterity."
+  ]
+}

@@ -20,6 +20,7 @@ public class SecondaryDamageAndBuildupTest {
   @Test
   public void testMorningstarSecondaryDamage() {
     AllLoaders.loadAll();
+    CreatureLoader.forceReload();
 
     // Create test creatures
     Player attacker = CreatureLoader.getPlayerById(5000); // Biggles
@@ -75,6 +76,7 @@ public class SecondaryDamageAndBuildupTest {
   @Test
   public void testPhysicalBuildupApplication() {
     AllLoaders.loadAll();
+    CreatureLoader.forceReload();
 
     Player attacker = CreatureLoader.getPlayerById(5000); // Biggles
     Creature target = CreatureLoader.getCreatureById(15000); // Goblin
@@ -108,6 +110,7 @@ public class SecondaryDamageAndBuildupTest {
   @Test
   public void testSecondaryDamageNoStatBonus() {
     AllLoaders.loadAll();
+    CreatureLoader.forceReload();
 
     Player attacker = CreatureLoader.getPlayerById(5000); // Biggles
     Creature target = CreatureLoader.getCreatureById(15000); // Goblin
@@ -182,6 +185,7 @@ public class SecondaryDamageAndBuildupTest {
   @Test
   public void testSecondaryDamageResistanceApplication() {
     AllLoaders.loadAll();
+    CreatureLoader.forceReload();
 
     Player attacker = CreatureLoader.getPlayerById(5000);
     Creature target = CreatureLoader.getCreatureById(15000);
@@ -222,9 +226,11 @@ public class SecondaryDamageAndBuildupTest {
   @Test
   public void testCritMirroringSecondaryDamage() {
     AllLoaders.loadAll();
+    // Force reload to reset creature state from previous tests
+    CreatureLoader.forceReload();
 
-    Player attacker = CreatureLoader.getPlayerById(5000);
-    Creature target = CreatureLoader.getCreatureById(15000);
+    Player attacker = CreatureLoader.getPlayerById(5000); // Biggles
+    Creature target = CreatureLoader.getCreatureById(15000); // Goblin
     attacker.finalizeAfterLoad();
     target.finalizeAfterLoad();
     for (com.bapppis.core.ResBuildUp rb : com.bapppis.core.ResBuildUp.values()) {
@@ -277,5 +283,167 @@ public class SecondaryDamageAndBuildupTest {
     assertEquals(1, capturedCritCount.get(), "Should have exactly 1 crit");
     assertEquals(2, capturedPrimaryDmg.get(), "Primary damage with crit should be 2 (1*2)");
     assertEquals(2, capturedSecondaryDmg.get(), "Secondary damage with crit should be 2 (1*2, mirroring primary crit)");
+  }
+
+  @Test
+  public void testPhysicalPropertyOnHit() {
+    AllLoaders.loadAll();
+    CreatureLoader.forceReload();
+
+    // Create attacker and target
+    Player attacker = CreatureLoader.getPlayerById(5000); // Biggles
+    Creature target = CreatureLoader.getCreatureById(15000); // Goblin
+    attacker.finalizeAfterLoad();
+    target.finalizeAfterLoad();
+
+    // Give Morningstar to attacker (has physicalOnHitProperty: "Dizzy")
+    Weapon morningstar = (Weapon) ItemLoader.getItemById(30334);
+    attacker.addItem(morningstar);
+    attacker.equipItem(attacker.getInventory().getWeapons().get(0));
+
+    // Create deterministic attack with property
+    Attack atk = new Attack();
+    atk.name = "Deterministic Property Test";
+    atk.times = 1;
+    atk.physicalDamageDice = "1d1";
+    atk.damageType = Resistances.PIERCING;
+    atk.physicalOnHitProperty = "Dizzy"; // Should apply Dizzy debuff
+    atk.physBuildUpMod = 0f; // no buildup to keep test focused
+
+    // Force hit (100% accuracy, 0 dodge/block)
+    attacker.modifyBaseAccuracy(200);
+    target.setDodge(0f);
+    target.setBlock(0f);
+    target.setResistance(Resistances.PIERCING, 100);
+
+    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar) * 5;
+
+    // Verify target doesn't have Dizzy before attack
+    assertNull(target.getDebuff(2337), "Target should not have Dizzy debuff before attack");
+
+    // Capture property application via listener
+    java.util.concurrent.atomic.AtomicInteger attemptedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+    java.util.concurrent.atomic.AtomicInteger appliedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+    AttackEngine.attackListener = (rpt) -> {
+      attemptedCount.set(rpt.physPropertyAttempted);
+      appliedCount.set(rpt.physPropertyApplied);
+      assertEquals("Dizzy", rpt.physPropertyName, "Property name should be Dizzy");
+    };
+
+    AttackEngine.applyAttackToTarget(attacker, atk, statBonus, target, Resistances.PIERCING, null, morningstar);
+    AttackEngine.attackListener = null;
+
+    // Verify property was attempted once
+    assertEquals(1, attemptedCount.get(), "Property application should be attempted exactly once");
+    // Note: whether it's applied depends on the to-hit roll. For deterministic test we could use custom RNG
+    // For now just verify attempt happened
+    assertTrue(attemptedCount.get() > 0, "Property should have been attempted at least once");
+  }
+
+  @Test
+  public void testMagicPropertyOnHit() {
+    AllLoaders.loadAll();
+    CreatureLoader.forceReload();
+
+    // Create attacker and target
+    Player attacker = CreatureLoader.getPlayerById(5000); // Biggles
+    Creature target = CreatureLoader.getCreatureById(15000); // Goblin
+    attacker.finalizeAfterLoad();
+    target.finalizeAfterLoad();
+
+    // Give Falchion of Doom to attacker (has magicOnHitProperty: "Afraid")
+    Weapon falchion = (Weapon) ItemLoader.getItemById(29000);
+    attacker.addItem(falchion);
+    attacker.equipItem(attacker.getInventory().getWeapons().get(0));
+
+    // Create deterministic attack with magic property
+    Attack atk = new Attack();
+    atk.name = "Deterministic Magic Property Test";
+    atk.times = 1;
+    atk.magicDamageDice = "1d1";
+    atk.magicDamageType = Resistances.DARKNESS;
+    atk.magicOnHitProperty = "Afraid"; // Should apply Afraid debuff
+    atk.magicBuildUpMod = 0f; // no buildup
+    atk.magicDamageMultiplier = 0.5f;
+
+    // Force magic hit (high accuracy, low resist/dodge)
+    attacker.modifyBaseMagicAccuracy(200);
+    target.setDodge(0f);
+    target.setMagicResist(0f);
+    target.setResistance(Resistances.DARKNESS, 100);
+
+    int statBonus = 0; // not used for magic
+
+    // Verify target doesn't have Afraid before attack
+    assertNull(target.getDebuff(2333), "Target should not have Afraid debuff before attack");
+
+    // Capture property application via listener
+    java.util.concurrent.atomic.AtomicInteger attemptedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+    java.util.concurrent.atomic.AtomicInteger appliedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+    AttackEngine.attackListener = (rpt) -> {
+      attemptedCount.set(rpt.magPropertyAttempted);
+      appliedCount.set(rpt.magPropertyApplied);
+      assertEquals("Afraid", rpt.magPropertyName, "Property name should be Afraid");
+    };
+
+    AttackEngine.applyAttackToTarget(attacker, atk, statBonus, target, null, Resistances.DARKNESS, falchion);
+    AttackEngine.attackListener = null;
+
+    // Verify property was attempted once
+    assertEquals(1, attemptedCount.get(), "Property application should be attempted exactly once");
+    assertTrue(attemptedCount.get() > 0, "Property should have been attempted at least once");
+  }
+
+  @Test
+  public void testPropertyOnlyAppliesWhenPrimaryHits() {
+    AllLoaders.loadAll();
+    CreatureLoader.forceReload();
+
+    Player attacker = CreatureLoader.getPlayerById(5000);
+    Creature target = CreatureLoader.getCreatureById(15000);
+    attacker.finalizeAfterLoad();
+    target.finalizeAfterLoad();
+
+    // Create attack that will miss (0 accuracy vs 100 dodge)
+    Attack atk = new Attack();
+    atk.name = "Miss Test";
+    atk.times = 1;
+    atk.physicalDamageDice = "1d1";
+    atk.damageType = Resistances.PIERCING;
+    atk.physicalOnHitProperty = "Dizzy";
+
+    // Save original accuracy to restore after test
+    int originalAccuracy = attacker.getAccuracy();
+    
+    // Force all hits to miss - set very low accuracy
+    int currentAccuracy = attacker.getAccuracy();
+    attacker.modifyBaseAccuracy(-currentAccuracy - 500); // drastically reduce accuracy below 0
+    target.setDodge(100f);
+    target.setBlock(0f);
+    target.setResistance(Resistances.PIERCING, 100);
+
+    java.util.concurrent.atomic.AtomicInteger attemptedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+    java.util.concurrent.atomic.AtomicInteger physAttempts = new java.util.concurrent.atomic.AtomicInteger(0);
+    java.util.concurrent.atomic.AtomicInteger physMiss = new java.util.concurrent.atomic.AtomicInteger(0);
+
+    AttackEngine.attackListener = (rpt) -> {
+      attemptedCount.set(rpt.physPropertyAttempted);
+      physAttempts.set(rpt.physAttempts);
+      physMiss.set(rpt.physMissDodge + rpt.physMissBlock);
+    };
+
+    AttackEngine.applyAttackToTarget(attacker, atk, 0, target, Resistances.PIERCING, null, null);
+    AttackEngine.attackListener = null;
+
+    // Restore original accuracy so we don't pollute subsequent tests
+    int currentAccuracyAfter = attacker.getAccuracy();
+    attacker.modifyBaseAccuracy(originalAccuracy - currentAccuracyAfter);
+
+    // Verify all attempts missed
+    assertEquals(physAttempts.get(), physMiss.get(), "All physical attempts should have missed");
+    // Property should NOT be attempted if primary attack misses
+    assertEquals(0, attemptedCount.get(), "Property should not be attempted when primary attack misses");
   }
 }

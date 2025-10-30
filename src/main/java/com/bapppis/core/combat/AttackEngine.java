@@ -44,6 +44,12 @@ public final class AttackEngine {
         public int physAttempts;
         public int physMissDodge;
         public int physMissBlock;
+        public int physPropertyAttempted;
+        public int physPropertyApplied;
+        public int magPropertyAttempted;
+        public int magPropertyApplied;
+        public String physPropertyName;
+        public String magPropertyName;
         public int magicAttempts;
         public int magicMissDodge;
         public int magicMissResist;
@@ -70,6 +76,8 @@ public final class AttackEngine {
         int physMissDodge = 0;
         int physMissBlock = 0;
         int phys2After = 0; // Secondary physical damage
+        int physPropertyAttempted = 0;
+        int physPropertyApplied = 0;
         boolean[] physHitCrits = new boolean[100]; // Track which hits crit (max 100 hits per attack)
         int times = attack.getTimes();
         float baseCrit = attacker.getCrit();
@@ -101,21 +109,25 @@ public final class AttackEngine {
                     if (toHit <= totalAvoid) {
                         if (effectiveDodge >= effectiveBlock) {
                             if (toHit <= effectiveBlock) {
-                                // System.out.println("Missed (block): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (block): " + attacker.getName() + " -> " +
+                                // target.getName());
                                 physMissBlock++;
                                 continue;
                             } else {
-                                // System.out.println("Missed (dodge): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (dodge): " + attacker.getName() + " -> " +
+                                // target.getName());
                                 physMissDodge++;
                                 continue;
                             }
                         } else {
                             if (toHit <= effectiveDodge) {
-                                // System.out.println("Missed (dodge): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (dodge): " + attacker.getName() + " -> " +
+                                // target.getName());
                                 physMissDodge++;
                                 continue;
                             } else {
-                                // System.out.println("Missed (block): " + attacker.getName() + " -> " + target.getName());
+                                // System.out.println("Missed (block): " + attacker.getName() + " -> " +
+                                // target.getName());
                                 physMissBlock++;
                                 continue;
                             }
@@ -156,19 +168,23 @@ public final class AttackEngine {
                 }
             } catch (Exception ignored) {
             }
-            // Use ResistanceUtil to calculate damage after resistance (handles nulls safely)
+            // Use ResistanceUtil to calculate damage after resistance (handles nulls
+            // safely)
             physAfter = ResistanceUtil.getDamageAfterResistance(target, totalPhysBeforeResist, physicalType);
             if (physAfter > 0) {
                 target.modifyHp(-physAfter);
             }
 
-            // Apply secondary physical damage if present (weapon.damageType2 and attack.physicalDamageDice2)
+            // Calculate successful primary hits once for both secondary damage and property application
+            int successfulPrimaryHits = physAttempts - physMissDodge - physMissBlock;
+
+            // Apply secondary physical damage if present (weapon.damageType2 and
+            // attack.physicalDamageDice2)
             // Secondary damage: no stat bonus, no buildup, applies only when primary hits
             // Secondary damage crits when the corresponding primary hit crit
-            if (weapon != null && weapon.getDamageType2() != null 
+            if (weapon != null && weapon.getDamageType2() != null
                     && attack.physicalDamageDice2 != null && !attack.physicalDamageDice2.isBlank()) {
                 int totalPhys2BeforeResist = 0;
-                int successfulPrimaryHits = physAttempts - physMissDodge - physMissBlock;
                 for (int i = 0; i < successfulPrimaryHits; i++) {
                     int hit2 = Dice.roll(attack.physicalDamageDice2);
                     // Apply crit if the corresponding primary hit crit
@@ -177,10 +193,45 @@ public final class AttackEngine {
                     }
                     totalPhys2BeforeResist += hit2;
                 }
-                phys2After = ResistanceUtil.getDamageAfterResistance(target, totalPhys2BeforeResist, weapon.getDamageType2());
+                phys2After = ResistanceUtil.getDamageAfterResistance(target, totalPhys2BeforeResist,
+                        weapon.getDamageType2());
                 if (phys2After > 0) {
                     target.modifyHp(-phys2After);
                 }
+            }
+
+            // Attempt physical-on-hit property once per attack (if configured and primary
+            // hit occurred)
+            try {
+                if (attack.physicalOnHitProperty != null && !attack.physicalOnHitProperty.isBlank()
+                        && successfulPrimaryHits > 0) {
+                    float rawProp = rng.nextFloat() * 100f;
+                    // Use statBonus only. Do NOT add accuracy or attack accuracy.
+                    int propToHit = Math.round(rawProp) + statBonus;
+                    boolean propHit = true;
+                    if (isTrue) {
+                        if (propToHit <= Math.max(0f, Math.min(100f, target.getDodge()))) {
+                            propHit = false;
+                        }
+                    } else {
+                        float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
+                        float effectiveBlock = Math.max(0f, Math.min(100f, target.getBlock()));
+                        float totalAvoid = Math.min(100f, effectiveDodge + effectiveBlock);
+                        if (propToHit <= totalAvoid) {
+                            propHit = false;
+                        }
+                    }
+                    physPropertyAttempted = 1;
+                    if (propHit) {
+                        try {
+                            boolean added = target.addProperty(attack.physicalOnHitProperty);
+                            if (added)
+                                physPropertyApplied = 1;
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
             }
         }
 
@@ -191,6 +242,8 @@ public final class AttackEngine {
         int magicStatBonus = 0;
         int magicStatExtra = 0;
         int mag2After = 0; // Secondary magic damage
+        int magPropertyAttempted = 0;
+        int magPropertyApplied = 0;
         boolean[] magicHitCrits = new boolean[100]; // Track which magic hits crit (max 100 hits per attack)
         float magicMult = attack.magicDamageMultiplier;
         String magicStatChosenName = null;
@@ -243,22 +296,26 @@ public final class AttackEngine {
                 if (toHit <= totalAvoid) {
                     if (effectiveDodge >= effectiveMagicResist) {
                         if (toHit <= effectiveMagicResist) {
-                // System.out
-                //         .println("Missed (magicResist): " + attacker.getName() + " -> " + target.getName());
+                            // System.out
+                            // .println("Missed (magicResist): " + attacker.getName() + " -> " +
+                            // target.getName());
                             magicMissResist++;
                         } else {
-                // System.out
-                //         .println("Missed (dodge magic): " + attacker.getName() + " -> " + target.getName());
+                            // System.out
+                            // .println("Missed (dodge magic): " + attacker.getName() + " -> " +
+                            // target.getName());
                             magicMissDodge++;
                         }
                     } else {
                         if (toHit <= effectiveDodge) {
-                // System.out
-                //         .println("Missed (dodge magic): " + attacker.getName() + " -> " + target.getName());
+                            // System.out
+                            // .println("Missed (dodge magic): " + attacker.getName() + " -> " +
+                            // target.getName());
                             magicMissDodge++;
                         } else {
-                // System.out
-                //         .println("Missed (magicResist): " + attacker.getName() + " -> " + target.getName());
+                            // System.out
+                            // .println("Missed (magicResist): " + attacker.getName() + " -> " +
+                            // target.getName());
                             magicMissResist++;
                         }
                     }
@@ -300,13 +357,17 @@ public final class AttackEngine {
                 target.modifyHp(-magAfter);
             }
 
-            // Apply secondary magic damage if present (weapon.magicElement2 and attack.magicDamageDice2)
-            // Secondary magic damage: no stat bonus, no buildup, applies only when primary magic hits
+            // Calculate successful magic hits once for both secondary damage and property application
+            int successfulMagicHits = magicAttempts - magicMissDodge - magicMissResist;
+
+            // Apply secondary magic damage if present (weapon.magicElement2 and
+            // attack.magicDamageDice2)
+            // Secondary magic damage: no stat bonus, no buildup, applies only when primary
+            // magic hits
             // Secondary magic damage crits when the corresponding primary magic hit crit
-            if (weapon != null && weapon.getMagicElement2() != null 
+            if (weapon != null && weapon.getMagicElement2() != null
                     && attack.magicDamageDice2 != null && !attack.magicDamageDice2.isBlank()) {
                 int totalMag2BeforeResist = 0;
-                int successfulMagicHits = magicAttempts - magicMissDodge - magicMissResist;
                 for (int i = 0; i < successfulMagicHits; i++) {
                     int hit2 = Dice.roll(attack.magicDamageDice2);
                     // Apply crit if the corresponding primary magic hit crit
@@ -315,10 +376,39 @@ public final class AttackEngine {
                     }
                     totalMag2BeforeResist += hit2;
                 }
-                mag2After = ResistanceUtil.getDamageAfterResistance(target, totalMag2BeforeResist, weapon.getMagicElement2());
+                mag2After = ResistanceUtil.getDamageAfterResistance(target, totalMag2BeforeResist,
+                        weapon.getMagicElement2());
                 if (mag2After > 0) {
                     target.modifyHp(-mag2After);
                 }
+            }
+
+            // Attempt magic-on-hit property once per attack (if configured and primary
+            // magic hit occurred)
+            try {
+                if (attack.magicOnHitProperty != null && !attack.magicOnHitProperty.isBlank()
+                        && successfulMagicHits > 0) {
+                    float rawProp = rng.nextFloat() * 100f;
+                    // Use magicToHitBonus only. Do NOT add magicAccuracy or attack.magicAccuracy.
+                    int propToHit = Math.round(rawProp) + Math.max(0, magicStatBonus) * 5;
+                    boolean propHit = true;
+                    float effectiveDodge = Math.max(0f, Math.min(100f, target.getDodge()));
+                    float effectiveMagicResist = Math.max(0f, Math.min(100f, target.getMagicResist()));
+                    float totalAvoid = Math.min(100f, effectiveDodge + effectiveMagicResist);
+                    if (propToHit <= totalAvoid) {
+                        propHit = false;
+                    }
+                    magPropertyAttempted = 1;
+                    if (propHit) {
+                        try {
+                            boolean added = target.addProperty(attack.magicOnHitProperty);
+                            if (added)
+                                magPropertyApplied = 1;
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
             }
         }
 
@@ -358,14 +448,20 @@ public final class AttackEngine {
                 rpt.physStatExtra = 0;
                 rpt.physDamageMultiplier = attack.damageMultiplier;
                 rpt.physStatChosen = null;
+                rpt.physPropertyAttempted = physPropertyAttempted;
+                rpt.physPropertyApplied = physPropertyApplied;
+                rpt.magPropertyAttempted = magPropertyAttempted;
+                rpt.magPropertyApplied = magPropertyApplied;
+                rpt.physPropertyName = attack.physicalOnHitProperty;
+                rpt.magPropertyName = attack.magicOnHitProperty;
                 AttackEngine.attackListener.accept(rpt);
             }
         } catch (Exception ignored) {
         }
 
         if (hasPhysical || isTrue) {
-        // System.out.println("Attack: " + attack.name + " Physical After: " + physAfter
-        //         + (magAfter > 0 ? (", Magic After: " + magAfter) : ""));
+            // System.out.println("Attack: " + attack.name + " Physical After: " + physAfter
+            // + (magAfter > 0 ? (", Magic After: " + magAfter) : ""));
         } else if (magAfter > 0) {
             // System.out.println("Attack: " + attack.name + " Magic After: " + magAfter);
         }

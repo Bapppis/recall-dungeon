@@ -66,6 +66,7 @@
       "damageMultiplier": 0.25,
       "magicDamageMultiplier": 0.25,
       "critMod": "+5",
+      "magicOnHitProperty": "Afraid",
       "weight": 2
     }
   ],
@@ -84,6 +85,8 @@
     "",
     "Big Slash (40%): Deals 2-12 + 5 * STR bonus slashing damage and 1-8 + 5 * CHA bonus darkness damage. This attack has a +10% critical chance.",
     "",
-    "Shadow Slashes (20%): Deals 12-20 + 5 * STR bonus slashing damage and 12-16 + 5 * CHA bonus darkness damage. This attack has a +5% critical chance."
+    "Shadow Slashes (20%): Deals 12-20 + 5 * STR bonus slashing damage and 12-16 + 5 * CHA bonus darkness damage. This attack has a chance to inflict the Afraid condition and a +5% critical chance.",
+    "",
+    "Afraid: You are 50% weaker to darkness."
   ]
 }

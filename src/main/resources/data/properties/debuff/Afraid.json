@@ -6,5 +6,8 @@
   "duration": 3,
   "resistances": {
     "DARKNESS": 50
-  }
+  },
+  "tooltip": [
+    "You are 50% weaker to darkness."
+  ]
 }
