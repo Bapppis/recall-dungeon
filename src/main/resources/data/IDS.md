@@ -1,4 +1,3 @@
-
 # Asset ID Index
 
 This file lists all known asset IDs, their names, and their resource paths. **Keep this file updated** when adding or editing assets.
@@ -13,11 +12,11 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 
 ---
 
+## Spells (50000-50999)
 
-## Spells (0000-0999)
-
-- [none indexed yet]
-
+- 50000 — Fireball — data/spells/Fireball.json
+- 50001 — Elemental Chaos — data/spells/Elemental Chaos.json
+- 50002 — Shield of Light — data/spells/Shield of Light.json
 
 ## Properties (1000-4999)
 
@@ -59,7 +58,6 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 - 4003 — TestTrait3 — data/properties/trait/TestTrait3.json
 - 4004 — TestTrait4 — data/properties/trait/TestTrait4.json
 - 4005 — TestTrait5 — data/properties/trait/TestTrait5.json
-
 
 ## Creatures (5000-19999)
 
@@ -186,7 +184,6 @@ Each species gets 100 IDs. Examples: Skeleton (19000-19099), Zombie (19100-19199
 
 - [none indexed yet]
 
-
 ## Items (20000-39999)
 
 ### Armor (20000-27999)
@@ -276,29 +273,26 @@ Weapons are organized by type (Melee, Ranged, Magic) with subcategories:
 
 - [none indexed yet]
 
-
 ## Loot Pools (40000-40999)
 
 - 40000 — Common Weapons — data/loot_pools/Common Weapons.json
 - 40001 — Common Potions — data/loot_pools/Common Potions.json
 - 40002 — Common Treasure Chest — data/loot_pools/Common Treasure Chest.json
 
-
 ## Monster Pools (41000-41999)
 
 - 41000 — Floor 0 Enemies — data/monster_pools/Floor 0 Enemies.json
 
-
 ## Reserved (42000-49999)
 
 Reserved for future game systems (quests, abilities, locations, etc.)
-
 
 ---
 
 # ID System Documentation
 
 ## Overview
+
 This section describes the ID allocation system for all game assets in Recall Dungeon.
 
 ### Design Principles
@@ -312,7 +306,7 @@ This section describes the ID allocation system for all game assets in Recall Du
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ SPELLS (0000-0999)                                          │
+│ SPELLS (50000-50999)                                        │
 │ - 1000 IDs total                                            │
 └─────────────────────────────────────────────────────────────┘
 
@@ -415,6 +409,7 @@ This section describes the ID allocation system for all game assets in Recall Du
 ## Migration Notes
 
 **Recent Changes (October 2025):**
+
 - The ID system was overhauled to accommodate all 14 creature types, increase ID ranges, and improve organization.
 - All asset JSON files were updated with new IDs. See git history for details.
 
@@ -437,6 +432,7 @@ This section describes the ID allocation system for all game assets in Recall Du
 ## Automated Validation (Future)
 
 Consider implementing:
+
 - Pre-commit hook to check for duplicate IDs
 - Build-time validation of ID ranges
 - Tool to find next available ID in a range

@@ -1,6 +1,7 @@
 package com.bapppis.core;
 
 import com.bapppis.core.property.PropertyLoader;
+import com.bapppis.core.spell.SpellLoader;
 import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.loot.LootPoolLoader;
 import com.bapppis.core.creature.CreatureLoader;
@@ -17,6 +18,13 @@ public class AllLoaders {
                 PropertyLoader.loadProperties();
             } catch (Exception e) {
                 System.err.println("Warning: PropertyLoader.loadProperties() failed");
+                e.printStackTrace();
+            }
+
+            try {
+                SpellLoader.loadSpells();
+            } catch (Exception e) {
+                System.err.println("Warning: SpellLoader.loadSpells() failed");
                 e.printStackTrace();
             }
 

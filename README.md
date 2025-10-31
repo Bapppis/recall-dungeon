@@ -56,6 +56,12 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Beast, Construct, Humanoid, Undead, etc.
 - Creatures have stats (Strength, Dexterity, Constitution, etc.) and resistances (Fire, Ice, Bludgeoning, etc.)
 - Level and XP system with customizable XP progression
+- **Spell system**: Creatures can learn and cast spells
+  - JSON-driven spell definitions with damage, elements, and properties
+  - Weighted spell selection in combat alongside weapon attacks
+  - Mana-based casting with cost checking
+  - Support for multi-element spells (up to 4 damage types per spell)
+  - Buff-only spells for self-enhancement
 - Runtime utilities: `com.bapppis.core.util` contains helper classes used by gameplay and tests. Notable ones:
   - `StatUtil` — static helpers to increase/decrease stats safely (clamps decreases to not go below zero).
   - `Dice` — rolls dice strings (e.g., "2d6").
@@ -105,9 +111,25 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 - Buffs, debuffs, immunities, and traits can be applied to creatures
 - Properties can modify stats, resistances, and vision range
 
+### Spell System
+
+- **JSON-driven spells**: Spells defined in `data/spells/*.json` with unique IDs (50000-50999 range)
+- **Mana-based casting**: Each spell has a mana cost; casters must have sufficient mana to cast
+- **Multi-element support**: Spells can deal up to 4 different elemental damage types simultaneously
+- **Stat-based bonuses**: Spells use the best stat from a list (e.g., INT or WIS) for damage and to-hit
+- **Spell types**:
+  - **Offensive spells**: Deal elemental damage with dice notation (e.g., `3d6 FIRE`)
+  - **Multi-element spells**: Multiple damage types rolled independently (e.g., FIRE + ICE + LIGHTNING)
+  - **Buff-only spells**: Apply properties to caster without requiring a target
+- **Property application**: Spells can apply debuffs on hit or buffs to self
+- **Combat integration**: Spells included in weighted attack pool alongside weapon attacks
+- **Weight system**: Spell usage frequency defined per-creature, not per-spell (same spell, different weights)
+- **AI behavior**: Enemies automatically cast spells if mana available; players can select manually
+- **See [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md) for complete spell mechanics documentation**
+
 ### Asset-driven Design
 
-- Creatures, items, floors, and properties are loaded from JSON files for easy customization and extension
+- Creatures, items, spells, floors, and properties are loaded from JSON files for easy customization and extension
 - Extensible mod support for the future
 
 ### Rendering & Sprites
@@ -145,6 +167,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 >
 > The SYSTEM_REFERENCE provides detailed explanations of:
 > - Complete attack resolution flow (to-hit, damage, crits, buildup)
+> - Spell system mechanics (casting, mana, multi-element spells, properties)
 > - Resistance buildup and overload system
 > - Multi-hit mechanics and damage calculation
 > - Stat formulas and derived values

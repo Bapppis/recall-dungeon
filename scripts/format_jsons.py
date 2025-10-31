@@ -43,7 +43,7 @@ except Exception as e:
 
 # ID RANGES (from IDS.md)
 ID_RANGES = {
-    "spells": (0, 999),
+    "spells": (50000, 50999),
     "properties_buff": (1000, 2332),
     "properties_debuff": (2333, 3665),
     "properties_trait": (3666, 4999),
@@ -228,6 +228,34 @@ CANON_PROPERTY_ORDER: List[str] = [
     "tooltip",
 ]
 
+# Canonical top-level ordering for spells
+CANON_SPELL_ORDER: List[str] = [
+    "id",
+    "name",
+    "description",
+    "times",
+    "manaCost",
+    "damageType",
+    "damageDice",
+    "damageType2",
+    "damageDice2",
+    "damageType3",
+    "damageDice3",
+    "damageType4",
+    "damageDice4",
+    "damageMult",
+    "critMod",
+    "accuracy",
+    "onHitProperty",
+    "buffProperty",
+    "statBonuses",
+    "buildUpMod",
+    "buildUpMod2",
+    "buildUpMod3",
+    "buildUpMod4",
+    "tooltip",
+]
+
 
 def order_keys(obj: Dict[str, Any], order: List[str]) -> Dict[str, Any]:
     """Return new dict with keys inserted following 'order'; remaining appended alphabetically."""
@@ -248,6 +276,8 @@ def transform(obj: Any, kind: str = None) -> Any:
     The `kind` parameter is used to select which canonical ordering to apply:
       - 'item' applies CANON_TOP_ORDER
       - 'creature' applies CANON_CREATURE_ORDER
+      - 'property' applies CANON_PROPERTY_ORDER
+      - 'spell' applies CANON_SPELL_ORDER
       - None applies no top-level ordering (only attack/inner ordering)
     """
     if isinstance(obj, dict):
@@ -260,6 +290,9 @@ def transform(obj: Any, kind: str = None) -> Any:
 
         if kind == 'property' and any(k in obj for k in CANON_PROPERTY_ORDER):
             obj = order_keys(obj, CANON_PROPERTY_ORDER)
+
+        if kind == 'spell' and any(k in obj for k in CANON_SPELL_ORDER):
+            obj = order_keys(obj, CANON_SPELL_ORDER)
 
         # Recurse into values
         for k, v in list(obj.items()):
@@ -579,7 +612,7 @@ for p in json_files:
     try:
         text = p.read_text(encoding='utf-8')
         obj = json.loads(text)
-        # Determine file kind by path segments (items vs creatures)
+        # Determine file kind by path segments (items vs creatures vs spells)
         rel = p.relative_to(data_dir)
         parts = rel.parts
         if parts and parts[0] == 'items':
@@ -588,6 +621,8 @@ for p in json_files:
             kind = 'creature'
         elif parts and parts[0] == 'properties':
             kind = 'property'
+        elif parts and parts[0] == 'spells':
+            kind = 'spell'
         else:
             kind = None
 

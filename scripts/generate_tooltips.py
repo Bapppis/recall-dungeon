@@ -121,16 +121,30 @@ def get_magic_stat(weapon: Dict[str, Any]) -> str:
 
 
 def load_property_by_name(property_name: str) -> Dict[str, Any]:
-    """Load a property JSON by name from the properties folder."""
+    """Load a property JSON by name from the properties folder.
+    
+    Handles both exact matches and normalized matches (removing spaces/case differences).
+    For example, 'Burning1' will match 'Burning 1', 'BleedImmunity' will match 'Bleed Immunity'.
+    """
     project_root = Path(__file__).resolve().parent.parent
     properties_dir = project_root / "src" / "main" / "resources" / "data" / "properties"
+    
+    # Normalize the search name for comparison (remove spaces, lowercase)
+    normalized_search = property_name.replace(" ", "").lower()
     
     # Search all subdirectories for property files
     for prop_file in properties_dir.rglob("*.json"):
         try:
             with open(prop_file, "r", encoding="utf-8") as f:
                 prop = json.load(f)
-                if prop.get("name") == property_name:
+                prop_name = prop.get("name", "")
+                
+                # Try exact match first
+                if prop_name == property_name:
+                    return prop
+                
+                # Try normalized match (remove spaces and compare case-insensitively)
+                if prop_name.replace(" ", "").lower() == normalized_search:
                     return prop
         except Exception:
             continue
@@ -441,6 +455,157 @@ def generate_weapon_tooltip(weapon: Dict[str, Any]) -> List[str]:
     return lines
 
 
+def generate_spell_tooltip(spell: Dict[str, Any]) -> List[str]:
+    """Generate tooltip lines for a spell based on its mechanics, similar to weapon tooltips."""
+    lines = []
+    
+    # Mana cost - always show first
+    mana_cost = spell.get("manaCost", 0)
+    if mana_cost > 0:
+        lines.append(f"Costs {mana_cost} mana to cast.")
+        lines.append("")
+    
+    # Check if this is a buff-only spell (no damage components)
+    has_damage = any(spell.get(f"damageDice{i if i > 1 else ''}") for i in range(1, 5))
+    buff_property = spell.get("buffProperty")
+    on_hit_property = spell.get("onHitProperty")
+    
+    if buff_property and not has_damage:
+        # Buff-only spell
+        lines.append(f"Grants the {buff_property} effect to the caster.")
+        lines.append("")
+        
+        # Load and display buff property details
+        prop_data = load_property_by_name(buff_property)
+        if prop_data:
+            prop_tooltip = prop_data.get("tooltip")
+            if prop_tooltip:
+                if isinstance(prop_tooltip, list):
+                    tooltip_text = " ".join(prop_tooltip)
+                else:
+                    tooltip_text = prop_tooltip
+                # Use the actual property name from the JSON for display
+                prop_display_name = prop_data.get("name", buff_property)
+                lines.append(f"{prop_display_name}: {tooltip_text}")
+                lines.append("")
+        
+        # Remove trailing blank line
+        if lines and lines[-1] == "":
+            lines.pop()
+        
+        return lines
+    
+    # Damage-based spell - build comprehensive damage description
+    times = spell.get("times", 1)
+    stat_bonuses = spell.get("statBonuses", [])
+    damage_components = []
+    
+    # Check all 4 damage types
+    for i in range(1, 5):
+        dice_key = f"damageDice{i if i > 1 else ''}"
+        type_key = f"damageType{i if i > 1 else ''}"
+        
+        dice_str = spell.get(dice_key)
+        damage_type = spell.get(type_key)
+        
+        if dice_str and damage_type:
+            min_dmg, max_dmg = parse_dice(dice_str)
+            min_total = min_dmg * times
+            max_total = max_dmg * times
+            
+            damage_type_display = get_damage_type_display(damage_type)
+            
+            # Build stat bonus text similar to weapon tooltips
+            if stat_bonuses:
+                if len(stat_bonuses) == 1:
+                    stat_abbrev = STAT_ABBREV.get(stat_bonuses[0], stat_bonuses[0])
+                    stat_bonus_text = f" + 5 * {stat_abbrev} bonus"
+                else:
+                    stat_abbrevs = "/".join(STAT_ABBREV.get(s, s) for s in stat_bonuses)
+                    stat_bonus_text = f" + 5 * {stat_abbrevs} bonus"
+            else:
+                stat_bonus_text = ""
+            
+            damage_components.append(f"{min_total}-{max_total}{stat_bonus_text} {damage_type_display} damage")
+    
+    # Main damage line
+    if damage_components:
+        damage_text = " and ".join(damage_components)
+        lines.append(f"Deals {damage_text}.")
+        
+        # Add modifiers as continuation
+        modifiers = []
+        
+        # Check for on-hit property
+        if on_hit_property:
+            modifiers.append(f"a chance to inflict the {on_hit_property} condition")
+        
+        # Crit mod
+        crit_mod = spell.get("critMod")
+        if crit_mod:
+            crit_val = crit_mod.strip().lstrip("+")
+            if crit_val and crit_val != "0":
+                modifiers.append(f"a +{crit_val}% critical chance")
+        
+        # Accuracy
+        accuracy = spell.get("accuracy")
+        if accuracy and accuracy != 0:
+            if accuracy > 0:
+                modifiers.append(f"+{accuracy} accuracy")
+            else:
+                modifiers.append(f"{accuracy} accuracy")
+        
+        if modifiers:
+            lines[-1] = lines[-1].rstrip(".") + f". This spell has {' and '.join(modifiers)}."
+        
+        lines.append("")
+    
+    # Additional spell info (damage multiplier if not 1.0)
+    damage_mult = spell.get("damageMult")
+    if damage_mult and damage_mult != 1.0:
+        lines.append(f"Damage is multiplied by {damage_mult}x.")
+        lines.append("")
+    
+    # Add property tooltip at the end if there's an on-hit property
+    if on_hit_property:
+        prop_data = load_property_by_name(on_hit_property)
+        if prop_data:
+            prop_tooltip = prop_data.get("tooltip")
+            if prop_tooltip:
+                if isinstance(prop_tooltip, list):
+                    tooltip_text = " ".join(prop_tooltip)
+                else:
+                    tooltip_text = prop_tooltip
+                # Use the actual property name from the JSON for display
+                prop_display_name = prop_data.get("name", on_hit_property)
+                lines.append(f"{prop_display_name}: {tooltip_text}")
+                lines.append("")
+    
+    # Add buff property tooltip if spell also grants a buff
+    if buff_property:
+        lines.append(f"Grants the {buff_property} effect to the caster.")
+        lines.append("")
+        
+        prop_data = load_property_by_name(buff_property)
+        if prop_data:
+            prop_tooltip = prop_data.get("tooltip")
+            if prop_tooltip:
+                if isinstance(prop_tooltip, list):
+                    tooltip_text = " ".join(prop_tooltip)
+                else:
+                    tooltip_text = prop_tooltip
+                # Use the actual property name from the JSON for display
+                prop_display_name = prop_data.get("name", buff_property)
+                lines.append(f"{prop_display_name}: {tooltip_text}")
+                lines.append("")
+    
+    # Remove trailing blank line
+    if lines and lines[-1] == "":
+        lines.pop()
+    
+    return lines
+
+
 def main():
     """Test the tooltip generator on Falchion of Doom."""
     # Load Falchion of Doom
@@ -516,11 +681,14 @@ def main():
     # If called with --apply, regenerate tooltips for all weapons in the data tree
     project_root = Path(__file__).resolve().parent.parent
     if '--apply' in sys.argv or '--regenerate' in sys.argv:
-        print('\nApplying generated tooltips to all weapon JSON files...')
-        data_dir = project_root / 'src' / 'main' / 'resources' / 'data' / 'items' / 'weapons'
-        files = list(data_dir.rglob('*.json'))
+        print('\nApplying generated tooltips to all weapon and spell JSON files...')
+        
+        # Process weapons
+        weapons_dir = project_root / 'src' / 'main' / 'resources' / 'data' / 'items' / 'weapons'
+        weapon_files = list(weapons_dir.rglob('*.json'))
         updated = []
-        for f in files:
+        
+        for f in weapon_files:
             try:
                 with open(f, 'r', encoding='utf-8') as fh:
                     obj = json.load(fh)
@@ -535,7 +703,28 @@ def main():
                         fh.write(json.dumps(obj, ensure_ascii=False, indent=2) + '\n')
                     updated.append(str(f.relative_to(project_root)))
             except Exception as e:
-                print(f'Failed to process {f}: {e}')
+                print(f'Failed to process weapon {f}: {e}')
+        
+        # Process spells
+        spells_dir = project_root / 'src' / 'main' / 'resources' / 'data' / 'spells'
+        if spells_dir.exists():
+            spell_files = list(spells_dir.rglob('*.json'))
+            
+            for f in spell_files:
+                try:
+                    with open(f, 'r', encoding='utf-8') as fh:
+                        obj = json.load(fh)
+                    if not isinstance(obj, dict):
+                        continue
+                    gen = generate_spell_tooltip(obj)
+                    if gen:
+                        obj['tooltip'] = gen
+                        with open(f, 'w', encoding='utf-8') as fh:
+                            fh.write(json.dumps(obj, ensure_ascii=False, indent=2) + '\n')
+                        updated.append(str(f.relative_to(project_root)))
+                except Exception as e:
+                    print(f'Failed to process spell {f}: {e}')
+        
         print('\nUpdated tooltips for the following files:')
         for u in updated:
             print(u)

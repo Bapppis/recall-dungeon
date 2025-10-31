@@ -1,0 +1,19 @@
+{
+  "id": 50002,
+  "name": "Shield of Light",
+  "description": "Conjures a protective shield of light energy.",
+  "times": 1,
+  "manaCost": 15,
+  "buffProperty": "BleedImmunity",
+  "statBonuses": [
+    "WISDOM",
+    "CHARISMA"
+  ],
+  "tooltip": [
+    "Costs 15 mana to cast.",
+    "",
+    "Grants the BleedImmunity effect to the caster.",
+    "",
+    "Bleed Immunity: Immune to Bleed condition."
+  ]
+}
