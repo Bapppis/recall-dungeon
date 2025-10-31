@@ -13,6 +13,7 @@
   "baseMagicResist": 0,
   "baseHp": 20,
   "hpDice": 20,
+  "baseMaxMana": 120,
   "stats": {
     "STRENGTH": 12,
     "DEXTERITY": 10,
@@ -60,5 +61,11 @@
       "weight": 2
     }
   ],
-  "sprite": "monster_goblin"
+  "sprite": "monster_goblin",
+  "spells": [
+    {
+      "name": "Fireball",
+      "weight": 3
+    }
+  ]
 }

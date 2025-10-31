@@ -38,9 +38,9 @@
     }
   ],
   "tooltip": [
-    "Jabs (70%): Deals 2-12 + 5 * STR bonus piercing damage and 2-2 + 5 * INT bonus nature damage.",
+    "Jabs (70%): Deals 2-12 (2-16) + 5 * STR bonus piercing damage and 2-2 (2-4) + 5 * INT bonus nature damage.",
     "",
-    "Thrust (30%): Deals 2-6 + 5 * STR bonus piercing damage and 1-2 + 5 * INT bonus nature damage. This attack has a +5% critical chance."
+    "Thrust (30%): Deals 2-6 (2-8) + 5 * STR bonus piercing damage and 1-2 (1-4) + 5 * INT bonus nature damage. This attack has a +5% (+10%) critical chance."
   ],
   "versatileAttacks": [
     {

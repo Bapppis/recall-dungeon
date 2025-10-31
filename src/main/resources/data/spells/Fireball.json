@@ -1,0 +1,25 @@
+{
+  "id": 50000,
+  "name": "Fireball",
+  "description": "A blazing sphere of fire that explodes on impact, dealing fire damage.",
+  "times": 1,
+  "manaCost": 20,
+  "damageType": "FIRE",
+  "damageDice": "3d6",
+  "damageMult": 1.0,
+  "critMod": "+10",
+  "accuracy": 5,
+  "onHitProperty": "Burning1",
+  "statBonuses": [
+    "INTELLIGENCE",
+    "WISDOM"
+  ],
+  "buildUpMod": 1.0,
+  "tooltip": [
+    "Costs 20 mana to cast.",
+    "",
+    "Deals 3-18 + 5 * INT/WIS bonus fire damage. This spell has a chance to inflict the Burning1 condition and a +10% critical chance and +5 accuracy.",
+    "",
+    "Burning 1: You take 1-5 fire damage at the start of your turn but also gain 50% resistance to water. Wet condition will extinguish the flames."
+  ]
+}

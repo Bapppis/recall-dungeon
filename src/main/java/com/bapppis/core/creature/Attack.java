@@ -23,9 +23,8 @@ public class Attack {
     public String critMod;
     public Integer accuracy;
     public Integer magicAccuracy;
-    public float physBuildUpMod = 1.0f;
-
-    public float magicBuildUpMod = 1.0f;
+    public Float physBuildUpMod;
+    public Float magicBuildUpMod;
 
     public int getTimes() {
         return times == null ? 1 : times;
@@ -62,10 +61,16 @@ public class Attack {
     }
 
     public float getPhysBuildUpMod() {
+        if (physBuildUpMod == null) {
+            return 1.0f / getTimes();
+        }
         return physBuildUpMod;
     }
 
     public float getMagicBuildUpMod() {
+        if (magicBuildUpMod == null) {
+            return 1.0f / getTimes();
+        }
         return magicBuildUpMod;
     }
 

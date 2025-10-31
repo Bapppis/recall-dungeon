@@ -527,6 +527,9 @@ public class CreatureLoader {
                             }
                             // Load starting inventory and equipment slots from JSON
                             applyStartingItemsFromJson(resource.getPath(), gson, creature);
+                            
+                            // Load spells from JSON
+                            applySpellsFromJson(resource.getPath(), gson, creature);
 
                             // Finalize creature fields after load (resets HP, recalculates mana, converts
                             // level->XP)
@@ -638,6 +641,76 @@ public class CreatureLoader {
                         }
                     } catch (Exception e) {
                         // ignore invalid slot entries
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    private static void applySpellsFromJson(String resourcePath, com.google.gson.Gson gson, Creature creature) {
+        try (Reader reader = new InputStreamReader(
+                CreatureLoader.class.getClassLoader().getResourceAsStream(resourcePath))) {
+            com.google.gson.JsonObject obj = gson.fromJson(reader, com.google.gson.JsonObject.class);
+            if (obj == null)
+                return;
+            // Spells array - can be objects with name+weight or simple strings/IDs
+            if (obj.has("spells") && obj.get("spells").isJsonArray()) {
+                for (com.google.gson.JsonElement el : obj.getAsJsonArray("spells")) {
+                    try {
+                        com.bapppis.core.spell.Spell spell = null;
+                        int weight = 1; // Default weight
+                        
+                        if (el.isJsonObject()) {
+                            // Object with name and weight: {"name": "Fireball", "weight": 3}
+                            com.google.gson.JsonObject spellObj = el.getAsJsonObject();
+                            String spellName = null;
+                            
+                            if (spellObj.has("name")) {
+                                spellName = spellObj.get("name").getAsString();
+                            } else if (spellObj.has("id")) {
+                                int spellId = spellObj.get("id").getAsInt();
+                                spell = com.bapppis.core.spell.SpellLoader.getSpellById(spellId);
+                            }
+                            
+                            if (spellName != null) {
+                                try {
+                                    int spellId = Integer.parseInt(spellName);
+                                    spell = com.bapppis.core.spell.SpellLoader.getSpellById(spellId);
+                                } catch (NumberFormatException nfe) {
+                                    spell = com.bapppis.core.spell.SpellLoader.getSpellByName(spellName);
+                                }
+                            }
+                            
+                            if (spellObj.has("weight")) {
+                                weight = spellObj.get("weight").getAsInt();
+                            }
+                        } else if (el.isJsonPrimitive()) {
+                            // Simple string or ID: "Fireball" or 50000
+                            if (el.getAsJsonPrimitive().isNumber()) {
+                                int spellId = el.getAsInt();
+                                spell = com.bapppis.core.spell.SpellLoader.getSpellById(spellId);
+                            } else if (el.getAsJsonPrimitive().isString()) {
+                                String spellNameOrId = el.getAsString();
+                                try {
+                                    int spellId = Integer.parseInt(spellNameOrId);
+                                    spell = com.bapppis.core.spell.SpellLoader.getSpellById(spellId);
+                                } catch (NumberFormatException nfe) {
+                                    spell = com.bapppis.core.spell.SpellLoader.getSpellByName(spellNameOrId);
+                                }
+                            }
+                        }
+                        
+                        if (spell != null) {
+                            creature.addSpell(spell);
+                            // Store spell reference with weight
+                            com.bapppis.core.spell.SpellReference ref = 
+                                new com.bapppis.core.spell.SpellReference(spell.getName(), weight);
+                            creature.getSpellReferences().add(ref);
+                        }
+                    } catch (Exception e) {
+                        // ignore invalid spell entries
                     }
                 }
             }

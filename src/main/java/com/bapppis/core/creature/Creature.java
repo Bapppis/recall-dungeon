@@ -9,6 +9,7 @@ import com.bapppis.core.util.StatUtil;
 import com.bapppis.core.util.ResistanceUtil;
 
 import com.bapppis.core.property.Property;
+import com.bapppis.core.spell.Spell;
 import com.google.gson.Gson;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.ResBuildUp;
@@ -82,6 +83,8 @@ public abstract class Creature {
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
     private Inventory inventory = new Inventory();
     private java.util.List<Attack> attacks = new java.util.ArrayList<>();
+    private java.util.List<Spell> spells = new java.util.ArrayList<>();
+    private java.util.List<com.bapppis.core.spell.SpellReference> spellReferences = new java.util.ArrayList<>();
     private String sprite;
 
     // --- Base stat modifier helpers ---
@@ -762,7 +765,11 @@ public abstract class Creature {
     }
 
     public void attack(Creature target) {
-        Attack chosen = null;
+        // Build weighted pool: weapon attacks, creature attacks, and spells
+        java.util.List<Object> actionPool = new java.util.ArrayList<>();
+        java.util.List<Integer> weights = new java.util.ArrayList<>();
+
+        // Add weapon attacks to pool
         Item equipped = this.getEquipped(EquipmentSlot.WEAPON);
         Weapon weapon = null;
         if (equipped instanceof Weapon) {
@@ -783,25 +790,110 @@ public abstract class Creature {
                 }
             }
             if (weaponAttackList != null && !weaponAttackList.isEmpty()) {
-                chosen = AttackUtil.chooseAttackFromList(weaponAttackList);
-                int statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
-                com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, chosen, statBonus, target,
-                        weapon.getDamageType(), weapon.getMagicElement(), weapon);
-                return;
+                for (Attack atk : weaponAttackList) {
+                    actionPool.add(atk);
+                    weights.add(atk.getWeight());
+                }
             }
         }
+
+        // Add creature's natural attacks to pool
         if (this.attacks != null && !this.attacks.isEmpty()) {
-            chosen = AttackUtil.chooseAttackFromList(this.attacks);
-            int statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
-            Resistances physType = (chosen == null ? null : chosen.getDamageTypeEnum());
-            Resistances magType = (chosen == null ? null : chosen.getMagicDamageTypeEnum());
-            com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, chosen, statBonus, target, physType,
-                    magType, null);
+            for (Attack atk : this.attacks) {
+                actionPool.add(atk);
+                weights.add(atk.getWeight());
+            }
+        }
+
+        // Add creature's spells to pool (only if creature has enough mana)
+        // Use spell references to get the weight defined in creature JSON
+        if (this.spellReferences != null && !this.spellReferences.isEmpty()) {
+            for (com.bapppis.core.spell.SpellReference spellRef : this.spellReferences) {
+                // Find the actual spell by name
+                com.bapppis.core.spell.Spell spell = null;
+                for (com.bapppis.core.spell.Spell s : this.spells) {
+                    if (s.getName().equals(spellRef.getName())) {
+                        spell = s;
+                        break;
+                    }
+                }
+                if (spell != null && this.getCurrentMana() >= spell.getManaCost()) {
+                    actionPool.add(spell);
+                    weights.add(spellRef.getWeight());
+                }
+            }
+        }
+
+        // If no actions available, return
+        if (actionPool.isEmpty()) {
+            return;
+        }
+
+        // Weighted random selection from pool
+        int totalWeight = 0;
+        for (int w : weights) {
+            totalWeight += w;
+        }
+        
+        int pick = java.util.concurrent.ThreadLocalRandom.current().nextInt(Math.max(1, totalWeight));
+        Object chosen = null;
+        for (int i = 0; i < actionPool.size(); i++) {
+            pick -= weights.get(i);
+            if (pick < 0) {
+                chosen = actionPool.get(i);
+                break;
+            }
+        }
+        if (chosen == null && !actionPool.isEmpty()) {
+            chosen = actionPool.get(0);
+        }
+
+        // Execute the chosen action
+        if (chosen instanceof Spell) {
+            // Cast spell
+            Spell spell = (Spell) chosen;
+            com.bapppis.core.spell.SpellEngine.castSpell(this, spell, target);
+        } else if (chosen instanceof Attack) {
+            // Execute attack
+            Attack attack = (Attack) chosen;
+            int statBonus;
+            Resistances physType = attack.getDamageTypeEnum();
+            Resistances magType = attack.getMagicDamageTypeEnum();
+            
+            if (weapon != null && actionPool.indexOf(attack) < (weapon.getAttacks() != null ? weapon.getAttacks().size() : 0)) {
+                // This is a weapon attack
+                statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
+                com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, attack, statBonus, target,
+                        weapon.getDamageType(), weapon.getMagicElement(), weapon);
+            } else {
+                // This is a natural attack
+                statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
+                com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, attack, statBonus, target, physType,
+                        magType, null);
+            }
         }
     }
 
     public Inventory getInventory() {
         return inventory;
+    }
+
+    public java.util.List<Spell> getSpells() {
+        return spells;
+    }
+
+    public java.util.List<com.bapppis.core.spell.SpellReference> getSpellReferences() {
+        return spellReferences;
+    }
+
+    public void addSpell(Spell spell) {
+        if (spell != null && !spells.contains(spell)) {
+            spells.add(spell);
+        }
+    }
+
+    public void removeSpell(Spell spell) {
+        spells.remove(spell);
     }
 
     public Item getEquipped(EquipmentSlot slot) {

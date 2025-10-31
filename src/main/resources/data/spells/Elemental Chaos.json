@@ -1,0 +1,29 @@
+{
+  "id": 50001,
+  "name": "Elemental Chaos",
+  "description": "Unleashes a chaotic burst of multiple elements.",
+  "times": 1,
+  "manaCost": 35,
+  "damageType": "FIRE",
+  "damageDice": "2d4",
+  "damageType2": "ICE",
+  "damageDice2": "2d4",
+  "damageType3": "LIGHTNING",
+  "damageDice3": "2d4",
+  "damageMult": 0.8,
+  "critMod": "+5",
+  "accuracy": 0,
+  "statBonuses": [
+    "INTELLIGENCE"
+  ],
+  "buildUpMod": 1.0,
+  "buildUpMod2": 1.0,
+  "buildUpMod3": 1.0,
+  "tooltip": [
+    "Costs 35 mana to cast.",
+    "",
+    "Deals 2-8 + 5 * INT bonus fire damage and 2-8 + 5 * INT bonus ice damage and 2-8 + 5 * INT bonus lightning damage. This spell has a +5% critical chance.",
+    "",
+    "Damage is multiplied by 0.8x."
+  ]
+}
