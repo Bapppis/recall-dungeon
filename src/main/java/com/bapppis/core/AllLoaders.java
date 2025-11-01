@@ -5,8 +5,11 @@ import com.bapppis.core.spell.SpellLoader;
 import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.loot.LootPoolLoader;
 import com.bapppis.core.creature.CreatureLoader;
+import com.bapppis.core.creature.PlayerClassLoader;
 
 public class AllLoaders {
+
+    private static PlayerClassLoader playerClassLoader;
 
     public static void loadAll() {
         synchronized (AllLoaders.class) {
@@ -25,6 +28,14 @@ public class AllLoaders {
                 SpellLoader.loadSpells();
             } catch (Exception e) {
                 System.err.println("Warning: SpellLoader.loadSpells() failed");
+                e.printStackTrace();
+            }
+
+            try {
+                playerClassLoader = new PlayerClassLoader();
+                playerClassLoader.loadAllPlayerClasses();
+            } catch (Exception e) {
+                System.err.println("Warning: PlayerClassLoader.loadAllPlayerClasses() failed");
                 e.printStackTrace();
             }
 
@@ -51,6 +62,10 @@ public class AllLoaders {
 
             LoadedState.loaded = true;
         }
+    }
+
+    public static PlayerClassLoader getPlayerClassLoader() {
+        return playerClassLoader;
     }
 }
 

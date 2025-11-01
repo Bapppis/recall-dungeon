@@ -44,6 +44,7 @@ except Exception as e:
 # ID RANGES (from IDS.md)
 ID_RANGES = {
     "spells": (50000, 50999),
+    "player_classes": (60000, 60999),
     "properties_buff": (1000, 2332),
     "properties_debuff": (2333, 3665),
     "properties_trait": (3666, 4999),
@@ -256,6 +257,26 @@ CANON_SPELL_ORDER: List[str] = [
     "tooltip",
 ]
 
+# Canonical top-level ordering for player classes
+CANON_PLAYERCLASS_ORDER: List[str] = [
+    "id",
+    "name",
+    "description",
+    "statBonuses",
+    "resistances",
+    "maxHpBonus",
+    "maxManaBonus",
+    "maxStaminaBonus",
+    "hpRegenBonus",
+    "manaRegenBonus",
+    "staminaRegenBonus",
+    "grantedProperties",
+    "unlockedSpells",
+    "talentPointsPerLevel",
+    "levelUnlocks",
+    "tooltip",
+]
+
 
 def order_keys(obj: Dict[str, Any], order: List[str]) -> Dict[str, Any]:
     """Return new dict with keys inserted following 'order'; remaining appended alphabetically."""
@@ -278,6 +299,7 @@ def transform(obj: Any, kind: str = None) -> Any:
       - 'creature' applies CANON_CREATURE_ORDER
       - 'property' applies CANON_PROPERTY_ORDER
       - 'spell' applies CANON_SPELL_ORDER
+      - 'player_class' applies CANON_PLAYERCLASS_ORDER
       - None applies no top-level ordering (only attack/inner ordering)
     """
     if isinstance(obj, dict):
@@ -293,6 +315,9 @@ def transform(obj: Any, kind: str = None) -> Any:
 
         if kind == 'spell' and any(k in obj for k in CANON_SPELL_ORDER):
             obj = order_keys(obj, CANON_SPELL_ORDER)
+
+        if kind == 'player_class' and any(k in obj for k in CANON_PLAYERCLASS_ORDER):
+            obj = order_keys(obj, CANON_PLAYERCLASS_ORDER)
 
         # Recurse into values
         for k, v in list(obj.items()):
@@ -612,13 +637,17 @@ for p in json_files:
     try:
         text = p.read_text(encoding='utf-8')
         obj = json.loads(text)
-        # Determine file kind by path segments (items vs creatures vs spells)
+        # Determine file kind by path segments (items vs creatures vs spells vs player_classes)
         rel = p.relative_to(data_dir)
         parts = rel.parts
         if parts and parts[0] == 'items':
             kind = 'item'
         elif parts and parts[0] == 'creatures':
-            kind = 'creature'
+            # Check if this is a player class specifically
+            if len(parts) > 1 and parts[1] == 'player_classes':
+                kind = 'player_class'
+            else:
+                kind = 'creature'
         elif parts and parts[0] == 'properties':
             kind = 'property'
         elif parts and parts[0] == 'spells':

@@ -47,6 +47,7 @@ for p in sorted(DATA_DIR.rglob('*.json')):
 # Updated to match IDS.md
 RANGE_RULES = [
     (("spells",), (50000, 50999, "Spells (50000-50999)")),
+    (("creatures", "player_classes"), (60000, 60999, "Player Classes (60000-60999)")),
     (("items", "armor", "armor"), (20000, 21999, "Chest Armor (20000-21999)")),
     (("items", "armor", "helmets"), (22000, 23999, "Helmets (22000-23999)")),
     (("items", "armor", "legwear"), (24000, 25999, "Legwear (24000-25999)")),

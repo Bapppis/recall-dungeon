@@ -105,12 +105,9 @@ public class RecallDungeon extends ApplicationAdapter {
                 com.bapppis.core.game.Game.selectPlayer(selected);
                 Gdx.app.log("RecallDungeon",
                         "Selected player index=" + idx + " id=" + selected.getId() + " name=" + selected.getName());
-                Gdx.app.log("RecallDungeon", "Selected player id=" + selected.getId() + " name=" + selected.getName());
-                Game game = new Game(selected);
-                game.initialize();
-                stage.setDebugAll(false);
-                stage.getRoot().setUserObject(game);
-                showFloorView();
+
+                // Show class selection screen before starting game
+                showClassSelection(selected);
             }
         });
 
@@ -125,6 +122,23 @@ public class RecallDungeon extends ApplicationAdapter {
         table.row().pad(10, 0, 0, 0);
         table.add(play).uniformX().padRight(10);
         table.add(back).uniformX();
+    }
+
+    private void showClassSelection(Player player) {
+        PlayerClassSelectionScreen classSelection = new PlayerClassSelectionScreen(
+                stage,
+                player,
+                () -> startGameWithPlayer(player));
+        classSelection.show();
+    }
+
+    private void startGameWithPlayer(Player player) {
+        Gdx.app.log("RecallDungeon", "Starting game with player id=" + player.getId() + " name=" + player.getName());
+        Game game = new Game(player);
+        game.initialize();
+        stage.setDebugAll(false);
+        stage.getRoot().setUserObject(game);
+        showFloorView();
     }
 
     public void showFloorView() {
@@ -307,7 +321,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     levelLabel.setText("Level: " + p.getLevel());
                 if (statsLabel != null) {
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
+                            .values()) {
                         if (s == com.bapppis.core.creature.creatureEnums.Stats.LUCK)
                             continue;
                         sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
@@ -335,7 +350,8 @@ public class RecallDungeon extends ApplicationAdapter {
         if (p == null)
             return;
         left.add(new com.kotcrab.vis.ui.widget.VisLabel("Equipped:")).left().row();
-    for (com.bapppis.core.item.itemEnums.EquipmentSlot slot : com.bapppis.core.item.itemEnums.EquipmentSlot.values()) {
+        for (com.bapppis.core.item.itemEnums.EquipmentSlot slot : com.bapppis.core.item.itemEnums.EquipmentSlot
+                .values()) {
             com.bapppis.core.item.Item eq = p.getEquipped(slot);
             String text = slot.name() + ": " + (eq != null ? eq.getName() : "Empty");
             left.add(new com.kotcrab.vis.ui.widget.VisLabel(text)).left().row();
@@ -428,7 +444,8 @@ public class RecallDungeon extends ApplicationAdapter {
             hpLabel.setText("HP: " + p.getCurrentHp() + "/" + p.getMaxHp());
             levelLabel.setText("Level: " + p.getLevel());
             StringBuilder sb = new StringBuilder();
-            for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+            for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
+                    .values()) {
                 if (s == com.bapppis.core.creature.creatureEnums.Stats.LUCK)
                     continue;
                 sb.append(s.name()).append(": ").append(p.getStat(s)).append('\n');
@@ -459,7 +476,8 @@ public class RecallDungeon extends ApplicationAdapter {
             enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
             enemyLevel.setText("Level: " + enemy.getLevel());
             StringBuilder sb = new StringBuilder();
-            for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+            for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
+                    .values()) {
                 sb.append(s.name()).append(": ").append(enemy.getStat(s)).append('\n');
             }
             enemyStats.setText(sb.toString());
@@ -492,7 +510,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     hpLabel.setText("HP: " + pp.getCurrentHp() + "/" + pp.getMaxHp());
                     levelLabel.setText("Level: " + pp.getLevel());
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
+                            .values()) {
                         if (s == com.bapppis.core.creature.creatureEnums.Stats.LUCK)
                             continue;
                         sb.append(s.name()).append(": ").append(pp.getStat(s)).append('\n');
@@ -509,7 +528,8 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (enemy != null) {
                     enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
                     StringBuilder sb = new StringBuilder();
-                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats.values()) {
+                    for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
+                            .values()) {
                         sb.append(s.name()).append(": ").append(enemy.getStat(s)).append('\n');
                     }
                     enemyStats.setText(sb.toString());

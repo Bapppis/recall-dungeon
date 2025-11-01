@@ -18,6 +18,12 @@ The Recall Dungeon asset ID system is designed for scalability, clarity, and mai
 - 50001 — Elemental Chaos — data/spells/Elemental Chaos.json
 - 50002 — Shield of Light — data/spells/Shield of Light.json
 
+## Player Classes (60000-60999)
+
+Player classes define character archetypes with stat bonuses, resistances, granted traits, unlocked spells, and level-based progression. Only Player creatures can have classes.
+
+- 60000 — Paladin — data/creatures/player_classes/Paladin.json
+
 ## Properties (1000-4999)
 
 ### Buffs (1000-2332)
