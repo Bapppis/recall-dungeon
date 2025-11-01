@@ -61,7 +61,7 @@ public class Property {
         this.damageDice = other.damageDice;
         this.statModifiers = other.statModifiers;
         this.resistanceModifiers = other.resistanceModifiers;
-    this.resBuildUpModifiers = other.resBuildUpModifiers;
+        this.resBuildUpModifiers = other.resBuildUpModifiers;
         this.visionRange = other.visionRange;
         this.tooltip = other.tooltip;
         this.duration = other.duration;
@@ -286,7 +286,9 @@ public class Property {
         return resistanceModifiers;
     }
 
-    public Map<ResBuildUp, Integer> getResBuildUpModifiers() { return resBuildUpModifiers; }
+    public Map<ResBuildUp, Integer> getResBuildUpModifiers() {
+        return resBuildUpModifiers;
+    }
 
     public Integer getVisionRangeModifier() {
         return visionRange;
@@ -392,11 +394,13 @@ public class Property {
         }
         // Apply ResBuildUp modifiers (absolute or delta). If value == -1 => immunity.
         if (resBuildUpModifiers != null && !resBuildUpModifiers.isEmpty()) {
-            if (this.appliedResBuildUpPrev == null) this.appliedResBuildUpPrev = new java.util.EnumMap<>(ResBuildUp.class);
+            if (this.appliedResBuildUpPrev == null)
+                this.appliedResBuildUpPrev = new java.util.EnumMap<>(ResBuildUp.class);
             for (Map.Entry<ResBuildUp, Integer> e : resBuildUpModifiers.entrySet()) {
                 ResBuildUp key = e.getKey();
                 Integer val = e.getValue();
-                if (val == null) continue;
+                if (val == null)
+                    continue;
                 if (val == -1) {
                     // save previous absolute and set immunity
                     this.appliedResBuildUpPrev.put(key, creature.getResBuildUp(key));
@@ -485,10 +489,12 @@ public class Property {
             for (Map.Entry<ResBuildUp, Integer> e : resBuildUpModifiers.entrySet()) {
                 ResBuildUp key = e.getKey();
                 Integer val = e.getValue();
-                if (val == null) continue;
+                if (val == null)
+                    continue;
                 if (val == -1) {
                     int prev = 0;
-                    if (this.appliedResBuildUpPrev != null && this.appliedResBuildUpPrev.containsKey(key)) prev = this.appliedResBuildUpPrev.get(key);
+                    if (this.appliedResBuildUpPrev != null && this.appliedResBuildUpPrev.containsKey(key))
+                        prev = this.appliedResBuildUpPrev.get(key);
                     creature.setResBuildUpAbsolute(key, prev);
                 } else {
                     creature.modifyResBuildUp(key, -val);

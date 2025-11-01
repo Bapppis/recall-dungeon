@@ -9,11 +9,19 @@ import com.bapppis.core.item.itemEnums.EquipmentSlot;
 import com.bapppis.core.util.LevelUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class Player extends Creature {
     private Coordinate position;
     private int statPoints = 0;
+
+    // Player class system
+    private Integer playerClassId; // ID of the player's class (60000-60999 range)
+    private int talentPoints = 0; // Available talent points for spending
+    private Set<String> learnedTalents = new HashSet<>(); // Talents the player has learned
 
     public Player() {
         this.setType(Type.PLAYER);
@@ -187,5 +195,42 @@ public class Player extends Creature {
                 .append("Consumables=").append(getInventory().getConsumables().size()).append(", ")
                 .append("Misc=").append(getInventory().getMisc().size()).append("\n");
         return sb.toString();
+    }
+
+    // Player class system methods
+
+    public Integer getPlayerClassId() {
+        return playerClassId;
+    }
+
+    public void setPlayerClassId(Integer playerClassId) {
+        this.playerClassId = playerClassId;
+    }
+
+    public int getTalentPoints() {
+        return talentPoints;
+    }
+
+    public void setTalentPoints(int talentPoints) {
+        this.talentPoints = talentPoints;
+    }
+
+    public void addTalentPoint() {
+        this.talentPoints++;
+    }
+
+    public void spendTalentPoint(String talentName) {
+        if (this.talentPoints > 0 && !learnedTalents.contains(talentName)) {
+            this.talentPoints--;
+            learnedTalents.add(talentName);
+        }
+    }
+
+    public Set<String> getLearnedTalents() {
+        return new HashSet<>(learnedTalents);
+    }
+
+    public boolean hasTalent(String talentName) {
+        return learnedTalents.contains(talentName);
     }
 }

@@ -1,0 +1,53 @@
+{
+  "id": 60000,
+  "name": "Paladin",
+  "description": "A holy warrior who combines martial prowess with divine magic. Paladins are defenders of the innocent and bringers of light.",
+  "statBonuses": {
+    "STRENGTH": 2,
+    "CONSTITUTION": 1,
+    "WISDOM": 1
+  },
+  "resistances": {
+    "LIGHT": 10,
+    "DARKNESS": -5
+  },
+  "maxHpBonus": 20,
+  "maxManaBonus": 10,
+  "hpRegenBonus": 1,
+  "grantedProperties": [
+    "Bleed Immunity"
+  ],
+  "unlockedSpells": [
+    "Shield of Light"
+  ],
+  "talentPointsPerLevel": 1,
+  "levelUnlocks": {
+    "3": {
+      "properties": [
+        "Poison Immunity"
+      ]
+    },
+    "5": {
+      "statBonuses": {
+        "STRENGTH": 1
+      },
+      "maxHpBonus": 10
+    },
+    "7": {
+      "spells": [
+        "Smite"
+      ]
+    },
+    "10": {
+      "statBonuses": {
+        "CONSTITUTION": 1,
+        "WISDOM": 1
+      },
+      "resistances": {
+        "HOLY": 5
+      },
+      "maxHpBonus": 15
+    }
+  },
+  "tooltip": "A holy warrior with enhanced constitution and divine protection. Grants immunity to bleeding and poison, wields holy magic, and gains bonus health regeneration."
+}

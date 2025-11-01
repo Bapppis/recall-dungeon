@@ -5,6 +5,193 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.0.98] - 2025-11-01
+
+### Added - Player Class System
+
+#### Core Implementation
+
+- **PlayerClass.java**: Complete POJO representing player classes
+
+  - Core fields: id, name, description, tooltip
+  - Stat bonuses: Map<Stats, Integer> for permanent stat modifications
+  - Resistances: Map<Resistances, Integer> for resistance modifications
+  - Resource bonuses: maxHpBonus, maxManaBonus, maxStaminaBonus
+  - Regeneration bonuses: hpRegenBonus, manaRegenBonus, staminaRegenBonus
+  - Granted properties: List<String> of trait names automatically applied
+  - Unlocked spells: List<String> of spell names granted at class selection
+  - Talent system: talentPointsPerLevel (default 1)
+  - Level progression: Map<Integer, LevelUnlock> for level-specific unlocks
+  - LevelUnlock inner class: Contains spells, properties, stat bonuses, resistances, and resource bonuses
+
+- **PlayerClassLoader.java**: JSON loader with Gson + ClassGraph
+
+  - Loads from `data/creatures/player_classes/*.json`
+  - Dual lookup: getPlayerClassById() and getPlayerClassByName() (case-insensitive)
+  - Uses ResistancesDeserializer for proper resistance enum handling
+  - Provides getAllClasses(), hasClass(), getClassCount() utilities
+
+- **PlayerClassService.java**: Business logic for class management
+
+  - applyClass(Player, PlayerClass): Applies all class bonuses to player
+    - Stat bonuses via player.increaseStat()
+    - Resistance modifications via player.setResistance()
+    - HP/Mana/Stamina bonuses (HP fully implemented)
+    - Granted properties via PropertyLoader.getPropertyByName() → player.addProperty()
+    - Unlocked spells via player.learnSpell()
+    - Sets playerClassId for persistence
+  - removeClass(Player): Reverses all class bonuses
+    - Stat bonuses removed via player.decreaseStat()
+    - Resistances restored to original values
+    - Properties removed via player.removeProperty()
+    - Spells remain learned (design choice)
+    - Clears playerClassId
+  - handleLevelUp(Player, int): Processes level-based unlocks
+    - Grants talent points based on talentPointsPerLevel
+    - Applies level-specific unlocks from class definition
+    - Recursive application of stat bonuses, traits, spells, resources
+
+- **Player.java**: Extended with class system fields
+  - playerClassId (Integer): Tracks assigned class ID for persistence
+  - talentPoints (int): Accumulated points for talent spending
+  - learnedTalents (Set<String>): Tracks spent talents (prevents duplicates)
+  - addTalentPoint(): Increments available points
+  - spendTalentPoint(String): Decrements points, adds to learned set
+  - hasTalent(String): Checks if talent already learned
+  - Getters/setters for all class-related fields
+
+#### User Interface
+
+- **PlayerClassSelectionScreen.java**: LibGDX Scene2D/VisUI class selection interface
+
+  - Split layout: Class list (left) + Details panel (right)
+  - Class list: Scrollable VisList with all available classes
+  - Details panel displays:
+    - Class name (highlighted in cyan)
+    - Description text (wrapped, 300px width)
+    - Stat bonuses with +/- formatting
+    - Resistance modifications with %
+    - Resource bonuses (HP, Mana, Stamina, Regen)
+    - Granted traits listed
+    - Starting spells listed
+  - Action buttons:
+    - "Select Class": Applies chosen class and continues
+    - "Skip (No Class)": Continues without class selection
+  - Dynamic updates: Details refresh when different class selected
+  - Callback integration: onComplete() triggers game start after selection
+
+- **RecallDungeon.java**: Integrated class selection into game flow
+  - Modified character selection to call showClassSelection() after player pick
+  - Added showClassSelection(Player): Creates and displays class selection screen
+  - Added startGameWithPlayer(Player): Initializes game after class selection
+  - Flow: Main Menu → Character Select → Class Select → Game Start
+
+#### Data and Configuration
+
+- **Paladin.json**: Example player class implementation
+
+  - ID: 60000 (first in player class range)
+  - Stat bonuses: STR +2, CON +1, WIS +1
+  - Resistances: LIGHT +10, DARKNESS -5
+  - Resources: HP +20, Mana +10, HP Regen +1
+  - Granted traits: ["Bleed Immunity"]
+  - Starting spells: ["Shield of Light"]
+  - Level unlocks:
+    - Level 3: Poison Immunity trait
+    - Level 5: +1 STR, +10 HP
+    - Level 7: Smite spell unlock
+    - Level 10: +1 CON, +1 WIS, +5 Light resistance, +15 HP
+  - Description: "A holy warrior devoted to protecting the innocent..."
+
+- **IDS.md**: Added Player Classes section
+
+  - Range: 60000-60999 (1000 classes allocated)
+  - Description: "Player classes define character archetypes with stat bonuses, resistances, granted traits, unlocked spells, and level-based progression. Only Player creatures can have classes."
+  - Entry: 60000 — Paladin — data/creatures/player_classes/Paladin.json
+
+- **AllLoaders.java**: Integrated PlayerClassLoader into loading pipeline
+  - Load order: PropertyLoader → SpellLoader → **PlayerClassLoader** → ItemLoader → LootPoolLoader → CreatureLoader
+  - Added private static PlayerClassLoader playerClassLoader field
+  - Added getPlayerClassLoader() static getter
+  - Try-catch wrapping for safe initialization
+
+#### Python Tooling
+
+- **generate_ids.py**: Added player_classes range validation
+
+  - Range rule: (("creatures", "player_classes"), (60000, 60999, "Player Classes (60000-60999)"))
+  - Positioned after spells (50000-50999), before items (20000-29999)
+  - Validates class IDs fall within allocated range
+
+- **format_jsons.py**: Added player class JSON formatting support
+  - CANON_PLAYERCLASS_ORDER: 16-field canonical ordering
+    - Order: id, name, description, statBonuses, resistances, maxHpBonus, maxManaBonus, maxStaminaBonus, hpRegenBonus, manaRegenBonus, staminaRegenBonus, grantedProperties, unlockedSpells, talentPointsPerLevel, levelUnlocks, tooltip
+  - Detection: Recognizes `creatures/player_classes/` path → kind='player_class'
+  - Transform: Applies CANON_PLAYERCLASS_ORDER when formatting player class JSONs
+
+#### Testing
+
+- **PlayerClassTest.java**: Comprehensive test suite (8 passing tests)
+  - testPlayerClassLoaderExists: Verifies loader initialization
+  - testPaladinClassLoads: Loads Paladin by ID 60000, checks name and description
+  - testPaladinStatBonuses: Validates STR +2, CON +1, WIS +1
+  - testPaladinResistances: Validates LIGHT +10, DARKNESS -5
+  - testApplyPaladinClassToPlayer: Tests full class application, stat increases
+  - testRemoveClass: Validates class removal restores original stats
+  - testLevelUpGrantsTalentPoints: Confirms talent point award on level-up
+  - testTalentPointManagement: Tests add/spend/duplicate prevention logic
+  - Test setup: @BeforeAll with AllLoaders.loadAll()
+  - Location: src/test/java/com/bapppis/core/Creature/PlayerClassTest.java
+
+#### Documentation
+
+- **README.md**: Added "Player Class System" section under Features
+  - Overview of JSON-driven class system
+  - Stat bonuses, resistance modifications, resource bonuses
+  - Granted traits and starting spells
+  - Level-based progression system
+  - Talent point customization
+  - Class selection UI description
+  - Paladin example mentioned
+
+### Technical Details
+
+- **ID Range**: 60000-60999 (1000 player classes allocated)
+- **Data Location**: src/main/resources/data/creatures/player_classes/\*.json
+- **Dependencies**: Uses PropertyLoader (for traits), SpellLoader (for spell grants)
+- **Design Pattern**: POJO + Loader + Service (matches Spell/Property/Item patterns)
+- **Known Limitations**:
+  - Mana/Stamina bonus setters not yet implemented in Creature class (logged for now)
+  - Regen bonus setters not yet implemented (logged for now)
+  - Currently only HP bonus fully applies via setBaseHp() + updateMaxHp()
+
+### Files Modified
+
+- src/main/java/com/bapppis/core/creature/PlayerClass.java (NEW)
+- src/main/java/com/bapppis/core/creature/PlayerClassLoader.java (NEW)
+- src/main/java/com/bapppis/core/creature/PlayerClassService.java (NEW)
+- src/main/java/com/bapppis/core/creature/Player.java (MODIFIED - added class fields)
+- src/main/java/com/bapppis/core/gfx/PlayerClassSelectionScreen.java (NEW)
+- src/main/java/com/bapppis/core/gfx/RecallDungeon.java (MODIFIED - integrated class selection)
+- src/main/java/com/bapppis/core/AllLoaders.java (MODIFIED - added PlayerClassLoader)
+- src/main/resources/data/creatures/player_classes/Paladin.json (NEW)
+- src/main/resources/data/IDS.md (MODIFIED - added Player Classes section)
+- src/test/java/com/bapppis/core/Creature/PlayerClassTest.java (NEW)
+- scripts/generate_ids.py (MODIFIED - added player_classes range)
+- scripts/format_jsons.py (MODIFIED - added CANON_PLAYERCLASS_ORDER)
+- README.md (MODIFIED - added Player Class System documentation)
+
+### Testing Results
+
+- All 8 PlayerClass tests passed successfully
+- Integration with existing systems verified
+- Property granting confirmed working (Bleed Immunity applied)
+- Stat bonuses confirmed (+2 STR, +1 CON, +1 WIS applied to player)
+- Resistance modifications confirmed (+10 Light, -5 Darkness applied)
+- HP bonus confirmed (+20 HP added to base HP)
+- Class removal confirmed (stats restored to baseline)
+- Talent point system confirmed working
+
 ## [v0.0.97] - 2025-10-31
 
 ### Added - Spell System Integration

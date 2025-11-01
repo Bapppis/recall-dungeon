@@ -56,6 +56,14 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Beast, Construct, Humanoid, Undead, etc.
 - Creatures have stats (Strength, Dexterity, Constitution, etc.) and resistances (Fire, Ice, Bludgeoning, etc.)
 - Level and XP system with customizable XP progression
+- **Player class system**: Choose a class that defines your character's playstyle
+  - JSON-driven class definitions with unique progression paths
+  - Stat bonuses and resistance modifications per class
+  - Granted traits and immunities (e.g., Paladin gains Bleed Immunity)
+  - Starting spells unlock automatically when class is applied
+  - Level-based unlocks: new abilities, stats, and traits at specific levels
+  - Talent point system for character customization
+  - Class selection UI integrated into character creation
 - **Spell system**: Creatures can learn and cast spells
   - JSON-driven spell definitions with damage, elements, and properties
   - Weighted spell selection in combat alongside weapon attacks
@@ -126,6 +134,29 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 - **Weight system**: Spell usage frequency defined per-creature, not per-spell (same spell, different weights)
 - **AI behavior**: Enemies automatically cast spells if mana available; players can select manually
 - **See [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md) for complete spell mechanics documentation**
+
+### Player Class System
+
+- **JSON-driven classes**: Classes defined in `data/creatures/player_classes/*.json` with unique IDs (60000-60999 range)
+- **Character customization**: Choose a class during character creation that defines your playstyle
+- **Stat bonuses**: Each class provides permanent stat modifications (e.g., Paladin: +2 STR, +1 CON, +1 WIS)
+- **Resistance modifications**: Classes can boost or reduce specific resistances (e.g., +10% Light, -5% Darkness)
+- **Resource bonuses**: HP, Mana, Stamina, and regeneration rate bonuses per class
+- **Granted traits**: Classes provide automatic traits and immunities (e.g., Bleed Immunity, Poison Immunity)
+- **Starting spells**: Classes unlock specific spells immediately upon selection
+- **Level-based progression**: Classes define unlocks at specific levels:
+  - Additional stat bonuses
+  - New traits and immunities
+  - Bonus spells
+  - Resource increases
+- **Talent point system**: Earn talent points on level-up for further customization
+- **Class selection UI**: Interactive screen shows all class details before selection:
+  - Stat bonuses preview
+  - Resistance modifications
+  - Resource bonuses
+  - Starting traits and spells
+  - Optional: Skip class selection to play classless
+- **Example classes**: Paladin (defensive holy warrior with Light affinity)
 
 ### Asset-driven Design
 
