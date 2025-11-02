@@ -35,7 +35,17 @@ public class TalentTreeServiceTest {
     classService = new PlayerClassService(AllLoaders.getPlayerClassLoader());
 
     // Create a fresh player for each test
+    // NOTE: CreatureLoader returns cached instances, so we need to ensure clean state
     player = CreatureLoader.getPlayerById(5000);
+    
+    // Clear any state from previous tests
+    player.clearUnlockedTalentNodes();
+    player.setTalentPoints(0);
+    
+    // Remove any existing class before applying fresh
+    if (player.getPlayerClassId() != null) {
+      classService.removeClass(player);
+    }
 
     // Apply Paladin class
     PlayerClass paladinClass = AllLoaders.getPlayerClassLoader().getPlayerClassById(60000);
