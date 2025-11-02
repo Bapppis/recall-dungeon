@@ -288,11 +288,34 @@ public class TalentTreeService {
             return 0;
         }
 
+        // Get the talent tree for this class
+        TalentTree tree = treeLoader.getTalentTreeByClassId(player.getPlayerClassId());
+        if (tree == null) {
+            System.out.println("Talent tree not found for class: " + player.getPlayerClassId());
+            return 0;
+        }
+
+        // IMPORTANT: Reverse all talent bonuses BEFORE removing class
+        // We need to manually undo each talent's effects
+        for (String unlockedNodeId : new java.util.HashSet<>(player.getUnlockedTalentNodes())) {
+            TalentNode node = tree.getNodeById(unlockedNodeId);
+            if (node == null) {
+                continue;
+            }
+
+            // Find which choice was taken (assume first choice if only one exists)
+            // TODO: This doesn't handle multi-choice nodes properly - would need to track choices
+            TalentChoice choice = node.getChoices().isEmpty() ? null : node.getChoices().get(0);
+            if (choice != null) {
+                reverseTalentRewards(player, choice);
+            }
+        }
+
         // Remove class to get back to base stats
         classService.removeClass(player);
 
-    // Clear all unlocked nodes (use Player API to clear the internal set)
-    player.clearUnlockedTalentNodes();
+        // Clear all unlocked nodes (use Player API to clear the internal set)
+        player.clearUnlockedTalentNodes();
 
         // Re-apply class
         classService.applyClass(player, playerClass);
@@ -304,5 +327,33 @@ public class TalentTreeService {
                 + " talent points");
 
         return nodeCount;
+    }
+
+    /**
+     * Reverses all rewards from a talent choice
+     */
+    private void reverseTalentRewards(Player player, TalentChoice choice) {
+        // Reverse stat bonuses
+        if (choice.getStatBonuses() != null) {
+            for (Map.Entry<Stats, Integer> entry : choice.getStatBonuses().entrySet()) {
+                player.decreaseStat(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // Reverse resistance modifications
+        if (choice.getResistances() != null) {
+            for (Map.Entry<Resistances, Integer> entry : choice.getResistances().entrySet()) {
+                int currentResist = player.getResistance(entry.getKey());
+                player.setResistance(entry.getKey(), currentResist - entry.getValue());
+            }
+        }
+
+        // Reverse HP bonus
+        if (choice.getMaxHpBonus() != null && choice.getMaxHpBonus() > 0) {
+            player.setBaseHp(player.getBaseHp() - choice.getMaxHpBonus());
+            player.updateMaxHp();
+        }
+
+        // Mana and Stamina bonuses are not yet implemented in Player, so nothing to reverse
     }
 }

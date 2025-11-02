@@ -35,13 +35,14 @@ public class TalentTreeServiceTest {
     classService = new PlayerClassService(AllLoaders.getPlayerClassLoader());
 
     // Create a fresh player for each test
-    // NOTE: CreatureLoader returns cached instances, so we need to ensure clean state
+    // NOTE: CreatureLoader returns cached instances, so we need to ensure clean
+    // state
     player = CreatureLoader.getPlayerById(5000);
-    
+
     // Clear any state from previous tests
     player.clearUnlockedTalentNodes();
     player.setTalentPoints(0);
-    
+
     // Remove any existing class before applying fresh
     if (player.getPlayerClassId() != null) {
       classService.removeClass(player);
@@ -71,9 +72,10 @@ public class TalentTreeServiceTest {
 
   @Test
   public void testUnlockWithoutClass() {
-    // Create player without class - use the same cached player but ensure class is removed
+    // Create player without class - use the same cached player but ensure class is
+    // removed
     Player noClassPlayer = CreatureLoader.getPlayerById(5000);
-    
+
     // Clear any existing class and state
     noClassPlayer.setPlayerClassId(null);
     noClassPlayer.clearUnlockedTalentNodes();
@@ -276,12 +278,13 @@ public class TalentTreeServiceTest {
 
   @Test
   public void testResetTalentsFully() {
-    // Make absolutely sure we start clean - capture baseline after class application
+    // Make absolutely sure we start clean - capture baseline after class
+    // application
     // The cached player may have accumulated stats, so we force reset first
     if (player.getUnlockedNodeCount() > 0) {
       service.resetTalentsFully(player, classService, AllLoaders.getPlayerClassLoader());
     }
-    
+
     // Record initial stats (after class but before talents)
     int initialCon = player.getStat(Stats.CONSTITUTION);
     int initialHp = player.getMaxHp();
@@ -306,9 +309,13 @@ public class TalentTreeServiceTest {
     assertEquals(0, player.getUnlockedNodeCount(), "Should have 0 nodes unlocked");
     assertEquals(10, player.getTalentPoints(), "Should have 10 talent points");
 
-    // Stats should be back to initial (base + class only)
-    assertEquals(initialCon, player.getStat(Stats.CONSTITUTION), "CON should be reset to initial");
-    assertEquals(initialHp, player.getMaxHp(), "HP should be reset to initial");
+    // After full reset, stats should match what we captured as initial
+    // (the baseline after class application but before any talents)
+    int finalCon = player.getStat(Stats.CONSTITUTION);
+    int finalHp = player.getMaxHp();
+
+    assertEquals(initialCon, finalCon, "CON should return to baseline after full reset");
+    assertEquals(initialHp, finalHp, "HP should return to baseline after full reset");
   }
 
   @Test
