@@ -277,6 +277,16 @@ CANON_PLAYERCLASS_ORDER: List[str] = [
     "tooltip",
 ]
 
+# Canonical top-level ordering for talent trees
+CANON_TALENTTREE_ORDER: List[str] = [
+    "id",
+    "name",
+    "description",
+    "classId",
+    "nodes",
+    "tooltip",
+]
+
 
 def order_keys(obj: Dict[str, Any], order: List[str]) -> Dict[str, Any]:
     """Return new dict with keys inserted following 'order'; remaining appended alphabetically."""
@@ -318,6 +328,9 @@ def transform(obj: Any, kind: str = None) -> Any:
 
         if kind == 'player_class' and any(k in obj for k in CANON_PLAYERCLASS_ORDER):
             obj = order_keys(obj, CANON_PLAYERCLASS_ORDER)
+
+        if kind == 'talent_tree' and any(k in obj for k in CANON_TALENTTREE_ORDER):
+            obj = order_keys(obj, CANON_TALENTTREE_ORDER)
 
         # Recurse into values
         for k, v in list(obj.items()):
@@ -637,15 +650,17 @@ for p in json_files:
     try:
         text = p.read_text(encoding='utf-8')
         obj = json.loads(text)
-        # Determine file kind by path segments (items vs creatures vs spells vs player_classes)
+        # Determine file kind by path segments (items vs creatures vs spells vs player_classes vs talent_trees)
         rel = p.relative_to(data_dir)
         parts = rel.parts
         if parts and parts[0] == 'items':
             kind = 'item'
         elif parts and parts[0] == 'creatures':
-            # Check if this is a player class specifically
+            # Check if this is a player class or talent tree specifically
             if len(parts) > 1 and parts[1] == 'player_classes':
                 kind = 'player_class'
+            elif len(parts) > 1 and parts[1] == 'talent_trees':
+                kind = 'talent_tree'
             else:
                 kind = 'creature'
         elif parts and parts[0] == 'properties':

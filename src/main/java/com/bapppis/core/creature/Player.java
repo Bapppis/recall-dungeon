@@ -21,7 +21,8 @@ public class Player extends Creature {
     // Player class system
     private Integer playerClassId; // ID of the player's class (60000-60999 range)
     private int talentPoints = 0; // Available talent points for spending
-    private Set<String> learnedTalents = new HashSet<>(); // Talents the player has learned
+    private Set<String> learnedTalents = new HashSet<>(); // Talents the player has learned (legacy/simple talents)
+    private Set<String> unlockedTalentNodes = new HashSet<>(); // Talent tree nodes unlocked (node IDs)
 
     public Player() {
         this.setType(Type.PLAYER);
@@ -232,5 +233,23 @@ public class Player extends Creature {
 
     public boolean hasTalent(String talentName) {
         return learnedTalents.contains(talentName);
+    }
+
+    // Talent tree system methods
+
+    public Set<String> getUnlockedTalentNodes() {
+        return new HashSet<>(unlockedTalentNodes);
+    }
+
+    public void unlockTalentNode(String nodeId) {
+        unlockedTalentNodes.add(nodeId);
+    }
+
+    public boolean hasUnlockedNode(String nodeId) {
+        return unlockedTalentNodes.contains(nodeId);
+    }
+
+    public int getUnlockedNodeCount() {
+        return unlockedTalentNodes.size();
     }
 }

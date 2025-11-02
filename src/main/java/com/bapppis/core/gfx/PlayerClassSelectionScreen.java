@@ -7,11 +7,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.*;
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.creature.Player;
-import com.bapppis.core.creature.PlayerClass;
-import com.bapppis.core.creature.PlayerClassLoader;
-import com.bapppis.core.creature.PlayerClassService;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.creature.creatureEnums.Stats;
+import com.bapppis.core.creature.playerClass.PlayerClass;
+import com.bapppis.core.creature.playerClass.PlayerClassLoader;
+import com.bapppis.core.creature.playerClass.PlayerClassService;
 
 import java.util.List;
 import java.util.Map;

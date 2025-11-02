@@ -5,11 +5,13 @@ import com.bapppis.core.spell.SpellLoader;
 import com.bapppis.core.item.ItemLoader;
 import com.bapppis.core.loot.LootPoolLoader;
 import com.bapppis.core.creature.CreatureLoader;
-import com.bapppis.core.creature.PlayerClassLoader;
+import com.bapppis.core.creature.playerClass.PlayerClassLoader;
+import com.bapppis.core.creature.playerClass.TalentTreeLoader;
 
 public class AllLoaders {
 
     private static PlayerClassLoader playerClassLoader;
+    private static TalentTreeLoader talentTreeLoader;
 
     public static void loadAll() {
         synchronized (AllLoaders.class) {
@@ -40,6 +42,13 @@ public class AllLoaders {
             }
 
             try {
+                talentTreeLoader = new TalentTreeLoader();
+            } catch (Exception e) {
+                System.err.println("Warning: TalentTreeLoader initialization failed");
+                e.printStackTrace();
+            }
+
+            try {
                 ItemLoader.loadItems();
             } catch (Exception e) {
                 System.err.println("Warning: ItemLoader.loadItems() failed");
@@ -66,6 +75,10 @@ public class AllLoaders {
 
     public static PlayerClassLoader getPlayerClassLoader() {
         return playerClassLoader;
+    }
+
+    public static TalentTreeLoader getTalentTreeLoader() {
+        return talentTreeLoader;
     }
 }
 

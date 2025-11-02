@@ -48,6 +48,7 @@ for p in sorted(DATA_DIR.rglob('*.json')):
 RANGE_RULES = [
     (("spells",), (50000, 50999, "Spells (50000-50999)")),
     (("creatures", "player_classes"), (60000, 60999, "Player Classes (60000-60999)")),
+    (("creatures", "talent_trees"), (70000, 70999, "Talent Trees (70000-70999)")),
     (("items", "armor", "armor"), (20000, 21999, "Chest Armor (20000-21999)")),
     (("items", "armor", "helmets"), (22000, 23999, "Helmets (22000-23999)")),
     (("items", "armor", "legwear"), (24000, 25999, "Legwear (24000-25999)")),

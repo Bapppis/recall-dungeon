@@ -158,6 +158,30 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Optional: Skip class selection to play classless
 - **Example classes**: Paladin (defensive holy warrior with Light affinity)
 
+### Talent Tree System (Semi-Ready)
+
+> **Note:** The talent tree system is implemented but currently a placeholder. The core architecture is complete and functional, but specific talent trees, rewards, and balancing are temporary and subject to change.
+
+- **JSON-driven talent trees**: Trees defined in `data/creatures/talent_trees/*.json` tied to specific classes (70000-70999 range)
+- **Progression**: Multiple diverging paths that lead to different powerful capstone abilities
+- **Flexible node system**: Each node can have 1-3 mutually exclusive choices, allowing for specialization within paths
+- **Prerequisite system**: Nodes require specific prior nodes to be unlocked, enforcing tier-based progression
+- **One point per node**: Spend a single talent point to unlock a node (one choice if multi-choice)
+- **Reward variety**: Talents grant the same types of rewards as classes:
+  - Stat bonuses (STR, DEX, CON, INT, WIS, CHA, LUCK)
+  - Resistance modifications (Fire, Ice, Light, Darkness, physical types)
+  - Resource bonuses (HP, Mana, Stamina, regeneration rates)
+  - Granted traits and immunities
+  - Spell unlocks
+- **Talent reset**: Two reset options available:
+  - Simple reset: Clears unlocked nodes and refunds talent points
+  - Full reset: Recalculates all stats by removing/re-applying class, fully reverting talent bonuses
+- **Path organization**: Logical path grouping (e.g., Holy, Protection, Combat) with row/column positioning for future UI
+- **Example tree**: Paladin Talents with 13 nodes across 3 paths (Holy, Protection, Combat)
+  - Each path has unique capstone abilities
+  - Tier 2 nodes offer 3 specialization choices per path
+  - Capstones provide major power spikes
+
 ### Asset-driven Design
 
 - Creatures, items, spells, floors, and properties are loaded from JSON files for easy customization and extension
@@ -194,7 +218,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ## Combat and Stats
 
-> **📖 For comprehensive combat system documentation, see [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md)**
+> **For comprehensive combat system documentation, see [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md)**
 >
 > The SYSTEM_REFERENCE provides detailed explanations of:
 > - Complete attack resolution flow (to-hit, damage, crits, buildup)

@@ -24,6 +24,12 @@ Player classes define character archetypes with stat bonuses, resistances, grant
 
 - 60000 — Paladin — data/creatures/player_classes/Paladin.json
 
+## Talent Trees (70000-70999)
+
+Talent trees define progression paths within player classes. Each tree contains nodes with choices that grant stats, resistances, spells, and traits. Trees are tied to specific class IDs.
+
+- 70000 — Paladin Talents — data/creatures/talent_trees/PaladinTalents.json
+
 ## Properties (1000-4999)
 
 ### Buffs (1000-2332)

@@ -1,6 +1,7 @@
-package com.bapppis.core.creature;
+package com.bapppis.core.creature.playerClass;
 
 import com.bapppis.core.Resistances;
+import com.bapppis.core.creature.Player;
 import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.property.Property;
 import com.bapppis.core.property.PropertyLoader;

@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.0.99] - 2025-11-02
+
+### Added - Talent Tree System (Semi-Ready)
+
+**Note**: Core architecture is complete and functional, but current content is placeholder and subject to change.
+
+#### Overview
+
+Implemented a Skyrim-style talent tree progression system that allows players to specialize their classes through branching paths. Each player class can have an associated talent tree with diverging paths leading to unique capstones. Players spend talent points earned through leveling to unlock nodes, making meaningful choices that permanently enhance their character.
+
+**Architecture:**
+- JSON-driven system (ID range: 70000-70999)
+- POJOs: `TalentChoice` (individual options), `TalentNode` (prerequisites + choices), `TalentTree` (full tree tied to class)
+- `TalentTreeLoader`: Loads trees, provides lookup by ID or by class ID
+- `TalentTreeService`: Validates unlocks, applies rewards, handles resets
+- Player integration: Tracks unlocked nodes, spends talent points per unlock
+
+**How It Works:**
+
+*Progression System:*
+- Players earn talent points through leveling (configurable per class, default 1/level)
+- Each node costs 1 talent point to unlock
+- Nodes can have 1-3 mutually exclusive choices (most have 1, specializations have multiple)
+- Prerequisites enforce tier progression (e.g., must unlock tier 1 before tier 2)
+- Paths can be mixed if prerequisites allow (not restricted by path grouping)
+
+*Reward Variety:*
+- Same reward types as class system: stats, resistances, HP/Mana/Stamina bonuses
+- Regeneration bonuses (HP/Mana/Stamina regen)
+- Granted traits (properties automatically applied)
+- Unlocked spells (granted when node unlocked)
+- Rewards stack with class bonuses and are applied immediately
+
+*Reset Functionality:*
+- **Simple Reset**: Clears unlocked nodes and refunds talent points (stat bonuses remain until player reinitializes)
+- **Full Reset**: Removes class, clears nodes, re-applies class to completely recalculate stats
+- Useful for experimentation and respeccing builds
+
+*UI-Ready Design:*
+- Nodes have row/column positioning for visual layout
+- Path grouping for logical organization (e.g., "Holy", "Protection", "Combat")
+- Prerequisite arrows can be drawn between nodes
+- Choice nodes show branching options visually
+
+*Example Structure:*
+- Paladin talent tree with 3 diverging paths (Holy, Protection, Combat)
+- 13 total nodes: 1 root, 3 paths with 4 tiers each
+- Each path has specialization choice nodes (3 options) and unique capstones
+- Capstones provide major power spikes (high stat bonuses, powerful traits/spells)
+
+#### Technical Integration
+
+- **AllLoaders.java**: Added `TalentTreeLoader` initialization (loads after `PlayerClassLoader`)
+- **Player.java**: Added `Set<String> unlockedTalentNodes` to track progression
+- **IDS.md**: Added talent tree section (70000-70999 range)
+- **generate_ids.py**: Added range validation for talent tree IDs
+- **format_jsons.py**: Added canonical ordering for talent tree JSON files
+- **TalentTreeServiceTest.java**: Comprehensive test coverage (unlock, prerequisites, reset, progression)
+
 ## [v0.0.98] - 2025-11-01
 
 ### Added - Player Class System

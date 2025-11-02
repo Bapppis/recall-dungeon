@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import com.bapppis.core.AllLoaders;
 import com.bapppis.core.Resistances;
 import com.bapppis.core.creature.Player;
-import com.bapppis.core.creature.PlayerClass;
-import com.bapppis.core.creature.PlayerClassLoader;
-import com.bapppis.core.creature.PlayerClassService;
 import com.bapppis.core.creature.creatureEnums.Stats;
+import com.bapppis.core.creature.playerClass.PlayerClass;
+import com.bapppis.core.creature.playerClass.PlayerClassLoader;
+import com.bapppis.core.creature.playerClass.PlayerClassService;
 
 /**
  * Tests for the PlayerClass system including loading, applying, removing,
