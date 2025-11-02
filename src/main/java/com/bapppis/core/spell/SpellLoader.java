@@ -36,10 +36,39 @@ public class SpellLoader {
         spellNameMap.clear();
         loaded = false;
 
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(com.bapppis.core.Resistances.class,
-                        new com.bapppis.core.util.ResistancesDeserializer())
-                .create();
+    // Base Gson used by the Spell deserializer to avoid recursion (includes non-Spell adapters)
+    Gson baseGson = new GsonBuilder()
+        .registerTypeAdapter(com.bapppis.core.Resistances.class,
+            new com.bapppis.core.util.ResistancesDeserializer())
+        .create();
+
+    // Custom deserializer for Spell to accept tooltip as either a string or an array of strings.
+    com.google.gson.JsonDeserializer<Spell> spellDeserializer = (json, typeOfT, context) -> {
+        if (!json.isJsonObject()) {
+        return null;
+        }
+        com.google.gson.JsonObject obj = json.getAsJsonObject();
+        com.google.gson.JsonElement tip = obj.get("tooltip");
+        if (tip != null && tip.isJsonArray()) {
+        com.google.gson.JsonArray arr = tip.getAsJsonArray();
+        StringBuilder sb = new StringBuilder();
+        for (com.google.gson.JsonElement e : arr) {
+            if (e.isJsonPrimitive()) {
+            if (sb.length() > 0) sb.append('\n');
+            sb.append(e.getAsString());
+            }
+        }
+        obj.addProperty("tooltip", sb.toString());
+        }
+        // Use baseGson to deserialize to avoid calling this deserializer recursively
+        return baseGson.fromJson(obj, Spell.class);
+    };
+
+    Gson gson = new GsonBuilder()
+        .registerTypeAdapter(com.bapppis.core.Resistances.class,
+            new com.bapppis.core.util.ResistancesDeserializer())
+        .registerTypeAdapter(Spell.class, spellDeserializer)
+        .create();
 
         try (ScanResult scanResult = new ClassGraph()
                 .acceptPaths("data/spells")
