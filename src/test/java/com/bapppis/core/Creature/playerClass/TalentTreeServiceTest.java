@@ -71,8 +71,12 @@ public class TalentTreeServiceTest {
 
   @Test
   public void testUnlockWithoutClass() {
-    // Create player without class
+    // Create player without class - use the same cached player but ensure class is removed
     Player noClassPlayer = CreatureLoader.getPlayerById(5000);
+    
+    // Clear any existing class and state
+    noClassPlayer.setPlayerClassId(null);
+    noClassPlayer.clearUnlockedTalentNodes();
     noClassPlayer.setTalentPoints(5);
 
     boolean result = service.unlockTalentNode(noClassPlayer, "pal_root", null);
@@ -272,7 +276,13 @@ public class TalentTreeServiceTest {
 
   @Test
   public void testResetTalentsFully() {
-    // Record initial stats
+    // Make absolutely sure we start clean - capture baseline after class application
+    // The cached player may have accumulated stats, so we force reset first
+    if (player.getUnlockedNodeCount() > 0) {
+      service.resetTalentsFully(player, classService, AllLoaders.getPlayerClassLoader());
+    }
+    
+    // Record initial stats (after class but before talents)
     int initialCon = player.getStat(Stats.CONSTITUTION);
     int initialHp = player.getMaxHp();
 
