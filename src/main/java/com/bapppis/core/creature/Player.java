@@ -245,6 +245,14 @@ public class Player extends Creature {
         unlockedTalentNodes.add(nodeId);
     }
 
+    /**
+     * Clear all unlocked talent nodes for this player.
+     * Used when performing talent resets.
+     */
+    public void clearUnlockedTalentNodes() {
+        unlockedTalentNodes.clear();
+    }
+
     public boolean hasUnlockedNode(String nodeId) {
         return unlockedTalentNodes.contains(nodeId);
     }

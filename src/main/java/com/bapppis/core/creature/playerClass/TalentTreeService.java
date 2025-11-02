@@ -246,8 +246,8 @@ public class TalentTreeService {
             return 0;
         }
 
-        // Clear all unlocked nodes
-        player.getUnlockedTalentNodes().clear();
+    // Clear all unlocked nodes (use Player API to clear the internal set)
+    player.clearUnlockedTalentNodes();
 
         // Refund talent points
         player.setTalentPoints(player.getTalentPoints() + nodeCount);
@@ -291,8 +291,8 @@ public class TalentTreeService {
         // Remove class to get back to base stats
         classService.removeClass(player);
 
-        // Clear all unlocked nodes
-        player.getUnlockedTalentNodes().clear();
+    // Clear all unlocked nodes (use Player API to clear the internal set)
+    player.clearUnlockedTalentNodes();
 
         // Re-apply class
         classService.applyClass(player, playerClass);
