@@ -1,0 +1,25 @@
+{
+  "id": 70000,
+  "name": "Rogue Talents",
+  "description": "The Rogue's talent tree offers three distinct paths: Stealth (enhanced sneaking and ambush), Trickery (deception and control), and Combat (improved melee prowess).",
+  "classId": 60001,
+  "nodes": [
+    {
+      "id": "rog_root",
+      "name": "Rogue's Guile",
+      "description": "The foundation of all Rogue powers",
+      "choices": [
+        {
+          "id": "rogue_foundation",
+          "name": "Rogue Foundation",
+          "description": "Basic training improves your survivability",
+          "dodgeBonus": 5,
+          "critBonus": 5
+        }
+      ],
+      "column": 1,
+      "path": "Core",
+      "row": 0
+    }
+  ]
+}

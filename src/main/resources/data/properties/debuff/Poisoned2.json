@@ -1,0 +1,12 @@
+{
+  "id": 2339,
+  "type": "DEBUFF",
+  "name": "Poisoned 2",
+  "description": "A debilitating poison that causes harm over time.",
+  "duration": 3,
+  "damageType": "NATURE",
+  "damageDice": "2d6",
+  "tooltip": [
+    "You take 2-12 nature damage at the start of your turn."
+  ]
+}

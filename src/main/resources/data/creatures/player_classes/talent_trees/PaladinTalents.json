@@ -8,9 +8,6 @@
       "id": "pal_root",
       "name": "Divine Foundation",
       "description": "The foundation of all Paladin powers",
-      "row": 0,
-      "column": 1,
-      "path": "Core",
       "choices": [
         {
           "id": "divine_foundation",
@@ -21,16 +18,15 @@
           },
           "maxHpBonus": 10
         }
-      ]
+      ],
+      "column": 1,
+      "path": "Core",
+      "row": 0
     },
     {
       "id": "pal_holy_1",
       "name": "Radiant Devotion",
       "description": "Begin your journey down the Holy path",
-      "requires": ["pal_root"],
-      "row": 1,
-      "column": 0,
-      "path": "Holy",
       "choices": [
         {
           "id": "radiant_devotion",
@@ -45,16 +41,18 @@
           },
           "maxManaBonus": 15
         }
-      ]
+      ],
+      "column": 0,
+      "path": "Holy",
+      "requires": [
+        "pal_root"
+      ],
+      "row": 1
     },
     {
       "id": "pal_prot_1",
       "name": "Stalwart Defender",
       "description": "Begin your journey down the Protection path",
-      "requires": ["pal_root"],
-      "row": 1,
-      "column": 1,
-      "path": "Protection",
       "choices": [
         {
           "id": "stalwart_defender",
@@ -69,16 +67,18 @@
           },
           "maxHpBonus": 20
         }
-      ]
+      ],
+      "column": 1,
+      "path": "Protection",
+      "requires": [
+        "pal_root"
+      ],
+      "row": 1
     },
     {
       "id": "pal_combat_1",
       "name": "Righteous Strike",
       "description": "Begin your journey down the Combat path",
-      "requires": ["pal_root"],
-      "row": 1,
-      "column": 2,
-      "path": "Combat",
       "choices": [
         {
           "id": "righteous_strike",
@@ -89,16 +89,18 @@
           },
           "maxStaminaBonus": 20
         }
-      ]
+      ],
+      "column": 2,
+      "path": "Combat",
+      "requires": [
+        "pal_root"
+      ],
+      "row": 1
     },
     {
       "id": "pal_holy_2",
       "name": "Choice: Healing Mastery",
       "description": "Choose your holy specialization",
-      "requires": ["pal_holy_1"],
-      "row": 2,
-      "column": 0,
-      "path": "Holy",
       "choices": [
         {
           "id": "healing_hands",
@@ -107,8 +109,12 @@
           "statBonuses": {
             "WISDOM": 2
           },
-          "grantedProperties": ["Poison Immunity"],
-          "unlockedSpells": ["Heal"]
+          "grantedProperties": [
+            "Poison Immunity"
+          ],
+          "unlockedSpells": [
+            "Heal"
+          ]
         },
         {
           "id": "divine_ward",
@@ -121,7 +127,9 @@
           "resistances": {
             "DARKNESS": 10
           },
-          "unlockedSpells": ["Divine Ward"]
+          "unlockedSpells": [
+            "Divine Ward"
+          ]
         },
         {
           "id": "purifying_light",
@@ -130,19 +138,25 @@
           "statBonuses": {
             "INTELLIGENCE": 2
           },
-          "grantedProperties": ["Disease Immunity"],
-          "unlockedSpells": ["Purify"]
+          "grantedProperties": [
+            "Disease Immunity"
+          ],
+          "unlockedSpells": [
+            "Purify"
+          ]
         }
-      ]
+      ],
+      "column": 0,
+      "path": "Holy",
+      "requires": [
+        "pal_holy_1"
+      ],
+      "row": 2
     },
     {
       "id": "pal_prot_2",
       "name": "Choice: Defensive Mastery",
       "description": "Choose your protection specialization",
-      "requires": ["pal_prot_1"],
-      "row": 2,
-      "column": 1,
-      "path": "Protection",
       "choices": [
         {
           "id": "shield_master",
@@ -152,8 +166,8 @@
             "CONSTITUTION": 2
           },
           "resistances": {
-            "PIERCING": 10,
-            "BLUDGEONING": 10
+            "BLUDGEONING": 10,
+            "PIERCING": 10
           },
           "maxHpBonus": 30
         },
@@ -179,19 +193,23 @@
             "STRENGTH": 1,
             "CONSTITUTION": 2
           },
-          "grantedProperties": ["Stun Immunity"],
-          "maxHpBonus": 25
+          "maxHpBonus": 25,
+          "grantedProperties": [
+            "Stun Immunity"
+          ]
         }
-      ]
+      ],
+      "column": 1,
+      "path": "Protection",
+      "requires": [
+        "pal_prot_1"
+      ],
+      "row": 2
     },
     {
       "id": "pal_combat_2",
       "name": "Choice: Combat Mastery",
       "description": "Choose your combat specialization",
-      "requires": ["pal_combat_1"],
-      "row": 2,
-      "column": 2,
-      "path": "Combat",
       "choices": [
         {
           "id": "crusaders_might",
@@ -215,7 +233,9 @@
           "resistances": {
             "LIGHT": 10
           },
-          "unlockedSpells": ["Holy Weapon"]
+          "unlockedSpells": [
+            "Holy Weapon"
+          ]
         },
         {
           "id": "zealots_fervor",
@@ -227,16 +247,18 @@
           },
           "maxStaminaBonus": 30
         }
-      ]
+      ],
+      "column": 2,
+      "path": "Combat",
+      "requires": [
+        "pal_combat_1"
+      ],
+      "row": 2
     },
     {
       "id": "pal_holy_3",
       "name": "Sanctified Power",
       "description": "Advanced holy magic mastery",
-      "requires": ["pal_holy_2"],
-      "row": 3,
-      "column": 0,
-      "path": "Holy",
       "choices": [
         {
           "id": "sanctified_power",
@@ -247,22 +269,24 @@
             "INTELLIGENCE": 1
           },
           "resistances": {
-            "LIGHT": 15,
-            "DARKNESS": -10
+            "DARKNESS": -10,
+            "LIGHT": 15
           },
           "maxManaBonus": 30,
           "manaRegenBonus": 2
         }
-      ]
+      ],
+      "column": 0,
+      "path": "Holy",
+      "requires": [
+        "pal_holy_2"
+      ],
+      "row": 3
     },
     {
       "id": "pal_prot_3",
       "name": "Immovable Object",
       "description": "Advanced protection mastery",
-      "requires": ["pal_prot_2"],
-      "row": 3,
-      "column": 1,
-      "path": "Protection",
       "choices": [
         {
           "id": "immovable_object",
@@ -279,16 +303,18 @@
           "maxHpBonus": 50,
           "hpRegenBonus": 2
         }
-      ]
+      ],
+      "column": 1,
+      "path": "Protection",
+      "requires": [
+        "pal_prot_2"
+      ],
+      "row": 3
     },
     {
       "id": "pal_combat_3",
       "name": "Divine Wrath",
       "description": "Advanced combat mastery",
-      "requires": ["pal_combat_2"],
-      "row": 3,
-      "column": 2,
-      "path": "Combat",
       "choices": [
         {
           "id": "divine_wrath",
@@ -303,16 +329,18 @@
           },
           "maxStaminaBonus": 40
         }
-      ]
+      ],
+      "column": 2,
+      "path": "Combat",
+      "requires": [
+        "pal_combat_2"
+      ],
+      "row": 3
     },
     {
       "id": "pal_holy_capstone",
       "name": "Avatar of Light",
       "description": "Ultimate holy power - become a beacon of the Light",
-      "requires": ["pal_holy_3"],
-      "row": 4,
-      "column": 0,
-      "path": "Holy",
       "choices": [
         {
           "id": "avatar_of_light",
@@ -324,25 +352,31 @@
             "CHARISMA": 2
           },
           "resistances": {
-            "LIGHT": 25,
             "DARKNESS": -15,
-            "FIRE": 10
+            "FIRE": 10,
+            "LIGHT": 25
           },
           "maxManaBonus": 50,
           "manaRegenBonus": 3,
-          "grantedProperties": ["Radiance"],
-          "unlockedSpells": ["Divine Intervention"]
+          "grantedProperties": [
+            "Radiance"
+          ],
+          "unlockedSpells": [
+            "Divine Intervention"
+          ]
         }
-      ]
+      ],
+      "column": 0,
+      "path": "Holy",
+      "requires": [
+        "pal_holy_3"
+      ],
+      "row": 4
     },
     {
       "id": "pal_prot_capstone",
       "name": "Bulwark of Faith",
       "description": "Ultimate protection - become an indestructible guardian",
-      "requires": ["pal_prot_3"],
-      "row": 4,
-      "column": 1,
-      "path": "Protection",
       "choices": [
         {
           "id": "bulwark_of_faith",
@@ -354,26 +388,30 @@
           },
           "resistances": {
             "BLUDGEONING": 20,
-            "PIERCING": 20,
-            "SLASHING": 20,
             "FIRE": 10,
             "ICE": 10,
-            "LIGHTNING": 10
+            "LIGHTNING": 10,
+            "PIERCING": 20,
+            "SLASHING": 20
           },
           "maxHpBonus": 100,
           "hpRegenBonus": 5,
-          "grantedProperties": ["Knockback Immunity"]
+          "grantedProperties": [
+            "Knockback Immunity"
+          ]
         }
-      ]
+      ],
+      "column": 1,
+      "path": "Protection",
+      "requires": [
+        "pal_prot_3"
+      ],
+      "row": 4
     },
     {
       "id": "pal_combat_capstone",
       "name": "Champion of Justice",
       "description": "Ultimate combat power - become an unstoppable warrior",
-      "requires": ["pal_combat_3"],
-      "row": 4,
-      "column": 2,
-      "path": "Combat",
       "choices": [
         {
           "id": "champion_of_justice",
@@ -385,15 +423,23 @@
             "CONSTITUTION": 1
           },
           "resistances": {
-            "SLASHING": 15,
-            "LIGHT": 15
+            "LIGHT": 15,
+            "SLASHING": 15
           },
           "maxHpBonus": 40,
           "maxStaminaBonus": 60,
           "staminaRegenBonus": 5,
-          "unlockedSpells": ["Divine Smite"]
+          "unlockedSpells": [
+            "Divine Smite"
+          ]
         }
-      ]
+      ],
+      "column": 2,
+      "path": "Combat",
+      "requires": [
+        "pal_combat_3"
+      ],
+      "row": 4
     }
   ]
 }

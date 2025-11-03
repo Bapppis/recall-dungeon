@@ -31,13 +31,21 @@ public class SpellEngine {
       return false;
     }
 
-    // Check mana cost
-    if (caster.getCurrentMana() < spell.getManaCost()) {
+    // Check mana and stamina costs (spells may use mana, stamina or both)
+    if (spell.getManaCost() > 0 && caster.getCurrentMana() < spell.getManaCost()) {
+      return false;
+    }
+    if (spell.getStaminaCost() > 0 && caster.getCurrentStamina() < spell.getStaminaCost()) {
       return false;
     }
 
-    // Deduct mana cost
-    caster.modifyMana(-spell.getManaCost());
+    // Deduct costs (only if > 0)
+    if (spell.getManaCost() > 0) {
+      caster.modifyMana(-spell.getManaCost());
+    }
+    if (spell.getStaminaCost() > 0) {
+      caster.modifyStamina(-spell.getStaminaCost());
+    }
 
     // Handle buff-only spells (no target needed)
     if (spell.isBuffOnly()) {

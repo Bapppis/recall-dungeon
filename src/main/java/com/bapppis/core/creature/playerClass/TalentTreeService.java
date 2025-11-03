@@ -133,27 +133,54 @@ public class TalentTreeService {
 
         // Apply Mana bonus (placeholder - needs implementation in Creature)
         if (choice.getMaxManaBonus() != null && choice.getMaxManaBonus() > 0) {
+            player.modifyBaseMaxMana(choice.getMaxManaBonus());
             System.out.println("  Mana bonus applied: +" + choice.getMaxManaBonus());
         }
 
         // Apply Stamina bonus (placeholder - needs implementation in Creature)
         if (choice.getMaxStaminaBonus() != null && choice.getMaxStaminaBonus() > 0) {
+            player.modifyBaseMaxStamina(choice.getMaxStaminaBonus());
             System.out.println("  Stamina bonus applied: +" + choice.getMaxStaminaBonus());
         }
 
         // Apply HP regen bonus (placeholder)
         if (choice.getHpRegenBonus() != null && choice.getHpRegenBonus() > 0) {
+            player.modifyBaseHpRegen(choice.getHpRegenBonus());
             System.out.println("  HP regen bonus applied: +" + choice.getHpRegenBonus());
         }
 
         // Apply Mana regen bonus (placeholder)
         if (choice.getManaRegenBonus() != null && choice.getManaRegenBonus() > 0) {
+            player.modifyBaseManaRegen(choice.getManaRegenBonus());
             System.out.println("  Mana regen bonus applied: +" + choice.getManaRegenBonus());
         }
 
         // Apply Stamina regen bonus (placeholder)
         if (choice.getStaminaRegenBonus() != null && choice.getStaminaRegenBonus() > 0) {
+            player.modifyBaseStaminaRegen(choice.getStaminaRegenBonus());
             System.out.println("  Stamina regen bonus applied: +" + choice.getStaminaRegenBonus());
+        }
+
+        // Apply combat-related bonuses
+        if (choice.getCritBonus() != null) {
+            player.modifyBaseCrit(choice.getCritBonus());
+            System.out.println("  +" + choice.getCritBonus() + "% crit chance");
+        }
+        if (choice.getDodgeBonus() != null) {
+            player.modifyBaseDodge(choice.getDodgeBonus());
+            System.out.println("  +" + choice.getDodgeBonus() + "% dodge");
+        }
+        if (choice.getBlockBonus() != null) {
+            player.modifyBaseBlock(choice.getBlockBonus());
+            System.out.println("  +" + choice.getBlockBonus() + "% block");
+        }
+        if (choice.getAccuracyBonus() != null) {
+            player.modifyBaseAccuracy(choice.getAccuracyBonus());
+            System.out.println("  +" + choice.getAccuracyBonus() + " accuracy");
+        }
+        if (choice.getMagicAccuracyBonus() != null) {
+            player.modifyBaseMagicAccuracy(choice.getMagicAccuracyBonus());
+            System.out.println("  +" + choice.getMagicAccuracyBonus() + " magic accuracy");
         }
 
         // Grant properties (traits)
@@ -353,7 +380,38 @@ public class TalentTreeService {
             player.setBaseHp(player.getBaseHp() - choice.getMaxHpBonus());
             player.updateMaxHp();
         }
+        // Reverse Mana/Stamina and regen bonuses
+        if (choice.getMaxManaBonus() != null && choice.getMaxManaBonus() > 0) {
+            player.modifyBaseMaxMana(-choice.getMaxManaBonus());
+        }
+        if (choice.getMaxStaminaBonus() != null && choice.getMaxStaminaBonus() > 0) {
+            player.modifyBaseMaxStamina(-choice.getMaxStaminaBonus());
+        }
+        if (choice.getHpRegenBonus() != null && choice.getHpRegenBonus() > 0) {
+            player.modifyBaseHpRegen(-choice.getHpRegenBonus());
+        }
+        if (choice.getManaRegenBonus() != null && choice.getManaRegenBonus() > 0) {
+            player.modifyBaseManaRegen(-choice.getManaRegenBonus());
+        }
+        if (choice.getStaminaRegenBonus() != null && choice.getStaminaRegenBonus() > 0) {
+            player.modifyBaseStaminaRegen(-choice.getStaminaRegenBonus());
+        }
 
-        // Mana and Stamina bonuses are not yet implemented in Player, so nothing to reverse
+        // Reverse combat bonuses
+        if (choice.getCritBonus() != null) {
+            player.modifyBaseCrit(-choice.getCritBonus());
+        }
+        if (choice.getDodgeBonus() != null) {
+            player.modifyBaseDodge(-choice.getDodgeBonus());
+        }
+        if (choice.getBlockBonus() != null) {
+            player.modifyBaseBlock(-choice.getBlockBonus());
+        }
+        if (choice.getAccuracyBonus() != null) {
+            player.modifyBaseAccuracy(-choice.getAccuracyBonus());
+        }
+        if (choice.getMagicAccuracyBonus() != null) {
+            player.modifyBaseMagicAccuracy(-choice.getMagicAccuracyBonus());
+        }
     }
 }

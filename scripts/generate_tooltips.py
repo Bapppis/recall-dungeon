@@ -459,10 +459,18 @@ def generate_spell_tooltip(spell: Dict[str, Any]) -> List[str]:
     """Generate tooltip lines for a spell based on its mechanics, similar to weapon tooltips."""
     lines = []
     
-    # Mana cost - always show first
+    # Resource cost - mana and/or stamina
     mana_cost = spell.get("manaCost", 0)
-    if mana_cost > 0:
+    stamina_cost = spell.get("staminaCost", 0)
+    # Display both if both are present, otherwise show whichever is > 0
+    if mana_cost > 0 and stamina_cost > 0:
+        lines.append(f"Costs {mana_cost} mana and {stamina_cost} stamina to cast.")
+        lines.append("")
+    elif mana_cost > 0:
         lines.append(f"Costs {mana_cost} mana to cast.")
+        lines.append("")
+    elif stamina_cost > 0:
+        lines.append(f"Costs {stamina_cost} stamina to cast.")
         lines.append("")
     
     # Check if this is a buff-only spell (no damage components)
@@ -560,11 +568,8 @@ def generate_spell_tooltip(spell: Dict[str, Any]) -> List[str]:
         
         lines.append("")
     
-    # Additional spell info (damage multiplier if not 1.0)
-    damage_mult = spell.get("damageMult")
-    if damage_mult and damage_mult != 1.0:
-        lines.append(f"Damage is multiplied by {damage_mult}x.")
-        lines.append("")
+    # Note: damage multiplier is an internal tuning parameter and is not shown to players
+    # (previously we appended a "Damage is multiplied by Xx." line here; removed on purpose)
     
     # Add property tooltip at the end if there's an on-hit property
     if on_hit_property:

@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.00] - 2025-11-02
+
+### Added - Rogue class
+
+- Stealthy rogue, who is about quick strikes, bleeds, poisons and dodging
+
+### Added - Spells
+
+- Serpent's Fang, an ability that does nature damage and has a chance to poison the enemy
+
+### Added - Build Up
+
+- Nature build up now poisons enemy
+
+### Added - Debuff
+
+- Poisoned 1
+- Poisoned 2
+
+#### Changes
+
+- Adjusted spells so they can use stamina too instead of mana
+
+### Added - Spell stamina support & engine changes
+
+- Spells can now declare a `staminaCost` (optional) in addition to or instead of `manaCost`.
+- `Spell.java` and the spell engine now validate and deduct mana and/or stamina as required when casting.
+- Existing spells without `staminaCost` remain unchanged.
+
+### Added - Combat bonuses for classes & talents
+
+- Classes (`PlayerClass`) and talent rewards (`TalentChoice`) may now grant combat modifiers: `crit`, `dodge`, `block`, `accuracy`, and `magicAccuracy` (plus existing stat/res/HP/resource bonuses).
+- `PlayerClassService` and `TalentTreeService` apply and reverse these bonuses using creature base-modifier helpers so derived stats recalc correctly.
+
+### Changed - ID index and tooling
+
+- The ID generator (`scripts/generate_ids.py`) and `IDS.md` were updated to include missing entries discovered during a regeneration run (player classes, talent trees, loot pools, monster pools, and new property entries such as Poisoned).
+- `src/main/resources/data/IDS.md` was merged with generated output to add the missing entries and a backup of the previous `IDS.md` was written.
+
+
 ## [v0.0.99] - 2025-11-02
 
 ### Added - Talent Tree System (Semi-Ready)
