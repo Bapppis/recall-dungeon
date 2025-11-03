@@ -25,6 +25,12 @@ public class TalentChoice {
   private Integer hpRegenBonus;
   private Integer manaRegenBonus;
   private Integer staminaRegenBonus;
+  // Combat-related bonuses
+  private Float critBonus; // percent points (e.g., 5.0 -> +5% crit)
+  private Float dodgeBonus; // percent points
+  private Float blockBonus; // percent points
+  private Integer accuracyBonus; // flat accuracy
+  private Integer magicAccuracyBonus; // flat magic accuracy
   private List<String> grantedProperties; // Trait names
   private List<String> unlockedSpells; // Spell names
 
@@ -130,6 +136,46 @@ public class TalentChoice {
 
   public void setStaminaRegenBonus(Integer staminaRegenBonus) {
     this.staminaRegenBonus = staminaRegenBonus;
+  }
+
+  public Float getCritBonus() {
+    return critBonus;
+  }
+
+  public void setCritBonus(Float critBonus) {
+    this.critBonus = critBonus;
+  }
+
+  public Float getDodgeBonus() {
+    return dodgeBonus;
+  }
+
+  public void setDodgeBonus(Float dodgeBonus) {
+    this.dodgeBonus = dodgeBonus;
+  }
+
+  public Float getBlockBonus() {
+    return blockBonus;
+  }
+
+  public void setBlockBonus(Float blockBonus) {
+    this.blockBonus = blockBonus;
+  }
+
+  public Integer getAccuracyBonus() {
+    return accuracyBonus;
+  }
+
+  public void setAccuracyBonus(Integer accuracyBonus) {
+    this.accuracyBonus = accuracyBonus;
+  }
+
+  public Integer getMagicAccuracyBonus() {
+    return magicAccuracyBonus;
+  }
+
+  public void setMagicAccuracyBonus(Integer magicAccuracyBonus) {
+    this.magicAccuracyBonus = magicAccuracyBonus;
   }
 
   public List<String> getGrantedProperties() {

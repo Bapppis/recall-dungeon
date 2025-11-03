@@ -8,8 +8,8 @@
     "WISDOM": 1
   },
   "resistances": {
-    "LIGHT": 10,
-    "DARKNESS": -5
+    "DARKNESS": -5,
+    "LIGHT": 10
   },
   "maxHpBonus": 20,
   "maxManaBonus": 10,

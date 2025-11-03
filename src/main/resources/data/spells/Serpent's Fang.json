@@ -1,0 +1,23 @@
+{
+  "id": 50500,
+  "name": "Serpent's Fang",
+  "description": "A venomous strike that deals poison damage and has a chance to inflict the Poisoned condition.",
+  "times": 3,
+  "damageType": "NATURE",
+  "damageDice": "1d6",
+  "damageMult": 0.33,
+  "critMod": "+10",
+  "onHitProperty": "Poisoned2",
+  "statBonuses": [
+    "DEXTERITY"
+  ],
+  "buildUpMod": 0.4,
+  "tooltip": [
+    "Costs 50 stamina to cast.",
+    "",
+    "Deals 3-18 + 5 * DEX bonus nature damage. This spell has a chance to inflict the Poisoned2 condition and a +10% critical chance.",
+    "",
+    "Poisoned 2: You take 2-12 nature damage at the start of your turn."
+  ],
+  "staminaCost": 50
+}

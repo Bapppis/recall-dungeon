@@ -59,8 +59,6 @@ Talent trees define progression paths within player classes. Each tree contains 
 - 2335 — Necrotic Plague — data/properties/debuff/NecroticPlague.json
 - 2336 — Burning 1 — data/properties/debuff/Burning1.json
 - 2337 — Dizzy — data/properties/debuff/Dizzy.json
-- 2338 — Poisoned 1 — data/properties/debuff/Poisoned1.json
-- 2339 — Poisoned 2 — data/properties/debuff/Poisoned2.json
 - 3665 — Test Debuff — data/properties/debuff/TestDebuff.json
 
 ### Traits (3666-4999)
@@ -76,11 +74,6 @@ Talent trees define progression paths within player classes. Each tree contains 
 
 ## Creatures (5000-19999)
 
-- 60000 — Paladin — data/creatures/player_classes/Paladin.json
-- 60001 — Rogue — data/creatures/player_classes/Rogue.json
-- 70000 — Paladin Talents — data/creatures/player_classes/talent_trees/PaladinTalents.json
-- 70000 — Paladin Talents — data/creatures/talent_trees/PaladinTalents.json
-- 70000 — Rogue Talents — data/creatures/player_classes/talent_trees/RogueTalents.json
 ### Players (5000-5499)
 
 - 5000 — Biggles The Unlucky — data/creatures/players/BigglesTheUnlucky.json
@@ -457,13 +450,3 @@ Consider implementing:
 - Build-time validation of ID ranges
 - Tool to find next available ID in a range
 - Generator for new asset templates with auto-assigned IDs
-
-## Monster_pools
-
-
-## Loot_pools
-
-- 40002 — Common Treasure Chest — data/loot_pools/Common Treasure Chest.json
-- 40001 — Common Potions — data/loot_pools/Common Potions.json
-- 40000 — Common Weapons — data/loot_pools/Common Weapons.json
-- 41000 — Floor 0 Enemies — data/monster_pools/Floor 0 Enemies.json

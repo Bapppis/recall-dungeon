@@ -29,6 +29,13 @@ public class PlayerClass {
   private Integer maxManaBonus;
   private Integer maxStaminaBonus;
 
+  // Combat-related bonuses (class-level)
+  private Float critBonus;
+  private Float dodgeBonus;
+  private Float blockBonus;
+  private Integer accuracyBonus;
+  private Integer magicAccuracyBonus;
+
   // Regeneration bonuses
   private Integer hpRegenBonus;
   private Integer manaRegenBonus;
@@ -60,6 +67,11 @@ public class PlayerClass {
     private Integer maxHpBonus;
     private Integer maxManaBonus;
     private Integer maxStaminaBonus;
+    private Float critBonus;
+    private Float dodgeBonus;
+    private Float blockBonus;
+    private Integer accuracyBonus;
+    private Integer magicAccuracyBonus;
 
     public LevelUnlock() {
       this.spells = new ArrayList<>();
@@ -122,6 +134,46 @@ public class PlayerClass {
 
     public void setMaxStaminaBonus(Integer maxStaminaBonus) {
       this.maxStaminaBonus = maxStaminaBonus;
+    }
+
+    public Float getCritBonus() {
+      return critBonus;
+    }
+
+    public void setCritBonus(Float critBonus) {
+      this.critBonus = critBonus;
+    }
+
+    public Float getDodgeBonus() {
+      return dodgeBonus;
+    }
+
+    public void setDodgeBonus(Float dodgeBonus) {
+      this.dodgeBonus = dodgeBonus;
+    }
+
+    public Float getBlockBonus() {
+      return blockBonus;
+    }
+
+    public void setBlockBonus(Float blockBonus) {
+      this.blockBonus = blockBonus;
+    }
+
+    public Integer getAccuracyBonus() {
+      return accuracyBonus;
+    }
+
+    public void setAccuracyBonus(Integer accuracyBonus) {
+      this.accuracyBonus = accuracyBonus;
+    }
+
+    public Integer getMagicAccuracyBonus() {
+      return magicAccuracyBonus;
+    }
+
+    public void setMagicAccuracyBonus(Integer magicAccuracyBonus) {
+      this.magicAccuracyBonus = magicAccuracyBonus;
     }
   }
 
@@ -261,6 +313,46 @@ public class PlayerClass {
 
   public void setTooltip(Object tooltip) {
     this.tooltip = tooltip;
+  }
+
+  public Float getCritBonus() {
+    return critBonus;
+  }
+
+  public void setCritBonus(Float critBonus) {
+    this.critBonus = critBonus;
+  }
+
+  public Float getDodgeBonus() {
+    return dodgeBonus;
+  }
+
+  public void setDodgeBonus(Float dodgeBonus) {
+    this.dodgeBonus = dodgeBonus;
+  }
+
+  public Float getBlockBonus() {
+    return blockBonus;
+  }
+
+  public void setBlockBonus(Float blockBonus) {
+    this.blockBonus = blockBonus;
+  }
+
+  public Integer getAccuracyBonus() {
+    return accuracyBonus;
+  }
+
+  public void setAccuracyBonus(Integer accuracyBonus) {
+    this.accuracyBonus = accuracyBonus;
+  }
+
+  public Integer getMagicAccuracyBonus() {
+    return magicAccuracyBonus;
+  }
+
+  public void setMagicAccuracyBonus(Integer magicAccuracyBonus) {
+    this.magicAccuracyBonus = magicAccuracyBonus;
   }
 
   @Override

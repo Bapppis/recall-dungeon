@@ -276,7 +276,7 @@ public final class ResistanceUtil {
             case ICE:
                 return -1; // TODO: Create "Frozen" property
             case NATURE:
-                return -1; // TODO: Create "Poisoned" property
+                return 2338; // TODO: Create "Poisoned" property
             case LIGHTNING:
                 return -1; // TODO: Create "Jolted" or "Shocked" property
             case LIGHT:

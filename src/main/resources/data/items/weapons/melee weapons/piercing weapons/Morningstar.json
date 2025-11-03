@@ -50,11 +50,11 @@
   "tooltip": [
     "You gain 10% critical chance while wielding this weapon.",
     "",
-    "Double Smash (40%): Deals 2-6 + 5 * STR bonus piercing damage and 2-6 bludgeoning damage.",
+    "Double Smash (40%): Deals 2-6 + 5 * STR bonus piercing damage.",
     "",
-    "Crushing Blow (40%): Deals 1-6 + 5 * STR bonus piercing damage and 1-6 bludgeoning damage.",
+    "Crushing Blow (40%): Deals 1-6 + 5 * STR bonus piercing damage.",
     "",
-    "Critical Blow (20%): Deals 2-7 + 5 * STR bonus piercing damage and 2-7 bludgeoning damage. This attack has a chance to inflict the Dizzy condition and a +10% critical chance.",
+    "Critical Blow (20%): Deals 2-7 + 5 * STR bonus piercing damage. This attack has a chance to inflict the Dizzy condition and a +10% critical chance.",
     "",
     "Dizzy: You have -10% block and -4 Dexterity."
   ]

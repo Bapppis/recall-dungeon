@@ -17,6 +17,7 @@ public class Spell {
     public String description;
     public Integer times;
     public int manaCost;
+    public Integer staminaCost;
     public Resistances damageType;
     public Resistances damageType2;
     public Resistances damageType3;
@@ -32,6 +33,10 @@ public class Spell {
     public String buffProperty;
     public List<Stats> statBonuses;
     public String tooltip;
+
+    public int getStaminaCost() {
+        return staminaCost == null ? 0 : staminaCost.intValue();
+    }
 
     public Float buildUpMod;
     public Float buildUpMod2;

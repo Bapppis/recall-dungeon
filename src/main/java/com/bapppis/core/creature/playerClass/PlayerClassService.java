@@ -76,23 +76,48 @@ public class PlayerClassService {
       player.updateMaxHp();
     }
     if (playerClass.getMaxManaBonus() != null) {
-      // Mana/Stamina bonuses would need to be stored and applied through custom logic
-      // For now, we'll modify base values directly when such setters exist
+      player.modifyBaseMaxMana(playerClass.getMaxManaBonus());
       System.out.println("Mana bonus applied: +" + playerClass.getMaxManaBonus());
     }
     if (playerClass.getMaxStaminaBonus() != null) {
+      player.modifyBaseMaxStamina(playerClass.getMaxStaminaBonus());
       System.out.println("Stamina bonus applied: +" + playerClass.getMaxStaminaBonus());
     }
 
     // Regeneration bonuses - these need to be tracked separately
     if (playerClass.getHpRegenBonus() != null) {
+      player.modifyBaseHpRegen(playerClass.getHpRegenBonus());
       System.out.println("HP regen bonus applied: +" + playerClass.getHpRegenBonus());
     }
     if (playerClass.getManaRegenBonus() != null) {
+      player.modifyBaseManaRegen(playerClass.getManaRegenBonus());
       System.out.println("Mana regen bonus applied: +" + playerClass.getManaRegenBonus());
     }
     if (playerClass.getStaminaRegenBonus() != null) {
+      player.modifyBaseStaminaRegen(playerClass.getStaminaRegenBonus());
       System.out.println("Stamina regen bonus applied: +" + playerClass.getStaminaRegenBonus());
+    }
+
+    // Apply combat-related bonuses
+    if (playerClass.getCritBonus() != null) {
+      player.modifyBaseCrit(playerClass.getCritBonus());
+      System.out.println("  +" + playerClass.getCritBonus() + "% crit chance");
+    }
+    if (playerClass.getDodgeBonus() != null) {
+      player.modifyBaseDodge(playerClass.getDodgeBonus());
+      System.out.println("  +" + playerClass.getDodgeBonus() + "% dodge");
+    }
+    if (playerClass.getBlockBonus() != null) {
+      player.modifyBaseBlock(playerClass.getBlockBonus());
+      System.out.println("  +" + playerClass.getBlockBonus() + "% block");
+    }
+    if (playerClass.getAccuracyBonus() != null) {
+      player.modifyBaseAccuracy(playerClass.getAccuracyBonus());
+      System.out.println("  +" + playerClass.getAccuracyBonus() + " accuracy");
+    }
+    if (playerClass.getMagicAccuracyBonus() != null) {
+      player.modifyBaseMagicAccuracy(playerClass.getMagicAccuracyBonus());
+      System.out.println("  +" + playerClass.getMagicAccuracyBonus() + " magic accuracy");
     }
 
     // Grant properties (traits)
@@ -177,7 +202,39 @@ public class PlayerClassService {
       player.setBaseHp(player.getBaseHp() - playerClass.getMaxHpBonus());
       player.updateMaxHp();
     }
-    // Note: Mana/Stamina/Regen bonuses would be reversed here when proper setters exist
+    if (playerClass.getMaxManaBonus() != null) {
+      player.modifyBaseMaxMana(-playerClass.getMaxManaBonus());
+    }
+    if (playerClass.getMaxStaminaBonus() != null) {
+      player.modifyBaseMaxStamina(-playerClass.getMaxStaminaBonus());
+    }
+
+    if (playerClass.getHpRegenBonus() != null) {
+      player.modifyBaseHpRegen(-playerClass.getHpRegenBonus());
+    }
+    if (playerClass.getManaRegenBonus() != null) {
+      player.modifyBaseManaRegen(-playerClass.getManaRegenBonus());
+    }
+    if (playerClass.getStaminaRegenBonus() != null) {
+      player.modifyBaseStaminaRegen(-playerClass.getStaminaRegenBonus());
+    }
+
+    // Reverse combat-related bonuses
+    if (playerClass.getCritBonus() != null) {
+      player.modifyBaseCrit(-playerClass.getCritBonus());
+    }
+    if (playerClass.getDodgeBonus() != null) {
+      player.modifyBaseDodge(-playerClass.getDodgeBonus());
+    }
+    if (playerClass.getBlockBonus() != null) {
+      player.modifyBaseBlock(-playerClass.getBlockBonus());
+    }
+    if (playerClass.getAccuracyBonus() != null) {
+      player.modifyBaseAccuracy(-playerClass.getAccuracyBonus());
+    }
+    if (playerClass.getMagicAccuracyBonus() != null) {
+      player.modifyBaseMagicAccuracy(-playerClass.getMagicAccuracyBonus());
+    }
 
     // Remove granted properties
     if (playerClass.getGrantedProperties() != null) {
