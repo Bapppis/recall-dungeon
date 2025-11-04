@@ -158,9 +158,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Optional: Skip class selection to play classless
 - **Example classes**: Paladin (defensive holy warrior with Light affinity)
 
-### Talent Tree System (Semi-Ready)
-
-> **Note:** The talent tree system is implemented but currently a placeholder. The core architecture is complete and functional, but specific talent trees, rewards, and balancing are temporary and subject to change.
+### Talent Tree System
 
 - **JSON-driven talent trees**: Trees defined in `data/creatures/talent_trees/*.json` tied to specific classes (70000-70999 range)
 - **Progression**: Multiple diverging paths that lead to different powerful capstone abilities
