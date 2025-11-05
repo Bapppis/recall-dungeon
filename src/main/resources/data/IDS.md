@@ -81,6 +81,7 @@ Talent trees define progression paths within player classes. Each tree contains 
 - 70000 — Paladin Talents — data/creatures/player_classes/talent_trees/PaladinTalents.json
 - 70000 — Paladin Talents — data/creatures/talent_trees/PaladinTalents.json
 - 70000 — Rogue Talents — data/creatures/player_classes/talent_trees/RogueTalents.json
+
 ### Players (5000-5499)
 
 - 5000 — Biggles The Unlucky — data/creatures/players/BigglesTheUnlucky.json

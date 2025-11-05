@@ -5,7 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.1.00] - 2025-11-02
+## [v0.1.01] - 2025-11-05
+
+### Added
+
+- Procedural dungeon generation foundation:
+  - `MapGenerator` interface (strategy contract for generators)
+  - `BSPRoomGenerator` concrete generator (simple room/floor generator used as a placeholder)
+  - Game now procedurally generates floors for depth -10 to +10 instead of relying on text files
+    - Floors 0 to ±4 are generated at random sizes between 20x20 and 30x30
+    - Floors ±5 to ±10 are generated at random sizes between 30x30 and 40x40
+  - Two-tile-thick outer walls are applied to every generated floor
+  - Every generated floor has an upstairs (^) and downstairs (v) placeholder tile
+
+- Reveal / hide floor UI shortcuts in the floor view:
+  - Press `R` to reveal the entire current floor (sets `discovered = true` for every tile)
+  - Press `H` to hide the entire current floor (sets `discovered = false` for every tile)
+
+- Unit and integration tests for the generator:
+  - `BSPRoomGeneratorTest` (determinism, sizing, walls, stairs, neighbors, interior walkability)
+  - `DungeonGenerationIntegrationTest` (basic end-to-end generation checks)
+
+- Documentation: Added `PROCEDURAL_GENERATION.md` describing the generator architecture and how to add new generators.
+
+### Changed
+
+- The game's `loadDungeon()` no longer loads floor text files by default — text-file loading was commented out and replaced by procedural generation in `Game` (kept commented for reference).
+- Generation uses a fixed seed for determinism by default (seed may be made configurable later).
+
+### Files created / modified (high level)
+
+- Created: `src/main/java/com/bapppis/core/dungeon/generator/MapGenerator.java`
+- Created: `src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java`
+- Modified: `src/main/java/com/bapppis/core/game/Game.java` (replaced map file loading with generator loop)
+- Modified: `src/main/java/com/bapppis/core/dungeon/Floor.java` (added `revealAll()` and `hideAll()` helpers)
+- Modified: `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` (added `R` and `H` key handlers to reveal/hide floor and refresh UI)
+- Created: `src/test/java/com/bapppis/core/dungeon/generator/BSPRoomGeneratorTest.java`
+- Created: `src/test/java/com/bapppis/core/dungeon/generator/DungeonGenerationIntegrationTest.java`
+- Created: `PROCEDURAL_GENERATION.md`
+
+### Notes
+
+- This is an initial, opinionated implementation intended as a minimal, testable replacement for text-file maps so other systems (UI, pathfinding, spawning) can work against a deterministic runtime-generated floor.
+- The `BSPRoomGenerator` is intentionally simple (fills interior with floors and places placeholder stairs); future work should replace it with a more advanced algorithm (BSP rooms/corridors, cellular automata, or hybrid approaches) and add content placement (monsters, chests, events).
+- Text-file map parsing is left in the repository (commented in code) so hand-authored maps remain available for future use.
+Text-file map parsing is left in the repository (commented in code) so hand-authored maps remain available for future use.
+
+### Fixed
+
+- Player class discovery bug: player classes were being loaded from nested JSONs under `data/creatures/player_classes/` (for example `talent_trees/*`). This caused entries like "Rogue Talents" to appear in the class selection list. The loader now only loads JSON files directly in `data/creatures/player_classes/` so talent tree files are not treated as classes.
+
+### Changed
+
+- UI: removed the "Skip (No Class)" option from the class selection screen so players must pick a class during character setup.
+
+
+
+## [v0.1.00] - 2025-11-03
 
 ### Added - Rogue class
 

@@ -18,8 +18,9 @@ public class Tile {
     private boolean isDiscovered = false;
     private char symbol;
     private Event isEvent = null;
-    private Item item = null;
     private List<Creature> occupants = new ArrayList<>();
+    private List<Item> items = new ArrayList<>();
+
     private Tile left = null;
     private Tile right = null;
     private Tile up = null;

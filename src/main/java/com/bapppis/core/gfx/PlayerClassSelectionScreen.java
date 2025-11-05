@@ -122,19 +122,7 @@ public class PlayerClassSelectionScreen {
       }
     });
 
-    VisTextButton skipButton = new VisTextButton("Skip (No Class)");
-    skipButton.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        // Continue without a class
-        if (onComplete != null) {
-          onComplete.run();
-        }
-      }
-    });
-
-    buttonTable.add(selectButton).padRight(10);
-    buttonTable.add(skipButton);
+    buttonTable.add(selectButton);
 
     mainTable.add(buttonTable).colspan(2).padTop(20);
 

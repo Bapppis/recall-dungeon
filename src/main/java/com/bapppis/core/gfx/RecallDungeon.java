@@ -267,6 +267,48 @@ public class RecallDungeon extends ApplicationAdapter {
                     case com.badlogic.gdx.Input.Keys.L:
                         cmd = "look";
                         break;
+                    case com.badlogic.gdx.Input.Keys.R:
+                        // Reveal entire floor
+                        com.bapppis.core.dungeon.Floor cfR = com.bapppis.core.game.GameState.getCurrentFloor();
+                        if (cfR != null) {
+                            cfR.revealAll();
+                            refreshMapDisplay();
+                            com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                                @Override
+                                public void run() {
+                                    refreshMapDisplay();
+                                }
+                            }, 0.12f);
+                            com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                                @Override
+                                public void run() {
+                                    refreshMapDisplay();
+                                }
+                            }, 0.35f);
+                            return true;
+                        }
+                        break;
+                    case com.badlogic.gdx.Input.Keys.H:
+                        // Hide entire floor
+                        com.bapppis.core.dungeon.Floor cfH = com.bapppis.core.game.GameState.getCurrentFloor();
+                        if (cfH != null) {
+                            cfH.hideAll();
+                            refreshMapDisplay();
+                            com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                                @Override
+                                public void run() {
+                                    refreshMapDisplay();
+                                }
+                            }, 0.12f);
+                            com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                                @Override
+                                public void run() {
+                                    refreshMapDisplay();
+                                }
+                            }, 0.35f);
+                            return true;
+                        }
+                        break;
                 }
                 if (cmd != null) {
                     g.submitCommand(cmd);
