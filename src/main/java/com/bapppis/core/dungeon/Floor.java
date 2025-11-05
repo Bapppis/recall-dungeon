@@ -17,6 +17,24 @@ public abstract class Floor {
         return tiles;
     }
 
+    /**
+     * Reveal all tiles on this floor (set discovered = true).
+     */
+    public void revealAll() {
+        for (Tile t : tiles.values()) {
+            if (t != null) t.setDiscovered(true);
+        }
+    }
+
+    /**
+     * Hide all tiles on this floor (set discovered = false).
+     */
+    public void hideAll() {
+        for (Tile t : tiles.values()) {
+            if (t != null) t.setDiscovered(false);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -44,20 +44,29 @@ public class PlayerClassLoader {
 
       for (Resource resource : scanResult.getAllResources()) {
         String relPath = resource.getPath();
-        if (relPath.endsWith(".json")) {
-          try (Reader reader = new InputStreamReader(resource.open())) {
-            PlayerClass playerClass = gson.fromJson(reader, PlayerClass.class);
+        if (!relPath.endsWith(".json")) continue;
 
-            if (playerClass != null) {
-              classesById.put(playerClass.getId(), playerClass);
-              classesByName.put(playerClass.getName().toLowerCase(), playerClass);
-              System.out
-                  .println("Loaded player class: " + playerClass.getName() + " (ID: " + playerClass.getId() + ")");
-            }
-          } catch (Exception e) {
-            System.err.println("Error loading player class from " + relPath + ": " + e.getMessage());
-            e.printStackTrace();
+        // Only load JSON files that are directly under the player_classes directory.
+        // Ignore talent_trees or other nested subdirectories (they have different schemas).
+        String prefix = PLAYER_CLASS_DIRECTORY + "/";
+        String relative = relPath.startsWith(prefix) ? relPath.substring(prefix.length()) : relPath;
+        // If the relative path contains a slash, it's in a subdirectory - skip it.
+        if (relative.contains("/")) {
+          // skip nested JSONs (e.g., talent_trees/*.json)
+          continue;
+        }
+
+        try (Reader reader = new InputStreamReader(resource.open())) {
+          PlayerClass playerClass = gson.fromJson(reader, PlayerClass.class);
+
+          if (playerClass != null) {
+            classesById.put(playerClass.getId(), playerClass);
+            classesByName.put(playerClass.getName().toLowerCase(), playerClass);
+            System.out.println("Loaded player class: " + playerClass.getName() + " (ID: " + playerClass.getId() + ")");
           }
+        } catch (Exception e) {
+          System.err.println("Error loading player class from " + relPath + ": " + e.getMessage());
+          e.printStackTrace();
         }
       }
     } catch (Exception e) {
