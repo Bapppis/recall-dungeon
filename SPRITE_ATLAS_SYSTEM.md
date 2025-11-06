@@ -8,7 +8,7 @@ The game uses a flexible sprite loading system with automatic fallback and perfo
 ### 1. Runtime-Built Atlas from Individual PNGs **PRIMARY**
 - **Location**: `src/main/resources/assets/sprite_pngs/`
 - **How it works**: The `AtlasBuilder` class automatically scans this folder and creates a texture atlas from all `.png` files at runtime
-- **Advantages**: 
+- **Advantages**:
   - Easy to add/edit sprites - just drop PNG files in the folder
   - No need to rebuild atlas manually
   - Automatically uses filename (without extension) as region name
@@ -40,6 +40,7 @@ The game uses a flexible sprite loading system with automatic fallback and perfo
 ## Current Sprite Files in sprites.atlas
 Based on the console output, these sprites are available:
 - `floor` - Floor tiles
+- `genfloor` - Generation floor tiles
 - `monster_goblin` - Goblin enemy sprite
 - `player_biggles` - Biggles character sprite
 - `player_default` - Default player sprite
@@ -54,6 +55,7 @@ In `RecallDungeon.java`, map characters are mapped to sprite regions:
 ```java
 '#' → "wall"
 '.' → "floor"
+':' → "genfloor"
 '^' → "stairs_up"
 'v' → "stairs_down"
 'P' → "player_default"

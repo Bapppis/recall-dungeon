@@ -15,6 +15,7 @@ public class Tile {
     private boolean isUpstairs = false;
     private boolean isDownstairs = false;
     private boolean isPit = false;
+    private boolean isGenFloor = false;
     private boolean isDiscovered = false;
     private char symbol;
     private Event isEvent = null;
@@ -31,6 +32,7 @@ public class Tile {
      * # - Wall or undiscovered tile
      * < - Breakable wall
      * . - Floor
+     * : - GenFloor
      * @ - Spawn point
      * ^ - Up staircase
      * v - Down staircase
@@ -59,6 +61,14 @@ public class Tile {
                 break;
             case 'v':
                 this.isDownstairs = true;
+                break;
+            case ':':
+                this.isGenFloor = true;
+                break;
+            case '.':
+                break;
+            /*case '!':
+                this.isEvent = new Event();
                 break;
             case '.':
                 break;
@@ -113,4 +123,29 @@ public class Tile {
     public void setDiscovered(boolean discovered) {
         this.isDiscovered = discovered;
     }
+
+    /**
+     * Mark this tile as a solid wall and update its symbol.
+     * This preserves neighbor links and other fields.
+     */
+    public void setAsWall() {
+        this.isWall = true;
+        this.isBreakableWall = false;
+        this.symbol = '#';
+    }
+
+    public void setAsGenFloor() {
+        this.isWall = false;
+        this.isBreakableWall = false;
+        this.symbol = ':';
+    }
+
+    public void setSpawn() {
+        this.isSpawn = true;
+        this.symbol = '@';
+    }
+
+    public boolean isUpstairs() { return isUpstairs; }
+
+    public boolean isDownstairs() { return isDownstairs; }
 }

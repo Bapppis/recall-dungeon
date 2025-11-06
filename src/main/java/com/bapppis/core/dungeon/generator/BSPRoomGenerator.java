@@ -40,6 +40,7 @@ public class BSPRoomGenerator implements MapGenerator {
     int downX = width - 3 - random.nextInt(Math.max(1, width / 4 - 4));
     int downY = height - 3 - random.nextInt(Math.max(1, height / 4 - 4));
     tiles[downX][downY] = new Tile(new Coordinate(downX, downY), 'v');
+    tiles[downX-1][downY].setSpawn();
 
     // Link neighbors
     for (int x = 0; x < width; x++) {
@@ -60,6 +61,16 @@ public class BSPRoomGenerator implements MapGenerator {
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
         floor.addTile(tiles[x][y].getCoordinate(), tiles[x][y]);
+      }
+    }
+
+    // Convert all plain floor tiles ('.') into genfloors (':'), but leave stairs intact
+    // For testing
+    for (Tile t : floor.getTiles().values()) {
+      if (t == null) continue;
+      char s = t.getSymbol();
+      if (s == '.') {
+        t.setAsGenFloor();
       }
     }
 

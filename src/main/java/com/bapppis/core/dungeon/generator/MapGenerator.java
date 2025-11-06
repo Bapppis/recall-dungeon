@@ -9,7 +9,7 @@ import com.bapppis.core.dungeon.Floor;
 public interface MapGenerator {
     /**
      * Generate a floor with the specified dimensions.
-     * 
+     *
      * @param width Floor width
      * @param height Floor height
      * @param floorNumber Floor number (for context, e.g., difficulty scaling)

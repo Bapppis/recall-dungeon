@@ -54,6 +54,21 @@ public class RecallDungeon extends ApplicationAdapter {
     }
 
     private void showMainMenu() {
+        // Clean up any runtime view resources to avoid stale references or disposed
+        // textures
+        try {
+            if (spriteAtlas != null) {
+                try {
+                    spriteAtlas.dispose();
+                } catch (Exception ignored) {
+                }
+                spriteAtlas = null;
+            }
+        } catch (Exception ignored) {
+        }
+        // Drop reference to the map actor so any scheduled refreshes become no-ops
+        mapActor = null;
+
         stage.clear();
         Table table = new Table();
         table.setFillParent(true);
@@ -161,8 +176,11 @@ public class RecallDungeon extends ApplicationAdapter {
         java.util.Map<Character, String> charToRegion = new java.util.HashMap<>();
         charToRegion.put('#', "wall");
         charToRegion.put('.', "floor");
+        charToRegion.put(':', "gen_floor");
         charToRegion.put('^', "stairs_up");
         charToRegion.put('v', "stairs_down");
+        // Default player mapping; we'll override below if a player-specific sprite is
+        // available
         charToRegion.put('P', "player_default");
         charToRegion.put('?', "undiscovered");
 
@@ -172,10 +190,80 @@ public class RecallDungeon extends ApplicationAdapter {
             spriteAtlas = com.bapppis.core.gfx.AtlasBuilder.loadWithFallback();
         }
 
+        if (spriteAtlas == null) {
+            Gdx.app.log("RecallDungeon", "spriteAtlas is null (no atlas loaded)");
+        } else {
+            // Log available region names to help debug missing sprites
+            try {
+                java.util.StringJoiner sj = new java.util.StringJoiner(", ");
+                for (com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion r : spriteAtlas.getRegions()) {
+                    if (r != null && r.name != null)
+                        sj.add(r.name);
+                }
+                Gdx.app.log("RecallDungeon", "Loaded spriteAtlas regions: " + sj.toString());
+            } catch (Exception ignored) {
+            }
+        }
+
+        // If we have a player with a specific sprite, and that region exists (or can be
+        // matched),
+        // map 'P' to that sprite so the player's custom avatar is drawn instead of the
+        // default.
+        try {
+            com.bapppis.core.creature.Player current = com.bapppis.core.game.GameState.getPlayer();
+            if (current != null) {
+                String spriteName = current.getSprite();
+                Gdx.app.log("RecallDungeon", "Current player sprite name: " + spriteName);
+                if (spriteName != null && spriteAtlas != null) {
+                    if (spriteAtlas.findRegion(spriteName) != null) {
+                        charToRegion.put('P', spriteName);
+                        Gdx.app.log("RecallDungeon", "Mapping 'P' to region: " + spriteName);
+                    } else {
+                        // Best-effort: try to find a region whose name contains or is contained by
+                        // spriteName
+                        com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion match = null;
+                        try {
+                            for (com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion r : spriteAtlas.getRegions()) {
+                                if (r == null || r.name == null)
+                                    continue;
+                                if (r.name.equalsIgnoreCase(spriteName)) {
+                                    match = r;
+                                    break;
+                                }
+                                if (r.name.contains(spriteName)) {
+                                    match = r;
+                                    break;
+                                }
+                                if (spriteName.contains(r.name)) {
+                                    match = r;
+                                    break;
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
+                        if (match != null) {
+                            charToRegion.put('P', match.name);
+                            Gdx.app.log("RecallDungeon", "Mapping 'P' to closest match region: " + match.name);
+                        } else {
+                            Gdx.app.log("RecallDungeon", "No atlas region matched player sprite '" + spriteName + "'.");
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Gdx.app.error("RecallDungeon", "Error mapping player sprite to atlas region", e);
+        }
+
         mapActor = new com.bapppis.core.gfx.MapActor(chosen, spriteAtlas, charToRegion, charTextureRegions);
+
+        // Zoom the map 2x to make tiles larger
+        float zoomScale = 2.0f;
+        mapActor.setZoomFactor(zoomScale);
+
         com.badlogic.gdx.scenes.scene2d.ui.Container<com.bapppis.core.gfx.MapActor> container = new com.badlogic.gdx.scenes.scene2d.ui.Container<>(
                 mapActor);
         container.center();
+        container.setClip(true); // Clip to viewport size
 
         com.kotcrab.vis.ui.widget.VisTable left = new com.kotcrab.vis.ui.widget.VisTable(true);
         nameLabel = new com.kotcrab.vis.ui.widget.VisLabel("Name: -");
@@ -205,7 +293,9 @@ public class RecallDungeon extends ApplicationAdapter {
 
         com.kotcrab.vis.ui.widget.VisScrollPane leftScroll = new com.kotcrab.vis.ui.widget.VisScrollPane(left);
         leftScroll.setFadeScrollBars(false);
+
         table.add(leftScroll).width(300).fillY().top().pad(8);
+        // Map container without scroll pane, will center on player
         table.add(container).expand().fill().row();
 
         VisTextButton back = new VisTextButton("Back to Menu");
@@ -799,35 +889,10 @@ public class RecallDungeon extends ApplicationAdapter {
                 spriteAtlas.dispose();
             } catch (Exception ignored) {
             }
-        try {
-            if (mapActor != null) {
-                java.lang.reflect.Field fAtlas = com.bapppis.core.gfx.MapActor.class.getDeclaredField("atlas");
-                fAtlas.setAccessible(true);
-                Object a = fAtlas.get(mapActor);
-                if (a instanceof com.badlogic.gdx.graphics.g2d.TextureAtlas) {
-                    ((com.badlogic.gdx.graphics.g2d.TextureAtlas) a).dispose();
-                }
-                java.lang.reflect.Field fTexMap = com.bapppis.core.gfx.MapActor.class
-                        .getDeclaredField("charTextureRegions");
-                fTexMap.setAccessible(true);
-                Object tm = fTexMap.get(mapActor);
-                if (tm instanceof java.util.Map) {
-                    java.util.Map<?, ?> mm = (java.util.Map<?, ?>) tm;
-                    for (Object v : mm.values()) {
-                        if (v instanceof com.badlogic.gdx.graphics.g2d.TextureRegion) {
-                            com.badlogic.gdx.graphics.g2d.TextureRegion tr = (com.badlogic.gdx.graphics.g2d.TextureRegion) v;
-                            com.badlogic.gdx.graphics.Texture tex = tr.getTexture();
-                            if (tex != null)
-                                try {
-                                    tex.dispose();
-                                } catch (Exception ex) {
-                                }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-        }
+        // Note: spriteAtlas is shared with mapActor, so don't dispose it again via
+        // reflection
+        // The charTextureRegions map contains regions from spriteAtlas, not separate
+        // textures to dispose
         if (stage != null)
             try {
                 stage.dispose();

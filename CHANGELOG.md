@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-11-06
+
+### Fixed
+
+- Fixed crash when returning to main menu and selecting a different character (double-dispose of spriteAtlas)
+- Fixed player sprites not rendering (atlas loading now prefers prebuilt atlas and merges runtime PNGs)
+
+### Changed
+
+- Floor view now displays at 2x zoom and centers on player position for better visibility
+- Map view no longer uses scroll bars; automatically centers and follows player movement
+- AtlasBuilder now loads prebuilt atlas first and augments with standalone PNGs from tiles.json
+- Added debug logging for atlas region loading and player sprite mapping
+- MapActor now supports configurable zoom factor that properly scales cell dimensions and rendering
+
+### Technical
+
+- Added `setZoomFactor()` method to MapActor for dynamic tile sizing
+- Added player-centered viewport calculations in MapActor draw method
+- Added so a tile can be turned into a wall afterwards
+- Added a pink floor so it can help test in generation
+- Made AtlasBuilder to rebuild spritesheet on launch
+- Fixed some AtlasBuilder issues
+
 ## [v0.1.01] - 2025-11-05
 
 ### Added

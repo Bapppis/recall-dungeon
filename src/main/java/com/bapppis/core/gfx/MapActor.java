@@ -20,6 +20,7 @@ public class MapActor extends Actor {
     private final TextureAtlas atlas;
     private final java.util.Map<Character, String> charToRegion;
     private final java.util.Map<Character, TextureRegion> charTextureRegions;
+    private float zoomFactor = 1.0f;
 
     public MapActor(BitmapFont font) {
         this(font, null, null, null);
@@ -39,6 +40,11 @@ public class MapActor extends Actor {
         this.atlas = atlas;
         this.charToRegion = charToRegion;
         this.charTextureRegions = charTextureRegions;
+        computeCellWidth();
+    }
+
+    public void setZoomFactor(float zoom) {
+        this.zoomFactor = zoom;
         computeCellWidth();
     }
 
@@ -63,7 +69,8 @@ public class MapActor extends Actor {
             if (gl.width > 0) max = gl.width;
             else max = 8f;
         }
-        cellWidth = max + 1f;
+        cellWidth = (max + 1f) * zoomFactor;
+        lineHeight = font.getLineHeight() * zoomFactor;
     }
 
     public void refresh() {
@@ -84,8 +91,24 @@ public class MapActor extends Actor {
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
         if (lines == null || lines.length == 0) return;
-        float startX = getX();
-        float startY = getY() + getHeight() - (lineHeight * 0.1f);
+        
+        // Calculate player position to center the view
+        Player player = GameState.getPlayer();
+        float offsetX = 0;
+        float offsetY = 0;
+        
+        if (player != null && player.getPosition() != null) {
+            int px = player.getX();
+            int py = player.getY();
+            // Center on player: viewport center minus player position
+            float viewportWidth = getParent() != null ? getParent().getWidth() : 800;
+            float viewportHeight = getParent() != null ? getParent().getHeight() : 600;
+            offsetX = (viewportWidth / 2) - (px * cellWidth) - (cellWidth / 2);
+            offsetY = (viewportHeight / 2) - ((lines.length - py - 1) * lineHeight) - (lineHeight / 2);
+        }
+        
+        float startX = getX() + offsetX;
+        float startY = getY() + getHeight() - (lineHeight * 0.1f) + offsetY;
         for (int row = 0; row < lines.length; row++) {
             String line = lines[row];
             if (line == null) line = "";
@@ -109,7 +132,10 @@ public class MapActor extends Actor {
                     }
                 }
                 if (!drawn) {
+                    // Scale font rendering to match zoom
+                    font.getData().setScale(zoomFactor);
                     font.draw(batch, s, x, y);
+                    font.getData().setScale(1.0f);
                 }
             }
         }
