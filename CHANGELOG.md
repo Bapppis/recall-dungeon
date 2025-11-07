@@ -5,29 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-11-06
+## [Unreleased] - 2025-11-07
+
+### Added
+
+- Procedural generation improvements:
+  - `BSPRoomGenerator` now divides the inner area into 4 quadrants and places upstairs/downstairs in distinct quadrants.
+  - Player spawn placement rules:
+    - Floor 0: spawn is placed in a quadrant distinct from both stairs.
+    - Other floors: spawn is placed adjacent to the appropriate staircase (downstairs by default; falls back to upstairs if needed).
+  - Random treasure chest placement: a `'C'` chest tile is placed in a random quadrant (avoids stairs/spawn) with sensible fallbacks.
+
+- Map / UI:
+  - Floor view supports a configurable zoom factor and now defaults to 2× zoom.
+  - Map view centers on the player and no longer relies on scrollbars for the main floor viewport.
 
 ### Fixed
 
-- Fixed crash when returning to main menu and selecting a different character (double-dispose of spriteAtlas)
-- Fixed player sprites not rendering (atlas loading now prefers prebuilt atlas and merges runtime PNGs)
+- Fixed crash when returning to main menu and selecting a different character (double-dispose of `spriteAtlas`).
+- Fixed player sprite rendering by preferring prebuilt atlas files and augmenting with standalone PNGs referenced in `assets/tiles.json` at runtime.
 
 ### Changed
 
-- Floor view now displays at 2x zoom and centers on player position for better visibility
-- Map view no longer uses scroll bars; automatically centers and follows player movement
-- AtlasBuilder now loads prebuilt atlas first and augments with standalone PNGs from tiles.json
-- Added debug logging for atlas region loading and player sprite mapping
-- MapActor now supports configurable zoom factor that properly scales cell dimensions and rendering
+- `AtlasBuilder.loadWithFallback()` now prefers a prebuilt atlas (`sprites.atlas`/`tiles.atlas`) and merges any standalone PNG regions found via `assets/tiles.json` so runtime-built regions do not override missing prepacked regions.
+- `RecallDungeon` logs loaded atlas regions and attempts a best-effort region name match for the player's sprite (helps diagnose mismatches such as `player_biggles`).
+- `MapActor` now exposes `setZoomFactor()` and computes cell sizes from the zoom so the scene2d layout reflects actual tile dimensions.
 
-### Technical
+### Technical / Notes
 
-- Added `setZoomFactor()` method to MapActor for dynamic tile sizing
-- Added player-centered viewport calculations in MapActor draw method
-- Added so a tile can be turned into a wall afterwards
-- Added a pink floor so it can help test in generation
-- Made AtlasBuilder to rebuild spritesheet on launch
-- Fixed some AtlasBuilder issues
+- `BSPRoomGenerator` places stairs and spawn according to quadrant rules and links tile neighbors as before. It also converts interior floor tiles to the generated-floor symbol and now places a chest tile when possible.
+- The map rendering pipeline draws `TextureAtlas` regions when available and falls back to font glyphs; debug logging was added to surface missing region lookups at runtime.
+- These changes are intended to be backwards compatible with prebuilt atlases and existing map-rendering code, while providing better runtime robustness for packaged assets.
 
 ## [v0.1.01] - 2025-11-05
 
