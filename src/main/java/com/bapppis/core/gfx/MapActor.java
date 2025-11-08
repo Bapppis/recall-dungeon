@@ -49,12 +49,13 @@ public class MapActor extends Actor {
     }
 
     private void computeCellWidth() {
-        char[] sample = new char[]{'#', 'P', '.', ' '};
+        char[] sample = new char[] { '#', 'P', '.', ' ' };
         float max = 0f;
         for (char c : sample) {
             try {
                 com.badlogic.gdx.graphics.g2d.BitmapFont.Glyph g = font.getData().getGlyph(c);
-                if (g != null) max = Math.max(max, g.xadvance);
+                if (g != null)
+                    max = Math.max(max, g.xadvance);
                 else {
                     GlyphLayout gl = new GlyphLayout(font, String.valueOf(c));
                     max = Math.max(max, gl.width);
@@ -66,8 +67,10 @@ public class MapActor extends Actor {
         }
         if (max <= 0f) {
             GlyphLayout gl = new GlyphLayout(font, " ");
-            if (gl.width > 0) max = gl.width;
-            else max = 8f;
+            if (gl.width > 0)
+                max = gl.width;
+            else
+                max = 8f;
         }
         cellWidth = (max + 1f) * zoomFactor;
         lineHeight = font.getLineHeight() * zoomFactor;
@@ -83,20 +86,23 @@ public class MapActor extends Actor {
             lines = map.split("\\n");
         }
         int maxLen = 0;
-        for (String l : lines) if (l != null && l.length() > maxLen) maxLen = l.length();
+        for (String l : lines)
+            if (l != null && l.length() > maxLen)
+                maxLen = l.length();
         setSize(maxLen * cellWidth, Math.max(1, lines.length) * lineHeight);
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
-        if (lines == null || lines.length == 0) return;
-        
+        if (lines == null || lines.length == 0)
+            return;
+
         // Calculate player position to center the view
         Player player = GameState.getPlayer();
         float offsetX = 0;
         float offsetY = 0;
-        
+
         if (player != null && player.getPosition() != null) {
             int px = player.getX();
             int py = player.getY();
@@ -106,12 +112,13 @@ public class MapActor extends Actor {
             offsetX = (viewportWidth / 2) - (px * cellWidth) - (cellWidth / 2);
             offsetY = (viewportHeight / 2) - ((lines.length - py - 1) * lineHeight) - (lineHeight / 2);
         }
-        
+
         float startX = getX() + offsetX;
         float startY = getY() + getHeight() - (lineHeight * 0.1f) + offsetY;
         for (int row = 0; row < lines.length; row++) {
             String line = lines[row];
-            if (line == null) line = "";
+            if (line == null)
+                line = "";
             float y = startY - row * lineHeight;
             for (int col = 0; col < line.length(); col++) {
                 char ch = line.charAt(col);

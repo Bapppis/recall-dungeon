@@ -3,6 +3,8 @@ package com.bapppis.core.dungeon.generator;
 import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.Tile;
+import com.bapppis.core.loot.LootPool;
+import com.bapppis.core.loot.LootPoolLoader;
 
 import java.util.Random;
 
@@ -166,44 +168,49 @@ public class BSPRoomGenerator implements MapGenerator {
     }
 
     // Place a random chest in a random quadrant (avoid placing on stairs or spawn)
-    int chestQuad = random.nextInt(4);
-    boolean chestPlaced = false;
-    // Try a few attempts in the chosen quadrant first
-    for (int attempt = 0; attempt < 12 && !chestPlaced; attempt++) {
-      Coordinate cc = pickInQuadrant.apply(chestQuad);
-      int cx = cc.getX();
-      int cy = cc.getY();
-      Tile cand = tiles[cx][cy];
-      if (cand != null && cand.getSymbol() == '.') {
-        tiles[cx][cy] = new Tile(cc, 'C');
-        chestPlaced = true;
-        break;
+    LootPool commonTreasureChest = LootPoolLoader.getLootPoolByName("Common Treasure Chest");
+    System.out.println("DEBUG: Common Treasure Chest loot pool loaded: " + commonTreasureChest);
+    if (commonTreasureChest != null) {
+      int chestQuad = random.nextInt(4);
+      boolean chestPlaced = false;
+      // Try a few attempts in the chosen quadrant first
+      for (int attempt = 0; attempt < 12 && !chestPlaced; attempt++) {
+        Coordinate cc = pickInQuadrant.apply(chestQuad);
+        int cx = cc.getX();
+        int cy = cc.getY();
+        Tile cand = tiles[cx][cy];
+        if (cand != null && cand.getSymbol() == '.') {
+          cand.spawnTreasureChest(commonTreasureChest);
+          System.out.println("DEBUG: Chest placed at (" + cx + ", " + cy + ") with loot: " + cand.getLoot());
+          chestPlaced = true;
+          break;
+        }
       }
-    }
-    // If not placed, try other quadrants
-    if (!chestPlaced) {
-      for (int q = 0; q < 4 && !chestPlaced; q++) {
-        for (int attempt = 0; attempt < 8 && !chestPlaced; attempt++) {
-          Coordinate cc = pickInQuadrant.apply(q);
-          int cx = cc.getX();
-          int cy = cc.getY();
-          Tile cand = tiles[cx][cy];
-          if (cand != null && cand.getSymbol() == '.') {
-            tiles[cx][cy] = new Tile(cc, 'C');
-            chestPlaced = true;
-            break;
+      // If not placed, try other quadrants
+      if (!chestPlaced) {
+        for (int q = 0; q < 4 && !chestPlaced; q++) {
+          for (int attempt = 0; attempt < 8 && !chestPlaced; attempt++) {
+            Coordinate cc = pickInQuadrant.apply(q);
+            int cx = cc.getX();
+            int cy = cc.getY();
+            Tile cand = tiles[cx][cy];
+            if (cand != null && cand.getSymbol() == '.') {
+              cand.spawnTreasureChest(commonTreasureChest);
+              chestPlaced = true;
+              break;
+            }
           }
         }
       }
-    }
-    // Final fallback: scan inner area for first plain floor tile
-    if (!chestPlaced) {
-      outer2:
-      for (int x = innerMinX; x <= innerMaxX; x++) {
-        for (int y = innerMinY; y <= innerMaxY; y++) {
-          if (tiles[x][y].getSymbol() == '.') {
-            tiles[x][y] = new Tile(new Coordinate(x, y), 'C');
-            break outer2;
+      // Final fallback: scan inner area for first plain floor tile
+      if (!chestPlaced) {
+        outer2:
+        for (int x = innerMinX; x <= innerMaxX; x++) {
+          for (int y = innerMinY; y <= innerMaxY; y++) {
+            if (tiles[x][y].getSymbol() == '.') {
+              tiles[x][y].spawnTreasureChest(commonTreasureChest);
+              break outer2;
+            }
           }
         }
       }
@@ -233,13 +240,13 @@ public class BSPRoomGenerator implements MapGenerator {
 
     // Convert all plain floor tiles ('.') into genfloors (':'), but leave stairs intact
     // For testing
-    for (Tile t : floor.getTiles().values()) {
+    /* for (Tile t : floor.getTiles().values()) {
       if (t == null) continue;
       char s = t.getSymbol();
       if (s == '.') {
         t.setAsGenFloor();
       }
-    }
+    } */
 
     return floor;
   }

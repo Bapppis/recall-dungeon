@@ -7,6 +7,8 @@ public class LootPool {
     public String id;
     // human-friendly name for the pool (optional). Allows lookup by name as well as id.
     public String name;
+    // sprite name for visual representation (e.g., "common_treasure_chest")
+    public String sprite;
     public List<Entry> entries;
 
     public static class Entry {

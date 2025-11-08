@@ -5,37 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-11-07
+## [v0.1.02] - 2025-11-08
 
 ### Added
 
+- **Loot Pool Sprite System**: Treasure chests now render with sprites
+  - Added `sprite` field to `LootPool` class for visual representation
+  - Common Treasure Chest displays `common_treasure_chest` sprite
+  - `LootPoolLoader` now provides static lookup methods (`getLootPoolById`, `getLootPoolByName`)
+  - Treasure chest sprite added to `tiles.json` for atlas loading
+
+- **Treasure Chest Spawning**: Procedurally generated chests with loot
+  - `BSPRoomGenerator` uses `spawnTreasureChest()` method to place Common Treasure Chest loot pools
+  - Chests placed in random quadrants (avoiding stairs and spawn points)
+  - `Tile.getLoot()` and `Tile.isOccupied()` getters added for chest detection
+
+- **Movement Blocking System**: Occupied tiles prevent movement
+  - Players cannot walk through treasure chests or other occupied tiles
+  - `CommandParser` now checks `tile.isOccupied()` before allowing movement
+  - Provides specific feedback about what blocks the way (e.g., "a treasure chest blocks your way")
+
 - Procedural generation improvements:
-  - `BSPRoomGenerator` now divides the inner area into 4 quadrants and places upstairs/downstairs in distinct quadrants.
+  - `BSPRoomGenerator` divides the inner area into 4 quadrants and places upstairs/downstairs in distinct quadrants
   - Player spawn placement rules:
-    - Floor 0: spawn is placed in a quadrant distinct from both stairs.
-    - Other floors: spawn is placed adjacent to the appropriate staircase (downstairs by default; falls back to upstairs if needed).
-  - Random treasure chest placement: a `'C'` chest tile is placed in a random quadrant (avoids stairs/spawn) with sensible fallbacks.
+    - Floor 0: spawn is placed in a quadrant distinct from both stairs
+    - Other floors: spawn is placed adjacent to the appropriate staircase (downstairs by default; falls back to upstairs if needed)
+  - Random treasure chest placement in quadrants with sensible fallbacks
 
 - Map / UI:
-  - Floor view supports a configurable zoom factor and now defaults to 2× zoom.
-  - Map view centers on the player and no longer relies on scrollbars for the main floor viewport.
+  - Floor view supports a configurable zoom factor and now defaults to 2× zoom
+  - Map view centers on the player and no longer relies on scrollbars for the main floor viewport
 
 ### Fixed
 
-- Fixed crash when returning to main menu and selecting a different character (double-dispose of `spriteAtlas`).
-- Fixed player sprite rendering by preferring prebuilt atlas files and augmenting with standalone PNGs referenced in `assets/tiles.json` at runtime.
+- **Treasure Chest Rendering**: Fixed chests not appearing on map
+  - `MapPrinter.renderWithPlayer()` now checks `tile.getLoot()` and renders 'C' for treasure chests
+  - Added 'C' → "common_treasure_chest" sprite mapping in `RecallDungeon`
+  - Treasure chests now properly visible in floor view
+
+- Fixed crash when returning to main menu and selecting a different character (double-dispose of `spriteAtlas`)
+- Fixed player sprite rendering by preferring prebuilt atlas files and augmenting with standalone PNGs referenced in `assets/tiles.json` at runtime
 
 ### Changed
 
-- `AtlasBuilder.loadWithFallback()` now prefers a prebuilt atlas (`sprites.atlas`/`tiles.atlas`) and merges any standalone PNG regions found via `assets/tiles.json` so runtime-built regions do not override missing prepacked regions.
-- `RecallDungeon` logs loaded atlas regions and attempts a best-effort region name match for the player's sprite (helps diagnose mismatches such as `player_biggles`).
-- `MapActor` now exposes `setZoomFactor()` and computes cell sizes from the zoom so the scene2d layout reflects actual tile dimensions.
+- **LootPoolLoader Architecture**: Enhanced lookup system
+  - Added static `HashMap` storage for loot pools (by ID and by name)
+  - Name lookup is case-insensitive and space-insensitive
+  - Loot pools now loaded and cached at startup for efficient retrieval
+
+- `AtlasBuilder.loadWithFallback()` now prefers a prebuilt atlas (`sprites.atlas`/`tiles.atlas`) and merges any standalone PNG regions found via `assets/tiles.json` so runtime-built regions do not override missing prepacked regions
+- `RecallDungeon` logs loaded atlas regions and attempts a best-effort region name match for the player's sprite (helps diagnose mismatches such as `player_biggles`)
+- `MapActor` now exposes `setZoomFactor()` and computes cell sizes from the zoom so the scene2d layout reflects actual tile dimensions
+- `MapPrinter` now consistently checks for loot in both `printWithPlayer()` and `renderWithPlayer()` methods
 
 ### Technical / Notes
 
-- `BSPRoomGenerator` places stairs and spawn according to quadrant rules and links tile neighbors as before. It also converts interior floor tiles to the generated-floor symbol and now places a chest tile when possible.
-- The map rendering pipeline draws `TextureAtlas` regions when available and falls back to font glyphs; debug logging was added to surface missing region lookups at runtime.
-- These changes are intended to be backwards compatible with prebuilt atlases and existing map-rendering code, while providing better runtime robustness for packaged assets.
+- `BSPRoomGenerator` places stairs, spawn, and treasure chests according to quadrant rules and links tile neighbors as before
+- Treasure chests use `spawnTreasureChest(LootPool)` method which sets `tile.loot` and `tile.isOccupied`
+- The map rendering pipeline draws `TextureAtlas` regions when available and falls back to font glyphs; debug logging was added to surface missing region lookups at runtime
+- Added debug logging to `BSPRoomGenerator` to track chest placement and loot pool loading
+- These changes are intended to be backwards compatible with prebuilt atlases and existing map-rendering code, while providing better runtime robustness for packaged assets
 
 ## [v0.1.01] - 2025-11-05
 

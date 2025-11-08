@@ -179,6 +179,7 @@ public class RecallDungeon extends ApplicationAdapter {
         charToRegion.put(':', "gen_floor");
         charToRegion.put('^', "stairs_up");
         charToRegion.put('v', "stairs_down");
+        charToRegion.put('C', "common_treasure_chest");
         // Default player mapping; we'll override below if a player-specific sprite is
         // available
         charToRegion.put('P', "player_default");

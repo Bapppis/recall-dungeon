@@ -1,6 +1,7 @@
 {
   "id": "40002",
   "name": "Common Treasure Chest",
+  "sprite": "common_treasure_chest",
   "entries": [
     {
       "id": "CommonPotions",

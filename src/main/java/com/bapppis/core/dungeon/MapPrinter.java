@@ -34,6 +34,9 @@ public class MapPrinter {
                         sb.append('.');
                     } else if (!t.isDiscovered()) {
                         sb.append('#');
+                    } else if (t.getLoot() != null) {
+                        // Render treasure chest if tile has loot
+                        sb.append('C');
                     } else {
                         sb.append(t.getSymbol());
                     }
@@ -74,6 +77,9 @@ public class MapPrinter {
                         sb.append('.');
                     } else if (!t.isDiscovered()) {
                         sb.append('#');
+                    } else if (t.getLoot() != null) {
+                        // Render treasure chest if tile has loot
+                        sb.append('C');
                     } else {
                         sb.append(t.getSymbol());
                     }

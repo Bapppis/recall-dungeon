@@ -5,6 +5,7 @@
     ":": "gen_floor",
     "^": "stairs_up",
     "v": "stairs_down",
-    "P": "player"
+    "P": "player",
+    "C": "common_treasure_chest"
   }
 }
