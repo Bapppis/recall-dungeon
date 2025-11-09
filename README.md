@@ -42,7 +42,8 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ### Turn-based Dungeon Exploration
 
-- Procedurally loaded dungeon floors with fog-of-war (undiscovered tiles are hidden until explored)
+- Static dungeon floors loaded from map files with fog-of-war (undiscovered tiles are hidden until explored)
+- **Coming soon:** Randomly generated dungeon floors for infinite replayability (not yet implemented)
 - Player vision range determines how much of the map is revealed
 - Creatures have multiple attacks that are decided semi-randomly via weighted randomness
 
@@ -50,7 +51,8 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 - **Creature type hierarchy**: Specialized creature classes for different entity types
   - **Player**: Player character with extended functionality
-  - **Enemy**: Hostile creatures with AI behavior
+  - **Enemy**: Hostile creatures with basic combat behavior
+    - **Coming soon:** AI movement and pathfinding so enemies actively move through the dungeon and chase the player (not yet implemented)
   - **NPC**: Non-hostile characters for dialogue and quests
 - **Creature variants**: Multiple creature types organized by family
   - Beast, Construct, Humanoid, Undead, etc.
