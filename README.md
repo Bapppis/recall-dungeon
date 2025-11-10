@@ -42,10 +42,20 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ### Turn-based Dungeon Exploration
 
-- Static dungeon floors loaded from map files with fog-of-war (undiscovered tiles are hidden until explored)
-- **Coming soon:** Randomly generated dungeon floors for infinite replayability (not yet implemented)
-- Player vision range determines how much of the map is revealed
-- Creatures have multiple attacks that are decided semi-randomly via weighted randomness
+- **Procedurally generated dungeons**: Floors -10 to +10 generated at runtime using BSPRoomGenerator
+  - Two-tile-thick outer walls for structural integrity
+  - Quadrant-based placement for stairs and spawn points
+  - Random treasure chest spawning
+  - Deterministic generation (fixed seed for testing)
+- **JSON-based tile system**: Data-driven tile definitions for easy content expansion
+  - TileType templates define: symbol, sprite, flags (isWall, isOccupied, etc.)
+  - Six core tile types: walls, floors, stairs (up/down), treasure chests
+  - Loot pools can be assigned directly in tile type definitions
+  - Adding new tiles requires just 2 files: TileType JSON + sprite PNG
+- **Fog of war**: Undiscovered tiles are hidden until explored
+- **Player vision range**: Determines how much of the map is revealed (affected by Darksight trait)
+- **Movement system**: Grid-based cardinal direction movement (WASD or arrow keys)
+- Creatures have multiple attacks decided semi-randomly via weighted randomness
 
 ### Creature System
 
@@ -189,11 +199,26 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 ### Rendering & Sprites
 
-- Tile and creature rendering: ASCII map characters are mapped to sprite regions so the LibGDX map view renders tiles and creatures using graphics instead of plain text.
-- Per-character sprite binding: player and creature JSON may include a `"sprite"` field to select a specific sprite for that character (for example, different starting characters can show different player sprites).
-- Loading strategy: the renderer prefers a packed `TextureAtlas` (region names from `tiles.json`) and falls back to individual PNG files in `src/main/resources/assets/sprite_pngs/` when an atlas region is not available.
-- Default behavior: when a player character has no sprite defined or loading fails, the runtime falls back to a built-in `player_default` sprite.
-- Asset locations: runtime sprite art and per-PNG fallbacks are kept in `src/main/resources/assets/`. Full third-party packs are archived under `src/main/resources/assets/thirdparty/` and are noted in `ATTRIBUTION.md`.
+- **Sprite atlas system**: Automated sprite packing and loading
+  - Individual sprite PNGs packed into `sprites.atlas` + `sprites.png` using `pack_sprites.py`
+  - Runtime atlas building from loose PNGs for development flexibility
+  - Production uses prebuilt atlas for faster loading
+- **Tile rendering**: TileType system maps tiles to sprites
+  - Each tile type defines its sprite name in JSON
+  - MapActor calls `tile.getSprite()` to get sprite name, then looks up in TextureAtlas
+  - No intermediate character-to-sprite mappings needed
+  - Adding new tiles: create TileType JSON + matching sprite PNG (2 files total)
+- **Creature sprites**: Per-character sprite binding
+  - Player and creature JSON may include a `"sprite"` field to select specific sprites
+  - Different player characters can have unique sprites (e.g., player_biggles, player_voss)
+  - Falls back to `player_default` sprite if not specified or missing
+- **Asset locations**:
+  - Sprite PNGs: `src/main/resources/assets/sprite_pngs/`
+  - Packed atlas: `src/main/resources/assets/sprites.atlas` + `sprites.png`
+  - Third-party packs: `src/main/resources/assets/thirdparty/` (see `ATTRIBUTION.md`)
+- **Sprite system tools**:
+  - `pack_sprites.py`: Packs individual PNGs into atlas (requires Pillow)
+  - `AtlasBuilder.java`: Runtime atlas loading with fallback to loose PNGs
 
 ### Extensible Command System
 
@@ -221,6 +246,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 > **For comprehensive combat system documentation, see [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md)**
 >
 > The SYSTEM_REFERENCE provides detailed explanations of:
+>
 > - Complete attack resolution flow (to-hit, damage, crits, buildup)
 > - Spell system mechanics (casting, mana, multi-element spells, properties)
 > - Resistance buildup and overload system
@@ -231,23 +257,27 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 ### Quick Reference
 
 **Attack Resolution:**
+
 - To-hit roll (0-100) vs. avoidance window (dodge + block/magicResist)
 - Physical attacks use dodge+block partition; TRUE damage ignores block
 - Magical attacks use dodge+magicResist partition
 - Each hit in multi-hit attacks resolves independently
 
 **Critical Hits:**
+
 - Base formula: `crit = baseCrit + 5 × (LUCK - 1) + equipment + properties`
 - Rolled per successful hit, doubles that hit's damage
 - Clamped to [0, 100] when checked
 
 **Resistance Buildup:**
+
 - Base: 20 per hit × attack modifier × (target resistance / 100)
 - Range: 0-100% (or -1 for immunity)
 - **Overload at 100%**: applies debuff, resets to 0
 - Decays over time: `(200 - resistance) / 10` per tick
 
 **Stat Mechanics:**
+
 - **Dodge**: `baseDodge + 2.5 × (DEX - 10)` — clamped [0, 80]
 - **Crit**: `baseCrit + 5 × (LUCK - 1)` — clamped [0, 100]
 - **Magic Resist**: `baseMagicResist + 5 × (WIS - 10) + 2.5 × (CON - 10)`
@@ -255,6 +285,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 - **Stamina Regen**: `baseRegen + max(1, floor(2.5 × WIS))`
 
 **Damage Calculation:**
+
 1. Roll damage dice per hit
 2. Add stat bonuses
 3. Check for crit (×2 if successful)
@@ -813,6 +844,7 @@ mvn exec:java -Dexec.mainClass="com.bapppis.core.gfx.DesktopLauncher"
 ## Running Tests
 
 The project includes comprehensive test coverage for core systems including:
+
 - **Creature system**: Species modifications, stat calculations, XP progression
 - **Item system**: Equipment, consumables, property application, stat modifiers
 - **Combat system**: Attack resolution, damage calculation, status effects

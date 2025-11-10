@@ -5,27 +5,136 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.03] - 2025-11-10
+
+### Added
+
+- **JSON-Based Tile System**: Complete refactor to data-driven tile architecture
+  - `TileType.java`: Template class defining tile blueprints (name, symbol, sprite, flags, loot)
+  - `TileTypeLoader.java`: Loads tile types from JSON files at startup
+  - Six tile type JSONs: basicWall, basicFloor, basicGenFloor, basicUpStairs, basicDownStairs, commonTreasureChest
+  - Tile types define: name, symbol, sprite name, isWall, isOccupied, isUpstairs, isDownstairs, lootPoolName
+- **Tile.java Refactor**: Instance-based tile system with TileType references
+  - Primary constructor: `Tile(Coordinate, TileType)` - uses TileType templates
+  - Deprecated constructor: `Tile(Coordinate, char)` - for backward compatibility with MapParser
+  - Delegates behavior to TileType: getSymbol(), getSprite(), isWall(), isOccupied()
+  - Instance-specific state: coordinate, discovered, spawn, loot, occupants, items
+- **Sprite Packing System**: Automated sprite atlas generation
+  - `pack_sprites.py`: Python script to pack individual PNGs into sprite atlas
+  - Generates `sprites.atlas` + `sprites.png` from `sprite_pngs/` folder
+  - Atlas includes: basicWall, basicFloor, basicUpStairs, basicDownStairs, treasure chest, player sprites
+  - Runtime atlas building from loose PNGs for development flexibility
+
+### Changed
+
+- **MapActor Rendering Optimization**: Eliminated character-to-sprite mapping duplication
+  - Removed ~70 lines of character-to-sprite HashMap creation from RecallDungeon.java
+  - MapActor now receives Floor object directly and calls `tile.getSprite()` for sprite names
+  - Removed intermediate mapping layers (tiles.json, charToRegion mappings)
+  - Sprite lookup now: TileType → sprite name → TextureAtlas lookup
+- **BSPRoomGenerator**: Updated to use TileTypeLoader
+  - Loads TileTypes at generation time: wallType, floorType, upStairsType, downStairsType
+  - All tile creation uses `new Tile(coordinate, tileType)` pattern
+  - Consistent tile creation across walls, floors, and stairs
+- **AtlasBuilder Improvements**: Enhanced sprite loading with fallback system
+  - Tries prebuilt atlas first (`assets/sprites.atlas`)
+  - Falls back to building from `assets/sprite_pngs/` folder at runtime
+  - Added comprehensive logging for atlas loading and sprite region detection
+  - Proper UTF-8 encoding for resource streams
+- **TileTypeLoader**: Classpath resource loading for packaged JARs
+  - Uses `getResourceAsStream()` instead of file system paths
+  - Loads from `data/tile_types/` in resources
+  - Explicit file list for reliable loading
+  - Works in both development and production builds
+
+### Fixed
+
+- **Tile System Initialization**: TileTypeLoader now loaded in AllLoaders.loadAll()
+  - Loads after PropertyLoader, before SpellLoader
+  - Prevents NullPointerException when BSPRoomGenerator tries to create tiles
+  - All tile types properly cached before dungeon generation
+- **Sprite Rendering**: Fixed sprites not displaying in game
+  - Deleted old `sprites.atlas` with outdated sprite names (wall, floor, stairs_up, stairs_down)
+  - Created new atlas with correct names matching TileType JSONs (basicWall, basicFloor, etc.)
+  - Fixed atlas folder path priority (tries `assets/sprite_pngs` first)
+  - Sprite names now consistent across: TileType JSONs → sprite PNGs → atlas regions
+
+### Removed
+
+- **tiles.json**: Eliminated redundant character-to-sprite mapping file
+  - Sprite names now defined in TileType JSONs
+  - Reduces maintenance burden from 5 files to 2 files per new tile type
+- **buildFromTilesJsonPngs()**: Removed obsolete atlas building method from AtlasBuilder
+  - Simplified loadWithFallback() to use either prebuilt atlas or PNG folder
+- **Character Mappings**: Removed duplicate sprite name mappings from RecallDungeon
+  - MapActor constructor simplified from 4 parameters to 2 (font, atlas)
+  - All tile rendering now goes through tile.getSprite()
+
+### Technical Details
+
+- **Tile Creation Flow**: TileTypeLoader loads JSONs → BSPRoomGenerator gets TileTypes → creates Tile instances
+- **Rendering Flow**: MapActor receives Floor → iterates tiles → tile.getSprite() → atlas.findRegion() → render
+- **Sprite System**: Individual PNGs (16×16 or 18×18) → packed into single atlas → loaded at runtime
+- **Extensibility**: Adding new tile type requires: 1) Create TileType JSON, 2) Add matching sprite PNG
+- **Backward Compatibility**: Deprecated char constructor allows MapParser to continue working
+- **ID Ranges**: Tile types use descriptive names (no numeric IDs needed for tiles)
+
+### Files Modified
+
+- src/main/java/com/bapppis/core/dungeon/Tile.java (REFACTORED)
+- src/main/java/com/bapppis/core/dungeon/TileType.java (NEW)
+- src/main/java/com/bapppis/core/dungeon/TileTypeLoader.java (NEW)
+- src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java (UPDATED - uses TileTypeLoader)
+- src/main/java/com/bapppis/core/gfx/MapActor.java (REFACTORED - direct Floor access)
+- src/main/java/com/bapppis/core/gfx/RecallDungeon.java (SIMPLIFIED - removed char mappings)
+- src/main/java/com/bapppis/core/gfx/AtlasBuilder.java (UPDATED - improved logging and paths)
+- src/main/java/com/bapppis/core/AllLoaders.java (UPDATED - added TileTypeLoader)
+- src/main/resources/data/tile_types/\*.json (NEW - 6 tile type definitions)
+- src/main/resources/assets/sprites.atlas (REGENERATED)
+- src/main/resources/assets/sprites.png (REGENERATED)
+- scripts/pack_sprites.py (NEW - sprite atlas packing tool)
+
+### Development Tools
+
+- **pack_sprites.py**: Automated sprite sheet generation
+  - Requires: Pillow (PIL) library
+  - Input: Individual PNG files in sprite_pngs/
+  - Output: sprites.atlas + sprites.png
+  - Maintains consistent sprite positions for stable atlas file
+
+### Notes
+
+- Tile system now fully data-driven and JSON-configurable
+- Adding new tiles is significantly easier (2 files instead of 5)
+- Runtime sprite atlas building enables rapid iteration during development
+- Prebuilt atlas can be used in production for faster loading
+- System designed for future expansion (biomes, tile variants, animated tiles)
+
 ## [v0.1.02] - 2025-11-08
 
 ### Added
 
 - **Loot Pool Sprite System**: Treasure chests now render with sprites
+
   - Added `sprite` field to `LootPool` class for visual representation
   - Common Treasure Chest displays `common_treasure_chest` sprite
   - `LootPoolLoader` now provides static lookup methods (`getLootPoolById`, `getLootPoolByName`)
   - Treasure chest sprite added to `tiles.json` for atlas loading
 
 - **Treasure Chest Spawning**: Procedurally generated chests with loot
+
   - `BSPRoomGenerator` uses `spawnTreasureChest()` method to place Common Treasure Chest loot pools
   - Chests placed in random quadrants (avoiding stairs and spawn points)
   - `Tile.getLoot()` and `Tile.isOccupied()` getters added for chest detection
 
 - **Movement Blocking System**: Occupied tiles prevent movement
+
   - Players cannot walk through treasure chests or other occupied tiles
   - `CommandParser` now checks `tile.isOccupied()` before allowing movement
   - Provides specific feedback about what blocks the way (e.g., "a treasure chest blocks your way")
 
 - Procedural generation improvements:
+
   - `BSPRoomGenerator` divides the inner area into 4 quadrants and places upstairs/downstairs in distinct quadrants
   - Player spawn placement rules:
     - Floor 0: spawn is placed in a quadrant distinct from both stairs
@@ -39,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Treasure Chest Rendering**: Fixed chests not appearing on map
+
   - `MapPrinter.renderWithPlayer()` now checks `tile.getLoot()` and renders 'C' for treasure chests
   - Added 'C' → "common_treasure_chest" sprite mapping in `RecallDungeon`
   - Treasure chests now properly visible in floor view
@@ -49,6 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **LootPoolLoader Architecture**: Enhanced lookup system
+
   - Added static `HashMap` storage for loot pools (by ID and by name)
   - Name lookup is case-insensitive and space-insensitive
   - Loot pools now loaded and cached at startup for efficient retrieval
@@ -71,6 +182,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Procedural dungeon generation foundation:
+
   - `MapGenerator` interface (strategy contract for generators)
   - `BSPRoomGenerator` concrete generator (simple room/floor generator used as a placeholder)
   - Game now procedurally generates floors for depth -10 to +10 instead of relying on text files
@@ -80,10 +192,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Every generated floor has an upstairs (^) and downstairs (v) placeholder tile
 
 - Reveal / hide floor UI shortcuts in the floor view:
+
   - Press `R` to reveal the entire current floor (sets `discovered = true` for every tile)
   - Press `H` to hide the entire current floor (sets `discovered = false` for every tile)
 
 - Unit and integration tests for the generator:
+
   - `BSPRoomGeneratorTest` (determinism, sizing, walls, stairs, neighbors, interior walkability)
   - `DungeonGenerationIntegrationTest` (basic end-to-end generation checks)
 
@@ -110,7 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This is an initial, opinionated implementation intended as a minimal, testable replacement for text-file maps so other systems (UI, pathfinding, spawning) can work against a deterministic runtime-generated floor.
 - The `BSPRoomGenerator` is intentionally simple (fills interior with floors and places placeholder stairs); future work should replace it with a more advanced algorithm (BSP rooms/corridors, cellular automata, or hybrid approaches) and add content placement (monsters, chests, events).
 - Text-file map parsing is left in the repository (commented in code) so hand-authored maps remain available for future use.
-Text-file map parsing is left in the repository (commented in code) so hand-authored maps remain available for future use.
+  Text-file map parsing is left in the repository (commented in code) so hand-authored maps remain available for future use.
 
 ### Fixed
 
@@ -119,8 +233,6 @@ Text-file map parsing is left in the repository (commented in code) so hand-auth
 ### Changed
 
 - UI: removed the "Skip (No Class)" option from the class selection screen so players must pick a class during character setup.
-
-
 
 ## [v0.1.00] - 2025-11-03
 
@@ -161,7 +273,6 @@ Text-file map parsing is left in the repository (commented in code) so hand-auth
 - The ID generator (`scripts/generate_ids.py`) and `IDS.md` were updated to include missing entries discovered during a regeneration run (player classes, talent trees, loot pools, monster pools, and new property entries such as Poisoned).
 - `src/main/resources/data/IDS.md` was merged with generated output to add the missing entries and a backup of the previous `IDS.md` was written.
 
-
 ## [v0.0.99] - 2025-11-02
 
 ### Added - Talent Tree System (Semi-Ready)
@@ -173,6 +284,7 @@ Text-file map parsing is left in the repository (commented in code) so hand-auth
 Implemented a Skyrim-style talent tree progression system that allows players to specialize their classes through branching paths. Each player class can have an associated talent tree with diverging paths leading to unique capstones. Players spend talent points earned through leveling to unlock nodes, making meaningful choices that permanently enhance their character.
 
 **Architecture:**
+
 - JSON-driven system (ID range: 70000-70999)
 - POJOs: `TalentChoice` (individual options), `TalentNode` (prerequisites + choices), `TalentTree` (full tree tied to class)
 - `TalentTreeLoader`: Loads trees, provides lookup by ID or by class ID
@@ -181,32 +293,37 @@ Implemented a Skyrim-style talent tree progression system that allows players to
 
 **How It Works:**
 
-*Progression System:*
+_Progression System:_
+
 - Players earn talent points through leveling (configurable per class, default 1/level)
 - Each node costs 1 talent point to unlock
 - Nodes can have 1-3 mutually exclusive choices (most have 1, specializations have multiple)
 - Prerequisites enforce tier progression (e.g., must unlock tier 1 before tier 2)
 - Paths can be mixed if prerequisites allow (not restricted by path grouping)
 
-*Reward Variety:*
+_Reward Variety:_
+
 - Same reward types as class system: stats, resistances, HP/Mana/Stamina bonuses
 - Regeneration bonuses (HP/Mana/Stamina regen)
 - Granted traits (properties automatically applied)
 - Unlocked spells (granted when node unlocked)
 - Rewards stack with class bonuses and are applied immediately
 
-*Reset Functionality:*
+_Reset Functionality:_
+
 - **Simple Reset**: Clears unlocked nodes and refunds talent points (stat bonuses remain until player reinitializes)
 - **Full Reset**: Removes class, clears nodes, re-applies class to completely recalculate stats
 - Useful for experimentation and respeccing builds
 
-*UI-Ready Design:*
+_UI-Ready Design:_
+
 - Nodes have row/column positioning for visual layout
 - Path grouping for logical organization (e.g., "Holy", "Protection", "Combat")
 - Prerequisite arrows can be drawn between nodes
 - Choice nodes show branching options visually
 
-*Example Structure:*
+_Example Structure:_
+
 - Paladin talent tree with 3 diverging paths (Holy, Protection, Combat)
 - 13 total nodes: 1 root, 3 paths with 4 tiers each
 - Each path has specialization choice nodes (3 options) and unique capstones

@@ -3,6 +3,8 @@ package com.bapppis.core.dungeon.generator;
 import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.dungeon.Floor;
 import com.bapppis.core.dungeon.Tile;
+import com.bapppis.core.dungeon.TileType;
+import com.bapppis.core.dungeon.TileTypeLoader;
 import com.bapppis.core.loot.LootPool;
 import com.bapppis.core.loot.LootPoolLoader;
 
@@ -19,6 +21,12 @@ public class BSPRoomGenerator implements MapGenerator {
     Random random = new Random(seed);
     Floor floor = new Floor() {};
 
+    // Load tile types
+    TileType wallType = TileTypeLoader.getTileTypeByName("basicWall");
+    TileType floorType = TileTypeLoader.getTileTypeByName("basicFloor");
+    TileType upStairsType = TileTypeLoader.getTileTypeByName("basicUpStairs");
+    TileType downStairsType = TileTypeLoader.getTileTypeByName("basicDownStairs");
+
     // Create all tiles
     Tile[][] tiles = new Tile[width][height];
     for (int x = 0; x < width; x++) {
@@ -26,9 +34,9 @@ public class BSPRoomGenerator implements MapGenerator {
         Coordinate coord = new Coordinate(x, y);
         // Two outer layers become walls
         if (x < 2 || x >= width - 2 || y < 2 || y >= height - 2) {
-          tiles[x][y] = new Tile(coord, '#');
+          tiles[x][y] = new Tile(coord, wallType);
         } else {
-          tiles[x][y] = new Tile(coord, '.');
+          tiles[x][y] = new Tile(coord, floorType);
         }
       }
     }
@@ -92,11 +100,11 @@ public class BSPRoomGenerator implements MapGenerator {
 
     // Place upstairs
     Coordinate upCoord = pickInQuadrant.apply(upQuad);
-    tiles[upCoord.getX()][upCoord.getY()] = new Tile(upCoord, '^');
+    tiles[upCoord.getX()][upCoord.getY()] = new Tile(upCoord, upStairsType);
 
     // Place downstairs
     Coordinate downCoord = pickInQuadrant.apply(downQuad);
-    tiles[downCoord.getX()][downCoord.getY()] = new Tile(downCoord, 'v');
+    tiles[downCoord.getX()][downCoord.getY()] = new Tile(downCoord, downStairsType);
 
     // Spawn placement:
     if (floorNumber == 0) {

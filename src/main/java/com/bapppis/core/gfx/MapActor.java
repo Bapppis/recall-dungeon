@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.utils.Align;
-import com.bapppis.core.dungeon.MapPrinter;
 import com.bapppis.core.creature.Player;
 import com.bapppis.core.dungeon.Floor;
+import com.bapppis.core.dungeon.Tile;
+import com.bapppis.core.dungeon.Coordinate;
 import com.bapppis.core.game.GameState;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
@@ -16,30 +16,19 @@ public class MapActor extends Actor {
     private final BitmapFont font;
     private float cellWidth;
     private float lineHeight;
-    private String[] lines = new String[0];
+    private Floor floor;
+    private int width;
+    private int height;
     private final TextureAtlas atlas;
-    private final java.util.Map<Character, String> charToRegion;
-    private final java.util.Map<Character, TextureRegion> charTextureRegions;
     private float zoomFactor = 1.0f;
 
-    public MapActor(BitmapFont font) {
-        this(font, null, null, null);
-    }
-
-    public MapActor(BitmapFont font, TextureAtlas atlas, java.util.Map<Character, String> charToRegion) {
-        this(font, atlas, charToRegion, null);
-    }
-
-    public MapActor(BitmapFont font, TextureAtlas atlas, java.util.Map<Character, String> charToRegion,
-            java.util.Map<Character, TextureRegion> charTextureRegions) {
+    public MapActor(BitmapFont font, TextureAtlas atlas) {
         if (font == null) {
             throw new IllegalArgumentException("MapActor requires a non-null BitmapFont");
         }
         this.font = font;
         this.lineHeight = font.getLineHeight();
         this.atlas = atlas;
-        this.charToRegion = charToRegion;
-        this.charTextureRegions = charTextureRegions;
         computeCellWidth();
     }
 
@@ -77,74 +66,134 @@ public class MapActor extends Actor {
     }
 
     public void refresh() {
-        Floor floor = GameState.getCurrentFloor();
-        Player player = GameState.getPlayer();
-        String map = MapPrinter.renderWithPlayer(floor, player);
-        if (map == null) {
-            lines = new String[0];
-        } else {
-            lines = map.split("\\n");
+        this.floor = GameState.getCurrentFloor();
+        if (floor == null) {
+            width = 0;
+            height = 0;
+            setSize(0, 0);
+            return;
         }
-        int maxLen = 0;
-        for (String l : lines)
-            if (l != null && l.length() > maxLen)
-                maxLen = l.length();
-        setSize(maxLen * cellWidth, Math.max(1, lines.length) * lineHeight);
+
+        int maxY = 0;
+        int maxX = 0;
+        for (Coordinate c : floor.getTiles().keySet()) {
+            if (c.getY() > maxY)
+                maxY = c.getY();
+            if (c.getX() > maxX)
+                maxX = c.getX();
+        }
+        height = maxY + 1;
+        width = maxX + 1;
+        setSize(width * cellWidth, height * lineHeight);
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
-        if (lines == null || lines.length == 0)
+        if (floor == null || width == 0 || height == 0)
             return;
 
-        // Calculate player position to center the view
         Player player = GameState.getPlayer();
         float offsetX = 0;
         float offsetY = 0;
 
+        // Center on player if present
         if (player != null && player.getPosition() != null) {
             int px = player.getX();
             int py = player.getY();
-            // Center on player: viewport center minus player position
             float viewportWidth = getParent() != null ? getParent().getWidth() : 800;
             float viewportHeight = getParent() != null ? getParent().getHeight() : 600;
             offsetX = (viewportWidth / 2) - (px * cellWidth) - (cellWidth / 2);
-            offsetY = (viewportHeight / 2) - ((lines.length - py - 1) * lineHeight) - (lineHeight / 2);
+            offsetY = (viewportHeight / 2) - ((height - py - 1) * lineHeight) - (lineHeight / 2);
         }
 
         float startX = getX() + offsetX;
         float startY = getY() + getHeight() - (lineHeight * 0.1f) + offsetY;
-        for (int row = 0; row < lines.length; row++) {
-            String line = lines[row];
-            if (line == null)
-                line = "";
-            float y = startY - row * lineHeight;
-            for (int col = 0; col < line.length(); col++) {
-                char ch = line.charAt(col);
-                String s = String.valueOf(ch);
-                float x = startX + col * cellWidth;
-                boolean drawn = false;
-                if (atlas != null && charToRegion != null) {
-                    String regionName = charToRegion.get(ch);
-                    if (regionName != null) {
-                        TextureRegion reg = atlas.findRegion(regionName);
-                        if (reg != null) {
-                            float tileW = cellWidth;
-                            float tileH = lineHeight * 0.9f;
-                            float texY = y - lineHeight + (lineHeight * 0.1f);
-                            batch.draw(reg, x, texY, tileW, tileH);
-                            drawn = true;
-                        }
+
+        int px = -1, py = -1;
+        if (player != null && player.getPosition() != null) {
+            px = player.getX();
+            py = player.getY();
+        }
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                float drawX = startX + x * cellWidth;
+                float drawY = startY - y * lineHeight;
+
+                // Determine what to render at this position
+                String spriteName = null;
+                char symbolFallback = '.';
+
+                if (x == px && y == py) {
+                    // Render player
+                    spriteName = getPlayerSpriteName(player);
+                    symbolFallback = 'P';
+                } else {
+                    Tile tile = floor.getTile(new Coordinate(x, y));
+                    if (tile == null) {
+                        spriteName = "basicFloor";
+                        symbolFallback = '.';
+                    } else if (!tile.isDiscovered()) {
+                        spriteName = "basicWall";
+                        symbolFallback = '#';
+                    } else if (tile.getLoot() != null) {
+                        spriteName = "common_treasure_chest";
+                        symbolFallback = 'C';
+                    } else {
+                        spriteName = tile.getSprite();
+                        symbolFallback = tile.getSymbol();
                     }
                 }
+
+                // Try to render sprite, fall back to symbol if not available
+                boolean drawn = false;
+                if (atlas != null && spriteName != null) {
+                    TextureRegion reg = atlas.findRegion(spriteName);
+                    if (reg != null) {
+                        float tileW = cellWidth;
+                        float tileH = lineHeight * 0.9f;
+                        float texY = drawY - lineHeight + (lineHeight * 0.1f);
+                        batch.draw(reg, drawX, texY, tileW, tileH);
+                        drawn = true;
+                    }
+                }
+
                 if (!drawn) {
-                    // Scale font rendering to match zoom
+                    // Fall back to text rendering
                     font.getData().setScale(zoomFactor);
-                    font.draw(batch, s, x, y);
+                    font.draw(batch, String.valueOf(symbolFallback), drawX, drawY);
                     font.getData().setScale(1.0f);
                 }
             }
         }
+    }
+
+    private String getPlayerSpriteName(Player player) {
+        if (player == null)
+            return "player_default";
+        String spriteName = player.getSprite();
+        if (spriteName == null || spriteName.isEmpty())
+            return "player_default";
+
+        // Check if the sprite exists in the atlas
+        if (atlas != null && atlas.findRegion(spriteName) != null) {
+            return spriteName;
+        }
+
+        // Try to find a close match
+        if (atlas != null) {
+            for (TextureAtlas.AtlasRegion r : atlas.getRegions()) {
+                if (r == null || r.name == null)
+                    continue;
+                if (r.name.equalsIgnoreCase(spriteName) ||
+                        r.name.contains(spriteName) ||
+                        spriteName.contains(r.name)) {
+                    return r.name;
+                }
+            }
+        }
+
+        return "player_default";
     }
 }

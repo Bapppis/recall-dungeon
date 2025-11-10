@@ -1,0 +1,7 @@
+﻿{
+  "name": "commonTreasureChest",
+  "symbol": "C",
+  "sprite": "common_treasure_chest",
+  "isOccupied": true,
+  "lootPoolName": "Common Treasure Chest"
+}

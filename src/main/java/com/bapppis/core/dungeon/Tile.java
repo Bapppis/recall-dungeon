@@ -7,100 +7,58 @@ import com.bapppis.core.creature.Creature;
 import com.bapppis.core.event.Event;
 import com.bapppis.core.item.Item;
 import com.bapppis.core.loot.LootPool;
+import com.bapppis.core.loot.LootPoolLoader;
 
+/**
+ * Tile represents a specific instance of a tile at a coordinate.
+ * It references a TileType (blueprint) and adds instance-specific data.
+ */
 public class Tile {
+    private final TileType tileType;
     private final Coordinate coordinate;
-    private boolean isWall = false;
-    private boolean isBreakableWall = false;
-    private boolean isBrokenWall = false;
-    private boolean isSpawn = false;
-    private boolean isUpstairs = false;
-    private boolean isDownstairs = false;
-    private boolean isPit = false;
-    private boolean isGenFloor = false;
-    private boolean isTreasureChest = false;
     private boolean isDiscovered = false;
-    private char symbol;
+    private boolean isSpawn = false;
+    private LootPool loot = null;
     private Event isEvent = null;
-    private boolean isOccupied = false;
     private List<Creature> occupants = new ArrayList<>();
     private List<Item> items = new ArrayList<>();
-    private LootPool loot = null;
-
     private Tile left = null;
     private Tile right = null;
     private Tile up = null;
     private Tile down = null;
 
-    /*
-     * Symbols legend
-     * # - Wall or undiscovered tile
-     * < - Breakable wall
-     * 0 - Broken wall
-     * . - Floor
-     * : - GenFloor
-     * @ - Spawn point
-     * ^ - Up staircase
-     * v - Down staircase
-     * ! - Event
-     * C - Chest (item)
-     * + - Pit
-     * M - Monster
-     * P - Player
-     */
+    public Tile(Coordinate coordinate, TileType tileType) {
+        this.coordinate = coordinate;
+        if (tileType == null) {
+            throw new IllegalArgumentException("TileType cannot be null for coordinate " + coordinate);
+        }
+        this.tileType = tileType;
+        if (tileType.lootPoolName != null && !tileType.lootPoolName.isEmpty()) {
+            this.loot = LootPoolLoader.getLootPoolByName(tileType.lootPoolName);
+        }
+    }
+
+    @Deprecated
     public Tile(Coordinate coordinate, char symbol) {
         this.coordinate = coordinate;
-        this.symbol = symbol;
-
+        String tileTypeName;
         switch (symbol) {
-            case '#':
-                this.isWall = true;
-                this.isOccupied = true;
-                break;
-            case '<':
-                this.isBreakableWall = true;
-                this.isOccupied = true;
-                break;
-            case '@':
-                this.isSpawn = true;
-                break;
-            case '^':
-                this.isUpstairs = true;
-                break;
-            case 'v':
-                this.isDownstairs = true;
-                break;
-            case '0':
-                this.isBrokenWall = true;
-            /* case 'C':
-                this.isTreasureChest = true;
-                break; */
-            case ':':
-                this.isGenFloor = true;
-                break;
-            case '.':
-                break;
-            /*
-             * case '!':
-             * this.isEvent = new Event();
-             * break;
-             * case '.':
-             * break;
-             * /*case '!':
-             * this.isEvent = new Event();
-             * break;
-             * case '+':
-             * this.isPit = true;
-             * break;
-             * case 'M':
-             * this.occupants.add(new Creature());
-             * break;
-             * case 'P':
-             * this.occupants.add(new Player());
-             * break;
-             */
-            default:
-                throw new IllegalArgumentException("Unknown symbol: " + symbol);
+            case '#': tileTypeName = "basicWall"; break;
+            case '.': tileTypeName = "basicFloor"; break;
+            case ':': tileTypeName = "basicGenFloor"; break;
+            case '^': tileTypeName = "basicUpStairs"; break;
+            case 'v': tileTypeName = "basicDownStairs"; break;
+            case '@': tileTypeName = "basicFloor"; this.isSpawn = true; break;
+            case 'C': tileTypeName = "commonTreasureChest"; break;
+            default: tileTypeName = "basicFloor"; System.err.println("Warning: Unknown symbol '" + symbol + "', defaulting to basicFloor"); break;
+        }
+        TileType type = TileTypeLoader.getTileTypeByName(tileTypeName);
+        if (type == null) {
+            throw new IllegalStateException("TileType not loaded: " + tileTypeName);
+        }
+        this.tileType = type;
+        if (tileType.lootPoolName != null && !tileType.lootPoolName.isEmpty()) {
+            this.loot = LootPoolLoader.getLootPoolByName(tileType.lootPoolName);
         }
     }
 
@@ -109,7 +67,15 @@ public class Tile {
     }
 
     public char getSymbol() {
-        return symbol;
+        return tileType.symbol;
+    }
+
+    public String getSprite() {
+        return tileType.sprite;
+    }
+
+    public TileType getTileType() {
+        return tileType;
     }
 
     // Neighbor getters
@@ -148,7 +114,7 @@ public class Tile {
 
     // Fog of war and wall logic
     public boolean isWall() {
-        return isWall;
+        return tileType.isWall;
     }
 
     public boolean isDiscovered() {
@@ -159,53 +125,56 @@ public class Tile {
         this.isDiscovered = discovered;
     }
 
-    /**
-     * Mark this tile as a solid wall and update its symbol.
-     * This preserves neighbor links and other fields.
-     */
-    public void setAsWall() {
-        this.isWall = true;
-        this.isBreakableWall = false;
-        this.isOccupied = true;
-        this.symbol = '#';
+    public boolean isOccupied() {
+        return tileType.isOccupied || !occupants.isEmpty();
     }
 
-    public void breakWall() {
-        this.isBrokenWall = true;
-        this.isWall = false;
-        this.isOccupied = false;
-        this.symbol = '0';
+    public boolean isUpstairs() {
+        return tileType.isUpstairs;
     }
 
-    public void setAsGenFloor() {
-        this.isWall = false;
-        this.isBreakableWall = false;
-        this.symbol = ':';
-    }
-
-    public void spawnTreasureChest(LootPool loot) {
-        this.loot = loot;
-        this.isOccupied = true;
+    public boolean isDownstairs() {
+        return tileType.isDownstairs;
     }
 
     public LootPool getLoot() {
         return loot;
     }
 
-    public boolean isOccupied() {
-        return isOccupied;
+    public List<Creature> getOccupants() {
+        return occupants;
     }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    // === Dynamic tile modifications ===
 
     public void setSpawn() {
         this.isSpawn = true;
-        this.symbol = '@';
     }
 
-    public boolean isUpstairs() {
-        return isUpstairs;
+    public boolean isSpawn() {
+        return isSpawn;
     }
 
-    public boolean isDownstairs() {
-        return isDownstairs;
+    public void spawnTreasureChest(LootPool loot) {
+        this.loot = loot;
+    }
+
+    @Deprecated
+    public void setAsGenFloor() {
+        // This method is deprecated - tiles should use TileTypes
+    }
+
+    @Deprecated
+    public void setAsWall() {
+        // This method is deprecated - tiles should use TileTypes
+    }
+
+    @Deprecated
+    public void breakWall() {
+        // This method is deprecated - tiles should use TileTypes
     }
 }
