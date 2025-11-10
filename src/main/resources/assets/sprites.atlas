@@ -1,21 +1,83 @@
+
 sprites.png
-size:256,32
-repeat:none
-floor
-bounds:154,4,16,16
-monster_goblin
-bounds:2,2,18,18
-player_biggles
-bounds:42,2,18,18
-player_default
-bounds:62,2,18,18
-player_voss
-bounds:22,2,18,18
-stairs_down
-bounds:136,4,16,16
-stairs_up
-bounds:82,4,16,16
+size: 256, 256
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+basicWall
+  rotate: false
+  xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+basicFloor
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+basicGenFloor
+  rotate: false
+  xy: 38, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+basicUpStairs
+  rotate: false
+  xy: 56, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+basicDownStairs
+  rotate: false
+  xy: 74, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+common_treasure_chest
+  rotate: false
+  xy: 92, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 undiscovered
-bounds:100,4,16,16
-wall
-bounds:118,4,16,16
+  rotate: false
+  xy: 110, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+player_default
+  rotate: false
+  xy: 128, 2
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+player_biggles
+  rotate: false
+  xy: 148, 2
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+player_voss
+  rotate: false
+  xy: 168, 2
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+monster_goblin
+  rotate: false
+  xy: 188, 2
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1

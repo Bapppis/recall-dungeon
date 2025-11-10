@@ -1,0 +1,7 @@
+﻿{
+  "name": "basicWall",
+  "symbol": "#",
+  "sprite": "basicWall",
+  "isWall": true,
+  "isOccupied": true
+}

@@ -7,6 +7,7 @@ import com.bapppis.core.loot.LootPoolLoader;
 import com.bapppis.core.creature.CreatureLoader;
 import com.bapppis.core.creature.playerClass.PlayerClassLoader;
 import com.bapppis.core.creature.playerClass.TalentTreeLoader;
+import com.bapppis.core.dungeon.TileTypeLoader;
 
 public class AllLoaders {
 
@@ -23,6 +24,13 @@ public class AllLoaders {
                 PropertyLoader.loadProperties();
             } catch (Exception e) {
                 System.err.println("Warning: PropertyLoader.loadProperties() failed");
+                e.printStackTrace();
+            }
+
+            try {
+                TileTypeLoader.loadTileTypes();
+            } catch (Exception e) {
+                System.err.println("Warning: TileTypeLoader.loadTileTypes() failed");
                 e.printStackTrace();
             }
 
