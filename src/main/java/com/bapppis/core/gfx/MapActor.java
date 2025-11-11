@@ -93,6 +93,9 @@ public class MapActor extends Actor {
         if (floor == null || width == 0 || height == 0)
             return;
 
+        // Enable alpha blending for transparency
+        batch.enableBlending();
+
         Player player = GameState.getPlayer();
         float offsetX = 0;
         float offsetY = 0;
@@ -121,49 +124,110 @@ public class MapActor extends Actor {
                 float drawX = startX + x * cellWidth;
                 float drawY = startY - y * lineHeight;
 
-                // Determine what to render at this position
-                String spriteName = null;
-                char symbolFallback = '.';
+                Tile tile = floor.getTile(new Coordinate(x, y));
+                String tileSpr = null;
+                String overlaySprite = null;
+                char tileSymbol = '.';
 
-                if (x == px && y == py) {
-                    // Render player
-                    spriteName = getPlayerSpriteName(player);
-                    symbolFallback = 'P';
+                if (tile == null) {
+                    tileSpr = "basicFloor";
+                    tileSymbol = '.';
+                } else if (!tile.isDiscovered()) {
+                    tileSpr = "basicWall";
+                    tileSymbol = '#';
                 } else {
-                    Tile tile = floor.getTile(new Coordinate(x, y));
-                    if (tile == null) {
-                        spriteName = "basicFloor";
-                        symbolFallback = '.';
-                    } else if (!tile.isDiscovered()) {
-                        spriteName = "basicWall";
-                        symbolFallback = '#';
-                    } else if (tile.getLoot() != null) {
-                        spriteName = "common_treasure_chest";
-                        symbolFallback = 'C';
-                    } else {
-                        spriteName = tile.getSprite();
-                        symbolFallback = tile.getSymbol();
+                    // Get the base tile sprite
+                    tileSpr = tile.getSprite();
+                    tileSymbol = tile.getSymbol();
+                    
+                    // If there's loot, it goes on top of the tile
+                    if (tile.getLoot() != null) {
+                        overlaySprite = "common_treasure_chest";
                     }
                 }
 
-                // Try to render sprite, fall back to symbol if not available
-                boolean drawn = false;
-                if (atlas != null && spriteName != null) {
-                    TextureRegion reg = atlas.findRegion(spriteName);
+                // Draw the base tile
+                boolean tileDrawn = false;
+                if (atlas != null && tileSpr != null) {
+                    TextureRegion reg = atlas.findRegion(tileSpr);
                     if (reg != null) {
                         float tileW = cellWidth;
                         float tileH = lineHeight * 0.9f;
                         float texY = drawY - lineHeight + (lineHeight * 0.1f);
                         batch.draw(reg, drawX, texY, tileW, tileH);
-                        drawn = true;
+                        tileDrawn = true;
                     }
                 }
 
-                if (!drawn) {
-                    // Fall back to text rendering
+                if (!tileDrawn) {
                     font.getData().setScale(zoomFactor);
-                    font.draw(batch, String.valueOf(symbolFallback), drawX, drawY);
+                    font.draw(batch, String.valueOf(tileSymbol), drawX, drawY);
                     font.getData().setScale(1.0f);
+                }
+                
+                // Draw overlay (chest, etc.) on top of tile if present
+                if (overlaySprite != null && atlas != null) {
+                    TextureRegion reg = atlas.findRegion(overlaySprite);
+                    if (reg != null) {
+                        float tileW = cellWidth;
+                        float tileH = lineHeight * 0.9f;
+                        float texY = drawY - lineHeight + (lineHeight * 0.1f);
+                        batch.draw(reg, drawX, texY, tileW, tileH);
+                    }
+                }
+
+                // Draw tile occupants (enemies, NPCs) before player - only on discovered tiles
+                if (tile != null && tile.isDiscovered() && tile.getOccupants() != null && !tile.getOccupants().isEmpty()) {
+                    for (com.bapppis.core.creature.Creature occupant : tile.getOccupants()) {
+                        // Skip the player (we'll draw them last)
+                        if (occupant == player) continue;
+
+                        String spriteName = occupant.getSprite();
+                        if (spriteName != null && !spriteName.isEmpty() && atlas != null) {
+                            TextureRegion reg = atlas.findRegion(spriteName);
+                            if (reg != null) {
+                                float maxWidth = cellWidth;
+                                float maxHeight = lineHeight * 0.9f;
+
+                                float scale = Math.min(maxWidth / reg.getRegionWidth(), maxHeight / reg.getRegionHeight());
+                                float finalW = reg.getRegionWidth() * scale;
+                                float finalH = reg.getRegionHeight() * scale;
+
+                                float texX = drawX + (maxWidth - finalW) / 2;
+                                float texY = drawY - lineHeight + (lineHeight * 0.1f) + (maxHeight - finalH) / 2;
+
+                                batch.draw(reg, texX, texY, finalW, finalH);
+                            }
+                        }
+                    }
+                }
+
+                // Draw player on top if at this position (transparent parts will show tile
+                // underneath)
+                if (x == px && y == py) {
+                    String spriteName = getPlayerSpriteName(player);
+
+                    if (atlas != null && spriteName != null) {
+                        TextureRegion reg = atlas.findRegion(spriteName);
+                        if (reg != null) {
+                            float maxWidth = cellWidth;
+                            float maxHeight = lineHeight * 0.9f;
+
+                            float scale = Math.min(maxWidth / reg.getRegionWidth(), maxHeight / reg.getRegionHeight());
+                            float finalW = reg.getRegionWidth() * scale;
+                            float finalH = reg.getRegionHeight() * scale;
+
+                            float texX = drawX + (maxWidth - finalW) / 2;
+                            float texY = drawY - lineHeight + (lineHeight * 0.1f) + (maxHeight - finalH) / 2;
+
+                            batch.draw(reg, texX, texY, finalW, finalH);
+                        } else {
+                            // Fallback to text
+                            font.getData().setScale(zoomFactor);
+                            font.draw(batch, "P", drawX, drawY);
+                            font.getData().setScale(1.0f);
+                        }
+                    }
                 }
             }
         }
@@ -176,24 +240,10 @@ public class MapActor extends Actor {
         if (spriteName == null || spriteName.isEmpty())
             return "player_default";
 
-        // Check if the sprite exists in the atlas
+        // Return sprite name if it exists in atlas, otherwise default
         if (atlas != null && atlas.findRegion(spriteName) != null) {
             return spriteName;
         }
-
-        // Try to find a close match
-        if (atlas != null) {
-            for (TextureAtlas.AtlasRegion r : atlas.getRegions()) {
-                if (r == null || r.name == null)
-                    continue;
-                if (r.name.equalsIgnoreCase(spriteName) ||
-                        r.name.contains(spriteName) ||
-                        spriteName.contains(r.name)) {
-                    return r.name;
-                }
-            }
-        }
-
         return "player_default";
     }
 }

@@ -1,83 +1,104 @@
 
 sprites.png
-size: 256, 256
+size: 256, 128
 format: RGBA8888
-filter: Nearest,Nearest
+filter: Nearest, Nearest
 repeat: none
-basicWall
+basicDownStairs
   rotate: false
-  xy: 2, 2
+  xy: 168, 42
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 basicFloor
   rotate: false
-  xy: 20, 2
+  xy: 234, 90
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 basicGenFloor
   rotate: false
-  xy: 38, 2
+  xy: 168, 24
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 basicUpStairs
   rotate: false
-  xy: 56, 2
+  xy: 186, 42
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-basicDownStairs
+basicWall
   rotate: false
-  xy: 74, 2
+  xy: 234, 72
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 common_treasure_chest
   rotate: false
-  xy: 92, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 234, 108
+  size: 17, 16
+  orig: 17, 16
   offset: 0, 0
   index: -1
-undiscovered
+monster_dark_hound
   rotate: false
-  xy: 110, 2
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-player_default
-  rotate: false
-  xy: 128, 2
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-player_biggles
-  rotate: false
-  xy: 148, 2
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-player_voss
-  rotate: false
-  xy: 168, 2
-  size: 18, 18
-  orig: 18, 18
+  xy: 2, 2
+  size: 52, 56
+  orig: 52, 56
   offset: 0, 0
   index: -1
 monster_goblin
   rotate: false
-  xy: 188, 2
-  size: 18, 18
-  orig: 18, 18
+  xy: 110, 10
+  size: 56, 48
+  orig: 56, 48
+  offset: 0, 0
+  index: -1
+monster_goblin_berserker
+  rotate: false
+  xy: 68, 64
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+monster_skeleton
+  rotate: false
+  xy: 188, 60
+  size: 44, 64
+  orig: 44, 64
+  offset: 0, 0
+  index: -1
+player_biggles
+  rotate: false
+  xy: 56, 6
+  size: 52, 52
+  orig: 52, 52
+  offset: 0, 0
+  index: -1
+player_default
+  rotate: false
+  xy: 130, 60
+  size: 56, 64
+  orig: 56, 64
+  offset: 0, 0
+  index: -1
+player_voss
+  rotate: false
+  xy: 2, 60
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+undiscovered
+  rotate: false
+  xy: 186, 24
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1

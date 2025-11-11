@@ -41,11 +41,36 @@ public class Player extends Creature {
     }
 
     public void setPosition(Coordinate position) {
+        // Update tile occupancy: remove from old tile occupants, add to new tile occupants
+        try {
+            com.bapppis.core.dungeon.Floor floor = com.bapppis.core.game.GameState.getCurrentFloor();
+            if (floor != null) {
+                // Remove from previous tile occupants
+                if (this.position != null) {
+                    com.bapppis.core.dungeon.Tile old = floor.getTile(this.position);
+                    if (old != null) {
+                        old.getOccupants().remove(this);
+                    }
+                }
+                // Set new position
+                this.position = position;
+                // Add to new tile occupants
+                if (this.position != null) {
+                    com.bapppis.core.dungeon.Tile now = floor.getTile(this.position);
+                    if (now != null && !now.getOccupants().contains(this)) {
+                        now.getOccupants().add(this);
+                    }
+                }
+                return;
+            }
+        } catch (Exception ignored) {
+            // Fall back to simple set if anything goes wrong
+        }
         this.position = position;
     }
 
     public void setPosition(int x, int y) {
-        this.position = new Coordinate(x, y);
+        setPosition(new Coordinate(x, y));
     }
 
     public int getX() {

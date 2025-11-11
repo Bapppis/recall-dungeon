@@ -66,7 +66,14 @@ public class AllLoaders {
             try {
                 LootPoolLoader.loadPoolsFromResources("loot_pools");
             } catch (Exception e) {
-                System.err.println("Warning: LootPoolLoader.loadPoolsFromResources() failed");
+                System.err.println("Warning: LootPoolLoader.loadPoolsFromResources('loot_pools') failed");
+                e.printStackTrace();
+            }
+
+            try {
+                LootPoolLoader.loadPoolsFromResources("monster_pools");
+            } catch (Exception e) {
+                System.err.println("Warning: LootPoolLoader.loadPoolsFromResources('monster_pools') failed");
                 e.printStackTrace();
             }
 

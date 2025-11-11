@@ -20,6 +20,8 @@ public class CommandParser {
         commandMap.put("look", new LookCommand());
         commandMap.put("up", new UpCommand(dungeon, currentFloorRef));
         commandMap.put("down", new DownCommand(dungeon, currentFloorRef));
+        commandMap.put("wait", new WaitCommand());
+        commandMap.put("pass", new WaitCommand()); // Alias for wait
         // ... add more as needed
     }
 
@@ -41,6 +43,14 @@ public class CommandParser {
                     currentFloorRef[0]++;
                     System.out.println("You ascend to floor " + currentFloorRef[0]);
                     Floor newFloor = dungeon.getFloor(currentFloorRef[0]);
+                    // Remove player from previous floor occupants before switching floors
+                    Floor oldFloor = GameState.getCurrentFloor();
+                    if (oldFloor != null) {
+                        Tile oldTile = oldFloor.getTile(player.getPosition());
+                        if (oldTile != null) {
+                            oldTile.getOccupants().remove(player);
+                        }
+                    }
                     GameState.setCurrentFloor(newFloor);
                     // Move player to '@' symbol on new floor
                     Coordinate spawn = null;
@@ -85,6 +95,14 @@ public class CommandParser {
                     currentFloorRef[0]--;
                     System.out.println("You descend to floor " + currentFloorRef[0]);
                     Floor newFloor = dungeon.getFloor(currentFloorRef[0]);
+                    // Remove player from previous floor occupants before switching floors
+                    Floor oldFloor = GameState.getCurrentFloor();
+                    if (oldFloor != null) {
+                        Tile oldTile = oldFloor.getTile(player.getPosition());
+                        if (oldTile != null) {
+                            oldTile.getOccupants().remove(player);
+                        }
+                    }
                     GameState.setCurrentFloor(newFloor);
                     // Move player to '@' symbol on new floor
                     Coordinate spawn = null;
@@ -344,6 +362,9 @@ class MoveCommand implements Command {
         // Reveal tiles around the player after moving
         floor.revealTilesWithVision(target.getX(), target.getY(), player.getVisionRange());
         // MapPrinter.printWithPlayer(floor, player);
+        
+        // Pass a turn after successful movement
+        Game.passTurn();
     }
 }
 
@@ -361,6 +382,13 @@ class MapCommand implements Command {
             return;
         }
         MapPrinter.printWithPlayer(floor, GameState.getPlayer());
+    }
+}
+
+class WaitCommand implements Command {
+    public void execute(String[] args) {
+        System.out.println("You wait...");
+        Game.passTurn();
     }
 }
 
