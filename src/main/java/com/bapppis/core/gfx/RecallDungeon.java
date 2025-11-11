@@ -284,6 +284,9 @@ public class RecallDungeon extends ApplicationAdapter {
                     case com.badlogic.gdx.Input.Keys.L:
                         cmd = "look";
                         break;
+                    case com.badlogic.gdx.Input.Keys.SPACE:
+                        cmd = "wait";
+                        break;
                     case com.badlogic.gdx.Input.Keys.R:
                         // Reveal entire floor
                         com.bapppis.core.dungeon.Floor cfR = com.bapppis.core.game.GameState.getCurrentFloor();

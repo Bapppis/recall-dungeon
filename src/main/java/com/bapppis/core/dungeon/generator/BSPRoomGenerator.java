@@ -19,7 +19,8 @@ public class BSPRoomGenerator implements MapGenerator {
   @Override
   public Floor generate(int width, int height, int floorNumber, long seed) {
     Random random = new Random(seed);
-    Floor floor = new Floor() {};
+    Floor floor = new Floor() {
+    };
 
     // Load tile types
     TileType wallType = TileTypeLoader.getTileTypeByName("basicWall");
@@ -63,8 +64,8 @@ public class BSPRoomGenerator implements MapGenerator {
     int bottomMax = innerMaxY;
 
     // helper to pick a coord in a range safely
-    java.util.function.BiFunction<Integer, Integer, Integer> pick =
-        (min, max) -> (max <= min) ? min : min + random.nextInt(max - min + 1);
+    java.util.function.BiFunction<Integer, Integer, Integer> pick = (min, max) -> (max <= min) ? min
+        : min + random.nextInt(max - min + 1);
 
     // pick distinct quadrants for up/down
     int upQuad = random.nextInt(4);
@@ -126,12 +127,14 @@ public class BSPRoomGenerator implements MapGenerator {
       tiles[spawnCoord.getX()][spawnCoord.getY()].setSpawn();
     } else {
       // non-zero floors: prefer spawn adjacent to the downstairs ('v').
-      // If player arrives via upstairs on this floor, game logic should place the player at the corresponding downstairs,
-      // so having the spawn adjacent to 'v' is a sensible default. If adjacency fails, try upstairs adjacency.
+      // If player arrives via upstairs on this floor, game logic should place the
+      // player at the corresponding downstairs,
+      // so having the spawn adjacent to 'v' is a sensible default. If adjacency
+      // fails, try upstairs adjacency.
       boolean placed = false;
       int sx = downCoord.getX();
       int sy = downCoord.getY();
-      int[][] dirs = {{-1,0},{1,0},{0,-1},{0,1}};
+      int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
       for (int[] d : dirs) {
         int nx = sx + d[0];
         int ny = sy + d[1];
@@ -163,8 +166,7 @@ public class BSPRoomGenerator implements MapGenerator {
       }
       // final fallback: place spawn on first non-wall inner tile
       if (!placed) {
-        outer:
-        for (int x = innerMinX; x <= innerMaxX; x++) {
+        outer: for (int x = innerMinX; x <= innerMaxX; x++) {
           for (int y = innerMinY; y <= innerMaxY; y++) {
             if (tiles[x][y].getSymbol() != '#') {
               tiles[x][y].setSpawn();
@@ -177,7 +179,6 @@ public class BSPRoomGenerator implements MapGenerator {
 
     // Place a random chest in a random quadrant (avoid placing on stairs or spawn)
     LootPool commonTreasureChest = LootPoolLoader.getLootPoolByName("Common Treasure Chest");
-    System.out.println("DEBUG: Common Treasure Chest loot pool loaded: " + commonTreasureChest);
     if (commonTreasureChest != null) {
       int chestQuad = random.nextInt(4);
       boolean chestPlaced = false;
@@ -189,7 +190,6 @@ public class BSPRoomGenerator implements MapGenerator {
         Tile cand = tiles[cx][cy];
         if (cand != null && cand.getSymbol() == '.') {
           cand.spawnTreasureChest(commonTreasureChest);
-          System.out.println("DEBUG: Chest placed at (" + cx + ", " + cy + ") with loot: " + cand.getLoot());
           chestPlaced = true;
           break;
         }
@@ -212,12 +212,167 @@ public class BSPRoomGenerator implements MapGenerator {
       }
       // Final fallback: scan inner area for first plain floor tile
       if (!chestPlaced) {
-        outer2:
-        for (int x = innerMinX; x <= innerMaxX; x++) {
+        outer2: for (int x = innerMinX; x <= innerMaxX; x++) {
           for (int y = innerMinY; y <= innerMaxY; y++) {
             if (tiles[x][y].getSymbol() == '.') {
               tiles[x][y].spawnTreasureChest(commonTreasureChest);
               break outer2;
+            }
+          }
+        }
+      }
+    }
+
+    // --- Spawn enemies on floor 0: place one monster in each quadrant that does
+    // NOT contain the player ---
+    if (floorNumber == 0) {
+      LootPool enemies = LootPoolLoader.getLootPoolByName("Floor 0 Enemies");
+      System.out.println("DEBUG: Floor 0 Enemies loot pool loaded: " + enemies);
+      if (enemies != null && enemies.entries != null && !enemies.entries.isEmpty()) {
+        // Determine the player's quadrant by locating the tile marked as spawn()
+        int spawnQuad = -1;
+        outerFindSpawn: for (int x = innerMinX; x <= innerMaxX; x++) {
+          for (int y = innerMinY; y <= innerMaxY; y++) {
+            Tile t = tiles[x][y];
+            if (t != null && t.isSpawn()) {
+              // map coordinate to quadrant index using left/right & top/bottom ranges
+              boolean isLeft = (x >= leftMin && x <= leftMax);
+              boolean isTop = (y >= topMin && y <= topMax);
+              if (isTop && isLeft)
+                spawnQuad = 0;
+              else if (isTop && !isLeft)
+                spawnQuad = 1;
+              else if (!isTop && isLeft)
+                spawnQuad = 2;
+              else
+                spawnQuad = 3;
+              break outerFindSpawn;
+            }
+          }
+        }
+        if (spawnQuad == -1) {
+          // fallback: pick the same spawnQuad logic used earlier (choose one at random)
+          spawnQuad = random.nextInt(4);
+        }
+
+        // spawn in the other three quadrants
+        for (int q = 0; q < 4; q++) {
+          if (q == spawnQuad)
+            continue; // skip player's quadrant
+
+          System.out.println("DEBUG: Attempting to spawn monster in quadrant " + q);
+
+          // Pick a monster entry from the loot pool weighted by 'weight' and
+          // type==monster (ONCE per quadrant)
+          com.bapppis.core.loot.LootPool.Entry choice = null;
+          int totalWeight = 0;
+          for (com.bapppis.core.loot.LootPool.Entry e : enemies.entries) {
+            if (e == null)
+              continue;
+            if (e.type == null || !"monster".equalsIgnoreCase(e.type))
+              continue;
+            int w = (e.weight == null) ? 1 : e.weight;
+            if (w <= 0)
+              continue;
+            totalWeight += w;
+          }
+          if (totalWeight <= 0) {
+            continue;
+          }
+          int pickWeight = random.nextInt(totalWeight);
+          int running = 0;
+          for (com.bapppis.core.loot.LootPool.Entry e : enemies.entries) {
+            if (e == null)
+              continue;
+            if (e.type == null || !"monster".equalsIgnoreCase(e.type))
+              continue;
+            int w = (e.weight == null) ? 1 : e.weight;
+            if (w <= 0)
+              continue;
+            running += w;
+            if (pickWeight < running) {
+              choice = e;
+              break;
+            }
+          }
+
+          if (choice == null) continue;
+
+          // Use CreatureLoader to create a fresh instance by the entry id or name
+          String monsterRef = (choice.id != null) ? choice.id : choice.name;
+          com.bapppis.core.creature.Creature spawned = null;
+          try {
+            com.bapppis.core.creature.CreatureLoader.loadCreatures();
+            spawned = com.bapppis.core.creature.CreatureLoader.spawnCreatureByName(monsterRef);
+          } catch (Exception ex) {
+            continue;
+          }
+          if (spawned == null) continue;
+
+          boolean placed = false;
+          // Try several random picks inside the quadrant first
+          for (int attempt = 0; attempt < 16 && !placed; attempt++) {
+            Coordinate cc = pickInQuadrant.apply(q);
+            int tx = cc.getX();
+            int ty = cc.getY();
+            Tile cand = tiles[tx][ty];
+            if (cand == null)
+              continue;
+            // Only skip if tile reports occupied (wall, chest, or occupant)
+            if (cand.isOccupied())
+              continue;
+
+            // Add to tile occupants
+            cand.getOccupants().add(spawned);
+            placed = true;
+            break;
+          }
+
+          // Fallback: scan quadrant for first valid tile
+          if (!placed) {
+            int xstart, xend, ystart, yend;
+            switch (q) {
+              case 0:
+                xstart = leftMin;
+                xend = leftMax;
+                ystart = topMin;
+                yend = topMax;
+                break;
+              case 1:
+                xstart = rightMin;
+                xend = rightMax;
+                ystart = topMin;
+                yend = topMax;
+                break;
+              case 2:
+                xstart = leftMin;
+                xend = leftMax;
+                ystart = bottomMin;
+                yend = bottomMax;
+                break;
+              case 3:
+              default:
+                xstart = rightMin;
+                xend = rightMax;
+                ystart = bottomMin;
+                yend = bottomMax;
+                break;
+            }
+            outerScan: for (int x = xstart; x <= xend; x++) {
+              for (int y = ystart; y <= yend; y++) {
+                Tile cand = tiles[x][y];
+                if (cand == null)
+                  continue;
+                // Only skip if tile reports occupied
+                if (cand.isOccupied())
+                  continue;
+
+                cand.getOccupants().add(spawned);
+                System.out
+                    .println("DEBUG: (fallback) Spawned " + spawned + " at (" + x + "," + y + ") in quadrant " + q);
+                placed = true;
+                break outerScan;
+              }
             }
           }
         }
@@ -246,15 +401,18 @@ public class BSPRoomGenerator implements MapGenerator {
       }
     }
 
-    // Convert all plain floor tiles ('.') into genfloors (':'), but leave stairs intact
+    // Convert all plain floor tiles ('.') into genfloors (':'), but leave stairs
+    // intact
     // For testing
-    /* for (Tile t : floor.getTiles().values()) {
-      if (t == null) continue;
-      char s = t.getSymbol();
-      if (s == '.') {
-        t.setAsGenFloor();
-      }
-    } */
+    /*
+     * for (Tile t : floor.getTiles().values()) {
+     * if (t == null) continue;
+     * char s = t.getSymbol();
+     * if (s == '.') {
+     * t.setAsGenFloor();
+     * }
+     * }
+     */
 
     return floor;
   }

@@ -201,4 +201,38 @@ public class Game {
             // unset.");
         }
     }
+
+    /**
+     * Pass a turn: tick properties on all creatures on the current floor.
+     * This includes the player and any NPCs/enemies.
+     * Later: add AI movement for NPCs/enemies here.
+     */
+    public static void passTurn() {
+        Floor floor = GameState.getCurrentFloor();
+        if (floor == null)
+            return;
+
+        Player player = GameState.getPlayer();
+        if (player != null) {
+            player.tickProperties();
+        }
+
+        // Tick properties on all creatures occupying tiles on the current floor
+        // (NPCs, enemies, etc.)
+        if (floor.getTiles() != null) {
+            for (Tile tile : floor.getTiles().values()) {
+                if (tile != null && tile.getOccupants() != null) {
+                    for (Creature occupant : tile.getOccupants()) {
+                        // Skip player since we already ticked them
+                        if (occupant != null && !(occupant instanceof Player)) {
+                            occupant.tickProperties();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Future: Add NPC/enemy AI movement here
+        // For now, just tick properties
+    }
 }

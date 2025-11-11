@@ -52,6 +52,11 @@
             <artifactId>vis-ui</artifactId>
             <version>1.5.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-tools</artifactId>
+            <version>1.13.1</version>
+        </dependency>
     </dependencies>
 
     <build>

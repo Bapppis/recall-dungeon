@@ -58,6 +58,6 @@
       "magicDamageType": "DARKNESS"
     }
   ],
-  "sprite": null,
+  "sprite": "monster_dark_hound",
   "defaultDamageType": "SLASHING"
 }

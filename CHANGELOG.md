@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.04] - 2025-11-11
+
+### Added
+
+- LibGDX-based texture packing utility: `AtlasPacker.java` (uses `gdx-tools` TexturePacker) to produce a proper `sprites.atlas` + `sprites.png` from individual PNGs.
+- `SPRITE_ATLAS_PACKING.md` documentation describing how and when to repack atlases and the recommended workflow for development vs production.
+ - Turn system foundations: `Game.passTurn()` and a `WaitCommand` (bound to SPACE) so player waits and creatures tick their per-turn properties.
+ - BSP content spawning: `BSPRoomGenerator` now spawns monsters on floor 0 (one per quadrant not containing the player) using the `monster_pools` definitions and places created creatures into `Tile.getOccupants()`.
+
+### Changed
+
+- Sprite pipeline: replaced the ad-hoc Python-only packing workflow with a LibGDX-integrated packer. The packer is wired into the build/dev flow and produces deterministic, non-overlapping atlas regions.
+- `MapActor` rendering refactor: simplified rendering path, enabled alpha blending, always draws the base tile first and then overlays (for example, treasure chests) and actors on top. Player sprite lookup was simplified and duplicate mapping logic removed.
+- `pom.xml` updated to include `com.badlogicgames.gdx:gdx-tools` so the packer runs on the project classpath.
+ - Tile / occupancy semantics: `Tile` now keeps `occupants` (a list of creatures). `Tile.isOccupied()` returns `tileType.isOccupied || !occupants.isEmpty()`. `Player.setPosition(...)` and floor-change logic were updated to remove/add the player to tile occupants when moving between tiles and floors.
+ - `MapActor` now respects fog-of-war for creatures: occupants (non-player creatures) are only rendered when their tile is discovered. This prevents enemies from appearing on undiscovered tiles.
+ - `BSPRoomGenerator` updated to use weighted sampling from the "Floor 0 Enemies" monster pool and to retry placement within the intended quadrant, falling back to a deterministic scan if random attempts fail.
+ - `AllLoaders` initialization order: now loads `monster_pools` (in addition to `loot_pools`) so monster pools are available to generators at startup.
+
+### Fixed
+
+- Resolved overlapping atlas regions that caused sprites to render twice (for example, a monster region bleeding into a player region). The new atlas is properly packed and no longer produces visual artifacts.
+- Transparency fixes: sprite alpha now shows underlying tiles correctly for players and chest overlays.
+ - Fixed monster pool loading bug: `monster_pools` are now loaded at startup (previously the lookup could return null, causing spawn failures).
+ - Fixed spawned creatures invisibility / occlusion: creature JSON `sprite` fields are respected and `MapActor` rendering order plus fog-of-war fixes ensure creatures render correctly when tiles are discovered.
+ - Cleaned up noisy debug logging introduced during development (BSP generator and chest placement messages removed).
+
+### Removed
+
+- `scripts/pack_sprites.py` is now removed in favour of the LibGDX `AtlasPacker`.
+
+### How to repack
+
+- To regenerate the atlas using the Java packer from the project root:
+
+  mvn compile exec:java "-Dexec.mainClass=com.bapppis.core.gfx.AtlasPacker"
+
+  The packer writes `src/main/resources/assets/sprites.atlas` and `src/main/resources/assets/sprites.png`.
+
+### Files modified / added
+
+- src/main/java/com/bapppis/core/gfx/AtlasPacker.java (NEW) — LibGDX TexturePacker-based packer utility
+- pom.xml (UPDATED) — added `gdx-tools` dependency
+- src/main/java/com/bapppis/core/gfx/MapActor.java (REFRACTORED) — rendering cleanup, blending, overlay support
+- src/main/resources/assets/sprites.atlas (REGENERATED)
+- src/main/resources/assets/sprites.png (REGENERATED)
+- SPRITE_ATLAS_PACKING.md (NEW) — atlas packing docs and workflow
+- scripts/pack_sprites.py (DEPRECATED) — left for reference, recommended to use `AtlasPacker`
+
+### Notes
+
+- Build and packer run were validated locally: the TexturePacker produced a non-overlapping atlas (256×128 in the validation run) and the project builds successfully with the new dependency. Use the Java packer for consistent, production-ready atlas files and reserve runtime PNG-based packing for quick development iteration only.
+
 ## [v0.1.03] - 2025-11-10
 
 ### Added
