@@ -11,6 +11,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - LibGDX-based texture packing utility: `AtlasPacker.java` (uses `gdx-tools` TexturePacker) to produce a proper `sprites.atlas` + `sprites.png` from individual PNGs.
 - `SPRITE_ATLAS_PACKING.md` documentation describing how and when to repack atlases and the recommended workflow for development vs production.
+
+## [v0.1.05] - 2025-11-12
+
+### Added
+
+- Maze generation for floor interiors: `BSPRoomGenerator` now includes a recursive backtracker maze generator for the inner area (carves winding corridors instead of a single open room).
+- Connectivity guarantees: `carvePathIfNeeded()` ensures the player spawn can reach both upstairs and downstairs on floor 0 by carving floor tiles when necessary.
+- Helper methods added to `BSPRoomGenerator`: `generateMaze()`, `ensureFloorAt()`, `isReachable()`, `carvePathIfNeeded()`, and `wouldBlockPath()` to support maze generation and path validation.
+
+### Changed
+
+- Chest placement now validates candidate locations with `wouldBlockPath()` so chests do not block critical paths between spawn and stairs. Chest placement remains quadrant-aware but will fallback to non-blocking locations when needed.
+- Monster and chest spawns are compatible with the new maze layout; quadrant-based spawning logic was preserved and adjusted to work on carved maze floors.
+
+### Fixed
+
+- Prevented chests from inadvertently blocking navigation to stairs on floor 0 by validating placements before committing them to tiles.
+
+### Files modified
+
+- `src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java` (UPDATED) — added maze generation, connectivity helpers, and chest non-blocking checks.
+
  - Turn system foundations: `Game.passTurn()` and a `WaitCommand` (bound to SPACE) so player waits and creatures tick their per-turn properties.
  - BSP content spawning: `BSPRoomGenerator` now spawns monsters on floor 0 (one per quadrant not containing the player) using the `monster_pools` definitions and places created creatures into `Tile.getOccupants()`.
 
