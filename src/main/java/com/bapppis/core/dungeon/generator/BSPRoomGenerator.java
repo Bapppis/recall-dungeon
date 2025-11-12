@@ -37,7 +37,7 @@ public class BSPRoomGenerator implements MapGenerator {
         if (x < 2 || x >= width - 2 || y < 2 || y >= height - 2) {
           tiles[x][y] = new Tile(coord, wallType);
         } else {
-          tiles[x][y] = new Tile(coord, floorType);
+          tiles[x][y] = new Tile(coord, wallType); // Start inner as walls for maze generation
         }
       }
     }
@@ -62,6 +62,9 @@ public class BSPRoomGenerator implements MapGenerator {
     int topMax = Math.max(topMin, centerY - 1);
     int bottomMin = Math.max(centerY, topMin);
     int bottomMax = innerMaxY;
+
+    // --- Generate maze in inner area ---
+    generateMaze(tiles, innerMinX, innerMinY, innerMaxX, innerMaxY, wallType, floorType, random);
 
     // helper to pick a coord in a range safely
     java.util.function.BiFunction<Integer, Integer, Integer> pick = (min, max) -> (max <= min) ? min
@@ -101,10 +104,12 @@ public class BSPRoomGenerator implements MapGenerator {
 
     // Place upstairs
     Coordinate upCoord = pickInQuadrant.apply(upQuad);
+    ensureFloorAt(tiles, upCoord, floorType);
     tiles[upCoord.getX()][upCoord.getY()] = new Tile(upCoord, upStairsType);
 
     // Place downstairs
     Coordinate downCoord = pickInQuadrant.apply(downQuad);
+    ensureFloorAt(tiles, downCoord, floorType);
     tiles[downCoord.getX()][downCoord.getY()] = new Tile(downCoord, downStairsType);
 
     // Spawn placement:
@@ -124,7 +129,12 @@ public class BSPRoomGenerator implements MapGenerator {
         } while (spawnQuad == upQuad);
       }
       Coordinate spawnCoord = pickInQuadrant.apply(spawnQuad);
+      ensureFloorAt(tiles, spawnCoord, floorType);
       tiles[spawnCoord.getX()][spawnCoord.getY()].setSpawn();
+
+      // Guarantee connectivity: carve paths if needed
+      carvePathIfNeeded(tiles, spawnCoord, upCoord, floorType);
+      carvePathIfNeeded(tiles, spawnCoord, downCoord, floorType);
     } else {
       // non-zero floors: prefer spawn adjacent to the downstairs ('v').
       // If player arrives via upstairs on this floor, game logic should place the
@@ -178,45 +188,54 @@ public class BSPRoomGenerator implements MapGenerator {
     }
 
     // Place a random chest in a random quadrant (avoid placing on stairs or spawn)
+    // AND ensure chest doesn't block critical paths
     LootPool commonTreasureChest = LootPoolLoader.getLootPoolByName("Common Treasure Chest");
     if (commonTreasureChest != null) {
       int chestQuad = random.nextInt(4);
       boolean chestPlaced = false;
       // Try a few attempts in the chosen quadrant first
-      for (int attempt = 0; attempt < 12 && !chestPlaced; attempt++) {
+      for (int attempt = 0; attempt < 20 && !chestPlaced; attempt++) {
         Coordinate cc = pickInQuadrant.apply(chestQuad);
         int cx = cc.getX();
         int cy = cc.getY();
         Tile cand = tiles[cx][cy];
-        if (cand != null && cand.getSymbol() == '.') {
-          cand.spawnTreasureChest(commonTreasureChest);
-          chestPlaced = true;
-          break;
+        if (cand != null && cand.getSymbol() == '.' && !cand.isSpawn()) {
+          // Test: if we place chest here, can spawn still reach both stairs?
+          if (!wouldBlockPath(tiles, cx, cy, upCoord, downCoord)) {
+            cand.spawnTreasureChest(commonTreasureChest);
+            chestPlaced = true;
+            break;
+          }
         }
       }
       // If not placed, try other quadrants
       if (!chestPlaced) {
         for (int q = 0; q < 4 && !chestPlaced; q++) {
-          for (int attempt = 0; attempt < 8 && !chestPlaced; attempt++) {
+          for (int attempt = 0; attempt < 12 && !chestPlaced; attempt++) {
             Coordinate cc = pickInQuadrant.apply(q);
             int cx = cc.getX();
             int cy = cc.getY();
             Tile cand = tiles[cx][cy];
-            if (cand != null && cand.getSymbol() == '.') {
-              cand.spawnTreasureChest(commonTreasureChest);
-              chestPlaced = true;
-              break;
+            if (cand != null && cand.getSymbol() == '.' && !cand.isSpawn()) {
+              if (!wouldBlockPath(tiles, cx, cy, upCoord, downCoord)) {
+                cand.spawnTreasureChest(commonTreasureChest);
+                chestPlaced = true;
+                break;
+              }
             }
           }
         }
       }
-      // Final fallback: scan inner area for first plain floor tile
+      // Final fallback: scan inner area for first valid non-blocking floor tile
       if (!chestPlaced) {
         outer2: for (int x = innerMinX; x <= innerMaxX; x++) {
           for (int y = innerMinY; y <= innerMaxY; y++) {
-            if (tiles[x][y].getSymbol() == '.') {
-              tiles[x][y].spawnTreasureChest(commonTreasureChest);
-              break outer2;
+            Tile cand = tiles[x][y];
+            if (cand != null && cand.getSymbol() == '.' && !cand.isSpawn()) {
+              if (!wouldBlockPath(tiles, x, y, upCoord, downCoord)) {
+                cand.spawnTreasureChest(commonTreasureChest);
+                break outer2;
+              }
             }
           }
         }
@@ -296,7 +315,8 @@ public class BSPRoomGenerator implements MapGenerator {
             }
           }
 
-          if (choice == null) continue;
+          if (choice == null)
+            continue;
 
           // Use CreatureLoader to create a fresh instance by the entry id or name
           String monsterRef = (choice.id != null) ? choice.id : choice.name;
@@ -307,7 +327,8 @@ public class BSPRoomGenerator implements MapGenerator {
           } catch (Exception ex) {
             continue;
           }
-          if (spawned == null) continue;
+          if (spawned == null)
+            continue;
 
           boolean placed = false;
           // Try several random picks inside the quadrant first
@@ -318,7 +339,6 @@ public class BSPRoomGenerator implements MapGenerator {
             Tile cand = tiles[tx][ty];
             if (cand == null)
               continue;
-            // Only skip if tile reports occupied (wall, chest, or occupant)
             if (cand.isOccupied())
               continue;
 
@@ -415,5 +435,205 @@ public class BSPRoomGenerator implements MapGenerator {
      */
 
     return floor;
+  }
+
+  // ========== Maze Generation & Connectivity Helpers ==========
+
+  /**
+   * Generate a perfect maze using recursive backtracker algorithm.
+   * Carves corridors on odd coordinates for traditional maze structure.
+   */
+  private void generateMaze(Tile[][] tiles, int minX, int minY, int maxX, int maxY, TileType wallType,
+      TileType floorType, Random random) {
+    // Start all inner tiles as walls (already done in tile creation)
+    // Carve using recursive backtracker on odd-coordinate grid
+    java.util.Stack<Coordinate> stack = new java.util.Stack<>();
+
+    // Find valid starting cell (prefer odd coordinates for classic maze structure)
+    int sx = (minX % 2 == 1) ? minX : Math.min(minX + 1, maxX);
+    int sy = (minY % 2 == 1) ? minY : Math.min(minY + 1, maxY);
+
+    stack.push(new Coordinate(sx, sy));
+    tiles[sx][sy] = new Tile(new Coordinate(sx, sy), floorType);
+
+    while (!stack.isEmpty()) {
+      Coordinate cur = stack.peek();
+      java.util.List<Coordinate> neighbors = new java.util.ArrayList<>();
+
+      // Look two cells away in each cardinal direction
+      int[][] dirs = { { 0, -2 }, { 0, 2 }, { -2, 0 }, { 2, 0 } };
+      for (int[] d : dirs) {
+        int nx = cur.getX() + d[0];
+        int ny = cur.getY() + d[1];
+        if (nx >= minX && nx <= maxX && ny >= minY && ny <= maxY) {
+          if (tiles[nx][ny].getSymbol() == '#') { // still wall
+            neighbors.add(new Coordinate(nx, ny));
+          }
+        }
+      }
+
+      if (!neighbors.isEmpty()) {
+        Coordinate chosen = neighbors.get(random.nextInt(neighbors.size()));
+        // Carve the wall between current and chosen cell
+        int betweenX = (cur.getX() + chosen.getX()) / 2;
+        int betweenY = (cur.getY() + chosen.getY()) / 2;
+        tiles[betweenX][betweenY] = new Tile(new Coordinate(betweenX, betweenY), floorType);
+        tiles[chosen.getX()][chosen.getY()] = new Tile(new Coordinate(chosen.getX(), chosen.getY()), floorType);
+        stack.push(chosen);
+      } else {
+        stack.pop();
+      }
+    }
+  }
+
+  /**
+   * Ensure the tile at coordinate c is a floor tile (convert if needed).
+   */
+  private void ensureFloorAt(Tile[][] tiles, Coordinate c, TileType floorType) {
+    int x = c.getX(), y = c.getY();
+    Tile t = tiles[x][y];
+    if (t == null || t.getSymbol() == '#') {
+      tiles[x][y] = new Tile(new Coordinate(x, y), floorType);
+    }
+  }
+
+  /**
+   * Check if two coordinates are reachable via floor tiles.
+   * Uses BFS to test connectivity.
+   */
+  private boolean isReachable(Tile[][] tiles, Coordinate a, Coordinate b) {
+    if (a == null || b == null)
+      return false;
+
+    java.util.Queue<Coordinate> q = new java.util.ArrayDeque<>();
+    java.util.Set<String> seen = new java.util.HashSet<>();
+    q.add(a);
+    seen.add(a.getX() + "," + a.getY());
+
+    int width = tiles.length, height = tiles[0].length;
+    while (!q.isEmpty()) {
+      Coordinate cur = q.remove();
+      if (cur.getX() == b.getX() && cur.getY() == b.getY())
+        return true;
+
+      int[][] dirs = { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } };
+      for (int[] d : dirs) {
+        int nx = cur.getX() + d[0], ny = cur.getY() + d[1];
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height)
+          continue;
+
+        Tile t = tiles[nx][ny];
+        if (t == null)
+          continue;
+
+        // Can walk through floors, stairs, and spawn tiles (not walls or occupied
+        // tiles)
+        char sym = t.getSymbol();
+        if (sym == '#')
+          continue;
+        if (t.isOccupied() && !(nx == b.getX() && ny == b.getY()))
+          continue; // Allow target even if occupied
+
+        String key = nx + "," + ny;
+        if (seen.contains(key))
+          continue;
+        seen.add(key);
+        q.add(new Coordinate(nx, ny));
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Carve a floor path between start and target if they are not already
+   * connected.
+   * Uses BFS ignoring walls to find shortest path, then converts path to floor
+   * tiles.
+   */
+  private void carvePathIfNeeded(Tile[][] tiles, Coordinate start, Coordinate target, TileType floorType) {
+    if (start == null || target == null)
+      return;
+    if (isReachable(tiles, start, target))
+      return; // Already connected
+
+    // BFS that ignores walls to find path
+    java.util.Queue<Coordinate> q = new java.util.ArrayDeque<>();
+    java.util.Map<Coordinate, Coordinate> prev = new java.util.HashMap<>();
+    java.util.Set<String> seen = new java.util.HashSet<>();
+    q.add(target);
+    seen.add(target.getX() + "," + target.getY());
+
+    boolean found = false;
+    int width = tiles.length, height = tiles[0].length;
+
+    while (!q.isEmpty() && !found) {
+      Coordinate cur = q.remove();
+      int[][] dirs = { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } };
+      for (int[] d : dirs) {
+        int nx = cur.getX() + d[0], ny = cur.getY() + d[1];
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height)
+          continue;
+
+        String key = nx + "," + ny;
+        if (seen.contains(key))
+          continue;
+        seen.add(key);
+
+        Coordinate next = new Coordinate(nx, ny);
+        prev.put(next, cur);
+
+        if (nx == start.getX() && ny == start.getY()) {
+          found = true;
+          break;
+        }
+        q.add(next);
+      }
+    }
+
+    // Backtrack and carve path
+    if (found) {
+      Coordinate cur = start;
+      while (cur != null && !(cur.getX() == target.getX() && cur.getY() == target.getY())) {
+        Tile t = tiles[cur.getX()][cur.getY()];
+        if (t == null || t.getSymbol() == '#') {
+          tiles[cur.getX()][cur.getY()] = new Tile(new Coordinate(cur.getX(), cur.getY()), floorType);
+        }
+        cur = prev.get(cur);
+      }
+    }
+  }
+
+  /**
+   * Test if placing a chest at (x,y) would block critical paths.
+   * Returns true if blocking spawn→upstairs or spawn→downstairs.
+   */
+  private boolean wouldBlockPath(Tile[][] tiles, int x, int y, Coordinate upCoord, Coordinate downCoord) {
+    // Find spawn tile
+    Coordinate spawnCoord = null;
+    for (int sx = 0; sx < tiles.length && spawnCoord == null; sx++) {
+      for (int sy = 0; sy < tiles[0].length && spawnCoord == null; sy++) {
+        if (tiles[sx][sy] != null && tiles[sx][sy].isSpawn()) {
+          spawnCoord = new Coordinate(sx, sy);
+        }
+      }
+    }
+    if (spawnCoord == null)
+      return false; // No spawn, can't block
+
+    // Temporarily mark chest location as occupied
+    Tile original = tiles[x][y];
+
+    // Create temporary wall tile to simulate blocking
+    Tile tempWall = new Tile(new Coordinate(x, y), original.getTileType());
+    tiles[x][y] = tempWall;
+
+    // Test reachability
+    boolean blocksUp = !isReachable(tiles, spawnCoord, upCoord);
+    boolean blocksDown = !isReachable(tiles, spawnCoord, downCoord);
+
+    // Restore original tile
+    tiles[x][y] = original;
+
+    return blocksUp || blocksDown;
   }
 }
