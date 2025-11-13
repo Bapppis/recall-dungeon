@@ -39,6 +39,11 @@ public class CommandParser {
             Floor floor = dungeon.getFloor(currentFloorRef[0]);
             Tile playerTile = floor.getTile(player.getPosition());
             if (playerTile != null && playerTile.getSymbol() == '^') {
+                // After floor 0, upstairs can only go up (positive floors)
+                if (currentFloorRef[0] < 0) {
+                    System.out.println("You cannot go up from here. You chose the downward path at floor 0.");
+                    return;
+                }
                 if (currentFloorRef[0] < 10 && dungeon.getFloor(currentFloorRef[0] + 1) != null) {
                     currentFloorRef[0]++;
                     System.out.println("You ascend to floor " + currentFloorRef[0]);
@@ -52,22 +57,28 @@ public class CommandParser {
                         }
                     }
                     GameState.setCurrentFloor(newFloor);
-                    // Move player to '@' symbol on new floor
+                    // Move player to downstairs 'v' on new floor (opposite of upstairs used)
                     Coordinate spawn = null;
                     for (var entry : newFloor.getTiles().entrySet()) {
-                        if (entry.getValue().getSymbol() == '@') {
+                        if (entry.getValue().getSymbol() == 'v') {
                             spawn = entry.getKey();
                             break;
                         }
                     }
                     if (spawn != null) {
+                        System.out.println("DEBUG: Found downstairs at " + spawn + ", moving player there");
                         player.setPosition(spawn);
-                        System.out.println("Player spawned at " + spawn);
+                        System.out.println("DEBUG: Player position is now " + player.getPosition());
+                        // Reset all tiles to undiscovered
+                        for (Tile t : newFloor.getTiles().values()) {
+                            t.setDiscovered(false);
+                        }
+                        // Reveal tiles around the player
+                        newFloor.revealTilesWithVision(spawn.getX(), spawn.getY(), player.getVisionRange());
+                        MapPrinter.printWithPlayer(newFloor, player);
                     } else {
-                        System.out.println("No '@' spawn found on this floor. Position unchanged.");
+                        System.out.println("No 'v' downstairs found on this floor. Position unchanged.");
                     }
-                    // Reveal tiles around the player as on spawn
-                    Game.respawnPlayerOnCurrentFloor(true);
                 } else {
                     System.out.println("You can't go higher!");
                 }
@@ -91,6 +102,11 @@ public class CommandParser {
             Floor floor = dungeon.getFloor(currentFloorRef[0]);
             Tile playerTile = floor.getTile(player.getPosition());
             if (playerTile != null && playerTile.getSymbol() == 'v') {
+                // After floor 0, downstairs can only go down (negative floors)
+                if (currentFloorRef[0] > 0) {
+                    System.out.println("You cannot go down from here. You chose the upward path at floor 0.");
+                    return;
+                }
                 if (currentFloorRef[0] > -10 && dungeon.getFloor(currentFloorRef[0] - 1) != null) {
                     currentFloorRef[0]--;
                     System.out.println("You descend to floor " + currentFloorRef[0]);
@@ -104,22 +120,28 @@ public class CommandParser {
                         }
                     }
                     GameState.setCurrentFloor(newFloor);
-                    // Move player to '@' symbol on new floor
+                    // Move player to upstairs '^' on new floor (opposite of downstairs used)
                     Coordinate spawn = null;
                     for (var entry : newFloor.getTiles().entrySet()) {
-                        if (entry.getValue().getSymbol() == '@') {
+                        if (entry.getValue().getSymbol() == '^') {
                             spawn = entry.getKey();
                             break;
                         }
                     }
                     if (spawn != null) {
+                        System.out.println("DEBUG: Found upstairs at " + spawn + ", moving player there");
                         player.setPosition(spawn);
-                        System.out.println("Player spawned at " + spawn);
+                        System.out.println("DEBUG: Player position is now " + player.getPosition());
+                        // Reset all tiles to undiscovered
+                        for (Tile t : newFloor.getTiles().values()) {
+                            t.setDiscovered(false);
+                        }
+                        // Reveal tiles around the player
+                        newFloor.revealTilesWithVision(spawn.getX(), spawn.getY(), player.getVisionRange());
+                        MapPrinter.printWithPlayer(newFloor, player);
                     } else {
-                        System.out.println("No '@' spawn found on this floor. Position unchanged.");
+                        System.out.println("No '^' upstairs found on this floor. Position unchanged.");
                     }
-                    // Reveal tiles around the player as on spawn
-                    Game.respawnPlayerOnCurrentFloor(true);
                 } else {
                     System.out.println("You can't go lower!");
                 }
@@ -337,23 +359,12 @@ class MoveCommand implements Command {
 
         // Check if tile is occupied
         if (next.isOccupied()) {
-            char sym = next.getSymbol();
-            String blockingObject;
-            if (next.getLoot() != null) {
-                blockingObject = "a treasure chest";
-            } else if (sym == '#' || sym == '<') {
-                blockingObject = "a wall";
-            } else {
-                blockingObject = "something";
-            }
-            System.out.println(blockingObject + " blocks your way.");
             return;
         }
 
         // Check if it's a wall (in case isOccupied isn't set properly)
         char sym = next.getSymbol();
         if (sym == '#' || sym == '<') {
-            System.out.println("A wall blocks your way.");
             return;
         }
 
@@ -362,7 +373,7 @@ class MoveCommand implements Command {
         // Reveal tiles around the player after moving
         floor.revealTilesWithVision(target.getX(), target.getY(), player.getVisionRange());
         // MapPrinter.printWithPlayer(floor, player);
-        
+
         // Pass a turn after successful movement
         Game.passTurn();
     }

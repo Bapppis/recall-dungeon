@@ -5,20 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.1.04] - 2025-11-11
+
+## [v0.1.06] - 2025-11-13
 
 ### Added
 
-- LibGDX-based texture packing utility: `AtlasPacker.java` (uses `gdx-tools` TexturePacker) to produce a proper `sprites.atlas` + `sprites.png` from individual PNGs.
-- `SPRITE_ATLAS_PACKING.md` documentation describing how and when to repack atlases and the recommended workflow for development vs production.
+- One-way stair choice: when the player first chooses a direction at floor 0, upstairs only allow going up and downstairs only allow going down on subsequent floors.
+- Spawn-at-stair behavior on floor transition: using an upstairs now places the player at the corresponding downstairs tile on the next floor (and vice versa), preserving logical movement between floors.
+- Final staircase connectivity safeguard: generator validates upstairs↔downstairs reachability after generation and will carve a connecting path if a staircase becomes isolated.
+
+### Changed
+
+- Dungeon openness tuning: reduced open-area creation from 8% to 3% to produce tighter layouts (corridor widening remains tuned to the current default).
+- Generation randomness: the generator now seeds from the current time by default (per-run base seed) so floors vary between runs; each floor continues to derive a distinct seed from the base seed.
+- Respawn behavior: floor-respawn logic was refactored so explicit stair-based spawns are preserved (we now reveal/reset fog manually after moving floors instead of calling the global respawn helper which previously overrode the position).
+
+### Fixed
+
+- Treasure chest blocking: chests spawned at runtime now mark tiles as occupied so players can no longer walk through occupied chests (`Tile.isOccupied()` now considers `loot != null`).
+- Debug noise removal: removed or silenced development prints related to movement, blocking messages, and spawn debug output.
+
+### Notes
+
+- Build: local Maven package (skip tests) completed successfully after these changes.
+- Follow-ups: make openness and seed behavior configurable at runtime; optionally add a deterministic seed option exposed in settings for reproducible runs.
+
 
 ## [v0.1.05] - 2025-11-12
+
 
 ### Added
 
 - Maze generation for floor interiors: `BSPRoomGenerator` now includes a recursive backtracker maze generator for the inner area (carves winding corridors instead of a single open room).
 - Connectivity guarantees: `carvePathIfNeeded()` ensures the player spawn can reach both upstairs and downstairs on floor 0 by carving floor tiles when necessary.
-- Helper methods added to `BSPRoomGenerator`: `generateMaze()`, `ensureFloorAt()`, `isReachable()`, `carvePathIfNeeded()`, and `wouldBlockPath()` to support maze generation and path validation.
+- Helper methods added to `BSPRoomGenerator`: `generateMaze()`, `ensureFloorAt()`, `isReachable()`, `carvePathIfNeeded()`, `wouldBlockPath()`, `spawnMonsters()`, and `spawnChests()` to support maze generation, spawn placement, and path validation.
 
 ### Changed
 
@@ -79,6 +99,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Notes
 
 - Build and packer run were validated locally: the TexturePacker produced a non-overlapping atlas (256×128 in the validation run) and the project builds successfully with the new dependency. Use the Java packer for consistent, production-ready atlas files and reserve runtime PNG-based packing for quick development iteration only.
+
+## [v0.1.04] - 2025-11-11
+
+### Added
+
+- LibGDX-based texture packing utility: `AtlasPacker.java` (uses `gdx-tools` TexturePacker) to produce a proper `sprites.atlas` + `sprites.png` from individual PNGs.
+- `SPRITE_ATLAS_PACKING.md` documentation describing how and when to repack atlases and the recommended workflow for development vs production.
 
 ## [v0.1.03] - 2025-11-10
 
