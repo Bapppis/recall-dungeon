@@ -111,7 +111,7 @@ public class Game {
 
         // Procedural generation using BSPRoomGenerator
         BSPRoomGenerator generator = new BSPRoomGenerator();
-        long seed = 12345L; // Fixed seed for now, could be configurable later
+        long baseSeed = System.currentTimeMillis(); // Random seed based on current time
 
         for (int i = -10; i <= 10; i++) {
             // Determine floor size based on depth
@@ -127,12 +127,12 @@ public class Game {
             }
 
             // Generate random size within range
-            java.util.Random random = new java.util.Random(seed + i);
+            java.util.Random random = new java.util.Random(baseSeed + i);
             int width = minSize + random.nextInt(maxSize - minSize + 1);
             int height = minSize + random.nextInt(maxSize - minSize + 1);
 
             // Generate floor
-            Floor floor = generator.generate(width, height, i, seed + i);
+            Floor floor = generator.generate(width, height, i, baseSeed + i);
             dungeon.addFloor(i, floor);
 
             if (i == 0) {

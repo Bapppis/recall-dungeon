@@ -126,7 +126,7 @@ public class Tile {
     }
 
     public boolean isOccupied() {
-        return tileType.isOccupied || !occupants.isEmpty();
+        return tileType.isOccupied || !occupants.isEmpty() || loot != null;
     }
 
     public boolean isUpstairs() {

@@ -16,6 +16,27 @@ import java.util.Random;
  */
 public class BSPRoomGenerator implements MapGenerator {
 
+  // Helper class to store quadrant boundary information
+  private static class QuadrantBounds {
+    int leftMin, leftMax, rightMin, rightMax;
+    int topMin, topMax, bottomMin, bottomMax;
+
+    int[][] getQuadrantBounds(int quadrant) {
+      switch (quadrant) {
+        case 0:
+          return new int[][] { { leftMin, leftMax }, { topMin, topMax } };
+        case 1:
+          return new int[][] { { rightMin, rightMax }, { topMin, topMax } };
+        case 2:
+          return new int[][] { { leftMin, leftMax }, { bottomMin, bottomMax } };
+        case 3:
+          return new int[][] { { rightMin, rightMax }, { bottomMin, bottomMax } };
+        default:
+          return new int[][] { { leftMin, leftMax }, { topMin, topMax } };
+      }
+    }
+  }
+
   @Override
   public Floor generate(int width, int height, int floorNumber, long seed) {
     Random random = new Random(seed);
@@ -62,6 +83,17 @@ public class BSPRoomGenerator implements MapGenerator {
     int topMax = Math.max(topMin, centerY - 1);
     int bottomMin = Math.max(centerY, topMin);
     int bottomMax = innerMaxY;
+
+    // Store quadrant bounds for spawning methods
+    QuadrantBounds qBounds = new QuadrantBounds();
+    qBounds.leftMin = leftMin;
+    qBounds.leftMax = leftMax;
+    qBounds.rightMin = rightMin;
+    qBounds.rightMax = rightMax;
+    qBounds.topMin = topMin;
+    qBounds.topMax = topMax;
+    qBounds.bottomMin = bottomMin;
+    qBounds.bottomMax = bottomMax;
 
     // --- Generate maze in inner area ---
     generateMaze(tiles, innerMinX, innerMinY, innerMaxX, innerMaxY, wallType, floorType, random);
@@ -187,216 +219,22 @@ public class BSPRoomGenerator implements MapGenerator {
       }
     }
 
-    // Place a random chest in a random quadrant (avoid placing on stairs or spawn)
-    // AND ensure chest doesn't block critical paths
-    LootPool commonTreasureChest = LootPoolLoader.getLootPoolByName("Common Treasure Chest");
-    if (commonTreasureChest != null) {
-      int chestQuad = random.nextInt(4);
-      boolean chestPlaced = false;
-      // Try a few attempts in the chosen quadrant first
-      for (int attempt = 0; attempt < 20 && !chestPlaced; attempt++) {
-        Coordinate cc = pickInQuadrant.apply(chestQuad);
-        int cx = cc.getX();
-        int cy = cc.getY();
-        Tile cand = tiles[cx][cy];
-        if (cand != null && cand.getSymbol() == '.' && !cand.isSpawn()) {
-          // Test: if we place chest here, can spawn still reach both stairs?
-          if (!wouldBlockPath(tiles, cx, cy, upCoord, downCoord)) {
-            cand.spawnTreasureChest(commonTreasureChest);
-            chestPlaced = true;
-            break;
-          }
-        }
-      }
-      // If not placed, try other quadrants
-      if (!chestPlaced) {
-        for (int q = 0; q < 4 && !chestPlaced; q++) {
-          for (int attempt = 0; attempt < 12 && !chestPlaced; attempt++) {
-            Coordinate cc = pickInQuadrant.apply(q);
-            int cx = cc.getX();
-            int cy = cc.getY();
-            Tile cand = tiles[cx][cy];
-            if (cand != null && cand.getSymbol() == '.' && !cand.isSpawn()) {
-              if (!wouldBlockPath(tiles, cx, cy, upCoord, downCoord)) {
-                cand.spawnTreasureChest(commonTreasureChest);
-                chestPlaced = true;
-                break;
-              }
-            }
-          }
-        }
-      }
-      // Final fallback: scan inner area for first valid non-blocking floor tile
-      if (!chestPlaced) {
-        outer2: for (int x = innerMinX; x <= innerMaxX; x++) {
-          for (int y = innerMinY; y <= innerMaxY; y++) {
-            Tile cand = tiles[x][y];
-            if (cand != null && cand.getSymbol() == '.' && !cand.isSpawn()) {
-              if (!wouldBlockPath(tiles, x, y, upCoord, downCoord)) {
-                cand.spawnTreasureChest(commonTreasureChest);
-                break outer2;
-              }
-            }
-          }
-        }
-      }
+    // Spawn chests using new method
+    if (floorNumber == 0) {
+      spawnChests(tiles, "Common Treasure Chest", 1, 2, false, qBounds, upCoord, downCoord, random);
     }
 
     // --- Spawn enemies on floor 0: place one monster in each quadrant that does
     // NOT contain the player ---
     if (floorNumber == 0) {
-      LootPool enemies = LootPoolLoader.getLootPoolByName("Floor 0 Enemies");
-      System.out.println("DEBUG: Floor 0 Enemies loot pool loaded: " + enemies);
-      if (enemies != null && enemies.entries != null && !enemies.entries.isEmpty()) {
-        // Determine the player's quadrant by locating the tile marked as spawn()
-        int spawnQuad = -1;
-        outerFindSpawn: for (int x = innerMinX; x <= innerMaxX; x++) {
-          for (int y = innerMinY; y <= innerMaxY; y++) {
-            Tile t = tiles[x][y];
-            if (t != null && t.isSpawn()) {
-              // map coordinate to quadrant index using left/right & top/bottom ranges
-              boolean isLeft = (x >= leftMin && x <= leftMax);
-              boolean isTop = (y >= topMin && y <= topMax);
-              if (isTop && isLeft)
-                spawnQuad = 0;
-              else if (isTop && !isLeft)
-                spawnQuad = 1;
-              else if (!isTop && isLeft)
-                spawnQuad = 2;
-              else
-                spawnQuad = 3;
-              break outerFindSpawn;
-            }
-          }
-        }
-        if (spawnQuad == -1) {
-          // fallback: pick the same spawnQuad logic used earlier (choose one at random)
-          spawnQuad = random.nextInt(4);
-        }
+      spawnMonsters(tiles, "Floor 0 Enemies", 2, 3, true, qBounds, random);
+    }
 
-        // spawn in the other three quadrants
-        for (int q = 0; q < 4; q++) {
-          if (q == spawnQuad)
-            continue; // skip player's quadrant
-
-          System.out.println("DEBUG: Attempting to spawn monster in quadrant " + q);
-
-          // Pick a monster entry from the loot pool weighted by 'weight' and
-          // type==monster (ONCE per quadrant)
-          com.bapppis.core.loot.LootPool.Entry choice = null;
-          int totalWeight = 0;
-          for (com.bapppis.core.loot.LootPool.Entry e : enemies.entries) {
-            if (e == null)
-              continue;
-            if (e.type == null || !"monster".equalsIgnoreCase(e.type))
-              continue;
-            int w = (e.weight == null) ? 1 : e.weight;
-            if (w <= 0)
-              continue;
-            totalWeight += w;
-          }
-          if (totalWeight <= 0) {
-            continue;
-          }
-          int pickWeight = random.nextInt(totalWeight);
-          int running = 0;
-          for (com.bapppis.core.loot.LootPool.Entry e : enemies.entries) {
-            if (e == null)
-              continue;
-            if (e.type == null || !"monster".equalsIgnoreCase(e.type))
-              continue;
-            int w = (e.weight == null) ? 1 : e.weight;
-            if (w <= 0)
-              continue;
-            running += w;
-            if (pickWeight < running) {
-              choice = e;
-              break;
-            }
-          }
-
-          if (choice == null)
-            continue;
-
-          // Use CreatureLoader to create a fresh instance by the entry id or name
-          String monsterRef = (choice.id != null) ? choice.id : choice.name;
-          com.bapppis.core.creature.Creature spawned = null;
-          try {
-            com.bapppis.core.creature.CreatureLoader.loadCreatures();
-            spawned = com.bapppis.core.creature.CreatureLoader.spawnCreatureByName(monsterRef);
-          } catch (Exception ex) {
-            continue;
-          }
-          if (spawned == null)
-            continue;
-
-          boolean placed = false;
-          // Try several random picks inside the quadrant first
-          for (int attempt = 0; attempt < 16 && !placed; attempt++) {
-            Coordinate cc = pickInQuadrant.apply(q);
-            int tx = cc.getX();
-            int ty = cc.getY();
-            Tile cand = tiles[tx][ty];
-            if (cand == null)
-              continue;
-            if (cand.isOccupied())
-              continue;
-
-            // Add to tile occupants
-            cand.getOccupants().add(spawned);
-            placed = true;
-            break;
-          }
-
-          // Fallback: scan quadrant for first valid tile
-          if (!placed) {
-            int xstart, xend, ystart, yend;
-            switch (q) {
-              case 0:
-                xstart = leftMin;
-                xend = leftMax;
-                ystart = topMin;
-                yend = topMax;
-                break;
-              case 1:
-                xstart = rightMin;
-                xend = rightMax;
-                ystart = topMin;
-                yend = topMax;
-                break;
-              case 2:
-                xstart = leftMin;
-                xend = leftMax;
-                ystart = bottomMin;
-                yend = bottomMax;
-                break;
-              case 3:
-              default:
-                xstart = rightMin;
-                xend = rightMax;
-                ystart = bottomMin;
-                yend = bottomMax;
-                break;
-            }
-            outerScan: for (int x = xstart; x <= xend; x++) {
-              for (int y = ystart; y <= yend; y++) {
-                Tile cand = tiles[x][y];
-                if (cand == null)
-                  continue;
-                // Only skip if tile reports occupied
-                if (cand.isOccupied())
-                  continue;
-
-                cand.getOccupants().add(spawned);
-                System.out
-                    .println("DEBUG: (fallback) Spawned " + spawned + " at (" + x + "," + y + ") in quadrant " + q);
-                placed = true;
-                break outerScan;
-              }
-            }
-          }
-        }
-      }
+    // FINAL CONNECTIVITY CHECK: Ensure upstairs and downstairs are mutually reachable
+    // This catches any edge cases where maze generation might have isolated a staircase
+    if (!isReachable(tiles, upCoord, downCoord)) {
+      System.out.println("WARNING: Stairs not connected on floor " + floorNumber + ", carving path...");
+      carvePathIfNeeded(tiles, upCoord, downCoord, floorType);
     }
 
     // Link neighbors
@@ -421,37 +259,72 @@ public class BSPRoomGenerator implements MapGenerator {
       }
     }
 
-    // Convert all plain floor tiles ('.') into genfloors (':'), but leave stairs
-    // intact
-    // For testing
-    /*
-     * for (Tile t : floor.getTiles().values()) {
-     * if (t == null) continue;
-     * char s = t.getSymbol();
-     * if (s == '.') {
-     * t.setAsGenFloor();
-     * }
-     * }
-     */
-
     return floor;
   }
 
   // ========== Maze Generation & Connectivity Helpers ==========
 
   /**
-   * Generate a perfect maze using recursive backtracker algorithm.
-   * Carves corridors on odd coordinates for traditional maze structure.
+   * Generate a hybrid dungeon: BSP rooms + maze corridors + widening + open
+   * areas.
+   * Creates a more dungeon-like layout with structured rooms and winding
+   * passages.
    */
   private void generateMaze(Tile[][] tiles, int minX, int minY, int maxX, int maxY, TileType wallType,
       TileType floorType, Random random) {
-    // Start all inner tiles as walls (already done in tile creation)
-    // Carve using recursive backtracker on odd-coordinate grid
+
+    // Phase 1: Create BSP rooms (3-6 rooms depending on floor size)
+    int roomCount = 3 + random.nextInt(4); // 3-6 rooms
+
+    // Use BSP to partition space and create rooms
+    java.util.List<Rectangle> partitions = bspPartition(minX, minY, maxX, maxY, roomCount, random);
+
+    for (Rectangle partition : partitions) {
+      // Create a room within this partition (leave 1-2 tile margins)
+      int roomMargin = 1 + random.nextInt(2);
+      int roomMinX = Math.max(partition.x + roomMargin, partition.x);
+      int roomMinY = Math.max(partition.y + roomMargin, partition.y);
+      int roomMaxX = Math.min(partition.x + partition.width - 1 - roomMargin, partition.x + partition.width - 1);
+      int roomMaxY = Math.min(partition.y + partition.height - 1 - roomMargin, partition.y + partition.height - 1);
+
+      if (roomMaxX > roomMinX && roomMaxY > roomMinY) {
+        // Carve out the room
+        for (int x = roomMinX; x <= roomMaxX; x++) {
+          for (int y = roomMinY; y <= roomMaxY; y++) {
+            tiles[x][y] = new Tile(new Coordinate(x, y), floorType);
+          }
+        }
+      }
+    }
+
+    // Phase 2: Generate maze in remaining areas (using recursive backtracker on odd
+    // coordinates)
     java.util.Stack<Coordinate> stack = new java.util.Stack<>();
 
-    // Find valid starting cell (prefer odd coordinates for classic maze structure)
-    int sx = (minX % 2 == 1) ? minX : Math.min(minX + 1, maxX);
-    int sy = (minY % 2 == 1) ? minY : Math.min(minY + 1, maxY);
+    // Find a starting cell for maze (prefer odd coordinates outside rooms)
+    int sx = -1, sy = -1;
+    for (int attempt = 0; attempt < 50; attempt++) {
+      int tx = minX + random.nextInt(maxX - minX + 1);
+      int ty = minY + random.nextInt(maxY - minY + 1);
+
+      // Prefer odd coordinates
+      if (tx % 2 == 0)
+        tx = Math.min(tx + 1, maxX);
+      if (ty % 2 == 0)
+        ty = Math.min(ty + 1, maxY);
+
+      if (tiles[tx][ty].getSymbol() == '#') {
+        sx = tx;
+        sy = ty;
+        break;
+      }
+    }
+
+    if (sx == -1) {
+      // Fallback: use first wall cell
+      sx = (minX % 2 == 1) ? minX : Math.min(minX + 1, maxX);
+      sy = (minY % 2 == 1) ? minY : Math.min(minY + 1, maxY);
+    }
 
     stack.push(new Coordinate(sx, sy));
     tiles[sx][sy] = new Tile(new Coordinate(sx, sy), floorType);
@@ -466,7 +339,7 @@ public class BSPRoomGenerator implements MapGenerator {
         int nx = cur.getX() + d[0];
         int ny = cur.getY() + d[1];
         if (nx >= minX && nx <= maxX && ny >= minY && ny <= maxY) {
-          if (tiles[nx][ny].getSymbol() == '#') { // still wall
+          if (tiles[nx][ny].getSymbol() == '#') {
             neighbors.add(new Coordinate(nx, ny));
           }
         }
@@ -483,6 +356,194 @@ public class BSPRoomGenerator implements MapGenerator {
       } else {
         stack.pop();
       }
+    }
+
+    // Phase 3: Widen corridors (make 2-tile wide passages in some areas)
+    widenCorridors(tiles, minX, minY, maxX, maxY, floorType, random, 0.10); // 10% of eligible walls
+
+  // Phase 4: Create some open areas by removing walls between adjacent floor
+  // tiles
+  // Reduced from 8% to 3% to make the map less open by default
+  createOpenAreas(tiles, minX, minY, maxX, maxY, floorType, random, 0.03); // 3% of walls
+
+    // Phase 5: Add some dead-end branches
+    addDeadEnds(tiles, minX, minY, maxX, maxY, floorType, random, 3 + random.nextInt(5)); // 3-7 dead ends
+  }
+
+  /**
+   * BSP partition helper: recursively splits space into rectangular partitions.
+   */
+  private java.util.List<Rectangle> bspPartition(int x, int y, int maxX, int maxY, int targetCount, Random random) {
+    java.util.List<Rectangle> result = new java.util.ArrayList<>();
+    java.util.Queue<Rectangle> queue = new java.util.ArrayDeque<>();
+
+    queue.add(new Rectangle(x, y, maxX - x + 1, maxY - y + 1));
+
+    while (!queue.isEmpty() && result.size() < targetCount) {
+      Rectangle rect = queue.remove();
+
+      // Stop splitting if too small
+      if (rect.width < 8 || rect.height < 8) {
+        result.add(rect);
+        continue;
+      }
+
+      // Randomly choose horizontal or vertical split
+      boolean splitHorizontal = random.nextBoolean();
+
+      if (splitHorizontal && rect.height >= 8) {
+        // Split horizontally
+        int splitY = rect.y + 4 + random.nextInt(rect.height - 7);
+        queue.add(new Rectangle(rect.x, rect.y, rect.width, splitY - rect.y));
+        queue.add(new Rectangle(rect.x, splitY, rect.width, rect.y + rect.height - splitY));
+      } else if (!splitHorizontal && rect.width >= 8) {
+        // Split vertically
+        int splitX = rect.x + 4 + random.nextInt(rect.width - 7);
+        queue.add(new Rectangle(rect.x, rect.y, splitX - rect.x, rect.height));
+        queue.add(new Rectangle(splitX, rect.y, rect.x + rect.width - splitX, rect.height));
+      } else {
+        result.add(rect);
+      }
+    }
+
+    // Add any remaining partitions
+    result.addAll(queue);
+    return result;
+  }
+
+  /**
+   * Widen corridors by removing walls adjacent to floor tiles.
+   */
+  private void widenCorridors(Tile[][] tiles, int minX, int minY, int maxX, int maxY,
+      TileType floorType, Random random, double chance) {
+
+    for (int x = minX + 1; x < maxX; x++) {
+      for (int y = minY + 1; y < maxY; y++) {
+        if (tiles[x][y].getSymbol() != '#')
+          continue;
+        if (random.nextDouble() > chance)
+          continue;
+
+        // Count adjacent floor tiles
+        int floorCount = 0;
+        if (tiles[x - 1][y].getSymbol() != '#')
+          floorCount++;
+        if (tiles[x + 1][y].getSymbol() != '#')
+          floorCount++;
+        if (tiles[x][y - 1].getSymbol() != '#')
+          floorCount++;
+        if (tiles[x][y + 1].getSymbol() != '#')
+          floorCount++;
+
+        // If wall has 2+ adjacent floors (corridor), widen it
+        if (floorCount >= 2) {
+          tiles[x][y] = new Tile(new Coordinate(x, y), floorType);
+        }
+      }
+    }
+  }
+
+  /**
+   * Create open areas by removing some walls.
+   */
+  private void createOpenAreas(Tile[][] tiles, int minX, int minY, int maxX, int maxY,
+      TileType floorType, Random random, double chance) {
+
+    for (int x = minX + 1; x < maxX; x++) {
+      for (int y = minY + 1; y < maxY; y++) {
+        if (tiles[x][y].getSymbol() != '#')
+          continue;
+        if (random.nextDouble() > chance)
+          continue;
+
+        // Count adjacent floor tiles (including diagonals)
+        int floorCount = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+          for (int dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0)
+              continue;
+            int nx = x + dx, ny = y + dy;
+            if (nx >= minX && nx <= maxX && ny >= minY && ny <= maxY) {
+              if (tiles[nx][ny].getSymbol() != '#')
+                floorCount++;
+            }
+          }
+        }
+
+        // If wall has many adjacent floors, remove it for openness
+        if (floorCount >= 4) {
+          tiles[x][y] = new Tile(new Coordinate(x, y), floorType);
+        }
+      }
+    }
+  }
+
+  /**
+   * Add dead-end branches (short corridors that don't connect to anything).
+   */
+  private void addDeadEnds(Tile[][] tiles, int minX, int minY, int maxX, int maxY,
+      TileType floorType, Random random, int count) {
+
+    for (int i = 0; i < count; i++) {
+      // Find a wall adjacent to exactly one floor tile
+      for (int attempt = 0; attempt < 30; attempt++) {
+        int x = minX + 1 + random.nextInt(maxX - minX - 1);
+        int y = minY + 1 + random.nextInt(maxY - minY - 1);
+
+        if (tiles[x][y].getSymbol() != '#')
+          continue;
+
+        int floorCount = 0;
+        int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+        for (int[] d : dirs) {
+          int nx = x + d[0], ny = y + d[1];
+          if (tiles[nx][ny].getSymbol() != '#')
+            floorCount++;
+        }
+
+        // If wall has exactly 1 adjacent floor, carve a short branch
+        if (floorCount == 1) {
+          int branchLength = 1 + random.nextInt(3); // 1-3 tiles
+          int dx = 0, dy = 0;
+
+          // Pick a direction away from floor
+          if (tiles[x - 1][y].getSymbol() != '#') {
+            dx = 1;
+          } else if (tiles[x + 1][y].getSymbol() != '#') {
+            dx = -1;
+          } else if (tiles[x][y - 1].getSymbol() != '#') {
+            dy = 1;
+          } else if (tiles[x][y + 1].getSymbol() != '#') {
+            dy = -1;
+          }
+
+          // Carve branch
+          int cx = x, cy = y;
+          for (int step = 0; step < branchLength; step++) {
+            if (cx < minX + 1 || cx > maxX - 1 || cy < minY + 1 || cy > maxY - 1)
+              break;
+            if (tiles[cx][cy].getSymbol() != '#')
+              break;
+
+            tiles[cx][cy] = new Tile(new Coordinate(cx, cy), floorType);
+            cx += dx;
+            cy += dy;
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // Helper class for BSP partitioning
+  private static class Rectangle {
+    int x, y, width, height;
+
+    Rectangle(int x, int y, int width, int height) {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
     }
   }
 
@@ -601,6 +662,310 @@ public class BSPRoomGenerator implements MapGenerator {
         cur = prev.get(cur);
       }
     }
+  }
+
+  // ========== Content Spawning Methods ==========
+
+  /**
+   * Spawn monsters from a monster pool with min/max count and optional spawn
+   * avoidance.
+   *
+   * @param tiles           The tile grid
+   * @param monsterPoolName Name of the monster pool to spawn from
+   * @param min             Minimum number of monsters to spawn
+   * @param max             Maximum number of monsters to spawn
+   * @param avoidSpawn      If true, avoid spawning in the same quadrant as player
+   *                        spawn
+   * @param qBounds         Quadrant boundary information
+   * @param random          Random number generator
+   */
+  private void spawnMonsters(Tile[][] tiles, String monsterPoolName, int min, int max, boolean avoidSpawn,
+      QuadrantBounds qBounds, Random random) {
+
+    LootPool monsterPool = LootPoolLoader.getLootPoolByName(monsterPoolName);
+    if (monsterPool == null || monsterPool.entries == null || monsterPool.entries.isEmpty()) {
+      return;
+    }
+
+    // Determine spawn quadrant if avoidance is needed
+    int spawnQuad = -1;
+    if (avoidSpawn) {
+      outerFindSpawn: for (int x = 0; x < tiles.length; x++) {
+        for (int y = 0; y < tiles[0].length; y++) {
+          Tile t = tiles[x][y];
+          if (t != null && t.isSpawn()) {
+            boolean isLeft = (x >= qBounds.leftMin && x <= qBounds.leftMax);
+            boolean isTop = (y >= qBounds.topMin && y <= qBounds.topMax);
+            if (isTop && isLeft)
+              spawnQuad = 0;
+            else if (isTop && !isLeft)
+              spawnQuad = 1;
+            else if (!isTop && isLeft)
+              spawnQuad = 2;
+            else
+              spawnQuad = 3;
+            break outerFindSpawn;
+          }
+        }
+      }
+    }
+
+    // Build list of available quadrants
+    java.util.List<Integer> availableQuads = new java.util.ArrayList<>();
+    for (int q = 0; q < 4; q++) {
+      if (!avoidSpawn || q != spawnQuad) {
+        availableQuads.add(q);
+      }
+    }
+
+    if (availableQuads.isEmpty()) {
+      availableQuads.add(0); // Fallback to quadrant 0
+    }
+
+    // Pick random count in range [min, max]
+    int count = (max <= min) ? min : min + random.nextInt(max - min + 1);
+
+    // Spawn one per available quadrant first, then distribute remaining randomly
+    int spawned = 0;
+
+    // Phase 1: One per quadrant
+    for (int q : availableQuads) {
+      if (spawned >= count)
+        break;
+
+      com.bapppis.core.creature.Creature monster = pickRandomMonsterFromPool(monsterPool, random);
+      if (monster != null && placeMonsterInQuadrant(tiles, monster, q, qBounds, random)) {
+        spawned++;
+      }
+    }
+
+    // Phase 2: Distribute remaining randomly across available quadrants
+    while (spawned < count) {
+      int q = availableQuads.get(random.nextInt(availableQuads.size()));
+      com.bapppis.core.creature.Creature monster = pickRandomMonsterFromPool(monsterPool, random);
+      if (monster != null && placeMonsterInQuadrant(tiles, monster, q, qBounds, random)) {
+        spawned++;
+      } else {
+        // Avoid infinite loop if placement consistently fails
+        break;
+      }
+    }
+  }
+
+  /**
+   * Spawn treasure chests from a loot pool with min/max count and optional spawn
+   * avoidance.
+   * Validates chest placement to ensure critical paths aren't blocked.
+   * 
+   * @param tiles        The tile grid
+   * @param lootPoolName Name of the loot pool for chest contents
+   * @param min          Minimum number of chests to spawn
+   * @param max          Maximum number of chests to spawn
+   * @param avoidSpawn   If true, avoid spawning in the same quadrant as player
+   *                     spawn
+   * @param qBounds      Quadrant boundary information
+   * @param upCoord      Upstairs coordinate (for path validation)
+   * @param downCoord    Downstairs coordinate (for path validation)
+   * @param random       Random number generator
+   */
+  private void spawnChests(Tile[][] tiles, String lootPoolName, int min, int max, boolean avoidSpawn,
+      QuadrantBounds qBounds, Coordinate upCoord, Coordinate downCoord, Random random) {
+
+    LootPool chestLoot = LootPoolLoader.getLootPoolByName(lootPoolName);
+    if (chestLoot == null) {
+      return;
+    }
+
+    // Determine spawn quadrant if avoidance is needed
+    int spawnQuad = -1;
+    if (avoidSpawn) {
+      outerFindSpawn: for (int x = 0; x < tiles.length; x++) {
+        for (int y = 0; y < tiles[0].length; y++) {
+          Tile t = tiles[x][y];
+          if (t != null && t.isSpawn()) {
+            boolean isLeft = (x >= qBounds.leftMin && x <= qBounds.leftMax);
+            boolean isTop = (y >= qBounds.topMin && y <= qBounds.topMax);
+            if (isTop && isLeft)
+              spawnQuad = 0;
+            else if (isTop && !isLeft)
+              spawnQuad = 1;
+            else if (!isTop && isLeft)
+              spawnQuad = 2;
+            else
+              spawnQuad = 3;
+            break outerFindSpawn;
+          }
+        }
+      }
+    }
+
+    // Build list of available quadrants
+    java.util.List<Integer> availableQuads = new java.util.ArrayList<>();
+    for (int q = 0; q < 4; q++) {
+      if (!avoidSpawn || q != spawnQuad) {
+        availableQuads.add(q);
+      }
+    }
+
+    if (availableQuads.isEmpty()) {
+      availableQuads.add(0); // Fallback
+    }
+
+    // Pick random count in range [min, max]
+    int count = (max <= min) ? min : min + random.nextInt(max - min + 1);
+
+    int spawned = 0;
+    int attempts = 0;
+    int maxAttempts = count * 50; // Prevent infinite loops
+
+    while (spawned < count && attempts < maxAttempts) {
+      attempts++;
+
+      // Pick a random quadrant from available ones
+      int q = availableQuads.get(random.nextInt(availableQuads.size()));
+      int[][] bounds = qBounds.getQuadrantBounds(q);
+      int xMin = bounds[0][0], xMax = bounds[0][1];
+      int yMin = bounds[1][0], yMax = bounds[1][1];
+
+      // Pick random coordinate in quadrant
+      int x = (xMax <= xMin) ? xMin : xMin + random.nextInt(xMax - xMin + 1);
+      int y = (yMax <= yMin) ? yMin : yMin + random.nextInt(yMax - yMin + 1);
+
+      Tile cand = tiles[x][y];
+      if (cand == null)
+        continue;
+
+      // Prefer floor tiles that aren't spawn and don't block paths
+      if (cand.getSymbol() == '.' && !cand.isSpawn() && !cand.isOccupied()) {
+        if (!wouldBlockPath(tiles, x, y, upCoord, downCoord)) {
+          cand.spawnTreasureChest(chestLoot);
+          spawned++;
+        }
+      }
+    }
+
+    // Fallback: If we couldn't place all chests on floors, replace walls
+    if (spawned < count) {
+      TileType chestType = TileTypeLoader.getTileTypeByName("commonTreasureChest");
+      if (chestType == null) {
+        // If no chest tile type, use floor + loot
+        chestType = TileTypeLoader.getTileTypeByName("basicFloor");
+      }
+
+      while (spawned < count && attempts < maxAttempts * 2) {
+        attempts++;
+
+        int q = availableQuads.get(random.nextInt(availableQuads.size()));
+        int[][] bounds = qBounds.getQuadrantBounds(q);
+        int xMin = bounds[0][0], xMax = bounds[0][1];
+        int yMin = bounds[1][0], yMax = bounds[1][1];
+
+        int x = (xMax <= xMin) ? xMin : xMin + random.nextInt(xMax - xMin + 1);
+        int y = (yMax <= yMin) ? yMin : yMin + random.nextInt(yMax - yMin + 1);
+
+        Tile cand = tiles[x][y];
+        if (cand == null)
+          continue;
+
+        // Replace wall with chest if it doesn't block critical paths
+        if (cand.getSymbol() == '#' && !wouldBlockPath(tiles, x, y, upCoord, downCoord)) {
+          Tile newTile = new Tile(new Coordinate(x, y), chestType);
+          newTile.spawnTreasureChest(chestLoot);
+          tiles[x][y] = newTile;
+          spawned++;
+        }
+      }
+    }
+  }
+
+  /**
+   * Pick a random monster from a monster pool using weighted selection.
+   */
+  private com.bapppis.core.creature.Creature pickRandomMonsterFromPool(LootPool pool, Random random) {
+    int totalWeight = 0;
+    for (com.bapppis.core.loot.LootPool.Entry e : pool.entries) {
+      if (e == null)
+        continue;
+      if (e.type == null || !"monster".equalsIgnoreCase(e.type))
+        continue;
+      int w = (e.weight == null) ? 1 : e.weight;
+      if (w <= 0)
+        continue;
+      totalWeight += w;
+    }
+
+    if (totalWeight <= 0)
+      return null;
+
+    int pickWeight = random.nextInt(totalWeight);
+    int running = 0;
+    for (com.bapppis.core.loot.LootPool.Entry e : pool.entries) {
+      if (e == null)
+        continue;
+      if (e.type == null || !"monster".equalsIgnoreCase(e.type))
+        continue;
+      int w = (e.weight == null) ? 1 : e.weight;
+      if (w <= 0)
+        continue;
+      running += w;
+      if (pickWeight < running) {
+        String monsterRef = (e.id != null) ? e.id : e.name;
+        try {
+          com.bapppis.core.creature.CreatureLoader.loadCreatures();
+          return com.bapppis.core.creature.CreatureLoader.spawnCreatureByName(monsterRef);
+        } catch (Exception ex) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Attempt to place a monster in a specific quadrant.
+   * Returns true if successful, false otherwise.
+   */
+  private boolean placeMonsterInQuadrant(Tile[][] tiles, com.bapppis.core.creature.Creature monster, int quadrant,
+      QuadrantBounds qBounds, Random random) {
+
+    int[][] bounds = qBounds.getQuadrantBounds(quadrant);
+    int xMin = bounds[0][0], xMax = bounds[0][1];
+    int yMin = bounds[1][0], yMax = bounds[1][1];
+
+    // Try random placement first (16 attempts)
+    for (int attempt = 0; attempt < 16; attempt++) {
+      int x = (xMax <= xMin) ? xMin : xMin + random.nextInt(xMax - xMin + 1);
+      int y = (yMax <= yMin) ? yMin : yMin + random.nextInt(yMax - yMin + 1);
+
+      Tile cand = tiles[x][y];
+      if (cand == null)
+        continue;
+      if (cand.isOccupied())
+        continue;
+      if (cand.getSymbol() == '#')
+        continue;
+
+      cand.getOccupants().add(monster);
+      return true;
+    }
+
+    // Fallback: scan quadrant for first valid tile
+    for (int x = xMin; x <= xMax; x++) {
+      for (int y = yMin; y <= yMax; y++) {
+        Tile cand = tiles[x][y];
+        if (cand == null)
+          continue;
+        if (cand.isOccupied())
+          continue;
+        if (cand.getSymbol() == '#')
+          continue;
+
+        cand.getOccupants().add(monster);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
