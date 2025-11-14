@@ -71,12 +71,12 @@ public abstract class Floor {
         int cx = x0;
         int cy = y0;
         while (true) {
+            if (cx == x1 && cy == y1) break;
             if (!(cx == x0 && cy == y0)) {
                 Tile t = tiles.get(new Coordinate(cx, cy));
                 if (t == null) return false;
                 if (t.isWall()) return false;
             }
-            if (cx == x1 && cy == y1) break;
             int e2 = 2 * err;
             if (e2 > -dy) { err -= dy; cx += sx; }
             if (e2 < dx) { err += dx; cy += sy; }

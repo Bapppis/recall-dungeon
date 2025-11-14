@@ -4,37 +4,44 @@ size: 256, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-basicDownStairs
+Unused_texture
   rotate: false
   xy: 168, 42
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-basicFloor
+basicDownStairs
   rotate: false
   xy: 234, 90
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-basicGenFloor
+basicFloor
   rotate: false
   xy: 168, 24
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-basicUpStairs
+basicGenFloor
   rotate: false
   xy: 186, 42
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-basicWall
+basicUpStairs
   rotate: false
   xy: 234, 72
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+basicWall
+  rotate: false
+  xy: 186, 24
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -97,7 +104,7 @@ player_voss
   index: -1
 undiscovered
   rotate: false
-  xy: 186, 24
+  xy: 204, 42
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

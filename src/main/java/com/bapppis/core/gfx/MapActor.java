@@ -19,7 +19,7 @@ public class MapActor extends Actor {
     private Floor floor;
     private int width;
     private int height;
-    private final TextureAtlas atlas;
+    private TextureAtlas atlas;
     private float zoomFactor = 1.0f;
 
     public MapActor(BitmapFont font, TextureAtlas atlas) {
@@ -30,6 +30,10 @@ public class MapActor extends Actor {
         this.lineHeight = font.getLineHeight();
         this.atlas = atlas;
         computeCellWidth();
+    }
+
+    public void setAtlas(TextureAtlas atlas) {
+        this.atlas = atlas;
     }
 
     public void setZoomFactor(float zoom) {
@@ -133,8 +137,8 @@ public class MapActor extends Actor {
                     tileSpr = "basicFloor";
                     tileSymbol = '.';
                 } else if (!tile.isDiscovered()) {
-                    tileSpr = "basicWall";
-                    tileSymbol = '#';
+                    tileSpr = "undiscovered";
+                    tileSymbol = ' ';
                 } else {
                     // Get the base tile sprite
                     tileSpr = tile.getSprite();
