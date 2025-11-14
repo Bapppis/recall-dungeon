@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.1.07] - 2025-11-14
+
+### Added
+
+- Runtime texture reload: "Reload Textures" button on floor view allows reloading the sprite atlas without restarting the game (useful for iterating on sprite changes).
+- `MapActor.setAtlas()` method enables updating the texture atlas at runtime.
+
+### Changed
+
+- Undiscovered tiles now render using the `undiscovered.png` sprite (black tile) instead of wall texture, improving visual clarity of unexplored areas.
+- Sprite atlas regenerated to include both `undiscovered` and `Unused_texture` sprites with proper naming.
+
+### Fixed
+
+- Wall tile discovery: walls at the edge of vision range are now properly discovered and display their wall texture (`basicWall.png`) instead of remaining as undiscovered tiles.
+- Line-of-sight algorithm corrected to discover the destination tile before checking if it blocks vision, ensuring wall tiles render correctly when revealed.
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/gfx/MapActor.java` — made atlas non-final, added `setAtlas()` method, changed undiscovered tile sprite from `"basicWall"` to `"undiscovered"`.
+- `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` — added "Reload Textures" button with atlas disposal and reload logic.
+- `src/main/java/com/bapppis/core/dungeon/Floor.java` — fixed `hasLineOfSight()` to check destination before blocking, ensuring walls are discovered.
+- `src/main/resources/assets/sprites.atlas` — regenerated with proper sprite names.
+
+
 ## [v0.1.06] - 2025-11-13
 
 ### Added

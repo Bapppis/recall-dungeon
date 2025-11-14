@@ -234,8 +234,36 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
+        VisTextButton reloadTextures = new VisTextButton("Reload Textures");
+        reloadTextures.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.log("RecallDungeon", "Reloading sprite atlas...");
+                try {
+                    // Dispose old atlas if present
+                    if (spriteAtlas != null) {
+                        try { spriteAtlas.dispose(); } catch (Exception ignored) {}
+                        spriteAtlas = null;
+                    }
+                    spriteAtlas = com.bapppis.core.gfx.AtlasBuilder.loadWithFallback();
+                    if (spriteAtlas == null) {
+                        Gdx.app.log("RecallDungeon", "Reload failed: atlas is null");
+                    } else {
+                        Gdx.app.log("RecallDungeon", "Reloaded atlas with " + spriteAtlas.getRegions().size + " regions");
+                        if (mapActor != null) {
+                            mapActor.setAtlas(spriteAtlas);
+                            refreshMapDisplay();
+                        }
+                    }
+                } catch (Exception e) {
+                    Gdx.app.error("RecallDungeon", "Error reloading sprite atlas", e);
+                }
+            }
+        });
+
         table.row().pad(10, 0, 0, 0);
-        table.add(back).colspan(2).fillX().uniformX();
+        table.add(back).colspan(1).fillX().uniformX();
+        table.add(reloadTextures).colspan(1).fillX().uniformX();
         refreshMapDisplay();
         com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
             @Override
