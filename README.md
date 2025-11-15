@@ -43,17 +43,32 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 ### Turn-based Dungeon Exploration
 
 - **Procedurally generated dungeons**: Floors -10 to +10 generated at runtime using BSPRoomGenerator
-  - Two-tile-thick outer walls for structural integrity
-  - Quadrant-based placement for stairs and spawn points
-  - Random treasure chest spawning
-  - Deterministic generation (fixed seed for testing)
+  - **Advanced maze generation**: Recursive backtracking algorithm creates organic, explorable dungeons
+  - **Two-tile-thick outer walls** for structural integrity
+  - **Dead-end removal**: Automatically opens up dead ends to create more open, interconnected spaces
+  - **Room carving**: Random rectangular rooms (3-10 tiles wide/tall) carved into maze for variety
+  - **Quadrant-based stair placement**:
+    - Upstairs and downstairs placed in different quadrants to ensure separation
+    - Each quadrant = 1/4 of the map (top-left, top-right, bottom-left, bottom-right)
+  - **Smart spawn placement** (floor 0 only):
+    - Player spawn placed in a third quadrant (distinct from both stairs)
+    - Ensures player doesn't start next to stairs
+  - **Treasure chest spawning**:
+    - 1-2 treasure chests per floor on floor 0
+    - Chests avoid blocking critical paths between stairs
+    - Placed on floor tiles in available quadrants
+    - Draws from loot pools (e.g., "Common Treasure Chest")
+  - **Deterministic generation**: Fixed seed (12345L + floorNumber) for reproducible floors
+  - **Dynamic floor sizing**:
+    - Floors 0 to ±4: 20x20 to 30x30 (random within range)
+    - Floors ±5 to ±10: 30x30 to 40x40 (larger, more dangerous)
 - **JSON-based tile system**: Data-driven tile definitions for easy content expansion
   - TileType templates define: symbol, sprite, flags (isWall, isOccupied, etc.)
-  - Six core tile types: walls, floors, stairs (up/down), treasure chests
-  - Loot pools can be assigned directly in tile type definitions
-  - Adding new tiles requires just 2 files: TileType JSON + sprite PNG
-- **Fog of war**: Undiscovered tiles are hidden until explored
-- **Player vision range**: Determines how much of the map is revealed (affected by Darksight trait)
+  - Core tile types: walls, floors, stairs (up/down), treasure chests
+  - Loot pools assigned directly in tile type definitions
+  - Adding new tiles requires 2 files: TileType JSON + sprite PNG
+- **Fog of war**: Undiscovered tiles hidden until explored
+- **Player vision range**: Determines revealed area (affected by Darksight trait)
 - **Movement system**: Grid-based cardinal direction movement (WASD or arrow keys)
 - Creatures have multiple attacks decided semi-randomly via weighted randomness
 
