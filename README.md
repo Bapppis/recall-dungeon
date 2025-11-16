@@ -76,8 +76,12 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 - **Creature type hierarchy**: Specialized creature classes for different entity types
   - **Player**: Player character with extended functionality
-  - **Enemy**: Hostile creatures with basic combat behavior
-    - **Coming soon:** AI movement and pathfinding so enemies actively move through the dungeon and chase the player (not yet implemented)
+  - **Enemy**: Hostile creatures with AI behavior
+    - **Basic AI**: Enemies move one tile per turn toward the player when within vision range (Will be changed in the future so enemy passively patrols and chases to player's last seen location)
+    - **Vision-based pursuit**: Uses creature's vision range to detect player (affected by Darksight trait)
+    - **Line-of-sight checks**: Enemies cannot see through walls or occupied tiles (chests, other creatures)
+    - **Combat awareness**: Enemies stop moving during combat encounters
+    - **Greedy pathfinding**: Uses Manhattan distance heuristic for simple, fast target selection
   - **NPC**: Non-hostile characters for dialogue and quests
 - **Creature variants**: Multiple creature types organized by family
   - Beast, Construct, Humanoid, Undead, etc.

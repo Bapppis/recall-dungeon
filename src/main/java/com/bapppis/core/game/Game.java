@@ -205,7 +205,7 @@ public class Game {
     /**
      * Pass a turn: tick properties on all creatures on the current floor.
      * This includes the player and any NPCs/enemies.
-     * Later: add AI movement for NPCs/enemies here.
+     * Then trigger AI movement for all enemies on the floor.
      */
     public static void passTurn() {
         Floor floor = GameState.getCurrentFloor();
@@ -232,7 +232,20 @@ public class Game {
             }
         }
 
-        // Future: Add NPC/enemy AI movement here
-        // For now, just tick properties
+        // AI movement for enemies
+        if (floor.getTiles() != null) {
+            for (Tile tile : floor.getTiles().values()) {
+                if (tile != null && tile.getOccupants() != null) {
+                    // Create a copy of occupants list to avoid concurrent modification
+                    java.util.List<Creature> occupants = new java.util.ArrayList<>(tile.getOccupants());
+                    for (Creature occupant : occupants) {
+                        if (occupant instanceof com.bapppis.core.creature.Enemy) {
+                            com.bapppis.core.creature.Enemy enemy = (com.bapppis.core.creature.Enemy) occupant;
+                            enemy.takeAITurn();
+                        }
+                    }
+                }
+            }
+        }
     }
 }
