@@ -17,6 +17,17 @@ public class Coordinate {
         return y;
     }
 
+    /**
+     * Calculate Manhattan distance between two coordinates.
+     * Manhattan distance is the sum of absolute differences of their coordinates.
+     * @param c1 first coordinate
+     * @param c2 second coordinate
+     * @return Manhattan distance
+     */
+    public static int manhattanDistance(Coordinate c1, Coordinate c2) {
+        return Math.abs(c1.x - c2.x) + Math.abs(c1.y - c2.y);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

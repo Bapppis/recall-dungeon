@@ -946,6 +946,10 @@ public class BSPRoomGenerator implements MapGenerator {
         continue;
 
       cand.getOccupants().add(monster);
+      // Set enemy position if it's an Enemy
+      if (monster instanceof com.bapppis.core.creature.Enemy) {
+        ((com.bapppis.core.creature.Enemy) monster).setPosition(cand.getCoordinate());
+      }
       return true;
     }
 
@@ -961,6 +965,10 @@ public class BSPRoomGenerator implements MapGenerator {
           continue;
 
         cand.getOccupants().add(monster);
+        // Set enemy position if it's an Enemy
+        if (monster instanceof com.bapppis.core.creature.Enemy) {
+          ((com.bapppis.core.creature.Enemy) monster).setPosition(cand.getCoordinate());
+        }
         return true;
       }
     }

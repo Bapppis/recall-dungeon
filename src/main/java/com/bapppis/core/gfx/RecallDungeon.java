@@ -54,6 +54,17 @@ public class RecallDungeon extends ApplicationAdapter {
     }
 
     private void showMainMenu() {
+        // Shutdown the game if it's running
+        try {
+            Object userObj = stage.getRoot().getUserObject();
+            if (userObj instanceof Game) {
+                ((Game) userObj).shutdown();
+                stage.getRoot().setUserObject(null);
+            }
+        } catch (Exception e) {
+            Gdx.app.error("RecallDungeon", "Error shutting down game", e);
+        }
+
         // Clean up any runtime view resources to avoid stale references or disposed
         // textures
         try {

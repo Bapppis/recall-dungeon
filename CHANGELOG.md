@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.1.08] - 2025-11-16
+### Added
+
+- Basic enemy AI: `Enemy.takeAITurn()` implements a simple greedy one-step chase toward the player when the player is within vision range. Enemies now move one tile per turn and use a Manhattan-distance heuristic for target selection.
+- `Coordinate.manhattanDistance()` helper for fast grid distance calculations used by AI and vision checks.
+- `docs/ENEMY_AI.md` documentation describing the AI design, behavior, and extensibility.
+
+### Changed
+
+- Turn processing (`Game.passTurn()`) now triggers NPC/enemy AI after creature property ticks so creatures take their turns following the player.
+- `BSPRoomGenerator` sets spawned enemy positions when placing monsters into tiles so newly spawned enemies have proper `position` fields and appear/move correctly.
+- `Floor.hasLineOfSight(...)` gained an overloaded variant that can optionally consider occupied tiles as blockers. `Enemy` AI now checks line of sight (including occupied tiles) before pursuing the player so enemies cannot see through chests or other occupied tiles.
+- UI flow: returning to the main menu now shuts down any running `Game` instance (`RecallDungeon.showMainMenu()`), preventing stale background threads and double-running game instances.
+- Updated readme
+
+### Fixed
+
+- Fixed issue where spawned enemies never moved because their `position` field was not initialized when added to a tile.
+- Fixed crash when returning to the main menu and selecting a character again by ensuring the previous `Game` is cleanly shut down before creating a new one.
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/creature/Enemy.java` — added position tracking, `takeAITurn()` AI method, LOS/vision checks.
+- `src/main/java/com/bapppis/core/dungeon/Coordinate.java` — added `manhattanDistance()`.
+- `src/main/java/com/bapppis/core/game/Game.java` — integrated AI execution into `passTurn()`.
+- `src/main/java/com/bapppis/core/game/GameState.java` — added `inCombat` flag and accessors to pause AI during combat.
+- `src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java` — ensure spawned monsters have their `position` set when placed into tiles.
+- `src/main/java/com/bapppis/core/dungeon/Floor.java` — extended `hasLineOfSight()` to optionally treat occupied tiles as LOS blockers.
+- `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` — shutdown existing `Game` instance when returning to main menu to avoid double-run crashes.
+- `README.md` — updated to document the enemy AI implementation and behavior.
+
+
 ## [v0.1.07] - 2025-11-14
 
 ### Added

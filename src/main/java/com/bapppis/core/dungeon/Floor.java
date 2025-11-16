@@ -63,6 +63,19 @@ public abstract class Floor {
     }
 
     public boolean hasLineOfSight(int x0, int y0, int x1, int y1) {
+        return hasLineOfSight(x0, y0, x1, y1, false);
+    }
+
+    /**
+     * Check if there is line of sight between two points.
+     * @param x0 start x
+     * @param y0 start y
+     * @param x1 end x
+     * @param y1 end y
+     * @param checkOccupied if true, also block LOS for occupied tiles (chests, etc.)
+     * @return true if line of sight exists
+     */
+    public boolean hasLineOfSight(int x0, int y0, int x1, int y1, boolean checkOccupied) {
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
         int sx = x0 < x1 ? 1 : -1;
@@ -76,6 +89,7 @@ public abstract class Floor {
                 Tile t = tiles.get(new Coordinate(cx, cy));
                 if (t == null) return false;
                 if (t.isWall()) return false;
+                if (checkOccupied && t.isOccupied()) return false;
             }
             int e2 = 2 * err;
             if (e2 > -dy) { err -= dy; cx += sx; }
