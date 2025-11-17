@@ -100,23 +100,22 @@ public class MapActor extends Actor {
         // Enable alpha blending for transparency
         batch.enableBlending();
 
-        Player player = GameState.getPlayer();
-        float offsetX = 0;
-        float offsetY = 0;
-
-        // Center on player if present
-        if (player != null && player.getPosition() != null) {
-            int px = player.getX();
-            int py = player.getY();
-            float viewportWidth = getParent() != null ? getParent().getWidth() : 800;
-            float viewportHeight = getParent() != null ? getParent().getHeight() : 600;
-            offsetX = (viewportWidth / 2) - (px * cellWidth) - (cellWidth / 2);
-            offsetY = (viewportHeight / 2) - ((height - py - 1) * lineHeight) - (lineHeight / 2);
-        }
+        // Compute offsets so the entire map is centered in the viewport (fixed center,
+        // do not follow player). If the map is larger than the viewport, offsets will
+        // be negative so the central portion of the map is visible.
+        float offsetX = 0f;
+        float offsetY = 0f;
+        float viewportWidth = getParent() != null ? getParent().getWidth() : 800;
+        float viewportHeight = getParent() != null ? getParent().getHeight() : 600;
+        float mapW = width * cellWidth;
+        float mapH = height * lineHeight;
+        offsetX = (viewportWidth - mapW) / 2f;
+        offsetY = (viewportHeight - mapH) / 2f;
 
         float startX = getX() + offsetX;
         float startY = getY() + getHeight() - (lineHeight * 0.1f) + offsetY;
 
+        Player player = GameState.getPlayer();
         int px = -1, py = -1;
         if (player != null && player.getPosition() != null) {
             px = player.getX();

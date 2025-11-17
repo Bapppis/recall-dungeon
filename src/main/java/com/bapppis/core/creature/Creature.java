@@ -3,7 +3,6 @@ package com.bapppis.core.creature;
 
 import java.util.EnumMap;
 import java.util.HashMap;
-import com.bapppis.core.util.AttackUtil;
 import com.bapppis.core.util.WeaponUtil;
 import com.bapppis.core.util.StatUtil;
 import com.bapppis.core.util.ResistanceUtil;

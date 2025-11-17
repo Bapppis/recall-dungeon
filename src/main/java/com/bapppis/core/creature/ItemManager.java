@@ -13,7 +13,7 @@ class ItemManager {
         if (item == null || creature == null)
             return false;
 
-    EquipmentSlot slot = item.getSlot();
+        EquipmentSlot slot = item.getSlot();
         Item oldItem = null;
         boolean willBeTwoHanded = false;
 
@@ -30,20 +30,60 @@ class ItemManager {
         }
 
         if (willBeTwoHanded) {
-            oldItem = creature.removeEquipped(EquipmentSlot.WEAPON);
-            if (oldItem != null) {
-                removeEffects(creature, oldItem);
+            Item oldWeapon = creature.removeEquipped(EquipmentSlot.WEAPON);
+            Item oldOffhand = creature.removeEquipped(EquipmentSlot.OFFHAND);
+            
+            if (oldWeapon != null) {
+                removeEffects(creature, oldWeapon);
+                // Add back to inventory if it's not the same as oldOffhand (to avoid double-adding two-handed weapons)
+                if (oldWeapon != oldOffhand) {
+                    try {
+                        creature.getInventory().addItem(oldWeapon);
+                    } catch (Exception ignored) {
+                    }
+                }
             }
-            oldItem = creature.removeEquipped(EquipmentSlot.OFFHAND);
-            if (oldItem != null) {
-                removeEffects(creature, oldItem);
+            
+            if (oldOffhand != null) {
+                removeEffects(creature, oldOffhand);
+                // Add back to inventory
+                try {
+                    creature.getInventory().addItem(oldOffhand);
+                } catch (Exception ignored) {
+                }
             }
+            
             creature.putEquipped(EquipmentSlot.WEAPON, item);
             creature.putEquipped(EquipmentSlot.OFFHAND, item);
         } else if (slot != null) {
+            // Check if we're equipping to OFFHAND or WEAPON and there's a two-handed weapon
+            // equipped
+            if (slot == EquipmentSlot.OFFHAND || slot == EquipmentSlot.WEAPON) {
+                Item weaponSlotItem = creature.getEquipped(EquipmentSlot.WEAPON);
+                Item offhandSlotItem = creature.getEquipped(EquipmentSlot.OFFHAND);
+
+                // If both slots have the same item reference, it's a two-handed weapon
+                if (weaponSlotItem != null && weaponSlotItem == offhandSlotItem) {
+                    // Remove the two-handed weapon from both slots
+                    creature.removeEquipped(EquipmentSlot.WEAPON);
+                    creature.removeEquipped(EquipmentSlot.OFFHAND);
+                    removeEffects(creature, weaponSlotItem);
+                    // Add it back to inventory
+                    try {
+                        creature.getInventory().addItem(weaponSlotItem);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+
             oldItem = creature.removeEquipped(slot);
             if (oldItem != null) {
                 removeEffects(creature, oldItem);
+                // Add old item back to inventory
+                try {
+                    creature.getInventory().addItem(oldItem);
+                } catch (Exception ignored) {
+                }
             }
             creature.putEquipped(slot, item);
         }
