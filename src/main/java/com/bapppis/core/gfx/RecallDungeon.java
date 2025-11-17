@@ -29,10 +29,13 @@ public class RecallDungeon extends ApplicationAdapter {
     private com.badlogic.gdx.graphics.g2d.TextureAtlas spriteAtlas;
     private com.kotcrab.vis.ui.widget.VisLabel nameLabel;
     private com.kotcrab.vis.ui.widget.VisLabel hpLabel;
+    private com.kotcrab.vis.ui.widget.VisLabel manaLabel;
+    private com.kotcrab.vis.ui.widget.VisLabel staminaLabel;
     private com.kotcrab.vis.ui.widget.VisLabel levelLabel;
     private com.kotcrab.vis.ui.widget.VisLabel statsLabel;
     private com.kotcrab.vis.ui.widget.VisLabel resistLabel;
     private com.kotcrab.vis.ui.widget.VisTextButton inventoryButton;
+    private com.kotcrab.vis.ui.widget.VisTextButton statsButton;
     private boolean showingInventory = false;
 
     @Override
@@ -51,6 +54,25 @@ public class RecallDungeon extends ApplicationAdapter {
         }
 
         showMainMenu();
+    }
+
+    private void showInventoryDialog() {
+        com.kotcrab.vis.ui.widget.VisTable table = new com.kotcrab.vis.ui.widget.VisTable(true);
+        showInventory(table);
+        com.kotcrab.vis.ui.widget.VisDialog dialog = new com.kotcrab.vis.ui.widget.VisDialog("Inventory");
+        dialog.add(table).pad(8).row();
+        dialog.button("Close", true);
+        dialog.show(stage);
+    }
+
+    private void showStatsDialog() {
+        com.kotcrab.vis.ui.widget.VisTable table = new com.kotcrab.vis.ui.widget.VisTable(true);
+        table.add(statsLabel).left().row();
+        table.add(resistLabel).left().row();
+        com.kotcrab.vis.ui.widget.VisDialog dialog = new com.kotcrab.vis.ui.widget.VisDialog("Stats");
+        dialog.add(table).pad(8).row();
+        dialog.button("Close", true);
+        dialog.show(stage);
     }
 
     private void showMainMenu() {
@@ -202,40 +224,55 @@ public class RecallDungeon extends ApplicationAdapter {
                 mapActor);
         container.center();
         container.setClip(true); // Clip to viewport size
+        container.fillX();
+        container.fillY();
 
-        com.kotcrab.vis.ui.widget.VisTable left = new com.kotcrab.vis.ui.widget.VisTable(true);
+        // Add map to main table centered
+        table.add(container).expand().fill();
+
+        // Create HUD overlay as a separate layer on the stage
+        final com.badlogic.gdx.scenes.scene2d.ui.Table hudOverlay = new com.badlogic.gdx.scenes.scene2d.ui.Table();
+        hudOverlay.setFillParent(true);
+        stage.addActor(hudOverlay);
+
+        // Create HUD labels
         nameLabel = new com.kotcrab.vis.ui.widget.VisLabel("Name: -");
         hpLabel = new com.kotcrab.vis.ui.widget.VisLabel("HP: -/-");
+        manaLabel = new com.kotcrab.vis.ui.widget.VisLabel("Mana: -/-");
+        staminaLabel = new com.kotcrab.vis.ui.widget.VisLabel("Stamina: -/-");
         levelLabel = new com.kotcrab.vis.ui.widget.VisLabel("Level: -");
         statsLabel = new com.kotcrab.vis.ui.widget.VisLabel("Stats: -");
         resistLabel = new com.kotcrab.vis.ui.widget.VisLabel("Resists: -");
+
+        // Top-left HUD: name, hp, mana, stamina, level
+        com.badlogic.gdx.scenes.scene2d.ui.Table topLeft = new com.badlogic.gdx.scenes.scene2d.ui.Table();
+        topLeft.add(nameLabel).left().pad(4).row();
+        topLeft.add(hpLabel).left().pad(4).row();
+        topLeft.add(manaLabel).left().pad(4).row();
+        topLeft.add(staminaLabel).left().pad(4).row();
+        topLeft.add(levelLabel).left().pad(4).row();
+
+        // Bottom-right HUD: stats and inventory buttons
+        statsButton = new com.kotcrab.vis.ui.widget.VisTextButton("Stats");
         inventoryButton = new com.kotcrab.vis.ui.widget.VisTextButton("Inventory");
+        statsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showStatsDialog();
+            }
+        });
         inventoryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                showingInventory = !showingInventory;
-                if (showingInventory)
-                    showInventory(left);
-                else
-                    showFloorView();
+                showInventoryDialog();
             }
         });
 
-        left.add(nameLabel).left().row();
-        left.add(hpLabel).left().row();
-        left.add(levelLabel).left().row();
-        left.add(statsLabel).left().padTop(8).row();
-        left.add(resistLabel).left().padTop(8).row();
-        left.add().expandY().row();
-        left.add(inventoryButton).width(140).padTop(8).row();
+        com.badlogic.gdx.scenes.scene2d.ui.Table bottomRight = new com.badlogic.gdx.scenes.scene2d.ui.Table();
+        bottomRight.add(statsButton).pad(4);
+        bottomRight.add(inventoryButton).pad(4);
 
-        com.kotcrab.vis.ui.widget.VisScrollPane leftScroll = new com.kotcrab.vis.ui.widget.VisScrollPane(left);
-        leftScroll.setFadeScrollBars(false);
-
-        table.add(leftScroll).width(300).fillY().top().pad(8);
-        // Map container without scroll pane, will center on player
-        table.add(container).expand().fill().row();
-
+        // Bottom-left: Back to Menu button
         VisTextButton back = new VisTextButton("Back to Menu");
         back.addListener(new ClickListener() {
             @Override
@@ -272,9 +309,16 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        table.row().pad(10, 0, 0, 0);
-        table.add(back).colspan(1).fillX().uniformX();
-        table.add(reloadTextures).colspan(1).fillX().uniformX();
+        com.badlogic.gdx.scenes.scene2d.ui.Table bottomLeft = new com.badlogic.gdx.scenes.scene2d.ui.Table();
+        bottomLeft.add(back).pad(4).row();
+        bottomLeft.add(reloadTextures).pad(4);
+
+        // Layout HUD overlay: top-left, bottom-left, bottom-right
+        hudOverlay.add(topLeft).expand().top().left().pad(12);
+        hudOverlay.add().expand(); // spacer
+        hudOverlay.row();
+        hudOverlay.add(bottomLeft).expand().bottom().left().pad(12);
+        hudOverlay.add(bottomRight).expand().bottom().right().pad(12);
         refreshMapDisplay();
         com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
             @Override
@@ -418,6 +462,18 @@ public class RecallDungeon extends ApplicationAdapter {
                     nameLabel.setText("Name: " + (p.getName() != null ? p.getName() : "-"));
                 if (hpLabel != null)
                     hpLabel.setText("HP: " + p.getCurrentHp() + "/" + p.getMaxHp());
+                    if (manaLabel != null) {
+                        try {
+                            manaLabel.setText("Mana: " + p.getCurrentMana() + "/" + p.getMaxMana());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (staminaLabel != null) {
+                        try {
+                            staminaLabel.setText("Stamina: " + p.getCurrentStamina() + "/" + p.getMaxStamina());
+                        } catch (Exception ignored) {
+                        }
+                    }
                 if (levelLabel != null)
                     levelLabel.setText("Level: " + p.getLevel());
                 if (statsLabel != null) {

@@ -5,8 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.09] - 2025-11-17
+
+- Top-left in-map HUD: player name, HP, Mana, Stamina and Level overlay the floor view (screen-anchored).
+- Bottom-right quick actions: `Stats` and `Inventory` buttons open lightweight dialogs.
+
+### Changed
+
+- Floor view map is now centered and uses a larger default zoom so the play area is more visible; HUD elements are anchored to screen corners instead of the map.
+- `RecallDungeon` now cleanly shuts down any running `Game` instance when returning to the main menu to prevent stale threads and duplicate runs.
+
+### Fixed
+
+- Equipment swap bugs: fixes in `ItemManager` ensure two-handed weapons and offhand items are removed/returned to inventory correctly when swapping (e.g., dagger ↔ bow behavior).
+- Spawn and LOS stability fixes carried over from earlier v0.1.08 changes (see continued section below).
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` — added HUD overlay, anchored HUD layout, centered map container, repositioned menu buttons.
+- `src/main/java/com/bapppis/core/creature/ItemManager.java` — fixed equip/unequip handling for two-handed and offhand items so swapped items return to inventory.
+- `README.md` — documented enemy AI and brief usage notes for HUD and controls.
 
 ## [v0.1.08] - 2025-11-16
+
+## [v0.1.08] - 2025-11-16
+
 ### Added
 
 - Basic enemy AI: `Enemy.takeAITurn()` implements a simple greedy one-step chase toward the player when the player is within vision range. Enemies now move one tile per turn and use a Manhattan-distance heuristic for target selection.
