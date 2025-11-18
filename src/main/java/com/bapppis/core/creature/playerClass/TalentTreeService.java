@@ -5,6 +5,7 @@ import com.bapppis.core.creature.Player;
 import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.property.Property;
 import com.bapppis.core.property.PropertyLoader;
+import com.bapppis.core.spell.SpellReference;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class TalentTreeService {
 
     /**
      * Attempts to unlock a talent node for a player
-     * 
+     *
      * @param player   The player unlocking the talent
      * @param nodeId   The node ID to unlock
      * @param choiceId The choice ID within the node (can be null if node has only 1
@@ -199,9 +200,22 @@ public class TalentTreeService {
         // Unlock spells
         if (choice.getUnlockedSpells() != null) {
             for (String spellName : choice.getUnlockedSpells()) {
-                // TODO: Implement spell learning for players
-                // player.learnSpell(spellName);
-                System.out.println("  Unlocked spell: " + spellName);
+                if (spellName == null || spellName.isEmpty()) continue;
+                try {
+                    boolean exists = false;
+                    for (SpellReference ref : player.getSpellReferences()) {
+                        if (spellName.equalsIgnoreCase(ref.getName())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        player.getSpellReferences().add(new SpellReference(spellName, 1));
+                    }
+                    System.out.println("  Unlocked spell: " + spellName);
+                } catch (Exception e) {
+                    System.err.println("  Failed to unlock spell: " + spellName);
+                }
             }
         }
     }

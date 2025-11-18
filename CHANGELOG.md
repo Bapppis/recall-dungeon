@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [v0.1.10] - 2025-11-18
+
+### Added
+
+- **Combat System**: Proximity-based combat triggering and dedicated combat view
+  - Enemy AI triggers combat when moving adjacent to player
+  - Player movement triggers combat when moving adjacent to enemy
+  - Dedicated combat UI with side-by-side player and enemy displays
+  - Combat view features:
+    - Player sprite (left) with stat panel showing HP, Mana, Stamina, Level
+    - Enemy sprite (right) with stat panel showing HP and Level
+    - Action buttons: Attack, Inventory, Spells, Use Item, Wait, Flee
+    - Spells button shows available spells with mana costs and effects
+    - Spells button grayed out when player has no learned spells
+  - Turn-based combat with player action followed by enemy counter-attack
+  - Victory handling: XP award, enemy removal from map, combat exit
+  - Thread-safe UI updates using LibGDX main thread (Gdx.app.postRunnable)
+  - Proper sprite sizing (48x48) for combat view display
+  - Font loading fallback system (default.fnt)
+
+### Changed
+
+- Game object preservation: Added instance variable to maintain Game state across view transitions
+- Input handling: Combat view and floor view use separate input processors
+- Enemy cleanup: Defeated enemies properly removed from tiles via setPosition(null)
+
+### Fixed
+
+- Combat triggering: Now consistent whether player or enemy initiates proximity
+- Movement after combat: Fixed Game object loss during stage clearing
+- Victory dialog listeners: Proper button creation and click handling
+- Combat exit timing: setInCombat(false) called after dialog dismissal
+- Sprite rendering: Removed conflicting setScale calls
+ - Spells unlocking: spells granted by classes, level unlocks, and talent choices are now added to the player's spell references so unlocked spells appear in combat
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` — added combat view, currentGame instance variable, victory handling
+- `src/main/java/com/bapppis/core/game/CommandParser.java` — added adjacent enemy detection after player movement
+- `src/main/java/com/bapppis/core/creature/Enemy.java` — proximity-based combat triggering in takeAITurn()
+- `src/main/java/com/bapppis/core/game/GameState.java` — combat state management with inCombat flag and combatEnemy reference
+ - `src/main/java/com/bapppis/core/creature/playerClass/PlayerClassService.java` — apply class & level unlocks now add unlocked spells to player's `spellReferences`
+ - `src/main/java/com/bapppis/core/creature/playerClass/TalentTreeService.java` — talent choice unlocks now add unlocked spells to player's `spellReferences`
+
 ## [v0.1.09] - 2025-11-17
 
 - Top-left in-map HUD: player name, HP, Mana, Stamina and Level overlay the floor view (screen-anchored).
@@ -25,8 +70,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` — added HUD overlay, anchored HUD layout, centered map container, repositioned menu buttons.
 - `src/main/java/com/bapppis/core/creature/ItemManager.java` — fixed equip/unequip handling for two-handed and offhand items so swapped items return to inventory.
 - `README.md` — documented enemy AI and brief usage notes for HUD and controls.
-
-## [v0.1.08] - 2025-11-16
 
 ## [v0.1.08] - 2025-11-16
 

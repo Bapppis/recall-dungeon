@@ -37,6 +37,7 @@ public class RecallDungeon extends ApplicationAdapter {
     private com.kotcrab.vis.ui.widget.VisTextButton inventoryButton;
     private com.kotcrab.vis.ui.widget.VisTextButton statsButton;
     private boolean showingInventory = false;
+    private Game currentGame; // Store the Game instance to preserve it across view changes
 
     @Override
     public void create() {
@@ -181,11 +182,10 @@ public class RecallDungeon extends ApplicationAdapter {
     }
 
     private void startGameWithPlayer(Player player) {
-        Gdx.app.log("RecallDungeon", "Starting game with player id=" + player.getId() + " name=" + player.getName());
-        Game game = new Game(player);
-        game.initialize();
+        currentGame = new Game(player);
+        currentGame.initialize();
         stage.setDebugAll(false);
-        stage.getRoot().setUserObject(game);
+        stage.getRoot().setUserObject(currentGame);
         showFloorView();
     }
 
@@ -194,12 +194,13 @@ public class RecallDungeon extends ApplicationAdapter {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
-
-        BitmapFont chosen = font;
+        
+        // Restore the Game object to the new root
+        if (currentGame != null) {
+            stage.getRoot().setUserObject(currentGame);
+        }        BitmapFont chosen = font;
         try {
-            if (Gdx.files.internal("font-small.fnt").exists()) {
-                chosen = new BitmapFont(Gdx.files.internal("font-small.fnt"));
-            } else if (Gdx.files.internal("default.fnt").exists()) {
+            if (Gdx.files.internal("default.fnt").exists()) {
                 chosen = new BitmapFont(Gdx.files.internal("default.fnt"));
             }
         } catch (Exception e) {
@@ -290,14 +291,18 @@ public class RecallDungeon extends ApplicationAdapter {
                 try {
                     // Dispose old atlas if present
                     if (spriteAtlas != null) {
-                        try { spriteAtlas.dispose(); } catch (Exception ignored) {}
+                        try {
+                            spriteAtlas.dispose();
+                        } catch (Exception ignored) {
+                        }
                         spriteAtlas = null;
                     }
                     spriteAtlas = com.bapppis.core.gfx.AtlasBuilder.loadWithFallback();
                     if (spriteAtlas == null) {
                         Gdx.app.log("RecallDungeon", "Reload failed: atlas is null");
                     } else {
-                        Gdx.app.log("RecallDungeon", "Reloaded atlas with " + spriteAtlas.getRegions().size + " regions");
+                        Gdx.app.log("RecallDungeon",
+                                "Reloaded atlas with " + spriteAtlas.getRegions().size + " regions");
                         if (mapActor != null) {
                             mapActor.setAtlas(spriteAtlas);
                             refreshMapDisplay();
@@ -337,8 +342,9 @@ public class RecallDungeon extends ApplicationAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 Object userObj = stage.getRoot().getUserObject();
-                if (!(userObj instanceof Game))
+                if (!(userObj instanceof Game)) {
                     return false;
+                }
                 Game g = (Game) userObj;
                 String cmd = null;
                 switch (keycode) {
@@ -442,6 +448,22 @@ public class RecallDungeon extends ApplicationAdapter {
 
     @Override
     public void render() {
+        // Check if combat has started and we need to show combat view
+        if (com.bapppis.core.game.GameState.isInCombat()) {
+            com.bapppis.core.creature.Enemy enemy = com.bapppis.core.game.GameState.getCombatEnemy();
+            if (enemy != null && !(stage.getRoot().getUserObject() instanceof String
+                    && "combat".equals(stage.getRoot().getUserObject()))) {
+                showCombatView(enemy);
+                stage.getRoot().setUserObject("combat"); // Mark that we're in combat view
+            }
+        } else {
+            // If we were in combat but it ended, return to floor view
+            if (stage.getRoot().getUserObject() instanceof String && "combat".equals(stage.getRoot().getUserObject())) {
+                stage.getRoot().setUserObject(null);
+                showFloorView();
+            }
+        }
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act();
@@ -462,18 +484,18 @@ public class RecallDungeon extends ApplicationAdapter {
                     nameLabel.setText("Name: " + (p.getName() != null ? p.getName() : "-"));
                 if (hpLabel != null)
                     hpLabel.setText("HP: " + p.getCurrentHp() + "/" + p.getMaxHp());
-                    if (manaLabel != null) {
-                        try {
-                            manaLabel.setText("Mana: " + p.getCurrentMana() + "/" + p.getMaxMana());
-                        } catch (Exception ignored) {
-                        }
+                if (manaLabel != null) {
+                    try {
+                        manaLabel.setText("Mana: " + p.getCurrentMana() + "/" + p.getMaxMana());
+                    } catch (Exception ignored) {
                     }
-                    if (staminaLabel != null) {
-                        try {
-                            staminaLabel.setText("Stamina: " + p.getCurrentStamina() + "/" + p.getMaxStamina());
-                        } catch (Exception ignored) {
-                        }
+                }
+                if (staminaLabel != null) {
+                    try {
+                        staminaLabel.setText("Stamina: " + p.getCurrentStamina() + "/" + p.getMaxStamina());
+                    } catch (Exception ignored) {
                     }
+                }
                 if (levelLabel != null)
                     levelLabel.setText("Level: " + p.getLevel());
                 if (statsLabel != null) {
@@ -584,21 +606,44 @@ public class RecallDungeon extends ApplicationAdapter {
     }
 
     public void showCombatView(com.bapppis.core.creature.Creature enemy) {
+        // No need to preserve from stage - use instance variable
+        
         stage.clear();
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
+        
+        // Mark as combat view (not Game object, to let render loop know we're in combat)
+        stage.getRoot().setUserObject("combat");
 
         com.kotcrab.vis.ui.widget.VisTable left = new com.kotcrab.vis.ui.widget.VisTable(true);
         com.bapppis.core.creature.Player p = com.bapppis.core.game.GameState.getPlayer();
+
+        // Player sprite
+        if (p != null && spriteAtlas != null) {
+            String playerSprite = p.getSprite();
+            if (playerSprite != null && !playerSprite.isEmpty()) {
+                com.badlogic.gdx.graphics.g2d.TextureRegion playerReg = spriteAtlas.findRegion(playerSprite);
+                if (playerReg != null) {
+                    com.badlogic.gdx.scenes.scene2d.ui.Image playerImg = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                            playerReg);
+                    left.add(playerImg).size(48, 48).pad(8).row();
+                }
+            }
+        }
+
         nameLabel = new com.kotcrab.vis.ui.widget.VisLabel("Name: -");
         hpLabel = new com.kotcrab.vis.ui.widget.VisLabel("HP: -/-");
+        manaLabel = new com.kotcrab.vis.ui.widget.VisLabel("Mana: -/-");
+        staminaLabel = new com.kotcrab.vis.ui.widget.VisLabel("Stamina: -/-");
         levelLabel = new com.kotcrab.vis.ui.widget.VisLabel("Level: -");
         statsLabel = new com.kotcrab.vis.ui.widget.VisLabel("Stats: -");
         resistLabel = new com.kotcrab.vis.ui.widget.VisLabel("Resists: -");
         if (p != null) {
             nameLabel.setText("Name: " + p.getName());
             hpLabel.setText("HP: " + p.getCurrentHp() + "/" + p.getMaxHp());
+            manaLabel.setText("Mana: " + p.getCurrentMana() + "/" + p.getMaxMana());
+            staminaLabel.setText("Stamina: " + p.getCurrentStamina() + "/" + p.getMaxStamina());
             levelLabel.setText("Level: " + p.getLevel());
             StringBuilder sb = new StringBuilder();
             for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
@@ -618,19 +663,39 @@ public class RecallDungeon extends ApplicationAdapter {
         }
         left.add(nameLabel).left().row();
         left.add(hpLabel).left().row();
+        left.add(manaLabel).left().row();
+        left.add(staminaLabel).left().row();
         left.add(levelLabel).left().row();
         left.add(statsLabel).left().padTop(8).row();
         left.add(resistLabel).left().padTop(8).row();
 
         com.kotcrab.vis.ui.widget.VisTable right = new com.kotcrab.vis.ui.widget.VisTable(true);
+
+        // Enemy sprite
+        if (enemy != null && spriteAtlas != null) {
+            String enemySprite = enemy.getSprite();
+            if (enemySprite != null && !enemySprite.isEmpty()) {
+                com.badlogic.gdx.graphics.g2d.TextureRegion enemyReg = spriteAtlas.findRegion(enemySprite);
+                if (enemyReg != null) {
+                    com.badlogic.gdx.scenes.scene2d.ui.Image enemyImg = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                            enemyReg);
+                    right.add(enemyImg).size(48, 48).pad(8).row();
+                }
+            }
+        }
+
         com.kotcrab.vis.ui.widget.VisLabel enemyName = new com.kotcrab.vis.ui.widget.VisLabel("Enemy: -");
         com.kotcrab.vis.ui.widget.VisLabel enemyHp = new com.kotcrab.vis.ui.widget.VisLabel("HP: -/-");
+        com.kotcrab.vis.ui.widget.VisLabel enemyMana = new com.kotcrab.vis.ui.widget.VisLabel("Mana: -/-");
+        com.kotcrab.vis.ui.widget.VisLabel enemyStamina = new com.kotcrab.vis.ui.widget.VisLabel("Stamina: -/-");
         com.kotcrab.vis.ui.widget.VisLabel enemyLevel = new com.kotcrab.vis.ui.widget.VisLabel("Level: -");
         com.kotcrab.vis.ui.widget.VisLabel enemyStats = new com.kotcrab.vis.ui.widget.VisLabel("");
         com.kotcrab.vis.ui.widget.VisLabel enemyResists = new com.kotcrab.vis.ui.widget.VisLabel("");
         if (enemy != null) {
             enemyName.setText("Enemy: " + enemy.getName());
             enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
+            enemyMana.setText("Mana: " + enemy.getCurrentMana() + "/" + enemy.getMaxMana());
+            enemyStamina.setText("Stamina: " + enemy.getCurrentStamina() + "/" + enemy.getMaxStamina());
             enemyLevel.setText("Level: " + enemy.getLevel());
             StringBuilder sb = new StringBuilder();
             for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
@@ -646,15 +711,25 @@ public class RecallDungeon extends ApplicationAdapter {
         }
         right.add(enemyName).right().row();
         right.add(enemyHp).right().row();
+        right.add(enemyMana).right().row();
+        right.add(enemyStamina).right().row();
         right.add(enemyLevel).right().row();
         right.add(enemyStats).right().padTop(8).row();
         right.add(enemyResists).right().padTop(8).row();
 
         com.kotcrab.vis.ui.widget.VisTable center = new com.kotcrab.vis.ui.widget.VisTable(true);
         com.kotcrab.vis.ui.widget.VisTextButton attackBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Attack");
-        com.kotcrab.vis.ui.widget.VisTextButton useBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Use");
+        com.kotcrab.vis.ui.widget.VisTextButton inventoryBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Inventory");
+        com.kotcrab.vis.ui.widget.VisTextButton spellsBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Spells");
+        com.kotcrab.vis.ui.widget.VisTextButton useBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Use Item");
         com.kotcrab.vis.ui.widget.VisTextButton waitBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Wait");
         com.kotcrab.vis.ui.widget.VisTextButton fleeBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Flee");
+
+        // Disable spells button if player has no spells
+        if (p != null) {
+            boolean hasSpells = p.getSpellReferences() != null && !p.getSpellReferences().isEmpty();
+            spellsBtn.setDisabled(!hasSpells);
+        }
 
         com.kotcrab.vis.ui.widget.VisLabel combatMsg = new com.kotcrab.vis.ui.widget.VisLabel("");
         combatMsg.setWrap(true);
@@ -665,6 +740,8 @@ public class RecallDungeon extends ApplicationAdapter {
                 if (pp != null) {
                     nameLabel.setText("Name: " + pp.getName());
                     hpLabel.setText("HP: " + pp.getCurrentHp() + "/" + pp.getMaxHp());
+                    manaLabel.setText("Mana: " + pp.getCurrentMana() + "/" + pp.getMaxMana());
+                    staminaLabel.setText("Stamina: " + pp.getCurrentStamina() + "/" + pp.getMaxStamina());
                     levelLabel.setText("Level: " + pp.getLevel());
                     StringBuilder sb = new StringBuilder();
                     for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
@@ -684,6 +761,8 @@ public class RecallDungeon extends ApplicationAdapter {
                 }
                 if (enemy != null) {
                     enemyHp.setText("HP: " + enemy.getCurrentHp() + "/" + enemy.getMaxHp());
+                    enemyMana.setText("Mana: " + enemy.getCurrentMana() + "/" + enemy.getMaxMana());
+                    enemyStamina.setText("Stamina: " + enemy.getCurrentStamina() + "/" + enemy.getMaxStamina());
                     StringBuilder sb = new StringBuilder();
                     for (com.bapppis.core.creature.creatureEnums.Stats s : com.bapppis.core.creature.creatureEnums.Stats
                             .values()) {
@@ -707,6 +786,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     if (pp == null || enemy == null)
                         return;
                     attackBtn.setDisabled(true);
+                    inventoryBtn.setDisabled(true);
+                    spellsBtn.setDisabled(true);
                     useBtn.setDisabled(true);
                     waitBtn.setDisabled(true);
                     fleeBtn.setDisabled(true);
@@ -718,46 +799,87 @@ public class RecallDungeon extends ApplicationAdapter {
                     refreshLabels.run();
 
                     if (enemy.getCurrentHp() <= 0) {
+                        // Handle enemy defeat: award XP if applicable
+                        if (pp instanceof com.bapppis.core.creature.Player
+                                && enemy instanceof com.bapppis.core.creature.Enemy) {
+                            Integer enemyXp = ((com.bapppis.core.creature.Enemy) enemy).getEnemyXp();
+                            if (enemyXp != null && enemyXp > 0) {
+                                ((com.bapppis.core.creature.Player) pp).addXp(enemyXp);
+                            }
+                        }
+                        // Remove enemy from tile and clear its position
+                        if (enemy instanceof com.bapppis.core.creature.Enemy) {
+                            com.bapppis.core.creature.Enemy en = (com.bapppis.core.creature.Enemy) enemy;
+                            if (en.getPosition() != null) {
+                                com.bapppis.core.dungeon.Floor floor = com.bapppis.core.game.GameState
+                                        .getCurrentFloor();
+                                if (floor != null) {
+                                    com.bapppis.core.dungeon.Tile tile = floor.getTile(en.getPosition());
+                                    if (tile != null) {
+                                        tile.getOccupants().remove(enemy);
+                                    }
+                                }
+                                // Clear the enemy's position to fully disconnect it from the map
+                                en.setPosition((com.bapppis.core.dungeon.Coordinate) null);
+                            }
+                        }
+                        // Show victory dialog and exit combat when dismissed
                         com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog("Victory");
                         dlg.text(enemy.getName() + " defeated!");
-                        dlg.button("OK");
+                        com.kotcrab.vis.ui.widget.VisTextButton okBtn = new com.kotcrab.vis.ui.widget.VisTextButton(
+                                "OK");
+                        okBtn.addListener(new ClickListener() {
+                            @Override
+                            public void clicked(InputEvent event, float x, float y) {
+                                dlg.hide();
+                                com.bapppis.core.game.GameState.setInCombat(false);
+                                showFloorView();
+                            }
+                        });
+                        dlg.button(okBtn);
                         dlg.show(stage);
-                        attackBtn.setDisabled(false);
-                        useBtn.setDisabled(false);
-                        waitBtn.setDisabled(false);
-                        fleeBtn.setDisabled(false);
                         return;
                     }
 
                     com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
                         @Override
                         public void run() {
-                            try {
-                                int beforePlayerHp = pp.getCurrentHp();
-                                enemy.attack(pp);
-                                int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
-                                combatMsg.setText("Enemy dealt " + taken + " damage.");
-                                refreshLabels.run();
-                                if (pp.getCurrentHp() <= 0) {
-                                    com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog(
-                                            "Defeat");
-                                    dlg.text(pp.getName() + " has been defeated!");
-                                    dlg.button("OK");
-                                    dlg.show(stage);
+                            Gdx.app.postRunnable(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        int beforePlayerHp = pp.getCurrentHp();
+                                        enemy.attack(pp);
+                                        int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
+                                        combatMsg.setText("Enemy dealt " + taken + " damage.");
+                                        refreshLabels.run();
+                                        if (pp.getCurrentHp() <= 0) {
+                                            com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog(
+                                                    "Defeat");
+                                            dlg.text(pp.getName() + " has been defeated!");
+                                            dlg.button("OK");
+                                            dlg.show(stage);
+                                        }
+                                    } catch (Exception e) {
+                                        Gdx.app.error("RecallDungeon", "Error during enemy retaliation", e);
+                                    } finally {
+                                        attackBtn.setDisabled(false);
+                                        useBtn.setDisabled(false);
+                                        waitBtn.setDisabled(false);
+                                        fleeBtn.setDisabled(false);
+                                    }
                                 }
-                            } catch (Exception e) {
-                                Gdx.app.error("RecallDungeon", "Error during enemy retaliation", e);
-                            } finally {
-                                attackBtn.setDisabled(false);
-                                useBtn.setDisabled(false);
-                                waitBtn.setDisabled(false);
-                                fleeBtn.setDisabled(false);
-                            }
+                            });
                         }
                     }, 0.9f);
                 } catch (Exception e) {
                     Gdx.app.error("RecallDungeon", "Error during attack action", e);
+                    com.bapppis.core.creature.Player p2 = com.bapppis.core.game.GameState.getPlayer();
                     attackBtn.setDisabled(false);
+                    inventoryBtn.setDisabled(false);
+                    boolean hasSpells2 = p2 != null && p2.getSpellReferences() != null
+                            && !p2.getSpellReferences().isEmpty();
+                    spellsBtn.setDisabled(!hasSpells2);
                     useBtn.setDisabled(false);
                     waitBtn.setDisabled(false);
                     fleeBtn.setDisabled(false);
@@ -773,6 +895,8 @@ public class RecallDungeon extends ApplicationAdapter {
                     if (pp == null || enemy == null)
                         return;
                     attackBtn.setDisabled(true);
+                    inventoryBtn.setDisabled(true);
+                    spellsBtn.setDisabled(true);
                     useBtn.setDisabled(true);
                     waitBtn.setDisabled(true);
                     fleeBtn.setDisabled(true);
@@ -780,27 +904,36 @@ public class RecallDungeon extends ApplicationAdapter {
                     com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
                         @Override
                         public void run() {
-                            try {
-                                int beforePlayerHp = pp.getCurrentHp();
-                                enemy.attack(pp);
-                                int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
-                                combatMsg.setText("Enemy dealt " + taken + " damage.");
-                                refreshLabels.run();
-                                if (pp.getCurrentHp() <= 0) {
-                                    com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog(
-                                            "Defeat");
-                                    dlg.text(pp.getName() + " has been defeated!");
-                                    dlg.button("OK");
-                                    dlg.show(stage);
+                            Gdx.app.postRunnable(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        int beforePlayerHp = pp.getCurrentHp();
+                                        enemy.attack(pp);
+                                        int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
+                                        combatMsg.setText("Enemy dealt " + taken + " damage.");
+                                        refreshLabels.run();
+                                        if (pp.getCurrentHp() <= 0) {
+                                            com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog(
+                                                    "Defeat");
+                                            dlg.text(pp.getName() + " has been defeated!");
+                                            dlg.button("OK");
+                                            dlg.show(stage);
+                                        }
+                                    } catch (Exception e) {
+                                        Gdx.app.error("RecallDungeon", "Error during wait enemy attack", e);
+                                    } finally {
+                                        attackBtn.setDisabled(false);
+                                        inventoryBtn.setDisabled(false);
+                                        boolean hasSpells2 = pp.getSpellReferences() != null
+                                                && !pp.getSpellReferences().isEmpty();
+                                        spellsBtn.setDisabled(!hasSpells2);
+                                        useBtn.setDisabled(false);
+                                        waitBtn.setDisabled(false);
+                                        fleeBtn.setDisabled(false);
+                                    }
                                 }
-                            } catch (Exception e) {
-                                Gdx.app.error("RecallDungeon", "Error during wait enemy attack", e);
-                            } finally {
-                                attackBtn.setDisabled(false);
-                                useBtn.setDisabled(false);
-                                waitBtn.setDisabled(false);
-                                fleeBtn.setDisabled(false);
-                            }
+                            });
                         }
                     }, 0.9f);
                 } catch (Exception e) {
@@ -812,6 +945,7 @@ public class RecallDungeon extends ApplicationAdapter {
         fleeBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                com.bapppis.core.game.GameState.setInCombat(false);
                 com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog("Flee");
                 dlg.text("You fled from combat.");
                 dlg.button("OK", true);
@@ -821,6 +955,232 @@ public class RecallDungeon extends ApplicationAdapter {
                         showFloorView();
                     }
                 });
+            }
+        });
+
+        inventoryBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                com.bapppis.core.creature.Player pp = com.bapppis.core.game.GameState.getPlayer();
+                if (pp == null)
+                    return;
+
+                com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog("Inventory");
+                com.kotcrab.vis.ui.widget.VisTable invTable = new com.kotcrab.vis.ui.widget.VisTable(true);
+
+                // Show equipped items
+                invTable.add(new com.kotcrab.vis.ui.widget.VisLabel("Equipped Items:")).left().colspan(2).row();
+                for (com.bapppis.core.item.itemEnums.EquipmentSlot slot : com.bapppis.core.item.itemEnums.EquipmentSlot
+                        .values()) {
+                    com.bapppis.core.item.Item eq = pp.getEquipped(slot);
+                    String text = slot.name() + ": " + (eq != null ? eq.getName() : "Empty");
+                    invTable.add(new com.kotcrab.vis.ui.widget.VisLabel(text)).left().colspan(2).row();
+                }
+
+                invTable.add().padTop(12).row();
+                invTable.add(new com.kotcrab.vis.ui.widget.VisLabel("Inventory (click Equip to swap):")).left()
+                        .colspan(2).row();
+
+                // Show inventory items by category
+                java.util.function.BiConsumer<String, java.util.List<com.bapppis.core.item.Item>> addInvGroup = (label,
+                        items) -> {
+                    if (items == null || items.isEmpty())
+                        return;
+                    invTable.add(new com.kotcrab.vis.ui.widget.VisLabel(label)).left().padTop(6).colspan(2).row();
+                    for (com.bapppis.core.item.Item item : items) {
+                        invTable.add(new com.kotcrab.vis.ui.widget.VisLabel(item.getName())).left();
+                        com.kotcrab.vis.ui.widget.VisTextButton equipBtn = new com.kotcrab.vis.ui.widget.VisTextButton(
+                                "Equip");
+                        equipBtn.addListener(new ClickListener() {
+                            @Override
+                            public void clicked(InputEvent event, float x, float y) {
+                                try {
+                                    if (item instanceof com.bapppis.core.item.Equipment) {
+                                        pp.equipItem((com.bapppis.core.item.Equipment) item);
+                                        refreshLabels.run();
+                                        dlg.hide();
+                                        com.kotcrab.vis.ui.widget.VisDialog msg = new com.kotcrab.vis.ui.widget.VisDialog(
+                                                "Success");
+                                        msg.text("Equipped " + item.getName());
+                                        msg.button("OK");
+                                        msg.show(stage);
+                                    }
+                                } catch (Exception e) {
+                                    Gdx.app.error("RecallDungeon", "Error equipping in combat", e);
+                                }
+                            }
+                        });
+                        invTable.add(equipBtn).padLeft(4).right().row();
+                    }
+                };
+
+                com.bapppis.core.creature.Inventory inv = pp.getInventory();
+                addInvGroup.accept("Weapons", inv.getWeapons());
+                addInvGroup.accept("Offhands", inv.getOffhands());
+                addInvGroup.accept("Helmets", inv.getHelmets());
+                addInvGroup.accept("Armors", inv.getArmors());
+                addInvGroup.accept("Legwear", inv.getLegwear());
+
+                com.kotcrab.vis.ui.widget.VisScrollPane scrollPane = new com.kotcrab.vis.ui.widget.VisScrollPane(
+                        invTable);
+                scrollPane.setFadeScrollBars(false);
+                dlg.getContentTable().add(scrollPane).width(400).height(400);
+                dlg.button("Close");
+                dlg.show(stage);
+            }
+        });
+
+        spellsBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                com.bapppis.core.creature.Player pp = com.bapppis.core.game.GameState.getPlayer();
+                if (pp == null)
+                    return;
+
+                java.util.List<com.bapppis.core.spell.SpellReference> spells = pp.getSpellReferences();
+                com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog("Cast Spell");
+
+                if (spells == null || spells.isEmpty()) {
+                    dlg.text("No spells available.");
+                    dlg.button("OK");
+                    dlg.show(stage);
+                    return;
+                }
+
+                com.kotcrab.vis.ui.widget.VisTable spellTable = new com.kotcrab.vis.ui.widget.VisTable(true);
+                for (com.bapppis.core.spell.SpellReference spellRef : spells) {
+                    com.bapppis.core.spell.Spell spell = com.bapppis.core.spell.SpellLoader
+                            .getSpellByName(spellRef.getName());
+                    if (spell == null)
+                        continue;
+
+                    com.kotcrab.vis.ui.widget.VisLabel lbl = new com.kotcrab.vis.ui.widget.VisLabel(
+                            spell.getName() + " (Mana: " + spell.getManaCost() + ")");
+                    com.kotcrab.vis.ui.widget.VisTextButton castBtn = new com.kotcrab.vis.ui.widget.VisTextButton(
+                            "Cast");
+
+                    // Disable if not enough mana
+                    if (pp.getCurrentMana() < spell.getManaCost()) {
+                        castBtn.setDisabled(true);
+                    }
+
+                    castBtn.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            try {
+                                attackBtn.setDisabled(true);
+                                inventoryBtn.setDisabled(true);
+                                spellsBtn.setDisabled(true);
+                                useBtn.setDisabled(true);
+                                waitBtn.setDisabled(true);
+                                fleeBtn.setDisabled(true);
+
+                                com.bapppis.core.spell.SpellEngine.castSpell(pp, spell, enemy);
+                                refreshLabels.run();
+                                dlg.hide();
+                                combatMsg.setText("You cast " + spell.getName() + "!");
+
+                                if (enemy.getCurrentHp() <= 0) {
+                                    // Handle enemy defeat: award XP if applicable
+                                    if (pp instanceof com.bapppis.core.creature.Player
+                                            && enemy instanceof com.bapppis.core.creature.Enemy) {
+                                        Integer enemyXp = ((com.bapppis.core.creature.Enemy) enemy).getEnemyXp();
+                                        if (enemyXp != null && enemyXp > 0) {
+                                            ((com.bapppis.core.creature.Player) pp).addXp(enemyXp);
+                                        }
+                                    }
+                                    // Remove enemy from tile and clear its position
+                                    if (enemy instanceof com.bapppis.core.creature.Enemy) {
+                                        com.bapppis.core.creature.Enemy en = (com.bapppis.core.creature.Enemy) enemy;
+                                        if (en.getPosition() != null) {
+                                            com.bapppis.core.dungeon.Floor floor = com.bapppis.core.game.GameState
+                                                    .getCurrentFloor();
+                                            if (floor != null) {
+                                                com.bapppis.core.dungeon.Tile tile = floor.getTile(en.getPosition());
+                                                if (tile != null) {
+                                                    tile.getOccupants().remove(enemy);
+                                                }
+                                            }
+                                            // Clear the enemy's position to fully disconnect it from the map
+                                            en.setPosition((com.bapppis.core.dungeon.Coordinate) null);
+                                        }
+                                    }
+                                    // Show victory dialog and exit combat when dismissed
+                                    com.kotcrab.vis.ui.widget.VisDialog victoryDlg = new com.kotcrab.vis.ui.widget.VisDialog(
+                                            "Victory");
+                                    victoryDlg.text(enemy.getName() + " defeated!");
+                                    com.kotcrab.vis.ui.widget.VisTextButton spellOkBtn = new com.kotcrab.vis.ui.widget.VisTextButton(
+                                            "OK");
+                                    spellOkBtn.addListener(new ClickListener() {
+                                        @Override
+                                        public void clicked(InputEvent event, float x, float y) {
+                                            victoryDlg.hide();
+                                            com.bapppis.core.game.GameState.setInCombat(false);
+                                            showFloorView();
+                                        }
+                                    });
+                                    victoryDlg.button(spellOkBtn);
+                                    victoryDlg.show(stage);
+                                    return;
+                                }
+
+                                // Enemy counter-attack
+                                com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                                    @Override
+                                    public void run() {
+                                        Gdx.app.postRunnable(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    int beforePlayerHp = pp.getCurrentHp();
+                                                    enemy.attack(pp);
+                                                    int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
+                                                    combatMsg.setText("Enemy dealt " + taken + " damage.");
+                                                    refreshLabels.run();
+                                                    if (pp.getCurrentHp() <= 0) {
+                                                        com.kotcrab.vis.ui.widget.VisDialog defeatDlg = new com.kotcrab.vis.ui.widget.VisDialog(
+                                                                "Defeat");
+                                                        defeatDlg.text(pp.getName() + " has been defeated!");
+                                                        defeatDlg.button("OK");
+                                                        defeatDlg.show(stage);
+                                                    }
+                                                } catch (Exception e) {
+                                                    Gdx.app.error("RecallDungeon",
+                                                            "Error during spell enemy retaliation", e);
+                                                } finally {
+                                                    attackBtn.setDisabled(false);
+                                                    inventoryBtn.setDisabled(false);
+                                                    boolean hasSpells2 = pp.getSpellReferences() != null
+                                                            && !pp.getSpellReferences().isEmpty();
+                                                    spellsBtn.setDisabled(!hasSpells2);
+                                                    useBtn.setDisabled(false);
+                                                    waitBtn.setDisabled(false);
+                                                    fleeBtn.setDisabled(false);
+                                                }
+                                            }
+                                        });
+                                    }
+                                }, 0.9f);
+                            } catch (Exception e) {
+                                Gdx.app.error("RecallDungeon", "Error casting spell in combat", e);
+                                attackBtn.setDisabled(false);
+                                inventoryBtn.setDisabled(false);
+                                boolean hasSpells2 = pp.getSpellReferences() != null
+                                        && !pp.getSpellReferences().isEmpty();
+                                spellsBtn.setDisabled(!hasSpells2);
+                                useBtn.setDisabled(false);
+                                waitBtn.setDisabled(false);
+                                fleeBtn.setDisabled(false);
+                            }
+                        }
+                    });
+                    spellTable.add(lbl).left().padRight(8);
+                    spellTable.add(castBtn).row();
+                }
+
+                dlg.getContentTable().add(spellTable);
+                dlg.button("Close");
+                dlg.show(stage);
             }
         });
 
@@ -870,6 +1230,8 @@ public class RecallDungeon extends ApplicationAdapter {
 
         center.add(combatMsg).width(300).padBottom(6).row();
         center.add(attackBtn).pad(6).row();
+        center.add(inventoryBtn).pad(6).row();
+        center.add(spellsBtn).pad(6).row();
         center.add(useBtn).pad(6).row();
         center.add(waitBtn).pad(6).row();
         center.add(fleeBtn).pad(6).row();
