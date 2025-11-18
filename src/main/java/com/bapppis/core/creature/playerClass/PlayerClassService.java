@@ -5,12 +5,13 @@ import com.bapppis.core.creature.Player;
 import com.bapppis.core.creature.creatureEnums.Stats;
 import com.bapppis.core.property.Property;
 import com.bapppis.core.property.PropertyLoader;
+import com.bapppis.core.spell.SpellReference;
 
 import java.util.Map;
 
 /**
  * Service for applying and managing player classes.
- * 
+ *
  * Handles:
  * - Applying class bonuses and properties to Player instances
  * - Removing class effects when switching classes
@@ -130,12 +131,25 @@ public class PlayerClassService {
       }
     }
 
-    // Unlock spells
+    // Unlock spells (add as SpellReference entries so player can use them in combat)
     if (playerClass.getUnlockedSpells() != null) {
       for (String spellName : playerClass.getUnlockedSpells()) {
-        // Note: Implement spell unlocking when spell system supports it
-        // For now, just log the unlock
-        System.out.println("Player unlocked spell: " + spellName);
+        if (spellName == null || spellName.isEmpty()) continue;
+        try {
+          // Add a basic SpellReference with default weight=1 if not already present
+          boolean exists = false;
+          for (SpellReference ref : player.getSpellReferences()) {
+            if (spellName.equalsIgnoreCase(ref.getName())) {
+              exists = true;
+              break;
+            }
+          }
+          if (!exists) {
+            player.getSpellReferences().add(new SpellReference(spellName, 1));
+          }
+        } catch (Exception e) {
+          System.err.println("Failed to add unlocked spell to player: " + spellName);
+        }
       }
     }
 
@@ -322,9 +336,20 @@ public class PlayerClassService {
         }
       }
 
-      // Unlock spells
+      // Unlock spells from level unlocks
       if (unlock.getSpells() != null) {
         for (String spellName : unlock.getSpells()) {
+          if (spellName == null || spellName.isEmpty()) continue;
+          boolean exists = false;
+          for (SpellReference ref : player.getSpellReferences()) {
+            if (spellName.equalsIgnoreCase(ref.getName())) {
+              exists = true;
+              break;
+            }
+          }
+          if (!exists) {
+            player.getSpellReferences().add(new SpellReference(spellName, 1));
+          }
           System.out.println(player.getName() + " unlocked spell: " + spellName + "!");
         }
       }

@@ -67,6 +67,7 @@ public class Enemy extends Creature {
      * distance to player.
      * Only moves if the target tile is walkable and unoccupied.
      * Does not move during combat.
+     * If adjacent to player (distance 1), initiates combat instead of moving.
      */
     public void takeAITurn() {
         // Don't move during combat
@@ -93,10 +94,18 @@ public class Enemy extends Creature {
             return; // Player not in vision range
         }
 
-        // Check line of sight - enemies can't see through occupied tiles (walls, chests, etc.)
-        if (!floor.hasLineOfSight(position.getX(), position.getY(), 
-                                   player.getPosition().getX(), player.getPosition().getY(), true)) {
+        // Check line of sight - enemies can't see through occupied tiles (walls,
+        // chests, etc.)
+        if (!floor.hasLineOfSight(position.getX(), position.getY(),
+                player.getPosition().getX(), player.getPosition().getY(), true)) {
             return; // No line of sight to player
+        }
+
+        // If adjacent to player (distance 1), start combat
+        if (distance == 1) {
+            com.bapppis.core.game.GameState.setInCombat(true);
+            com.bapppis.core.game.GameState.setCombatEnemy(this);
+            return;
         }
 
         // Find the best adjacent tile to move toward player

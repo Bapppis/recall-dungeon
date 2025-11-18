@@ -11,26 +11,14 @@
     "DARKNESS": -5
   },
   "maxStaminaBonus": 20,
-  "grantedProperties": [
-    "Bleed Immunity"
-  ],
-  "unlockedSpells": [
-    "Serpent's Fang"
-  ],
+  "grantedProperties": ["Bleed Immunity"],
+  "unlockedSpells": ["Serpent's Fang"],
   "talentPointsPerLevel": 1,
   "levelUnlocks": {
-    "3": {
-      
-    },
-    "5": {
-
-    },
-    "7": {
-      
-    },
-    "10": {
-      
-    }
+    "3": {},
+    "5": {},
+    "7": {},
+    "10": {}
   },
   "tooltip": "A stealthy assassin who strikes from the shadows. Rogues are masters of deception and agility."
 }

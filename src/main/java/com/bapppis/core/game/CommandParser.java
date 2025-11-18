@@ -66,9 +66,7 @@ public class CommandParser {
                         }
                     }
                     if (spawn != null) {
-                        System.out.println("DEBUG: Found downstairs at " + spawn + ", moving player there");
                         player.setPosition(spawn);
-                        System.out.println("DEBUG: Player position is now " + player.getPosition());
                         // Reset all tiles to undiscovered
                         for (Tile t : newFloor.getTiles().values()) {
                             t.setDiscovered(false);
@@ -129,9 +127,7 @@ public class CommandParser {
                         }
                     }
                     if (spawn != null) {
-                        System.out.println("DEBUG: Found upstairs at " + spawn + ", moving player there");
                         player.setPosition(spawn);
-                        System.out.println("DEBUG: Player position is now " + player.getPosition());
                         // Reset all tiles to undiscovered
                         for (Tile t : newFloor.getTiles().values()) {
                             t.setDiscovered(false);
@@ -374,8 +370,36 @@ class MoveCommand implements Command {
         floor.revealTilesWithVision(target.getX(), target.getY(), player.getVisionRange());
         // MapPrinter.printWithPlayer(floor, player);
 
+        // Check for adjacent enemies and trigger combat
+        checkForAdjacentEnemies(floor, player);
+
         // Pass a turn after successful movement
         Game.passTurn();
+    }
+
+    private void checkForAdjacentEnemies(Floor floor, Player player) {
+        if (player.getPosition() == null)
+            return;
+
+        int[][] directions = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } };
+
+        for (int[] dir : directions) {
+            int checkX = player.getX() + dir[0];
+            int checkY = player.getY() + dir[1];
+            Coordinate checkCoord = new Coordinate(checkX, checkY);
+            Tile tile = floor.getTile(checkCoord);
+
+            if (tile != null && !tile.getOccupants().isEmpty()) {
+                for (var occupant : tile.getOccupants()) {
+                    if (occupant instanceof com.bapppis.core.creature.Enemy) {
+                        com.bapppis.core.creature.Enemy enemy = (com.bapppis.core.creature.Enemy) occupant;
+                        GameState.setInCombat(true);
+                        GameState.setCombatEnemy(enemy);
+                        return;
+                    }
+                }
+            }
+        }
     }
 }
 
