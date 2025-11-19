@@ -80,6 +80,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
     - **Basic AI**: Enemies move one tile per turn toward the player when within vision range (Will be changed in the future so enemy passively patrols and chases to player's last seen location)
     - **Vision-based pursuit**: Uses creature's vision range to detect player (affected by Darksight trait)
     - **Line-of-sight checks**: Enemies cannot see through walls or occupied tiles (chests, other creatures)
+    - **Proximity combat**: Enemies trigger combat when moving adjacent to player (Manhattan distance = 1)
     - **Combat awareness**: Enemies stop moving during combat encounters
     - **Greedy pathfinding**: Uses Manhattan distance heuristic for simple, fast target selection
   - **NPC**: Non-hostile characters for dialogue and quests
@@ -91,7 +92,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - JSON-driven class definitions with unique progression paths
   - Stat bonuses and resistance modifications per class
   - Granted traits and immunities (e.g., Paladin gains Bleed Immunity)
-  - Starting spells unlock automatically when class is applied
+  - Starting spells unlock automatically when class is applied and added to player's spell references
   - Level-based unlocks: new abilities, stats, and traits at specific levels
   - Talent point system for character customization
   - Class selection UI integrated into character creation
@@ -101,6 +102,8 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Mana-based casting with cost checking
   - Support for multi-element spells (up to 4 damage types per spell)
   - Buff-only spells for self-enhancement
+  - Spells unlocked via classes, level unlocks, and talent choices appear in combat UI
+  - Player can select spells from spell list during combat encounters
 - Runtime utilities: `com.bapppis.core.util` contains helper classes used by gameplay and tests. Notable ones:
   - `StatUtil` — static helpers to increase/decrease stats safely (clamps decreases to not go below zero).
   - `Dice` — rolls dice strings (e.g., "2d6").
@@ -130,6 +133,17 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 ### Combat System
 
 - **Turn-based combat** between player and enemies with sophisticated hit/miss/crit mechanics
+- **Proximity-based triggering**: Combat starts automatically when player and enemy are adjacent (Manhattan distance = 1)
+  - Enemy AI triggers combat when moving next to player
+  - Player movement triggers combat when moving next to enemy
+  - Consistent combat initiation regardless of who initiates proximity
+- **Dedicated combat UI**: Side-by-side combat view with sprites and stats
+  - Player sprite (left) with HP, Mana, Stamina, Level display
+  - Enemy sprite (right) with HP and Level display
+  - Action buttons: Attack, Inventory, Spells, Use Item, Wait, Flee
+  - Spells button grayed out when no spells available
+  - Turn-based action resolution with enemy counter-attacks
+  - Thread-safe UI updates using LibGDX main thread (Gdx.app.postRunnable)
 - **Per-hit resolution**: Each attack can have multiple hits (`attack.times`), each resolved independently
 - **Dice-based damage**: Physical and magical damage use dice notation (e.g., `2d6`, `1d8+5`)
 - **Resistance buildup system**: Successful hits add buildup (0-100%) to resistance types
@@ -142,6 +156,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Dual-element weapons resolve physical and magical independently
 - **Critical hits**: Rolled per successful hit, doubles damage for that hit
 - **Damage bonuses**: Stat bonuses (STR/DEX for physical, INT/WIS/CHA for magic) and multipliers
+- **Victory handling**: XP rewards, enemy removal from map, combat exit on dialog dismissal
 - **Detailed reporting**: `AttackEngine.AttackReport` tracks all combat metrics for testing and logging
 - **See [SYSTEM_REFERENCE.md](src/main/resources/SYSTEM_REFERENCE.md) for complete combat mechanics documentation**
 
@@ -201,7 +216,7 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
   - Resistance modifications (Fire, Ice, Light, Darkness, physical types)
   - Resource bonuses (HP, Mana, Stamina, regeneration rates)
   - Granted traits and immunities
-  - Spell unlocks
+  - Spell unlocks (automatically added to player's spell references for combat use)
 - **Talent reset**: Two reset options available:
   - Simple reset: Clears unlocked nodes and refunds talent points
   - Full reset: Recalculates all stats by removing/re-applying class, fully reverting talent bonuses
