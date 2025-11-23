@@ -55,5 +55,7 @@
       "weight": 3
     }
   ],
-  "sprite": "monster_skeleton"
+  "sprite": "monster_skeleton",
+  "deathSprite": "lootable_corpse",
+  "lootPool": "CommonPotions"
 }

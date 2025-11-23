@@ -62,6 +62,8 @@
     }
   ],
   "sprite": "monster_goblin",
+  "deathSprite": "lootable_corpse",
+  "lootPool": "CommonPotions",
   "spells": [
     {
       "name": "Fireball",

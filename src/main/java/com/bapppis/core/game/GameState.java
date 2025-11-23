@@ -3,12 +3,14 @@ package com.bapppis.core.game;
 import com.bapppis.core.creature.Enemy;
 import com.bapppis.core.creature.Player;
 import com.bapppis.core.dungeon.Floor;
+import com.bapppis.core.dungeon.Coordinate;
 
 public final class GameState {
     private static Floor currentFloor;
     private static Player player;
     private static boolean inCombat = false;
     private static Enemy combatEnemy = null;
+    private static LootTransferCallback lootTransferCallback = null;
 
     private GameState() {}
 
@@ -48,5 +50,15 @@ public final class GameState {
 
     public static void setCombatEnemy(Enemy enemy) {
         combatEnemy = enemy;
+    }
+    
+    public static void setLootTransferCallback(LootTransferCallback callback) {
+        lootTransferCallback = callback;
+    }
+    
+    public static void showLootTransferDialog(Coordinate coord) {
+        if (lootTransferCallback != null) {
+            lootTransferCallback.showLootTransferDialog(coord);
+        }
     }
 }

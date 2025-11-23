@@ -21,11 +21,23 @@
     "LIGHT": 10
   },
   "tooltip": [
-    "Test helmet with WIS+3, INT+2, CHA-1",
-    "Provides +3 defense, 5% crit, 15% magic resist, +2 magic accuracy",
-    "Resistances: LIGHT+10%, DARKNESS-5%"
+    "You gain 5% critical chance while wearing this armor.",
+    "",
+    "Your magic resist is increased by 15% while wearing this armor.",
+    "",
+    "You gain +2 magic accuracy while wearing this armor.",
+    "",
+    "Your CHA bonus is decreased by 1 while wearing this armor.",
+    "",
+    "Your INT bonus is increased by 2 while wearing this armor.",
+    "",
+    "Your WIS bonus is increased by 3 while wearing this armor.",
+    "",
+    "You take 5% more darkness damage while wearing this armor.",
+    "",
+    "You take 10% less light damage while wearing this armor."
   ],
-  "defense": 3,
+  "droppedSprite": "dropped_item",
   "properties": [
     "TestTrait5"
   ]

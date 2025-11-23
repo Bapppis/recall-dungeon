@@ -213,13 +213,12 @@ public class Player extends Creature {
                 .append("Buffs=").append(getBuffs().size()).append(" ")
                 .append("Debuffs=").append(getDebuffs().size()).append(" ")
                 .append("Traits=").append(getTraits().size()).append("\n");
-        sb.append("Inventory counts: ")
-                .append("Weapons=").append(getInventory().getWeapons().size()).append(", ")
-                .append("Offhands=").append(getInventory().getOffhands().size()).append(", ")
-                .append("Helmets=").append(getInventory().getHelmets().size()).append(", ")
-                .append("Armor=").append(getInventory().getArmors().size()).append(", ")
-                .append("Consumables=").append(getInventory().getConsumables().size()).append(", ")
-                .append("Misc=").append(getInventory().getMisc().size()).append("\n");
+        sb.append("Inventory: ")
+                .append(getInventory().getCurrentLoad()).append("/").append(getInventory().getMaxCapacity());
+        if (getInventory().isOverEncumbered()) {
+            sb.append(" (OVER-ENCUMBERED!)");
+        }
+        sb.append("\n");
         return sb.toString();
     }
 

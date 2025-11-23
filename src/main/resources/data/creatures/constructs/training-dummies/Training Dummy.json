@@ -15,5 +15,7 @@
   "hpDice": 4,
   "weapon": null,
   "properties": null,
-  "sprite": null
+  "sprite": null,
+  "deathSprite": "lootable_corpse",
+  "lootPool": "CommonPotions"
 }

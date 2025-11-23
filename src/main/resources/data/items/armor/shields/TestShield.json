@@ -21,11 +21,23 @@
     "PIERCING": 10
   },
   "tooltip": [
-    "A test shield with CON+2, WIS+1, DEX-1",
-    "Provides 20% block, -5% dodge, 5% magic resist, +5 defense",
-    "Resistances: BLUDGEONING+15%, PIERCING+10%"
+    "Your dodge chance is decreased by 5% while wearing this armor.",
+    "",
+    "Your gain 20% block chance while wearing this armor.",
+    "",
+    "Your magic resist is increased by 5% while wearing this armor.",
+    "",
+    "Your CON bonus is increased by 2 while wearing this armor.",
+    "",
+    "Your DEX bonus is decreased by 1 while wearing this armor.",
+    "",
+    "Your WIS bonus is increased by 1 while wearing this armor.",
+    "",
+    "You take 15% less bludgeoning damage while wearing this armor.",
+    "",
+    "You take 10% less piercing damage while wearing this armor."
   ],
-  "defense": 5,
+  "droppedSprite": "dropped_item",
   "properties": [
     "TestTrait4"
   ]

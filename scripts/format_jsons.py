@@ -111,6 +111,7 @@ CANON_TOP_ORDER: List[str] = [
     "resistances",
     "attacks",
     "tooltip",
+    "droppedSprite"
 ]
 
 # Canonical ordering for attack objects (fields optional; absent ones skipped).
@@ -170,7 +171,9 @@ CANON_CREATURE_ORDER: List[str] = [
     "removeProperties",
     "properties",
     "attacks",
-    "sprite"
+    "sprite",
+    "deathSprite",
+    "lootPool"
 ]
 
 # Canonical ordering for creature stats and resistances

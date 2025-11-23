@@ -15,6 +15,7 @@ public interface Item {
     int getId();
     EquipmentSlot getSlot();
     void setSlot(EquipmentSlot slot);
+    String getDroppedSprite(); // Sprite to use when item is dropped on ground
 
     List<Property> getProperties();
     void setProperties(List<Property> properties);

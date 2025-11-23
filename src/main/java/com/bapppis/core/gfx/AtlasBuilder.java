@@ -48,10 +48,26 @@ public class AtlasBuilder {
     }
 
     public static TextureAtlas loadWithFallback() {
-        String[] spriteFolders = { "assets/sprite_pngs", "sprite_pngs", "sprite_pngs/" };
+        String[] spriteFolders = { 
+            "assets/sprite_pngs", 
+            "sprite_pngs", 
+            "sprite_pngs/",
+            "src/main/resources/assets/sprite_pngs",
+            "../src/main/resources/assets/sprite_pngs"
+        };
         TextureAtlas atlas = null;
-        // Prefer a prebuilt atlas if available (this contains player sprites and other
-        // packed regions)
+        
+        // First try to build from PNG folder (this ensures we get the latest sprites)
+        Gdx.app.log("AtlasBuilder", "Building atlas from PNG folder...");
+        for (String folder : spriteFolders) {
+            atlas = buildFromFolder(folder);
+            if (atlas != null && atlas.getRegions().size > 0) {
+                return atlas;
+            }
+        }
+
+        // Fallback to prebuilt atlas if PNG folder doesn't work
+        Gdx.app.log("AtlasBuilder", "No PNGs found, trying prebuilt atlas...");
         String[] atlasFiles = { "assets/sprites.atlas", "sprites.atlas", "assets/tiles.atlas", "tiles.atlas" };
         for (String atlasFile : atlasFiles) {
             try {
@@ -62,16 +78,6 @@ public class AtlasBuilder {
                 }
             } catch (Exception e) {
                 Gdx.app.error("AtlasBuilder", "Error loading atlas: " + atlasFile, e);
-            }
-        }
-
-        Gdx.app.log("AtlasBuilder", "No prebuilt atlas found, building from PNGs...");
-
-        // If no prebuilt atlas was present, try loading loose PNGs from known folders.
-        for (String folder : spriteFolders) {
-            atlas = buildFromFolder(folder);
-            if (atlas != null && atlas.getRegions().size > 0) {
-                return atlas;
             }
         }
 

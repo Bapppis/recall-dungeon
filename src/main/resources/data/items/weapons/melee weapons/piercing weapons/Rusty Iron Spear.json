@@ -42,6 +42,7 @@
     "",
     "Thrust (30%): Deals 2-6 + 5 * STR bonus piercing damage and 1-2 + 5 * INT bonus nature damage. This attack has a +5% critical chance."
   ],
+  "droppedSprite": "dropped_item",
   "versatileAttacks": [
     {
       "name": "Two-handed Jabs",

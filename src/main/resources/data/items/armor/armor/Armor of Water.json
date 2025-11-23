@@ -21,5 +21,6 @@
     "Your INT bonus is increased by 2 while wearing this armor.",
     "",
     "You take 50% less water damage while wearing this armor."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

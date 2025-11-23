@@ -13,8 +13,8 @@
           "id": "rogue_foundation",
           "name": "Rogue Foundation",
           "description": "Basic training improves your survivability",
-          "dodgeBonus": 5,
-          "critBonus": 5
+          "critBonus": 5,
+          "dodgeBonus": 5
         }
       ],
       "column": 1,

@@ -129,7 +129,6 @@ public class MapActor extends Actor {
 
                 Tile tile = floor.getTile(new Coordinate(x, y));
                 String tileSpr = null;
-                String overlaySprite = null;
                 char tileSymbol = '.';
 
                 if (tile == null) {
@@ -142,17 +141,19 @@ public class MapActor extends Actor {
                     // Get the base tile sprite
                     tileSpr = tile.getSprite();
                     tileSymbol = tile.getSymbol();
-                    
-                    // If there's loot, it goes on top of the tile
-                    if (tile.getLoot() != null) {
-                        overlaySprite = "common_treasure_chest";
-                    }
                 }
 
-                // Draw the base tile
+                // Draw the base tile first (floor/wall/etc)
                 boolean tileDrawn = false;
-                if (atlas != null && tileSpr != null) {
-                    TextureRegion reg = atlas.findRegion(tileSpr);
+                String baseTileSpr = tileSpr;
+
+                // For corpses, dropped items, and chests, draw floor underneath
+                if (tileSymbol == '%' || tileSymbol == '*' || tileSymbol == 'C') {
+                    baseTileSpr = "basicFloor";
+                }
+
+                if (atlas != null && baseTileSpr != null) {
+                    TextureRegion reg = atlas.findRegion(baseTileSpr);
                     if (reg != null) {
                         float tileW = cellWidth;
                         float tileH = lineHeight * 0.9f;
@@ -167,23 +168,44 @@ public class MapActor extends Actor {
                     font.draw(batch, String.valueOf(tileSymbol), drawX, drawY);
                     font.getData().setScale(1.0f);
                 }
+
+                // Draw corpse/dropped item sprites on top of floor (1/3 size, centered)
+                if ((tileSymbol == '%' || tileSymbol == '*') && atlas != null && tileSpr != null) {
+                    TextureRegion itemReg = atlas.findRegion(tileSpr);
+                    if (itemReg != null) {
+                        float itemScale = 0.33f; // 1/3 size
+                        float itemW = cellWidth * itemScale;
+                        float itemH = (lineHeight * 0.9f) * itemScale;
+
+                        // Center the item sprite on the tile
+                        float itemX = drawX + (cellWidth - itemW) / 2;
+                        float itemY = drawY - lineHeight + (lineHeight * 0.1f) + ((lineHeight * 0.9f) - itemH) / 2;
+
+                        batch.draw(itemReg, itemX, itemY, itemW, itemH);
+                    }
+                }
                 
-                // Draw overlay (chest, etc.) on top of tile if present
-                if (overlaySprite != null && atlas != null) {
-                    TextureRegion reg = atlas.findRegion(overlaySprite);
-                    if (reg != null) {
+                // Draw chest sprites on top of floor (full size, centered)
+                if (tileSymbol == 'C' && atlas != null && tileSpr != null) {
+                    TextureRegion chestReg = atlas.findRegion(tileSpr);
+                    if (chestReg != null) {
                         float tileW = cellWidth;
                         float tileH = lineHeight * 0.9f;
                         float texY = drawY - lineHeight + (lineHeight * 0.1f);
-                        batch.draw(reg, drawX, texY, tileW, tileH);
+                        batch.draw(chestReg, drawX, texY, tileW, tileH);
                     }
                 }
 
                 // Draw tile occupants (enemies, NPCs) before player - only on discovered tiles
-                if (tile != null && tile.isDiscovered() && tile.getOccupants() != null && !tile.getOccupants().isEmpty()) {
-                    for (com.bapppis.core.creature.Creature occupant : tile.getOccupants()) {
+                if (tile != null && tile.isDiscovered() && tile.getOccupants() != null
+                        && !tile.getOccupants().isEmpty()) {
+                    // Create a copy to avoid ConcurrentModificationException
+                    java.util.List<com.bapppis.core.creature.Creature> occupantsCopy = new java.util.ArrayList<>(
+                            tile.getOccupants());
+                    for (com.bapppis.core.creature.Creature occupant : occupantsCopy) {
                         // Skip the player (we'll draw them last)
-                        if (occupant == player) continue;
+                        if (occupant == player)
+                            continue;
 
                         String spriteName = occupant.getSprite();
                         if (spriteName != null && !spriteName.isEmpty() && atlas != null) {
@@ -192,7 +214,8 @@ public class MapActor extends Actor {
                                 float maxWidth = cellWidth;
                                 float maxHeight = lineHeight * 0.9f;
 
-                                float scale = Math.min(maxWidth / reg.getRegionWidth(), maxHeight / reg.getRegionHeight());
+                                float scale = Math.min(maxWidth / reg.getRegionWidth(),
+                                        maxHeight / reg.getRegionHeight());
                                 float finalW = reg.getRegionWidth() * scale;
                                 float finalH = reg.getRegionHeight() * scale;
 

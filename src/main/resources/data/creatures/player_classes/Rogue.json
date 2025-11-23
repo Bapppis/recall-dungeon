@@ -7,12 +7,16 @@
     "WISDOM": 1
   },
   "resistances": {
-    "NATURE": -10,
-    "DARKNESS": -5
+    "DARKNESS": -5,
+    "NATURE": -10
   },
   "maxStaminaBonus": 20,
-  "grantedProperties": ["Bleed Immunity"],
-  "unlockedSpells": ["Serpent's Fang"],
+  "grantedProperties": [
+    "Bleed Immunity"
+  ],
+  "unlockedSpells": [
+    "Serpent's Fang"
+  ],
   "talentPointsPerLevel": 1,
   "levelUnlocks": {
     "3": {},

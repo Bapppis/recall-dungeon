@@ -44,5 +44,6 @@
     "Slashes (70%): Deals 2-6 + 5 * STR or DEX bonus slashing damage.",
     "",
     "Stab (30%): Deals 1-6 + 5 * STR or DEX bonus piercing damage. This attack has a +5% critical chance."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

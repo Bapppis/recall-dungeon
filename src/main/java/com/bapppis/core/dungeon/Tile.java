@@ -19,6 +19,7 @@ public class Tile {
     private boolean isDiscovered = false;
     private boolean isSpawn = false;
     private LootPool loot = null;
+    private String lootPoolId = null; // For corpses - stores the loot pool ID reference
     private Event isEvent = null;
     private List<Creature> occupants = new ArrayList<>();
     private List<Item> items = new ArrayList<>();
@@ -141,6 +142,14 @@ public class Tile {
         return loot;
     }
 
+    public void setLootPoolId(String lootPoolId) {
+        this.lootPoolId = lootPoolId;
+    }
+
+    public String getLootPoolId() {
+        return lootPoolId;
+    }
+
     public List<Creature> getOccupants() {
         return occupants;
     }
@@ -161,6 +170,8 @@ public class Tile {
 
     public void spawnTreasureChest(LootPool loot) {
         this.loot = loot;
+        // Note: This method is deprecated in favor of replacing the tile with a chest TileType
+        // The BSPRoomGenerator should replace the tile instead of calling this method
     }
 
     @Deprecated

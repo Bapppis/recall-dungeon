@@ -7,7 +7,7 @@ public class DesktopLauncher {
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Recall Dungeon");
-        config.setWindowedMode(1280, 800);
+        config.setWindowedMode(1600, 1000);
         new Lwjgl3Application(new RecallDungeon(), config);
     }
 }
