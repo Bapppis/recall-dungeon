@@ -19,5 +19,6 @@
     "You take 5% less piercing damage while wearing this armor.",
     "",
     "You take 10% less slashing damage while wearing this armor."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

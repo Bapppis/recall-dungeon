@@ -46,5 +46,6 @@
     "Crush (25%): Deals 2-8 + 5 * STR bonus bludgeoning damage. This attack has a +5% critical chance.",
     "",
     "Skull Crush (15%): Deals 2-10 + 5 * STR bonus bludgeoning damage. This attack has a +10% critical chance and +5 accuracy."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

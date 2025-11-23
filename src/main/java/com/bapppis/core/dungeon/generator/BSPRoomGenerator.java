@@ -230,8 +230,10 @@ public class BSPRoomGenerator implements MapGenerator {
       spawnMonsters(tiles, "Floor 0 Enemies", 2, 3, true, qBounds, random);
     }
 
-    // FINAL CONNECTIVITY CHECK: Ensure upstairs and downstairs are mutually reachable
-    // This catches any edge cases where maze generation might have isolated a staircase
+    // FINAL CONNECTIVITY CHECK: Ensure upstairs and downstairs are mutually
+    // reachable
+    // This catches any edge cases where maze generation might have isolated a
+    // staircase
     if (!isReachable(tiles, upCoord, downCoord)) {
       System.out.println("WARNING: Stairs not connected on floor " + floorNumber + ", carving path...");
       carvePathIfNeeded(tiles, upCoord, downCoord, floorType);
@@ -361,10 +363,10 @@ public class BSPRoomGenerator implements MapGenerator {
     // Phase 3: Widen corridors (make 2-tile wide passages in some areas)
     widenCorridors(tiles, minX, minY, maxX, maxY, floorType, random, 0.10); // 10% of eligible walls
 
-  // Phase 4: Create some open areas by removing walls between adjacent floor
-  // tiles
-  // Reduced from 8% to 3% to make the map less open by default
-  createOpenAreas(tiles, minX, minY, maxX, maxY, floorType, random, 0.03); // 3% of walls
+    // Phase 4: Create some open areas by removing walls between adjacent floor
+    // tiles
+    // Reduced from 8% to 3% to make the map less open by default
+    createOpenAreas(tiles, minX, minY, maxX, maxY, floorType, random, 0.03); // 3% of walls
 
     // Phase 5: Add some dead-end branches
     addDeadEnds(tiles, minX, minY, maxX, maxY, floorType, random, 3 + random.nextInt(5)); // 3-7 dead ends
@@ -838,8 +840,29 @@ public class BSPRoomGenerator implements MapGenerator {
       // Prefer floor tiles that aren't spawn and don't block paths
       if (cand.getSymbol() == '.' && !cand.isSpawn() && !cand.isOccupied()) {
         if (!wouldBlockPath(tiles, x, y, upCoord, downCoord)) {
-          cand.spawnTreasureChest(chestLoot);
-          spawned++;
+          // Replace floor tile with chest tile
+          TileType chestType = TileTypeLoader.getTileTypeByName("commonTreasureChest");
+          if (chestType != null) {
+            Tile chestTile = new Tile(new Coordinate(x, y), chestType);
+            // Copy navigation references
+            chestTile.setLeft(cand.getLeft());
+            chestTile.setRight(cand.getRight());
+            chestTile.setUp(cand.getUp());
+            chestTile.setDown(cand.getDown());
+            chestTile.setDiscovered(cand.isDiscovered());
+            tiles[x][y] = chestTile;
+
+            // Update neighbor references
+            if (chestTile.getLeft() != null)
+              chestTile.getLeft().setRight(chestTile);
+            if (chestTile.getRight() != null)
+              chestTile.getRight().setLeft(chestTile);
+            if (chestTile.getUp() != null)
+              chestTile.getUp().setDown(chestTile);
+            if (chestTile.getDown() != null)
+              chestTile.getDown().setUp(chestTile);
+            spawned++;
+          }
         }
       }
     }
@@ -870,8 +893,23 @@ public class BSPRoomGenerator implements MapGenerator {
         // Replace wall with chest if it doesn't block critical paths
         if (cand.getSymbol() == '#' && !wouldBlockPath(tiles, x, y, upCoord, downCoord)) {
           Tile newTile = new Tile(new Coordinate(x, y), chestType);
-          newTile.spawnTreasureChest(chestLoot);
+          // Copy navigation and state
+          newTile.setLeft(cand.getLeft());
+          newTile.setRight(cand.getRight());
+          newTile.setUp(cand.getUp());
+          newTile.setDown(cand.getDown());
+          newTile.setDiscovered(cand.isDiscovered());
           tiles[x][y] = newTile;
+
+          // Update neighbor references
+          if (newTile.getLeft() != null)
+            newTile.getLeft().setRight(newTile);
+          if (newTile.getRight() != null)
+            newTile.getRight().setLeft(newTile);
+          if (newTile.getUp() != null)
+            newTile.getUp().setDown(newTile);
+          if (newTile.getDown() != null)
+            newTile.getDown().setUp(newTile);
           spawned++;
         }
       }

@@ -37,6 +37,7 @@ public class Equipment implements Item {
     private Integer defense;
     private Integer accuracy;
     private Integer magicAccuracy;
+    private String droppedSprite; // Sprite to use when dropped on ground
 
     // Field to store property names/IDs from JSON
     @SerializedName("properties")
@@ -194,5 +195,14 @@ public class Equipment implements Item {
 
     public void setMagicAccuracy(Integer magicAccuracy) {
         this.magicAccuracy = magicAccuracy;
+    }
+
+    @Override
+    public String getDroppedSprite() {
+        return droppedSprite;
+    }
+
+    public void setDroppedSprite(String droppedSprite) {
+        this.droppedSprite = droppedSprite;
     }
 }

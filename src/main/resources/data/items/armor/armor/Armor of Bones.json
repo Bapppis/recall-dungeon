@@ -24,5 +24,6 @@
     "You take 70% less darkness damage while wearing this armor.",
     "",
     "You take 20% less bludgeoning damage while wearing this armor."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

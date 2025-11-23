@@ -14,7 +14,13 @@ import java.util.Map;
  * Loads talent trees from JSON files in data/creatures/talent_trees/
  */
 public class TalentTreeLoader {
-  private static final String TALENT_TREE_PATH = "data/creatures/talent_trees";
+  // Search both the legacy and the nested path under player_classes so tests
+  // and loaders can find talent trees regardless of where they live in the
+  // resources tree.
+  private static final String[] TALENT_TREE_PATHS = new String[] {
+      "data/creatures/talent_trees",
+      "data/creatures/player_classes/talent_trees"
+  };
 
   private final Map<Integer, TalentTree> treesById = new HashMap<>();
   private final Map<Integer, TalentTree> treesByClassId = new HashMap<>();
@@ -29,8 +35,15 @@ public class TalentTreeLoader {
 
   private void loadAllTalentTrees() {
     try (ScanResult scanResult = new ClassGraph()
-        .acceptPaths(TALENT_TREE_PATH)
+        .acceptPaths(TALENT_TREE_PATHS)
         .scan()) {
+
+      // Debug: print any JSON resources that look like talent tree files
+      for (Resource r : scanResult.getResourcesWithExtension("json")) {
+        if (r.getPath() != null && r.getPath().toLowerCase().contains("talent_trees")) {
+          System.out.println("Found JSON resource path: " + r.getPath());
+        }
+      }
 
       for (Resource resource : scanResult.getResourcesWithExtension("json")) {
         try {

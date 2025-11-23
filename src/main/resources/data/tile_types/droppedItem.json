@@ -1,0 +1,6 @@
+{
+  "name": "droppedItem",
+  "symbol": "*",
+  "sprite": "dropped_item",
+  "isOccupied": false
+}

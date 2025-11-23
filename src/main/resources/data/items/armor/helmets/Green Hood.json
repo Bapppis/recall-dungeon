@@ -18,5 +18,6 @@
     "Your DEX bonus is increased by 1 while wearing this armor.",
     "",
     "You take 10% less nature damage while wearing this armor."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

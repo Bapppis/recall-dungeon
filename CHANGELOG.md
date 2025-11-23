@@ -5,6 +5,94 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.10] - 2025-11-23
+
+### Added
+
+- **Interaction System**: E key + directional input for interacting with tiles
+  - Press E to enter interaction mode (yellow prompt appears)
+  - Press WASD/arrows to interact with tile in that direction
+  - Works with chests, corpses, and dropped items
+- **Loot Transfer Dialog**: Two-panel UI for looting items
+  - Left panel shows container contents ("Chest:" or "On Ground:")
+  - Right panel shows player inventory (read-only)
+  - Click "Take" to transfer items to inventory
+  - Dialog automatically refreshes when taking items
+  - Auto-closes when all items are looted
+- **Chest Spawning**: Treasure chests now properly spawn with loot from loot pools
+  - Fixed loot pool sampling to use numeric IDs (40000, 40001, 40002)
+  - Nested pool references now work correctly (Common Treasure Chest → Common Potions/Weapons)
+  - Chests spawn with 1 guaranteed potion + chance for more potions/weapons
+  - Chests remain on map after being emptied (can be looted multiple times if refilled)
+- **Corpse Creation**: Defeated enemies leave lootable corpses
+  - Enemy death creates corpse tile with loot from enemy's loot pool
+  - Corpse sprite rendered at 1/3 scale with transparency
+  - Corpses removed from map when all items are looted
+- **Drop Item Functionality**: Players can drop items from inventory onto floor
+  - Dropped consumables create droppedPotion tiles
+  - Dropped items render at 1/3 scale with floor showing underneath
+  - Dropped item tiles removed when all items are picked up
+- **Inventory Shortcuts**: Press 'I' to toggle inventory dialog open/close
+- **Tile Type System Expansion**: Added new tile types for loot system
+  - lootableCorpse.json (symbol: '%', sprite: lootable_corpse)
+  - droppedItem.json (symbol: '*', sprite: dropped_item)
+  - droppedPotion.json (sprite: dropped_potion)
+  - commonTreasureChest.json (symbol: 'C', sprite: common_treasure_chest)
+
+### Changed
+
+- **Sprite Atlas System**: PNG folder now prioritized over prebuilt atlas for development
+  - AtlasBuilder tries multiple path variations for PNG folder
+  - Falls back to prebuilt atlas if PNG folder not found
+  - Enables rapid sprite iteration without atlas rebuilding
+- **Map Rendering**: Enhanced transparency and sprite scaling
+  - Floor tiles render underneath chests, corpses, and dropped items
+  - Corpses and dropped items render at 0.33x scale (centered)
+  - Chests render at full size on top of floor
+  - All special tiles show floor underneath for visual clarity
+- **Map Viewport**: Increased zoom from 2.0x to 2.5x for better map coverage
+  - More tiles visible on screen at once
+  - Reduces need for scrolling/panning during exploration
+- **Loot System**: Complete refactor of loot pool loading and sampling
+  - LootManager now calls loadDefaults() to load all nested pools
+  - Fixed loot pool ID resolution (numeric IDs vs string names)
+  - Added comprehensive debug logging for loot spawning pipeline
+
+### Fixed
+
+- **Tile Visibility**: Fixed tiles not appearing on map
+  - TileTypeLoader now loads lootableCorpse, droppedItem, droppedPotion tile types
+  - All tile symbols now render correctly (C, %, *, etc.)
+- **Loot Pool Sampling**: Fixed nested pool references
+  - Common Treasure Chest pool references now use numeric IDs ("40001", "40000")
+  - LootManager properly resolves nested pools by ID and name
+  - Fixed empty chest bug caused by unloaded nested pools
+- **Sprite Loading**: Fixed sprite atlas loading priority
+  - PNG folder sprites now load correctly
+  - Fixed transparency issues with chest/corpse/item sprites
+- **ConcurrentModificationException**: Fixed crash when iterating over tile items during looting
+  - Now creates defensive copy of items list before iteration
+- **Chest Persistence**: Chests no longer disappear after looting
+  - Only corpses and dropped items are replaced with floor when empty
+  - Chests remain on map (symbol 'C') even when empty
+- **Dialog Labeling**: Loot dialog now shows correct container type
+  - "Chest:" for treasure chests
+  - "On Ground:" for corpses and dropped items
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/dungeon/TileTypeLoader.java` — added missing tile types to load list
+- `src/main/java/com/bapppis/core/gfx/AtlasBuilder.java` — PNG folder priority, multiple path variations
+- `src/main/java/com/bapppis/core/gfx/MapActor.java` — transparency, sprite scaling, increased zoom to 2.5x
+- `src/main/java/com/bapppis/core/gfx/RecallDungeon.java` — loot transfer dialog, 'I' key handler, drop item, corpse creation
+- `src/main/java/com/bapppis/core/game/CommandParser.java` — interaction mode, chest/corpse/item interaction
+- `src/main/java/com/bapppis/core/game/GameState.java` — LootTransferCallback interface and static methods
+- `src/main/java/com/bapppis/core/loot/LootManager.java` — loadDefaults() calls, debug logging, nested pool resolution
+- `src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java` — chest tile creation instead of spawnTreasureChest()
+- `src/main/resources/data/loot_pools/Common Treasure Chest.json` — fixed nested pool IDs to numeric format
+- `src/main/resources/data/tile_types/lootableCorpse.json` (NEW)
+- `src/main/resources/data/tile_types/droppedItem.json` (NEW)
+- `src/main/resources/data/tile_types/droppedPotion.json` (NEW)
 
 ## [v0.1.10] - 2025-11-18
 

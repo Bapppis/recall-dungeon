@@ -46,6 +46,7 @@
     "",
     "Stab (30%): Deals 1-6 + 5 * STR or DEX bonus piercing damage and 1-2 + 5 * INT bonus nature damage. This attack has a +5% critical chance."
   ],
+  "droppedSprite": "dropped_item",
   "versatileAttacks": [
     {
       "name": "Two-handed Slashes",

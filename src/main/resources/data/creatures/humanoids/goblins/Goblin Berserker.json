@@ -59,5 +59,7 @@
       "weight": 2
     }
   ],
-  "sprite": "monster_goblin_berserker"
+  "sprite": "monster_goblin_berserker",
+  "deathSprite": "lootable_corpse",
+  "lootPool": "CommonPotions"
 }

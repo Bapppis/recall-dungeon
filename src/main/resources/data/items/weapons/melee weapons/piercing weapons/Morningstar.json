@@ -57,5 +57,6 @@
     "Critical Blow (20%): Deals 2-7 + 5 * STR bonus piercing damage. This attack has a chance to inflict the Dizzy condition and a +10% critical chance.",
     "",
     "Dizzy: You have -10% block and -4 Dexterity."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

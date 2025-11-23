@@ -16,7 +16,9 @@
   },
   "resistances": {},
   "tooltip": [
-    "Test boots with DEX+1 and 10% dodge bonus"
+    "Your dodge chance is increased by 10% while wearing this armor.",
+    "",
+    "Your DEX bonus is increased by 1 while wearing this armor."
   ],
-  "defense": 1
+  "droppedSprite": "dropped_item"
 }

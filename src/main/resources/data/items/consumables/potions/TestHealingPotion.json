@@ -7,5 +7,6 @@
   "tooltip": [
     "Heals 3d6+5 HP when used."
   ],
+  "droppedSprite": "dropped_potion",
   "healingDice": "3d6+5"
 }

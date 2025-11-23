@@ -48,5 +48,6 @@
     "Barrage (25%): Deals 3-9 + 5 * DEX bonus piercing damage.",
     "",
     "Perfect Shot (5%): Deals 1-6 + 5 * DEX bonus true damage. This attack has a +30% critical chance."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

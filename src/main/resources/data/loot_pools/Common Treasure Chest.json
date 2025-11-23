@@ -4,7 +4,7 @@
   "sprite": "common_treasure_chest",
   "entries": [
     {
-      "id": "CommonPotions",
+      "id": "40001",
       "name": "Common Potions",
       "countMax": 1,
       "countMin": 1,
@@ -12,7 +12,7 @@
       "type": "pool"
     },
     {
-      "id": "CommonPotions",
+      "id": "40001",
       "name": "Common Potions",
       "chance": 0.2,
       "countMax": 1,
@@ -20,7 +20,7 @@
       "type": "pool"
     },
     {
-      "id": "CommonWeapons",
+      "id": "40000",
       "name": "Common Weapons",
       "chance": 0.5,
       "countMax": 1,

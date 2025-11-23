@@ -1,0 +1,6 @@
+{
+  "name": "droppedPotion",
+  "symbol": "*",
+  "sprite": "dropped_potion",
+  "isOccupied": false
+}

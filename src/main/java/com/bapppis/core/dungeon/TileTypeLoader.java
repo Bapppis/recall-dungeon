@@ -26,7 +26,10 @@ public class TileTypeLoader {
       "basicGenFloor.json",
       "basicUpStairs.json",
       "basicDownStairs.json",
-      "commonTreasureChest.json"
+      "commonTreasureChest.json",
+      "lootableCorpse.json",
+      "droppedItem.json",
+      "droppedPotion.json"
     };
 
     for (String fileName : tileTypeFiles) {

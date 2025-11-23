@@ -77,7 +77,7 @@ public abstract class Creature {
     private int propertyAccuracy = 0;
     private int propertyMagicAccuracy = 0;
     private final java.util.EnumMap<Stats, Integer> statBonuses = new java.util.EnumMap<>(Stats.class);
-    private final PropertyManager propertyManager = new PropertyManager(this);
+    private PropertyManager propertyManager = new PropertyManager(this);
     private String description;
     private EnumMap<EquipmentSlot, Item> equipment = new EnumMap<>(EquipmentSlot.class);
     private Inventory inventory = new Inventory();
@@ -85,6 +85,8 @@ public abstract class Creature {
     private java.util.List<Spell> spells = new java.util.ArrayList<>();
     private java.util.List<com.bapppis.core.spell.SpellReference> spellReferences = new java.util.ArrayList<>();
     private String sprite;
+    private String deathSprite; // Sprite to use when this creature dies (becomes a corpse)
+    private String lootPool; // Loot pool ID for this creature's drops
 
     // --- Base stat modifier helpers ---
     public void modifyBaseCrit(float delta) {
@@ -117,6 +119,14 @@ public abstract class Creature {
 
     public String getSprite() {
         return sprite;
+    }
+
+    public String getDeathSprite() {
+        return deathSprite;
+    }
+
+    public String getLootPool() {
+        return lootPool;
     }
 
     // --- Additional base field modifiers ---
@@ -180,6 +190,9 @@ public abstract class Creature {
         level = 0; // default level
         xp = 0; // default xp
         recalcDerivedStats();
+        
+        // Set inventory owner
+        inventory.setOwner(this);
     }
 
     public int getSTR() {
@@ -833,7 +846,7 @@ public abstract class Creature {
         for (int w : weights) {
             totalWeight += w;
         }
-        
+
         int pick = java.util.concurrent.ThreadLocalRandom.current().nextInt(Math.max(1, totalWeight));
         Object chosen = null;
         for (int i = 0; i < actionPool.size(); i++) {
@@ -858,8 +871,9 @@ public abstract class Creature {
             int statBonus;
             Resistances physType = attack.getDamageTypeEnum();
             Resistances magType = attack.getMagicDamageTypeEnum();
-            
-            if (weapon != null && actionPool.indexOf(attack) < (weapon.getAttacks() != null ? weapon.getAttacks().size() : 0)) {
+
+            if (weapon != null
+                    && actionPool.indexOf(attack) < (weapon.getAttacks() != null ? weapon.getAttacks().size() : 0)) {
                 // This is a weapon attack
                 statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
                 com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, attack, statBonus, target,

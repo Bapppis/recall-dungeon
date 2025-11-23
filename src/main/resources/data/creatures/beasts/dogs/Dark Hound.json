@@ -59,5 +59,7 @@
     }
   ],
   "sprite": "monster_dark_hound",
+  "deathSprite": "lootable_corpse",
+  "lootPool": "CommonPotions",
   "defaultDamageType": "SLASHING"
 }

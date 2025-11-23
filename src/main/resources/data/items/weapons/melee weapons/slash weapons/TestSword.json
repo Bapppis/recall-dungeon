@@ -21,8 +21,8 @@
     "STRENGTH": 3
   },
   "resistances": {
-    "FIRE": 5,
-    "SLASHING": 10
+    "FIRE": -5,
+    "SLASHING": -10
   },
   "attacks": [
     {
@@ -53,5 +53,5 @@
     "",
     "Slash (100%): Deals 1-8 + 5 * STR bonus slashing damage."
   ],
-  "defense": 2
+  "droppedSprite": "dropped_item"
 }

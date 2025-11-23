@@ -22,9 +22,23 @@
     "SLASHING": 15
   },
   "tooltip": [
-    "Heavy test armor with CON+4, STR+2, DEX-2",
-    "Provides +10 defense, 5% block, -10% dodge, 10% magic resist",
-    "Resistances: BLUDGEONING+20%, SLASHING+15%, FIRE-10%"
+    "Your dodge chance is decreased by 10% while wearing this armor.",
+    "",
+    "Your gain 5% block chance while wearing this armor.",
+    "",
+    "Your magic resist is increased by 10% while wearing this armor.",
+    "",
+    "Your CON bonus is increased by 4 while wearing this armor.",
+    "",
+    "Your DEX bonus is decreased by 2 while wearing this armor.",
+    "",
+    "Your STR bonus is increased by 2 while wearing this armor.",
+    "",
+    "You take 20% less bludgeoning damage while wearing this armor.",
+    "",
+    "You take 10% more fire damage while wearing this armor.",
+    "",
+    "You take 15% less slashing damage while wearing this armor."
   ],
-  "defense": 10
+  "droppedSprite": "dropped_item"
 }

@@ -75,5 +75,6 @@
     "Wind Shear (30%): Deals 2-8 + 5 * STR bonus slashing damage and 2-12 + 5 * CHA bonus wind damage.",
     "",
     "The Name of the Wind (10%): Deals 2-12 + 5 * STR bonus slashing damage and 3-24 + 5 * CHA bonus wind damage. This attack has +5 accuracy and +10 magic accuracy."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

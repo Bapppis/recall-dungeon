@@ -1,0 +1,6 @@
+{
+  "name": "lootableCorpse",
+  "symbol": "%",
+  "sprite": "lootable_corpse",
+  "isOccupied": false
+}

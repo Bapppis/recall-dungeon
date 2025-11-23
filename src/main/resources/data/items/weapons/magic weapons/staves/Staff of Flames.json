@@ -50,5 +50,6 @@
     "Flamethrower (30%): Deals 4-16 + 5 * STR bonus fire damage. This attack has a +10% critical chance and +5 accuracy.",
     "",
     "Fireball (10%): Deals 3-15 + 5 * STR bonus fire damage. This attack has a +15% critical chance and +5 accuracy."
-  ]
+  ],
+  "droppedSprite": "dropped_item"
 }

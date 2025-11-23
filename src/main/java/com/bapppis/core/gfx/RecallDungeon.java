@@ -37,6 +37,8 @@ public class RecallDungeon extends ApplicationAdapter {
     private com.kotcrab.vis.ui.widget.VisTextButton inventoryButton;
     private com.kotcrab.vis.ui.widget.VisTextButton statsButton;
     private boolean showingInventory = false;
+    private boolean awaitingInteractionDirection = false;
+    private com.badlogic.gdx.scenes.scene2d.ui.Label interactionPromptLabel;
     private Game currentGame; // Store the Game instance to preserve it across view changes
 
     @Override
@@ -73,6 +75,121 @@ public class RecallDungeon extends ApplicationAdapter {
         com.kotcrab.vis.ui.widget.VisDialog dialog = new com.kotcrab.vis.ui.widget.VisDialog("Stats");
         dialog.add(table).pad(8).row();
         dialog.button("Close", true);
+        dialog.show(stage);
+    }
+
+    private void showLootTransferDialog(com.bapppis.core.dungeon.Coordinate coord) {
+        com.bapppis.core.dungeon.Floor floor = com.bapppis.core.game.GameState.getCurrentFloor();
+        com.bapppis.core.creature.Player player = com.bapppis.core.game.GameState.getPlayer();
+        if (floor == null || player == null)
+            return;
+
+        com.bapppis.core.dungeon.Tile tile = floor.getTile(coord);
+        if (tile == null || tile.getItems() == null || tile.getItems().isEmpty()) {
+            System.out.println("There's nothing to loot here.");
+            return;
+        }
+
+        com.kotcrab.vis.ui.widget.VisDialog dialog = new com.kotcrab.vis.ui.widget.VisDialog("Loot");
+        com.kotcrab.vis.ui.widget.VisTable mainTable = new com.kotcrab.vis.ui.widget.VisTable(true);
+
+        // Determine if this is a chest or ground loot
+        boolean isChest = tile.getSymbol() == 'C';
+        String containerLabel = isChest ? "Chest:" : "On Ground:";
+
+        // Left side: Ground items
+        com.kotcrab.vis.ui.widget.VisTable groundTable = new com.kotcrab.vis.ui.widget.VisTable(true);
+        groundTable.add(new com.kotcrab.vis.ui.widget.VisLabel(containerLabel)).left().row();
+
+        // Right side: Player inventory
+        com.kotcrab.vis.ui.widget.VisTable invTable = new com.kotcrab.vis.ui.widget.VisTable(true);
+        com.bapppis.core.creature.Inventory inv = player.getInventory();
+        String capacityText = "Inventory (" + inv.getCurrentLoad() + "/" + inv.getMaxCapacity() + "):";
+        invTable.add(new com.kotcrab.vis.ui.widget.VisLabel(capacityText)).left().row();
+
+        Runnable refreshDialog = new Runnable() {
+            @Override
+            public void run() {
+                dialog.hide();
+                showLootTransferDialog(coord);
+            }
+        };
+
+        // Add ground items with "Take" buttons
+        java.util.List<com.bapppis.core.item.Item> groundItems = new java.util.ArrayList<>(tile.getItems());
+        for (com.bapppis.core.item.Item item : groundItems) {
+            com.kotcrab.vis.ui.widget.VisTable row = new com.kotcrab.vis.ui.widget.VisTable(true);
+            row.add(new com.kotcrab.vis.ui.widget.VisLabel(item.getName())).left().width(200);
+            com.kotcrab.vis.ui.widget.VisTextButton takeBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Take");
+            takeBtn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if (player.getInventory().addItem(item)) {
+                        tile.getItems().remove(item);
+
+                        // Replace empty tile with floor ONLY if it's not a chest
+                        if (tile.getItems().isEmpty()) {
+                            boolean isChest = tile.getSymbol() == 'C';
+                            if (!isChest) {
+                                // Replace corpses/dropped items with floor when empty
+                                com.bapppis.core.dungeon.TileType floorType = com.bapppis.core.dungeon.TileTypeLoader
+                                        .getTileTypeByName("basicFloor");
+                                if (floorType != null) {
+                                    com.bapppis.core.dungeon.Tile floorTile = new com.bapppis.core.dungeon.Tile(coord,
+                                            floorType);
+                                    floorTile.setLeft(tile.getLeft());
+                                    floorTile.setRight(tile.getRight());
+                                    floorTile.setUp(tile.getUp());
+                                    floorTile.setDown(tile.getDown());
+                                    floorTile.setDiscovered(tile.isDiscovered());
+                                    floor.addTile(coord, floorTile);
+
+                                    if (floorTile.getLeft() != null)
+                                        floorTile.getLeft().setRight(floorTile);
+                                    if (floorTile.getRight() != null)
+                                        floorTile.getRight().setLeft(floorTile);
+                                    if (floorTile.getUp() != null)
+                                        floorTile.getUp().setDown(floorTile);
+                                    if (floorTile.getDown() != null)
+                                        floorTile.getDown().setUp(floorTile);
+                                }
+                            }
+                            dialog.hide();
+                            refreshMapDisplay();
+                        } else {
+                            refreshDialog.run();
+                        }
+                    }
+                }
+            });
+            row.add(takeBtn).padLeft(4);
+            groundTable.add(row).fillX().row();
+        }
+
+        // Add inventory items (simplified view)
+        java.util.List<com.bapppis.core.item.Item> allItems = new java.util.ArrayList<>();
+        allItems.addAll(inv.getWeapons());
+        allItems.addAll(inv.getOffhands());
+        allItems.addAll(inv.getHelmets());
+        allItems.addAll(inv.getArmors());
+        allItems.addAll(inv.getLegwear());
+        allItems.addAll(inv.getConsumables());
+        allItems.addAll(inv.getMisc());
+
+        for (com.bapppis.core.item.Item item : allItems) {
+            invTable.add(new com.kotcrab.vis.ui.widget.VisLabel(item.getName())).left().row();
+        }
+
+        com.kotcrab.vis.ui.widget.VisScrollPane groundScroll = new com.kotcrab.vis.ui.widget.VisScrollPane(groundTable);
+        groundScroll.setFadeScrollBars(false);
+        com.kotcrab.vis.ui.widget.VisScrollPane invScroll = new com.kotcrab.vis.ui.widget.VisScrollPane(invTable);
+        invScroll.setFadeScrollBars(false);
+
+        mainTable.add(groundScroll).width(250).height(300).pad(4);
+        mainTable.add(invScroll).width(250).height(300).pad(4);
+
+        dialog.add(mainTable).row();
+        dialog.button("Close");
         dialog.show(stage);
     }
 
@@ -186,6 +303,15 @@ public class RecallDungeon extends ApplicationAdapter {
         currentGame.initialize();
         stage.setDebugAll(false);
         stage.getRoot().setUserObject(currentGame);
+
+        // Set the loot transfer callback
+        com.bapppis.core.game.GameState.setLootTransferCallback(new com.bapppis.core.game.LootTransferCallback() {
+            @Override
+            public void showLootTransferDialog(com.bapppis.core.dungeon.Coordinate coord) {
+                RecallDungeon.this.showLootTransferDialog(coord);
+            }
+        });
+
         showFloorView();
     }
 
@@ -194,11 +320,12 @@ public class RecallDungeon extends ApplicationAdapter {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
-        
+
         // Restore the Game object to the new root
         if (currentGame != null) {
             stage.getRoot().setUserObject(currentGame);
-        }        BitmapFont chosen = font;
+        }
+        BitmapFont chosen = font;
         try {
             if (Gdx.files.internal("default.fnt").exists()) {
                 chosen = new BitmapFont(Gdx.files.internal("default.fnt"));
@@ -244,6 +371,10 @@ public class RecallDungeon extends ApplicationAdapter {
         levelLabel = new com.kotcrab.vis.ui.widget.VisLabel("Level: -");
         statsLabel = new com.kotcrab.vis.ui.widget.VisLabel("Stats: -");
         resistLabel = new com.kotcrab.vis.ui.widget.VisLabel("Resists: -");
+
+        // Create interaction prompt label (centered at bottom)
+        interactionPromptLabel = new com.kotcrab.vis.ui.widget.VisLabel("");
+        interactionPromptLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
 
         // Top-left HUD: name, hp, mana, stamina, level
         com.badlogic.gdx.scenes.scene2d.ui.Table topLeft = new com.badlogic.gdx.scenes.scene2d.ui.Table();
@@ -318,11 +449,16 @@ public class RecallDungeon extends ApplicationAdapter {
         bottomLeft.add(back).pad(4).row();
         bottomLeft.add(reloadTextures).pad(4);
 
-        // Layout HUD overlay: top-left, bottom-left, bottom-right
+        // Center bottom: interaction prompt
+        com.badlogic.gdx.scenes.scene2d.ui.Table bottomCenter = new com.badlogic.gdx.scenes.scene2d.ui.Table();
+        bottomCenter.add(interactionPromptLabel).pad(12);
+
+        // Layout HUD overlay: top-left, bottom-left, bottom-center, bottom-right
         hudOverlay.add(topLeft).expand().top().left().pad(12);
         hudOverlay.add().expand(); // spacer
         hudOverlay.row();
         hudOverlay.add(bottomLeft).expand().bottom().left().pad(12);
+        hudOverlay.add(bottomCenter).expandX().bottom().center().pad(12);
         hudOverlay.add(bottomRight).expand().bottom().right().pad(12);
         refreshMapDisplay();
         com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
@@ -347,7 +483,72 @@ public class RecallDungeon extends ApplicationAdapter {
                 }
                 Game g = (Game) userObj;
                 String cmd = null;
+
+                // Handle interaction mode
+                if (awaitingInteractionDirection) {
+                    String direction = null;
+                    switch (keycode) {
+                        case com.badlogic.gdx.Input.Keys.W:
+                        case com.badlogic.gdx.Input.Keys.UP:
+                            direction = "north";
+                            break;
+                        case com.badlogic.gdx.Input.Keys.S:
+                        case com.badlogic.gdx.Input.Keys.DOWN:
+                            direction = "south";
+                            break;
+                        case com.badlogic.gdx.Input.Keys.A:
+                        case com.badlogic.gdx.Input.Keys.LEFT:
+                            direction = "west";
+                            break;
+                        case com.badlogic.gdx.Input.Keys.D:
+                        case com.badlogic.gdx.Input.Keys.RIGHT:
+                            direction = "east";
+                            break;
+                        case com.badlogic.gdx.Input.Keys.ESCAPE:
+                            // Cancel interaction mode
+                            awaitingInteractionDirection = false;
+                            if (interactionPromptLabel != null) {
+                                interactionPromptLabel.setText("");
+                            }
+                            return true;
+                    }
+
+                    if (direction != null) {
+                        awaitingInteractionDirection = false;
+                        if (interactionPromptLabel != null) {
+                            interactionPromptLabel.setText("");
+                        }
+                        cmd = "interact " + direction;
+                        g.submitCommand(cmd);
+                        refreshMapDisplay();
+                        com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                            @Override
+                            public void run() {
+                                refreshMapDisplay();
+                            }
+                        }, 0.12f);
+                        return true;
+                    }
+                    return false;
+                }
+
                 switch (keycode) {
+                    case com.badlogic.gdx.Input.Keys.I:
+                        // Toggle inventory
+                        if (showingInventory) {
+                            showingInventory = false;
+                            showFloorView();
+                        } else {
+                            showInventoryDialog();
+                        }
+                        return true;
+                    case com.badlogic.gdx.Input.Keys.E:
+                        // Enter interaction mode
+                        awaitingInteractionDirection = true;
+                        if (interactionPromptLabel != null) {
+                            interactionPromptLabel.setText("Press a direction to interact with (or ESC to cancel)");
+                        }
+                        return true;
                     case com.badlogic.gdx.Input.Keys.W:
                     case com.badlogic.gdx.Input.Keys.UP:
                         cmd = "move north";
@@ -536,7 +737,14 @@ public class RecallDungeon extends ApplicationAdapter {
             left.add(new com.kotcrab.vis.ui.widget.VisLabel(text)).left().row();
         }
         left.add().padTop(8).row();
-        left.add(new com.kotcrab.vis.ui.widget.VisLabel("Inventory (click to equip):")).left().row();
+
+        // Show capacity info
+        com.bapppis.core.creature.Inventory inv = p.getInventory();
+        String capacityText = "Inventory (" + inv.getCurrentLoad() + "/" + inv.getMaxCapacity() + "):";
+        if (inv.isOverEncumbered()) {
+            capacityText += " OVER-ENCUMBERED!";
+        }
+        left.add(new com.kotcrab.vis.ui.widget.VisLabel(capacityText)).left().row();
 
         com.kotcrab.vis.ui.widget.VisTextButton backBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Back");
         backBtn.addListener(new ClickListener() {
@@ -547,14 +755,82 @@ public class RecallDungeon extends ApplicationAdapter {
             }
         });
 
-        com.bapppis.core.creature.Inventory inv = p.getInventory();
         java.util.function.BiConsumer<String, java.util.List<com.bapppis.core.item.Item>> addGroup = (label, items) -> {
             if (items == null || items.isEmpty())
                 return;
             left.add(new com.kotcrab.vis.ui.widget.VisLabel(label)).left().padTop(6).row();
             for (com.bapppis.core.item.Item item : items) {
                 com.kotcrab.vis.ui.widget.VisTable row = new com.kotcrab.vis.ui.widget.VisTable(true);
-                row.add(new com.kotcrab.vis.ui.widget.VisLabel(item.getName())).left();
+                row.add(new com.kotcrab.vis.ui.widget.VisLabel(item.getName())).left().expandX();
+
+                // Add Drop button
+                com.kotcrab.vis.ui.widget.VisTextButton dropBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Drop");
+                dropBtn.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        try {
+                            p.getInventory().removeItem(item);
+
+                            // Create a dropped item tile at player's position
+                            com.bapppis.core.dungeon.Floor floor = com.bapppis.core.game.GameState.getCurrentFloor();
+                            if (floor != null && p.getPosition() != null) {
+                                com.bapppis.core.dungeon.Tile currentTile = floor.getTile(p.getPosition());
+                                if (currentTile != null) {
+                                    // Check if tile already has items or is a corpse
+                                    if (currentTile.getSymbol() == '*' || currentTile.getSymbol() == '%') {
+                                        // Just add to existing items
+                                        currentTile.getItems().add(item);
+                                    } else {
+                                        // Create a new dropped item tile
+                                        // Use dropped_potion for consumables, dropped_item for everything else
+                                        String droppedTileTypeName = "droppedItem";
+                                        if (item.getType() == com.bapppis.core.item.itemEnums.ItemType.CONSUMABLE) {
+                                            // Check if we have a droppedPotion tile type
+                                            if (com.bapppis.core.dungeon.TileTypeLoader.hasTileType("droppedPotion")) {
+                                                droppedTileTypeName = "droppedPotion";
+                                            }
+                                        }
+
+                                        com.bapppis.core.dungeon.TileType droppedItemType = com.bapppis.core.dungeon.TileTypeLoader
+                                                .getTileTypeByName(droppedTileTypeName);
+                                        if (droppedItemType != null) {
+                                            com.bapppis.core.dungeon.Tile droppedTile = new com.bapppis.core.dungeon.Tile(
+                                                    currentTile.getCoordinate(), droppedItemType);
+                                            droppedTile.getItems().add(item);
+
+                                            // Copy navigation and discovery state
+                                            droppedTile.setLeft(currentTile.getLeft());
+                                            droppedTile.setRight(currentTile.getRight());
+                                            droppedTile.setUp(currentTile.getUp());
+                                            droppedTile.setDown(currentTile.getDown());
+                                            droppedTile.setDiscovered(currentTile.isDiscovered());
+
+                                            // Replace tile in floor
+                                            floor.addTile(currentTile.getCoordinate(), droppedTile);
+
+                                            // Update navigation references
+                                            if (droppedTile.getLeft() != null)
+                                                droppedTile.getLeft().setRight(droppedTile);
+                                            if (droppedTile.getRight() != null)
+                                                droppedTile.getRight().setLeft(droppedTile);
+                                            if (droppedTile.getUp() != null)
+                                                droppedTile.getUp().setDown(droppedTile);
+                                            if (droppedTile.getDown() != null)
+                                                droppedTile.getDown().setUp(droppedTile);
+                                        }
+                                    }
+                                }
+                            }
+
+                            showInventory(left);
+                            refreshMapDisplay();
+                        } catch (Exception e) {
+                            Gdx.app.error("RecallDungeon", "Error dropping item", e);
+                        }
+                    }
+                });
+                row.add(dropBtn).padLeft(4).width(60);
+
                 com.kotcrab.vis.ui.widget.VisTextButton actionBtn;
                 if (item.getType() == com.bapppis.core.item.itemEnums.ItemType.CONSUMABLE) {
                     actionBtn = new com.kotcrab.vis.ui.widget.VisTextButton("Use");
@@ -588,7 +864,7 @@ public class RecallDungeon extends ApplicationAdapter {
                         }
                     });
                 }
-                row.add(actionBtn).padLeft(4).right();
+                row.add(actionBtn).padLeft(4).width(60).right();
                 left.add(row).fillX().row();
             }
         };
@@ -607,13 +883,14 @@ public class RecallDungeon extends ApplicationAdapter {
 
     public void showCombatView(com.bapppis.core.creature.Creature enemy) {
         // No need to preserve from stage - use instance variable
-        
+
         stage.clear();
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
-        
-        // Mark as combat view (not Game object, to let render loop know we're in combat)
+
+        // Mark as combat view (not Game object, to let render loop know we're in
+        // combat)
         stage.getRoot().setUserObject("combat");
 
         com.kotcrab.vis.ui.widget.VisTable left = new com.kotcrab.vis.ui.widget.VisTable(true);
@@ -807,7 +1084,7 @@ public class RecallDungeon extends ApplicationAdapter {
                                 ((com.bapppis.core.creature.Player) pp).addXp(enemyXp);
                             }
                         }
-                        // Remove enemy from tile and clear its position
+                        // Remove enemy from tile, create corpse, and clear its position
                         if (enemy instanceof com.bapppis.core.creature.Enemy) {
                             com.bapppis.core.creature.Enemy en = (com.bapppis.core.creature.Enemy) enemy;
                             if (en.getPosition() != null) {
@@ -817,6 +1094,8 @@ public class RecallDungeon extends ApplicationAdapter {
                                     com.bapppis.core.dungeon.Tile tile = floor.getTile(en.getPosition());
                                     if (tile != null) {
                                         tile.getOccupants().remove(enemy);
+                                        // Create corpse tile with loot
+                                        createCorpseTile(tile, en);
                                     }
                                 }
                                 // Clear the enemy's position to fully disconnect it from the map
@@ -1243,6 +1522,132 @@ public class RecallDungeon extends ApplicationAdapter {
         com.kotcrab.vis.ui.widget.VisScrollPane rightCombatScroll = new com.kotcrab.vis.ui.widget.VisScrollPane(right);
         rightCombatScroll.setFadeScrollBars(false);
         table.add(rightCombatScroll).width(320).fillY().top().pad(8);
+    }
+
+    /**
+     * Creates a corpse tile with loot when an enemy is defeated.
+     * Spawns items from the enemy's loot pool and places them on the tile.
+     */
+    private void createCorpseTile(com.bapppis.core.dungeon.Tile tile, com.bapppis.core.creature.Enemy enemy) {
+        try {
+            Gdx.app.log("RecallDungeon",
+                    "createCorpseTile called for enemy: " + enemy.getName() + " at " + tile.getCoordinate());
+
+            // Get the death sprite from the enemy (should be "lootable_corpse")
+            String deathSprite = enemy.getDeathSprite();
+            Gdx.app.log("RecallDungeon", "Death sprite: " + deathSprite);
+            if (deathSprite == null || deathSprite.isEmpty()) {
+                Gdx.app.log("RecallDungeon", "No death sprite, skipping corpse creation");
+                return; // No corpse sprite defined, skip corpse creation
+            }
+
+            // Load the lootable corpse tile type
+            com.bapppis.core.dungeon.TileType corpseTileType = com.bapppis.core.dungeon.TileTypeLoader
+                    .getTileTypeByName("lootableCorpse");
+            if (corpseTileType == null) {
+                Gdx.app.error("RecallDungeon", "Failed to load lootableCorpse tile type");
+                return;
+            }
+
+            Gdx.app.log("RecallDungeon", "Loaded corpse tile type successfully");
+
+            // Get the loot pool and sample it
+            String lootPoolId = enemy.getLootPool();
+            Gdx.app.log("RecallDungeon", "Enemy loot pool ID: " + lootPoolId);
+            com.bapppis.core.loot.LootPool lootPool = null;
+            if (lootPoolId != null && !lootPoolId.isEmpty()) {
+                // Try to load pool by ID first, then by name
+                lootPool = com.bapppis.core.loot.LootPoolLoader.getLootPoolById(lootPoolId);
+                if (lootPool == null) {
+                    lootPool = com.bapppis.core.loot.LootPoolLoader.getLootPoolByName(lootPoolId);
+                }
+                if (lootPool != null) {
+                    Gdx.app.log("RecallDungeon", "Loaded loot pool: " + lootPool.name);
+                } else {
+                    Gdx.app.log("RecallDungeon", "Failed to load loot pool: " + lootPoolId);
+                }
+            } else {
+                Gdx.app.log("RecallDungeon", "Enemy has no loot pool");
+            }
+
+            // Create a new corpse tile at the same coordinate
+            com.bapppis.core.dungeon.Tile corpseTile = new com.bapppis.core.dungeon.Tile(
+                    tile.getCoordinate(), corpseTileType);
+
+            // Sample and spawn loot if we have a pool
+            if (lootPool != null) {
+                // Create a temporary LootManager to sample the pool
+                com.bapppis.core.loot.LootManager tempManager = new com.bapppis.core.loot.LootManager();
+                tempManager.loadDefaults();
+                tempManager.registerPool(lootPool);
+
+                // Sample using the pool's actual ID, not the reference name
+                String poolIdToSample = lootPool.id;
+                Gdx.app.log("RecallDungeon", "Sampling loot pool with ID: " + poolIdToSample);
+                java.util.List<com.bapppis.core.loot.LootManager.Spawn> spawns = tempManager
+                        .samplePool(poolIdToSample);
+                Gdx.app.log("RecallDungeon", "Got " + (spawns != null ? spawns.size() : 0) + " spawns");
+                if (spawns != null && !spawns.isEmpty()) {
+                    // Spawn items from the loot pool
+                    for (com.bapppis.core.loot.LootManager.Spawn spawn : spawns) {
+                        Gdx.app.log("RecallDungeon", "Spawn type: " + spawn.type + ", id: " + spawn.id);
+                        if ("item".equalsIgnoreCase(spawn.type)) {
+                            com.bapppis.core.item.Item item = null;
+                            if (spawn.id != null) {
+                                // Try as integer ID first
+                                try {
+                                    int itemId = Integer.parseInt(spawn.id);
+                                    item = com.bapppis.core.item.ItemLoader.getItemById(itemId);
+                                } catch (NumberFormatException e) {
+                                    // Not an int, try as name
+                                    item = com.bapppis.core.item.ItemLoader.getItemByName(spawn.id);
+                                }
+                            }
+                            if (item != null) {
+                                corpseTile.getItems().add(item);
+                                Gdx.app.log("RecallDungeon", "Added item to corpse: " + item.getName());
+                            } else {
+                                Gdx.app.log("RecallDungeon", "Failed to load item: " + spawn.id);
+                            }
+                        }
+                    }
+                }
+                // Store the loot pool ID on the tile for reference
+                corpseTile.setLootPoolId(lootPoolId);
+            }
+
+            // Copy over any navigation references from the old tile
+            corpseTile.setLeft(tile.getLeft());
+            corpseTile.setRight(tile.getRight());
+            corpseTile.setUp(tile.getUp());
+            corpseTile.setDown(tile.getDown());
+            corpseTile.setDiscovered(tile.isDiscovered());
+
+            // Replace the tile in the floor's tile map
+            com.bapppis.core.dungeon.Floor floor = com.bapppis.core.game.GameState.getCurrentFloor();
+            if (floor != null) {
+                floor.addTile(tile.getCoordinate(), corpseTile);
+                Gdx.app.log("RecallDungeon", "Replaced tile at " + tile.getCoordinate() + " with corpse tile");
+                Gdx.app.log("RecallDungeon", "Corpse tile has " + corpseTile.getItems().size() + " items");
+
+                // Update navigation references from neighboring tiles
+                if (corpseTile.getLeft() != null) {
+                    corpseTile.getLeft().setRight(corpseTile);
+                }
+                if (corpseTile.getRight() != null) {
+                    corpseTile.getRight().setLeft(corpseTile);
+                }
+                if (corpseTile.getUp() != null) {
+                    corpseTile.getUp().setDown(corpseTile);
+                }
+                if (corpseTile.getDown() != null) {
+                    corpseTile.getDown().setUp(corpseTile);
+                }
+            }
+
+        } catch (Exception e) {
+            Gdx.app.error("RecallDungeon", "Error creating corpse tile", e);
+        }
     }
 
     @Override
