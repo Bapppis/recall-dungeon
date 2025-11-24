@@ -320,11 +320,17 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 
 **Damage Calculation:**
 
-1. Roll damage dice per hit
-2. Add stat bonuses
+1. Roll damage dice per hit and **multiply by 5** (d100 scaling)
+2. Add stat bonuses: **`(statBonus × 5 × damageMultiplier)`** per hit
 3. Check for crit (×2 if successful)
 4. Sum all successful hits
 5. Apply resistance: `damage × (targetResist / 100)`
+
+**Example Attack (2d6, STR bonus 5, mult 1.0):**
+- Base dice: 2d6 × 5 = 10-60 damage
+- Stat bonus: (5 × 5 × 1.0) = 25 damage
+- Total per hit: 35-85 damage
+- With crit (×2): 70-170 damage
 
 ---
 

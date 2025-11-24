@@ -874,13 +874,13 @@ public abstract class Creature {
 
             if (weapon != null
                     && actionPool.indexOf(attack) < (weapon.getAttacks() != null ? weapon.getAttacks().size() : 0)) {
-                // This is a weapon attack
-                statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon) * 5;
+                // This is a weapon attack - pass stat bonus (not multiplied), will be applied with multiplier in AttackEngine
+                statBonus = WeaponUtil.determineWeaponStatBonus(this, weapon);
                 com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, attack, statBonus, target,
                         weapon.getDamageType(), weapon.getMagicElement(), weapon);
             } else {
-                // This is a natural attack
-                statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH)) * 5;
+                // This is a natural attack - pass stat bonus (not multiplied), will be applied with multiplier in AttackEngine
+                statBonus = Math.max(0, this.getStatBonus(Stats.STRENGTH));
                 com.bapppis.core.combat.AttackEngine.applyAttackToTarget(this, attack, statBonus, target, physType,
                         magType, null);
             }

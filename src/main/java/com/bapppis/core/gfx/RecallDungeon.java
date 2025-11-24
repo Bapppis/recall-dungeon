@@ -1010,6 +1010,10 @@ public class RecallDungeon extends ApplicationAdapter {
 
         com.kotcrab.vis.ui.widget.VisLabel combatMsg = new com.kotcrab.vis.ui.widget.VisLabel("");
         combatMsg.setWrap(true);
+
+        // Track total damage dealt in combat
+        final int[] lastDamageDealt = new int[1];
+
         final Runnable refreshLabels = new Runnable() {
             @Override
             public void run() {
@@ -1069,10 +1073,47 @@ public class RecallDungeon extends ApplicationAdapter {
                     waitBtn.setDisabled(true);
                     fleeBtn.setDisabled(true);
 
-                    int beforeEnemyHp = enemy.getCurrentHp();
+                    // Set up attack listener to capture total damage and combat details
+                    final StringBuilder combatDetails = new StringBuilder();
+                    com.bapppis.core.combat.AttackEngine.attackListener = (report) -> {
+                        lastDamageDealt[0] = report.totalDamageDealt;
+                        
+                        // Build combat message with details
+                        if (report.totalDamageDealt > 0) {
+                            combatDetails.append("You dealt ").append(report.totalDamageDealt).append(" damage");
+                            if (report.isCrit) {
+                                combatDetails.append(" (CRITICAL HIT!)");
+                            }
+                            combatDetails.append(".");
+                        } else {
+                            // No damage dealt - check why
+                            int totalMisses = report.physMissDodge + report.physMissBlock + report.magicMissDodge + report.magicMissResist;
+                            if (totalMisses > 0) {
+                                if (report.physMissDodge > 0 || report.magicMissDodge > 0) {
+                                    combatDetails.append("Enemy dodged your attack!");
+                                } else if (report.physMissBlock > 0) {
+                                    combatDetails.append("Enemy blocked your attack!");
+                                } else if (report.magicMissResist > 0) {
+                                    combatDetails.append("Enemy resisted your magic!");
+                                }
+                            } else {
+                                combatDetails.append("You missed!");
+                            }
+                        }
+                    };
+
                     pp.attack(enemy);
-                    int dealt = Math.max(0, beforeEnemyHp - enemy.getCurrentHp());
-                    combatMsg.setText("You dealt " + dealt + " damage.");
+
+                    // Use the combat message from the report
+                    if (combatDetails.length() > 0) {
+                        combatMsg.setText(combatDetails.toString());
+                    } else {
+                        combatMsg.setText("You dealt " + lastDamageDealt[0] + " damage.");
+                    }
+
+                    // Clear the listener
+                    com.bapppis.core.combat.AttackEngine.attackListener = null;
+
                     refreshLabels.run();
 
                     if (enemy.getCurrentHp() <= 0) {
@@ -1127,10 +1168,38 @@ public class RecallDungeon extends ApplicationAdapter {
                                 @Override
                                 public void run() {
                                     try {
-                                        int beforePlayerHp = pp.getCurrentHp();
+                                        final int[] enemyDamage = new int[1];
+                                        final StringBuilder enemyCombat = new StringBuilder();
+                                        com.bapppis.core.combat.AttackEngine.attackListener = (report) -> {
+                                            enemyDamage[0] = report.totalDamageDealt;
+                                            if (report.totalDamageDealt > 0) {
+                                                enemyCombat.append("Enemy dealt ").append(report.totalDamageDealt).append(" damage");
+                                                if (report.isCrit) {
+                                                    enemyCombat.append(" (CRITICAL HIT!)");
+                                                }
+                                                enemyCombat.append(".");
+                                            } else {
+                                                int totalMisses = report.physMissDodge + report.physMissBlock + report.magicMissDodge + report.magicMissResist;
+                                                if (totalMisses > 0) {
+                                                    if (report.physMissDodge > 0 || report.magicMissDodge > 0) {
+                                                        enemyCombat.append("You dodged the enemy's attack!");
+                                                    } else if (report.physMissBlock > 0) {
+                                                        enemyCombat.append("You blocked the enemy's attack!");
+                                                    } else if (report.magicMissResist > 0) {
+                                                        enemyCombat.append("You resisted the enemy's magic!");
+                                                    }
+                                                } else {
+                                                    enemyCombat.append("Enemy missed!");
+                                                }
+                                            }
+                                        };
                                         enemy.attack(pp);
-                                        int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
-                                        combatMsg.setText("Enemy dealt " + taken + " damage.");
+                                        com.bapppis.core.combat.AttackEngine.attackListener = null;
+                                        if (enemyCombat.length() > 0) {
+                                            combatMsg.setText(enemyCombat.toString());
+                                        } else {
+                                            combatMsg.setText("Enemy dealt " + enemyDamage[0] + " damage.");
+                                        }
                                         refreshLabels.run();
                                         if (pp.getCurrentHp() <= 0) {
                                             com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog(
@@ -1187,10 +1256,38 @@ public class RecallDungeon extends ApplicationAdapter {
                                 @Override
                                 public void run() {
                                     try {
-                                        int beforePlayerHp = pp.getCurrentHp();
+                                        final int[] enemyDamage = new int[1];
+                                        final StringBuilder enemyCombat = new StringBuilder();
+                                        com.bapppis.core.combat.AttackEngine.attackListener = (report) -> {
+                                            enemyDamage[0] = report.totalDamageDealt;
+                                            if (report.totalDamageDealt > 0) {
+                                                enemyCombat.append("Enemy dealt ").append(report.totalDamageDealt).append(" damage");
+                                                if (report.isCrit) {
+                                                    enemyCombat.append(" (CRITICAL HIT!)");
+                                                }
+                                                enemyCombat.append(".");
+                                            } else {
+                                                int totalMisses = report.physMissDodge + report.physMissBlock + report.magicMissDodge + report.magicMissResist;
+                                                if (totalMisses > 0) {
+                                                    if (report.physMissDodge > 0 || report.magicMissDodge > 0) {
+                                                        enemyCombat.append("You dodged the enemy's attack!");
+                                                    } else if (report.physMissBlock > 0) {
+                                                        enemyCombat.append("You blocked the enemy's attack!");
+                                                    } else if (report.magicMissResist > 0) {
+                                                        enemyCombat.append("You resisted the enemy's magic!");
+                                                    }
+                                                } else {
+                                                    enemyCombat.append("Enemy missed!");
+                                                }
+                                            }
+                                        };
                                         enemy.attack(pp);
-                                        int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
-                                        combatMsg.setText("Enemy dealt " + taken + " damage.");
+                                        com.bapppis.core.combat.AttackEngine.attackListener = null;
+                                        if (enemyCombat.length() > 0) {
+                                            combatMsg.setText(enemyCombat.toString());
+                                        } else {
+                                            combatMsg.setText("Enemy dealt " + enemyDamage[0] + " damage.");
+                                        }
                                         refreshLabels.run();
                                         if (pp.getCurrentHp() <= 0) {
                                             com.kotcrab.vis.ui.widget.VisDialog dlg = new com.kotcrab.vis.ui.widget.VisDialog(
@@ -1411,10 +1508,38 @@ public class RecallDungeon extends ApplicationAdapter {
                                             @Override
                                             public void run() {
                                                 try {
-                                                    int beforePlayerHp = pp.getCurrentHp();
+                                                    final int[] enemyDamage = new int[1];
+                                                    final StringBuilder enemyCombat = new StringBuilder();
+                                                    com.bapppis.core.combat.AttackEngine.attackListener = (report) -> {
+                                                        enemyDamage[0] = report.totalDamageDealt;
+                                                        if (report.totalDamageDealt > 0) {
+                                                            enemyCombat.append("Enemy dealt ").append(report.totalDamageDealt).append(" damage");
+                                                            if (report.isCrit) {
+                                                                enemyCombat.append(" (CRITICAL HIT!)");
+                                                            }
+                                                            enemyCombat.append(".");
+                                                        } else {
+                                                            int totalMisses = report.physMissDodge + report.physMissBlock + report.magicMissDodge + report.magicMissResist;
+                                                            if (totalMisses > 0) {
+                                                                if (report.physMissDodge > 0 || report.magicMissDodge > 0) {
+                                                                    enemyCombat.append("You dodged the enemy's attack!");
+                                                                } else if (report.physMissBlock > 0) {
+                                                                    enemyCombat.append("You blocked the enemy's attack!");
+                                                                } else if (report.magicMissResist > 0) {
+                                                                    enemyCombat.append("You resisted the enemy's magic!");
+                                                                }
+                                                            } else {
+                                                                enemyCombat.append("Enemy missed!");
+                                                            }
+                                                        }
+                                                    };
                                                     enemy.attack(pp);
-                                                    int taken = Math.max(0, beforePlayerHp - pp.getCurrentHp());
-                                                    combatMsg.setText("Enemy dealt " + taken + " damage.");
+                                                    com.bapppis.core.combat.AttackEngine.attackListener = null;
+                                                    if (enemyCombat.length() > 0) {
+                                                        combatMsg.setText(enemyCombat.toString());
+                                                    } else {
+                                                        combatMsg.setText("Enemy dealt " + enemyDamage[0] + " damage.");
+                                                    }
                                                     refreshLabels.run();
                                                     if (pp.getCurrentHp() <= 0) {
                                                         com.kotcrab.vis.ui.widget.VisDialog defeatDlg = new com.kotcrab.vis.ui.widget.VisDialog(
@@ -1490,7 +1615,38 @@ public class RecallDungeon extends ApplicationAdapter {
                                 refreshLabels.run();
                                 dlg.hide();
                                 if (enemy != null && pp.getCurrentHp() > 0) {
+                                    final int[] enemyDamage = new int[1];
+                                    final StringBuilder enemyCombat = new StringBuilder();
+                                    com.bapppis.core.combat.AttackEngine.attackListener = (report) -> {
+                                        enemyDamage[0] = report.totalDamageDealt;
+                                        if (report.totalDamageDealt > 0) {
+                                            enemyCombat.append("Enemy dealt ").append(report.totalDamageDealt).append(" damage");
+                                            if (report.isCrit) {
+                                                enemyCombat.append(" (CRITICAL HIT!)");
+                                            }
+                                            enemyCombat.append(".");
+                                        } else {
+                                            int totalMisses = report.physMissDodge + report.physMissBlock + report.magicMissDodge + report.magicMissResist;
+                                            if (totalMisses > 0) {
+                                                if (report.physMissDodge > 0 || report.magicMissDodge > 0) {
+                                                    enemyCombat.append("You dodged the enemy's attack!");
+                                                } else if (report.physMissBlock > 0) {
+                                                    enemyCombat.append("You blocked the enemy's attack!");
+                                                } else if (report.magicMissResist > 0) {
+                                                    enemyCombat.append("You resisted the enemy's magic!");
+                                                }
+                                            } else {
+                                                enemyCombat.append("Enemy missed!");
+                                            }
+                                        }
+                                    };
                                     enemy.attack(pp);
+                                    com.bapppis.core.combat.AttackEngine.attackListener = null;
+                                    if (enemyCombat.length() > 0) {
+                                        combatMsg.setText(enemyCombat.toString());
+                                    } else {
+                                        combatMsg.setText("Enemy dealt " + enemyDamage[0] + " damage.");
+                                    }
                                     refreshLabels.run();
                                 }
                             } catch (Exception e) {

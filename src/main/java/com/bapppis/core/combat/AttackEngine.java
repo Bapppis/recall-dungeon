@@ -6,7 +6,6 @@ import com.bapppis.core.Resistances;
 import com.bapppis.core.item.Weapon;
 import com.bapppis.core.util.Dice;
 import com.bapppis.core.util.ResistanceUtil;
-import com.bapppis.core.util.WeaponUtil;
 
 public final class AttackEngine {
 
@@ -24,6 +23,7 @@ public final class AttackEngine {
         public int magAfter;
         public int phys2After; // Secondary physical damage
         public int mag2After; // Secondary magic damage
+        public int totalDamageDealt; // Total damage dealt (physAfter + magAfter + phys2After + mag2After)
         public int times;
         public String damageType;
         public String magicType;
@@ -136,9 +136,11 @@ public final class AttackEngine {
                 }
                 int hit = 0;
                 if (attack.physicalDamageDice != null && !attack.physicalDamageDice.isBlank()) {
-                    hit = Dice.roll(attack.physicalDamageDice);
+                    hit = Dice.roll(attack.physicalDamageDice) * 5;
                 }
-                hit += Math.max(0, statBonus);
+                // Stat bonus will be added per-hit with multiplier
+                int statBonusForHit = (int) Math.floor(statBonus * 5.0 * Math.max(0.0, attack.damageMultiplier));
+                hit += statBonusForHit;
                 physRaw += hit;
                 float effectiveCrit = critChance;
                 boolean crit = rng.nextFloat() < (effectiveCrit / 100f);
@@ -156,18 +158,7 @@ public final class AttackEngine {
                 } catch (Exception ignored) {
                 }
             }
-            int physStatBase = 0;
-            int physStatExtra = 0;
-            try {
-                if (weapon != null) {
-                    physStatBase = WeaponUtil.determineWeaponStatBonus(attacker, weapon);
-                    double physMult = Math.max(0.0, attack.damageMultiplier);
-                    physStatExtra = (int) Math.floor(physStatBase * 5.0 * physMult);
-                    if (physStatExtra != 0)
-                        totalPhysBeforeResist += physStatExtra;
-                }
-            } catch (Exception ignored) {
-            }
+            // No additional stat bonus needed - already applied per-hit
             // Use ResistanceUtil to calculate damage after resistance (handles nulls
             // safely)
             physAfter = ResistanceUtil.getDamageAfterResistance(target, totalPhysBeforeResist, physicalType);
@@ -186,7 +177,7 @@ public final class AttackEngine {
                     && attack.physicalDamageDice2 != null && !attack.physicalDamageDice2.isBlank()) {
                 int totalPhys2BeforeResist = 0;
                 for (int i = 0; i < successfulPrimaryHits; i++) {
-                    int hit2 = Dice.roll(attack.physicalDamageDice2);
+                    int hit2 = Dice.roll(attack.physicalDamageDice2) * 5;
                     // Apply crit if the corresponding primary hit crit
                     if (physHitCrits[i]) {
                         hit2 *= 2;
@@ -271,12 +262,11 @@ public final class AttackEngine {
                     }
                     if (chosen != null) {
                         magicStatBonus = best;
-                        int extra = (int) Math.floor(best * 5.0 * Math.max(0.0, magicMult));
-                        magicStatExtra = extra;
-                        if (extra != 0)
-                            magicBeforeResist += extra;
+                        magicStatExtra = 0; // Stat bonus applied per-hit now
                         magicStatChosenName = chosen.name();
                     }
+                } else {
+                    magicStatBonus = attacker.getStatBonus(com.bapppis.core.creature.creatureEnums.Stats.INTELLIGENCE);
                 }
             } catch (Exception ignored) {
             }
@@ -323,9 +313,11 @@ public final class AttackEngine {
                 }
                 int hit = 0;
                 if (attack.magicDamageDice != null && !attack.magicDamageDice.isBlank()) {
-                    hit = Dice.roll(attack.magicDamageDice);
+                    hit = Dice.roll(attack.magicDamageDice) * 5;
                 }
-                hit += Math.max(0, magicToHitBonus);
+                // Add stat bonus per-hit with multiplier
+                int magicStatBonusForHit = (int) Math.floor(magicStatBonus * 5.0 * Math.max(0.0, magicMult));
+                hit += magicStatBonusForHit;
                 magRaw += hit;
                 float effectiveCrit = critChance;
                 boolean crit = rng.nextFloat() < (effectiveCrit / 100f);
@@ -369,7 +361,7 @@ public final class AttackEngine {
                     && attack.magicDamageDice2 != null && !attack.magicDamageDice2.isBlank()) {
                 int totalMag2BeforeResist = 0;
                 for (int i = 0; i < successfulMagicHits; i++) {
-                    int hit2 = Dice.roll(attack.magicDamageDice2);
+                    int hit2 = Dice.roll(attack.magicDamageDice2) * 5; // Option 2: Scale by 5
                     // Apply crit if the corresponding primary magic hit crit
                     if (magicHitCrits[i]) {
                         hit2 *= 2;
@@ -423,6 +415,7 @@ public final class AttackEngine {
                 rpt.magAfter = magAfter;
                 rpt.phys2After = phys2After; // Include secondary physical damage
                 rpt.mag2After = mag2After; // Include secondary magic damage
+                rpt.totalDamageDealt = physAfter + magAfter + phys2After + mag2After;
                 rpt.times = attack.getTimes();
                 rpt.damageType = (physicalType == null ? null : physicalType.name());
                 rpt.magicType = (magicType == null ? null : magicType.name());

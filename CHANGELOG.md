@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.12] - 2025-11-24
+
+### Changed
+
+- **Combat System**: Implemented d100-style damage scaling (Option 2) for larger numbers and variance
+  - **All dice rolls now multiply by 5**: Damage ranges significantly increased (e.g., 2d6 becomes 10-60 instead of 2-12)
+  - **Stat bonuses applied per-hit**: Formula changed from once-per-attack to `(statBonus × 5 × damageMultiplier)` per hit
+  - **Physical attacks**: `(Dice.roll(dice) × 5) + (statBonus × 5 × damageMultiplier)` per hit
+  - **Magic attacks**: `(Dice.roll(dice) × 5) + (magicStatBonus × 5 × magicMult)` per hit
+  - **Secondary damage**: Dice × 5 (no stat bonus, same as before)
+  - **Spell damage**: `(Dice.roll(dice) × 5) + (statBonus × 5)` then multiplied by damageMult
+  - **Example changes**:
+    - Captain Voss "Shoot" (2d4, STR 5): 27-33 → **35-65 damage**
+    - Captain Voss "Barrage" (3×1d3, mult 0.32): 11-17 → **39-69 damage**
+    - Spells (2d6, INT 8, mult 1.25): 52.5-90 → **62.5-125 damage**
+- **Stat bonus calculation**: Creature.java now passes base stat value to AttackEngine (removed pre-multiplication by 5)
+- **Test updates**: Updated SecondaryDamageAndBuildupTest expected values for new damage ranges
+  - Added damageMultiplier = 1.0f to test attacks (required for stat bonus application)
+  - Updated assertions: 1d1 with crit now expects 10 (was 2), 1d1 with stat bonus expects 55 (was 51)
+
+### Fixed
+
+- **Test failures**: Resolved damage calculation mismatches in combat tests due to scaling changes
+- **Stat bonus application**: Fixed tests that created attacks without damageMultiplier (was defaulting to 0)
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/combat/AttackEngine.java` — physical/magic damage scaling by 5, stat bonus per-hit with multiplier
+- `src/main/java/com/bapppis/core/combat/SpellEngine.java` — spell damage scaling by 5, stat bonus application updated
+- `src/main/java/com/bapppis/core/creature/Creature.java` — removed stat bonus pre-multiplication, passes base value
+- `src/test/java/com/bapppis/core/game/SecondaryDamageAndBuildupTest.java` — updated test expectations and added damageMultiplier
+- `src/main/resources/SYSTEM_REFERENCE.md` — updated all damage formulas to reflect d100 scaling
+- `README.md` — updated damage calculation documentation with d100 scaling examples
+
+### Developer Notes
+
+- **Damage ranges increased ~5x**: Enemy HP pools may need rebalancing for appropriate challenge levels
+- **Stat bonuses now scale**: Characters with higher stats see much larger damage increases
+- **Critical hits amplified**: Crits now double larger base numbers (e.g., 35-65 becomes 70-130)
+- **More variance in combat**: Dice rolls have wider ranges, making combat less predictable
+
+
+
 ## [v0.1.11] - 2025-11-23
 
 ### Added
