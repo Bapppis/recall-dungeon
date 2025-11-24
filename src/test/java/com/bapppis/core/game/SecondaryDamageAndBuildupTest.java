@@ -55,7 +55,7 @@ public class SecondaryDamageAndBuildupTest {
     target.setBlock(0f);
 
     // Calculate stat bonus from weapon and apply it
-    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar) * 5;
+    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar);
 
     int initialHp = target.getCurrentHp();
     AttackEngine.applyAttackToTarget(attacker, atk, statBonus, target, morningstar.getDamageType(),
@@ -98,7 +98,7 @@ public class SecondaryDamageAndBuildupTest {
 
     // Perform attack
     Weapon falchion = (Weapon) attacker.getEquipped(com.bapppis.core.item.itemEnums.EquipmentSlot.WEAPON);
-    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, falchion) * 5;
+    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, falchion);
     AttackEngine.applyAttackToTarget(attacker, falchion.getAttacks().get(0), statBonus, target,
         falchion.getDamageType(), falchion.getMagicElement(), falchion);
 
@@ -141,10 +141,11 @@ public class SecondaryDamageAndBuildupTest {
     atk.physicalDamageDice = "1d1";
     atk.physicalDamageDice2 = "1d1";
     atk.damageType = Resistances.PIERCING;
+    atk.damageMultiplier = 1.0f;
 
     // Set STR high and compute stat bonus
     attacker.setStat(com.bapppis.core.creature.creatureEnums.Stats.STRENGTH, 20);
-    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar) * 5;
+    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar);
 
     // Ensure target is easy to hit and takes raw damage
     target.setResistance(Resistances.PIERCING, 100);
@@ -173,12 +174,12 @@ public class SecondaryDamageAndBuildupTest {
       AttackEngine.applyAttackToTarget(attacker, atk, statBonus, target, Resistances.PIERCING, null, morningstar);
       AttackEngine.attackListener = null;
 
-      // Primary: 1d1 (rolls 1) + statBonus = 51 (no crit)
-      // Secondary: 1d1 (rolls 1) = 1 (no crit, no stat bonus)
-      assertEquals(statBonus + 1, capturedPrimaryDmg.get(),
-          "Primary damage should be statBonus + 1 (1d1+statBonus with no crit)");
-      assertEquals(1, capturedSecondaryDmg.get(),
-          "Secondary damage should be 1 (1d1 with no stat bonus and no crit)");
+      // Primary: 1d1*5 (rolls 5) + statBonus*5*1.0 = 5 + 50 = 55 (no crit)
+      // Secondary: 1d1*5 (rolls 5) = 5 (no crit, no stat bonus)
+      assertEquals(55, capturedPrimaryDmg.get(),
+          "Primary damage should be 55 (1d1*5 + statBonus*5 with no crit)");
+      assertEquals(5, capturedSecondaryDmg.get(),
+          "Secondary damage should be 5 (1d1*5 with no stat bonus and no crit)");
     }
   }
 
@@ -212,7 +213,7 @@ public class SecondaryDamageAndBuildupTest {
     atk.physicalDamageDice2 = "1d1";
     atk.damageType = Resistances.PIERCING;
 
-    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar) * 5;
+    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar);
 
     int initialHp = target.getCurrentHp();
     // Ensure hits by giving attacker high accuracy
@@ -255,6 +256,7 @@ public class SecondaryDamageAndBuildupTest {
     atk.physicalDamageDice = "1d1";
     atk.physicalDamageDice2 = "1d1";
     atk.damageType = Resistances.PIERCING;
+    atk.damageMultiplier = 1.0f;
 
     // Force attacker to always crit and always hit
     attacker.setCrit(100f);
@@ -276,13 +278,12 @@ public class SecondaryDamageAndBuildupTest {
     AttackEngine.applyAttackToTarget(attacker, atk, statBonus, target, Resistances.PIERCING, null, morningstar);
     AttackEngine.attackListener = null;
 
-    // Expect both primary (1) and secondary (1) to crit -> doubled each: (1*2) +
-    // (1*2) = 4
-    // Primary: 1d1 with crit = 2
-    // Secondary: 1d1 with crit = 2
+    // Expect both primary (1d1*5=5) and secondary (1d1*5=5) to crit -> doubled each: (5*2) + (5*2) = 20
+    // Primary: 1d1*5 with crit = 10
+    // Secondary: 1d1*5 with crit = 10
     assertEquals(1, capturedCritCount.get(), "Should have exactly 1 crit");
-    assertEquals(2, capturedPrimaryDmg.get(), "Primary damage with crit should be 2 (1*2)");
-    assertEquals(2, capturedSecondaryDmg.get(), "Secondary damage with crit should be 2 (1*2, mirroring primary crit)");
+    assertEquals(10, capturedPrimaryDmg.get(), "Primary damage with crit should be 10 (1d1*5*2)");
+    assertEquals(10, capturedSecondaryDmg.get(), "Secondary damage with crit should be 10 (1d1*5*2, mirroring primary crit)");
   }
 
   @Test
@@ -316,7 +317,7 @@ public class SecondaryDamageAndBuildupTest {
     target.setBlock(0f);
     target.setResistance(Resistances.PIERCING, 100);
 
-    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar) * 5;
+    int statBonus = com.bapppis.core.util.WeaponUtil.determineWeaponStatBonus(attacker, morningstar);
 
     // Verify target doesn't have Dizzy before attack
     assertNull(target.getDebuff(2337), "Target should not have Dizzy debuff before attack");

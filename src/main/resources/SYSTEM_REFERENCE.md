@@ -56,28 +56,26 @@ Combat in Recall Dungeon is turn-based and uses a sophisticated hit/miss/crit sy
 
 #### Rolling Damage
 
-- **Physical Damage**: `Dice.roll(attack.physicalDamageDice) + max(0, statBonus)` per hit
-  - Example: `"2d6"` rolls two six-sided dice
-  - StatBonus added to each individual hit
-- **Magical Damage**: `Dice.roll(attack.magicDamageDice) + max(0, magicToHitBonus)` per hit
-  - Example: `"1d8"` rolls one eight-sided die
-  - Magic to-hit bonus derived from creature's magic stat (INT/WIS/CHA)
+- **Physical Damage**: `(Dice.roll(attack.physicalDamageDice) × 5) + (statBonus × 5 × attack.damageMultiplier)` per hit
+  - Example: `"2d6"` rolls two six-sided dice, multiplied by 5 (10-60 range)
+  - Stat bonus (scaled by 5 and damage multiplier) added to each individual hit
+- **Magical Damage**: `(Dice.roll(attack.magicDamageDice) × 5) + (magicStatBonus × 5 × attack.magicDamageMultiplier)` per hit
+  - Example: `"1d8"` rolls one eight-sided die, multiplied by 5 (5-40 range)
+  - Magic stat bonus (scaled by 5 and magic damage multiplier) added per hit
 
 #### Damage Bonuses
 
 - **Physical Stat Bonus**:
   - Determined by weapon's stat requirements (STR for most melee, DEX for finesse/ranged)
   - `weaponStatBonus = creature.getStat(weapon.primaryStat)`
-  - Added to each individual hit before crit
-- **Physical Multiplier** (from Attack):
-  - `physStatExtra = floor(physStatBase × 5.0 × attack.damageMultiplier)`
-  - Applied after all hits are summed
+  - Formula: `statBonusPerHit = floor(weaponStatBonus × 5.0 × attack.damageMultiplier)`
+  - Applied to **each individual hit** before crit (d100 scaling)
 - **Magic Stat Bonus**:
   - Weapon can specify `magicStatBonuses` (e.g., INT, WIS, CHA)
   - System picks the highest stat from the list
   - `magicStatBonus × 5` added to to-hit roll
-  - `magicStatExtra = floor(magicStatBonus × 5.0 × attack.magicDamageMultiplier)`
-  - Applied after all hits are summed
+  - Formula: `magicBonusPerHit = floor(magicStatBonus × 5.0 × attack.magicDamageMultiplier)`
+  - Applied to **each individual hit** before crit (d100 scaling)
 
 #### Resistance Reduction
 
@@ -197,7 +195,7 @@ Weapons can have secondary damage types that apply automatically when primary hi
 - **Fields**: `weapon.damageType2` + `attack.physicalDamageDice2`
 - **Trigger**: Applies for each successful primary physical hit
 - **To-Hit**: Uses primary hit success (no separate roll)
-- **Damage**: Rolls `physicalDamageDice2` only (NO stat bonus added)
+- **Damage**: `Dice.roll(physicalDamageDice2) × 5` (NO stat bonus added)
 - **Crit**: Crits when the corresponding primary hit crits
 - **Buildup**: Does NOT apply buildup
 - **Resistance**: Reduced by target's `damageType2` resistance
@@ -207,7 +205,7 @@ Weapons can have secondary damage types that apply automatically when primary hi
 - **Fields**: `weapon.magicElement2` + `attack.magicDamageDice2`
 - **Trigger**: Applies for each successful primary magic hit
 - **To-Hit**: Uses primary magic hit success (no separate roll)
-- **Damage**: Rolls `magicDamageDice2` only (NO stat bonus added)
+- **Damage**: `Dice.roll(magicDamageDice2) × 5` (NO stat bonus added)
 - **Crit**: Crits when the corresponding primary magic hit crits
 - **Buildup**: Does NOT apply buildup
 - **Resistance**: Reduced by target's `magicElement2` resistance
@@ -359,7 +357,7 @@ Spells can define up to 4 different damage types with independent dice:
 #### Stat Bonus Selection
 
 - **Best Stat**: Spell uses highest stat value from `statBonuses` list
-- **Calculation**: `statBonus = bestStat × 5`
+- **Calculation**: Base stat value (not pre-multiplied)
 - **Example**: Spell with `["INTELLIGENCE", "WISDOM"]` uses whichever stat is higher
 - **Empty List**: If no stats specified, statBonus = 0
 
@@ -367,16 +365,16 @@ Spells can define up to 4 different damage types with independent dice:
 
 Spells roll to-hit similar to magic attacks:
 
-- **Roll**: `random(0-100) + statBonus + spell.accuracy`
+- **Roll**: `random(0-100) + (statBonus × 5) + spell.accuracy`
 - **Dodge Check**: `random(0-100) < target.dodge` → miss
 - **Magic Resist Check**: `random(0-100) < target.magicResist` → miss (if not dodged)
 - **Success**: Hit lands if both checks pass
 
 #### Damage Calculation (Per Hit)
 
-1. **Base Damage**: Roll dice (e.g., `Dice.roll("3d6")`)
-2. **Add Stat Bonus**: `baseDamage + statBonus`
-3. **Apply Multiplier**: `(baseDamage + statBonus) × damageMult`
+1. **Base Damage**: `Dice.roll(damageDice) × 5` (d100 scaling)
+2. **Add Stat Bonus**: `baseDamage + (statBonus × 5)`
+3. **Apply Multiplier**: `(baseDamage + statBonus × 5) × damageMult`
 4. **Check Crit**: Roll vs. `caster.crit + spell.critMod` → damage ×2 if crit
 5. **Apply Resistance**: `damage × (targetResistance / 100)`
 6. **Apply to Target**: `target.modifyHp(-finalDamage)`

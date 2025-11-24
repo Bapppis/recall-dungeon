@@ -60,8 +60,8 @@ public class SpellEngine {
       return false;
     }
 
-    // Get best stat bonus from statBonuses list
-    int statBonus = spell.getBestStatBonus(caster) * 5;
+    // Get best stat bonus from statBonuses list (base value - will be scaled in damage calculation)
+    int statBonus = spell.getBestStatBonus(caster);
 
     // Track if at least one damage component hit
     boolean anyDamageHit = false;
@@ -166,9 +166,9 @@ public class SpellEngine {
       }
 
       if (hit) {
-        // Roll damage
-        int baseDamage = Dice.roll(damageDice);
-        int damageWithStat = Math.round((baseDamage + statBonus) * damageMult);
+        // Roll damage - Option 2: Scale dice by 5
+        int baseDamage = Dice.roll(damageDice) * 5;
+        int damageWithStat = Math.round((baseDamage + (statBonus * 5)) * damageMult);
 
         // Check for crit
         boolean isCrit = false;
