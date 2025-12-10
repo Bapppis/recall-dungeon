@@ -986,7 +986,10 @@ public class BSPRoomGenerator implements MapGenerator {
       cand.getOccupants().add(monster);
       // Set enemy position if it's an Enemy
       if (monster instanceof com.bapppis.core.creature.Enemy) {
-        ((com.bapppis.core.creature.Enemy) monster).setPosition(cand.getCoordinate());
+        com.bapppis.core.creature.Enemy enemy = (com.bapppis.core.creature.Enemy) monster;
+        enemy.setPosition(cand.getCoordinate());
+        // Initialize patrol route with 3-5 tile radius from spawn
+        enemy.initializePatrolRoute(cand.getCoordinate(), 4);
       }
       return true;
     }
@@ -1005,7 +1008,10 @@ public class BSPRoomGenerator implements MapGenerator {
         cand.getOccupants().add(monster);
         // Set enemy position if it's an Enemy
         if (monster instanceof com.bapppis.core.creature.Enemy) {
-          ((com.bapppis.core.creature.Enemy) monster).setPosition(cand.getCoordinate());
+          com.bapppis.core.creature.Enemy enemy = (com.bapppis.core.creature.Enemy) monster;
+          enemy.setPosition(cand.getCoordinate());
+          // Initialize patrol route with 3-5 tile radius from spawn
+          enemy.initializePatrolRoute(cand.getCoordinate(), 4);
         }
         return true;
       }

@@ -233,6 +233,10 @@ public class Game {
         }
 
         // AI movement for enemies
+        // Track which enemies have already moved to avoid moving them multiple times
+        // per turn
+        java.util.Set<com.bapppis.core.creature.Enemy> movedEnemies = new java.util.HashSet<>();
+
         if (floor.getTiles() != null) {
             for (Tile tile : floor.getTiles().values()) {
                 if (tile != null && tile.getOccupants() != null) {
@@ -241,7 +245,11 @@ public class Game {
                     for (Creature occupant : occupants) {
                         if (occupant instanceof com.bapppis.core.creature.Enemy) {
                             com.bapppis.core.creature.Enemy enemy = (com.bapppis.core.creature.Enemy) occupant;
-                            enemy.takeAITurn();
+                            // Only move each enemy once per turn
+                            if (!movedEnemies.contains(enemy)) {
+                                enemy.takeAITurn();
+                                movedEnemies.add(enemy);
+                            }
                         }
                     }
                 }
