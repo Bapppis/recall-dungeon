@@ -5,6 +5,102 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.13] - 2025-12-10
+
+### Added
+
+- **Enemy AI Patrol System**: Complete enemy behavior overhaul with state machine
+  - **Patrol routes**: Enemies now follow randomized patrol routes with 2-4 waypoints (within 4-tile radius of spawn)
+  - **Four AI states**: PATROLLING, CHASING, INVESTIGATING, and ALERT
+  - **Smart pursuit**: Enemies actively chase player only when maintaining line of sight
+  - **Last known position tracking**: When line of sight breaks, enemies investigate player's last seen location
+  - **Alert behavior**: After reaching last known position without finding player, enemies pause for 2 turns before resuming patrol
+  - **State transitions**: Dynamic switching between states based on vision, line-of-sight, and player proximity
+- **EnemyAIState enum**: Defines four distinct AI behavioral states for enemy creatures
+- **Patrol route generation**: `Enemy.initializePatrolRoute()` creates unique patrol paths at spawn time
+
+### Changed
+
+- **Enemy AI**: Completely refactored from simple chase-on-sight to stateful patrol system
+  - Enemies no longer chase immediately upon spotting player - they must maintain line of sight
+  - Patrol behavior is now the default state when player is not detected
+  - Investigation phase when player breaks line of sight before returning to patrol
+  - Patrol routes regenerate after 2 completions to prevent repetitive movement patterns
+- **BSPRoomGenerator**: Automatically initializes patrol routes when spawning enemies (4-tile radius)
+- **Enemy class**: Added fields for AI state tracking: `aiState`, `lastSeenPlayerPosition`, `patrolRoute`, `patrolIndex`, `alertCooldown`, `stuckCounter`, `spawnPosition`, `routeCompletions`
+- **Patrol route generation**: Improved to avoid duplicate waypoints and handle occupied tiles correctly
+  - Enemies can now path to tiles that were occupied at spawn time
+  - Fallback to lazy initialization if patrol route is empty when needed
+  - Stores spawn position for route regeneration functionality
+  - Validates waypoints for line-of-sight during generation
+
+### Fixed
+
+- **ItemEquipmentTest**: Corrected resistance modifier expectations to match actual item data
+  - Test Sword: FIRE: -5, SLASHING: -10 (player takes MORE damage, not less)
+  - Test Armor: FIRE: -10, SLASHING: +15, BLUDGEONING: +20
+  - Test Shield: BLUDGEONING: +15, PIERCING: +10
+  - Fixed `testBasicItemEquipAndUnequip`: Expected FIRE: 95 (was expecting 105)
+  - Fixed `testEquipmentResistanceStacking`: Expected FIRE: 85, SLASHING: 105 (was expecting 95 and 125)
+- **Enemy patrol routes**: Fixed issue where enemies wouldn't patrol if only one waypoint was generated
+  - Added check to only move when patrol route has more than one waypoint
+  - Improved patrol route initialization to avoid duplicate coordinates
+- **Enemy multi-turn bug**: Fixed enemies moving multiple times per player turn
+  - Added HashSet tracking in Game.passTurn() to ensure each enemy moves only once per turn
+  - Prevented duplicate takeAITurn() calls when enemies moved to new tiles during iteration
+- **Enemy teleporting**: Fixed waypoint advancement order causing backward movement
+  - Now moves first, then checks if waypoint reached (was checking before moving)
+  - Prevents premature waypoint cycling
+- **Enemy stuck detection**: Added 5-attempt threshold to skip unreachable waypoints
+  - Tracks consecutive failed movement attempts with stuckCounter field
+  - Automatically skips waypoint after 5 failed attempts
+  - Resets counter on successful movement or waypoint reach
+  - Handles enemies blocking each other in narrow hallways
+- **Waypoint reachability**: Added line-of-sight validation during route generation
+  - Validates each waypoint is reachable from spawn using hasLineOfSight()
+  - Skips waypoints blocked by walls during generation
+  - Prevents enemies from pathing to unreachable locations behind walls
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/creature/Enemy.java` — AI state machine, patrol routes, state transitions
+- `src/main/java/com/bapppis/core/creature/EnemyAIState.java` — New enum for AI states (CREATED)
+- `src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java` — Initialize patrol routes on enemy spawn
+- `src/test/java/com/bapppis/core/item/ItemEquipmentTest.java` — Fixed resistance test expectations
+- `README.md` — Updated enemy AI documentation
+- `CHANGELOG.md` — Documented v0.1.13 changes
+
+### Changed
+
+- **Enemy.takeAITurn()**: Completely refactored from simple chase to full state machine
+  - Now handles PATROLLING, CHASING, INVESTIGATING, and ALERT states separately
+  - Checks line of sight before chasing (not just vision range)
+  - Tracks last seen player position for investigation behavior
+  - Alert cooldown system for post-investigation pause
+- **BSPRoomGenerator.placeMonsterInQuadrant()**: Initializes patrol routes for spawned enemies
+  - Calls `enemy.initializePatrolRoute()` with 4-tile patrol radius
+  - Patrol routes generated at both random and fallback placement
+
+### Files Modified
+
+- `src/main/java/com/bapppis/core/creature/EnemyAIState.java` — new enum for AI states (PATROLLING, CHASING, INVESTIGATING, ALERT)
+- `src/main/java/com/bapppis/core/creature/Enemy.java` — added AI state fields, patrol route system, refactored takeAITurn() into state machine
+- `src/main/java/com/bapppis/core/dungeon/generator/BSPRoomGenerator.java` — initialize patrol routes when spawning enemies
+- `README.md` — updated enemy AI documentation to reflect new patrol/chase/investigate behavior
+- `CHANGELOG.md` — v0.1.13 entry
+
+### Developer Notes
+
+- **Patrol radius**: Set to 4 tiles from spawn, can be adjusted per enemy or difficulty level
+- **Alert duration**: 2 turns, can be modified via `alertCooldown` field
+- **Route regeneration**: Triggers after 2 patrol completions, creates fresh random waypoints for variety
+- **Stuck detection**: 5-attempt threshold before skipping waypoints prevents permanent blocking
+- **Waypoint validation**: Line-of-sight checks during generation prevent unreachable waypoints
+- **Pathfinding**: Still uses greedy Manhattan distance (future: A* pathfinding for smarter navigation)
+- **Performance**: Minimal overhead - state checks are simple conditionals, no complex algorithms
+- **Debug logging**: Extensive patrol debug output currently enabled (shows waypoint progress, stuck counter, route completions)
+
+
 ## [v0.1.12] - 2025-11-24
 
 ### Changed

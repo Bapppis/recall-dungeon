@@ -77,7 +77,14 @@ Now includes a LibGDX desktop client (LWJGL3) with Scene2D/VisUI for menus and r
 - **Creature type hierarchy**: Specialized creature classes for different entity types
   - **Player**: Player character with extended functionality
   - **Enemy**: Hostile creatures with AI behavior
-    - **Basic AI**: Enemies move one tile per turn toward the player when within vision range (Will be changed in the future so enemy passively patrols and chases to player's last seen location)
+    - **Patrol AI**: Enemies patrol along randomized routes (2-4 waypoints) when not engaged
+      - Routes regenerate after 2 completions for variety and unpredictability
+      - Waypoints validated for line-of-sight during generation (no unreachable waypoints)
+      - Stuck detection: automatically skips waypoints after 5 failed movement attempts
+    - **Line-of-sight detection**: Enemies spot player when within vision range with clear line of sight
+    - **Chase behavior**: When player is spotted, enemies actively pursue while maintaining line of sight
+    - **Investigation**: If line of sight is broken, enemies move to player's last seen position
+    - **Alert state**: After reaching last known position without finding player, enemies briefly pause (2 turns) before resuming patrol
     - **Vision-based pursuit**: Uses creature's vision range to detect player (affected by Darksight trait)
     - **Line-of-sight checks**: Enemies cannot see through walls or occupied tiles (chests, other creatures)
     - **Proximity combat**: Enemies trigger combat when moving adjacent to player (Manhattan distance = 1)

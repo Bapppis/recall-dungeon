@@ -69,10 +69,11 @@ public class ItemEquipmentTest {
         assertEquals(baseAccuracy + 1, player.getAccuracy(), "Accuracy should increase by 1");
 
         // Verify resistances updated
-        assertEquals(baseFireResist + 5, player.getResistance(Resistances.FIRE),
-                "FIRE resistance should increase by 5");
-        assertEquals(baseSlashResist + 10, player.getResistance(Resistances.SLASHING),
-                "SLASHING resistance should increase by 10");
+        // Test Sword has FIRE: -5, SLASHING: -10 (player takes MORE damage)
+        assertEquals(baseFireResist - 5, player.getResistance(Resistances.FIRE),
+                "FIRE resistance should decrease by 5");
+        assertEquals(baseSlashResist - 10, player.getResistance(Resistances.SLASHING),
+                "SLASHING resistance should decrease by 10");
 
         // Unequip the sword
         boolean unequipped = player.unequipItemByName("Test Sword");
@@ -433,12 +434,15 @@ public class ItemEquipmentTest {
         player.equipItemByName("Test Shield");
 
         // Verify resistance stacking
-        // FIRE: +5% (sword) -10% (armor) = -5% net
-        // SLASHING: +10% (sword) +15% (armor) = +25% net
-        // BLUDGEONING: +20% (armor) +15% (shield) = +35% net
-        assertEquals(baseFireResist - 5, player.getResistance(Resistances.FIRE), "FIRE resist should be -5%");
-        assertEquals(baseSlashResist + 25, player.getResistance(Resistances.SLASHING),
-                "SLASHING resist should be +25%");
+        // Test Sword: FIRE: -5, SLASHING: -10
+        // Test Armor: BLUDGEONING: +20, FIRE: -10, SLASHING: +15
+        // Test Shield: BLUDGEONING: +15, PIERCING: +10
+        // FIRE: -5 (sword) -10 (armor) = -15 net
+        // SLASHING: -10 (sword) +15 (armor) = +5 net
+        // BLUDGEONING: +20 (armor) +15 (shield) = +35 net
+        assertEquals(baseFireResist - 15, player.getResistance(Resistances.FIRE), "FIRE resist should be -15%");
+        assertEquals(baseSlashResist + 5, player.getResistance(Resistances.SLASHING),
+                "SLASHING resist should be +5%");
         assertEquals(baseBludgeonResist + 35, player.getResistance(Resistances.BLUDGEONING),
                 "BLUDGEONING resist should be +35%");
     }
